@@ -1,0 +1,156 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFGroupsUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+	
+TSharedPtr<const FPFGroupsAcceptGroupApplicationRequest> ConvertAcceptGroupApplicationRequestToUnreal(const PFGroupsAcceptGroupApplicationRequest* Datatype);
+const PFGroupsAcceptGroupApplicationRequest* ConvertAcceptGroupApplicationRequestToPlayfab(TSharedPtr<const FPFGroupsAcceptGroupApplicationRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsAcceptGroupInvitationRequest> ConvertAcceptGroupInvitationRequestToUnreal(const PFGroupsAcceptGroupInvitationRequest* Datatype);
+const PFGroupsAcceptGroupInvitationRequest* ConvertAcceptGroupInvitationRequestToPlayfab(TSharedPtr<const FPFGroupsAcceptGroupInvitationRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsAddMembersRequest> ConvertAddMembersRequestToUnreal(const PFGroupsAddMembersRequest* Datatype);
+const PFGroupsAddMembersRequest* ConvertAddMembersRequestToPlayfab(TSharedPtr<const FPFGroupsAddMembersRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsApplyToGroupRequest> ConvertApplyToGroupRequestToUnreal(const PFGroupsApplyToGroupRequest* Datatype);
+const PFGroupsApplyToGroupRequest* ConvertApplyToGroupRequestToPlayfab(TSharedPtr<const FPFGroupsApplyToGroupRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsEntityWithLineage> ConvertEntityWithLineageToUnreal(const PFGroupsEntityWithLineage* Datatype);
+const PFGroupsEntityWithLineage* ConvertEntityWithLineageToPlayfab(TSharedPtr<const FPFGroupsEntityWithLineage> Datatype);
+	
+TSharedPtr<const FPFGroupsApplyToGroupResponse> ConvertApplyToGroupResponseToUnreal(const PFGroupsApplyToGroupResponse* Datatype);
+const PFGroupsApplyToGroupResponse* ConvertApplyToGroupResponseToPlayfab(TSharedPtr<const FPFGroupsApplyToGroupResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsBlockEntityRequest> ConvertBlockEntityRequestToUnreal(const PFGroupsBlockEntityRequest* Datatype);
+const PFGroupsBlockEntityRequest* ConvertBlockEntityRequestToPlayfab(TSharedPtr<const FPFGroupsBlockEntityRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsChangeMemberRoleRequest> ConvertChangeMemberRoleRequestToUnreal(const PFGroupsChangeMemberRoleRequest* Datatype);
+const PFGroupsChangeMemberRoleRequest* ConvertChangeMemberRoleRequestToPlayfab(TSharedPtr<const FPFGroupsChangeMemberRoleRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsCreateGroupRequest> ConvertCreateGroupRequestToUnreal(const PFGroupsCreateGroupRequest* Datatype);
+const PFGroupsCreateGroupRequest* ConvertCreateGroupRequestToPlayfab(TSharedPtr<const FPFGroupsCreateGroupRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsCreateGroupResponse> ConvertCreateGroupResponseToUnreal(const PFGroupsCreateGroupResponse* Datatype);
+const PFGroupsCreateGroupResponse* ConvertCreateGroupResponseToPlayfab(TSharedPtr<const FPFGroupsCreateGroupResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsCreateGroupRoleRequest> ConvertCreateGroupRoleRequestToUnreal(const PFGroupsCreateGroupRoleRequest* Datatype);
+const PFGroupsCreateGroupRoleRequest* ConvertCreateGroupRoleRequestToPlayfab(TSharedPtr<const FPFGroupsCreateGroupRoleRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsCreateGroupRoleResponse> ConvertCreateGroupRoleResponseToUnreal(const PFGroupsCreateGroupRoleResponse* Datatype);
+const PFGroupsCreateGroupRoleResponse* ConvertCreateGroupRoleResponseToPlayfab(TSharedPtr<const FPFGroupsCreateGroupRoleResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsDeleteGroupRequest> ConvertDeleteGroupRequestToUnreal(const PFGroupsDeleteGroupRequest* Datatype);
+const PFGroupsDeleteGroupRequest* ConvertDeleteGroupRequestToPlayfab(TSharedPtr<const FPFGroupsDeleteGroupRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsDeleteRoleRequest> ConvertDeleteRoleRequestToUnreal(const PFGroupsDeleteRoleRequest* Datatype);
+const PFGroupsDeleteRoleRequest* ConvertDeleteRoleRequestToPlayfab(TSharedPtr<const FPFGroupsDeleteRoleRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsGetGroupRequest> ConvertGetGroupRequestToUnreal(const PFGroupsGetGroupRequest* Datatype);
+const PFGroupsGetGroupRequest* ConvertGetGroupRequestToPlayfab(TSharedPtr<const FPFGroupsGetGroupRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsGetGroupResponse> ConvertGetGroupResponseToUnreal(const PFGroupsGetGroupResponse* Datatype);
+const PFGroupsGetGroupResponse* ConvertGetGroupResponseToPlayfab(TSharedPtr<const FPFGroupsGetGroupResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsInviteToGroupRequest> ConvertInviteToGroupRequestToUnreal(const PFGroupsInviteToGroupRequest* Datatype);
+const PFGroupsInviteToGroupRequest* ConvertInviteToGroupRequestToPlayfab(TSharedPtr<const FPFGroupsInviteToGroupRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsInviteToGroupResponse> ConvertInviteToGroupResponseToUnreal(const PFGroupsInviteToGroupResponse* Datatype);
+const PFGroupsInviteToGroupResponse* ConvertInviteToGroupResponseToPlayfab(TSharedPtr<const FPFGroupsInviteToGroupResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsIsMemberRequest> ConvertIsMemberRequestToUnreal(const PFGroupsIsMemberRequest* Datatype);
+const PFGroupsIsMemberRequest* ConvertIsMemberRequestToPlayfab(TSharedPtr<const FPFGroupsIsMemberRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsIsMemberResponse> ConvertIsMemberResponseToUnreal(const PFGroupsIsMemberResponse* Datatype);
+const PFGroupsIsMemberResponse* ConvertIsMemberResponseToPlayfab(TSharedPtr<const FPFGroupsIsMemberResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupApplicationsRequest> ConvertListGroupApplicationsRequestToUnreal(const PFGroupsListGroupApplicationsRequest* Datatype);
+const PFGroupsListGroupApplicationsRequest* ConvertListGroupApplicationsRequestToPlayfab(TSharedPtr<const FPFGroupsListGroupApplicationsRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsGroupApplication> ConvertGroupApplicationToUnreal(const PFGroupsGroupApplication* Datatype);
+const PFGroupsGroupApplication* ConvertGroupApplicationToPlayfab(TSharedPtr<const FPFGroupsGroupApplication> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupApplicationsResponse> ConvertListGroupApplicationsResponseToUnreal(const PFGroupsListGroupApplicationsResponse* Datatype);
+const PFGroupsListGroupApplicationsResponse* ConvertListGroupApplicationsResponseToPlayfab(TSharedPtr<const FPFGroupsListGroupApplicationsResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupBlocksRequest> ConvertListGroupBlocksRequestToUnreal(const PFGroupsListGroupBlocksRequest* Datatype);
+const PFGroupsListGroupBlocksRequest* ConvertListGroupBlocksRequestToPlayfab(TSharedPtr<const FPFGroupsListGroupBlocksRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsGroupBlock> ConvertGroupBlockToUnreal(const PFGroupsGroupBlock* Datatype);
+const PFGroupsGroupBlock* ConvertGroupBlockToPlayfab(TSharedPtr<const FPFGroupsGroupBlock> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupBlocksResponse> ConvertListGroupBlocksResponseToUnreal(const PFGroupsListGroupBlocksResponse* Datatype);
+const PFGroupsListGroupBlocksResponse* ConvertListGroupBlocksResponseToPlayfab(TSharedPtr<const FPFGroupsListGroupBlocksResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupInvitationsRequest> ConvertListGroupInvitationsRequestToUnreal(const PFGroupsListGroupInvitationsRequest* Datatype);
+const PFGroupsListGroupInvitationsRequest* ConvertListGroupInvitationsRequestToPlayfab(TSharedPtr<const FPFGroupsListGroupInvitationsRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsGroupInvitation> ConvertGroupInvitationToUnreal(const PFGroupsGroupInvitation* Datatype);
+const PFGroupsGroupInvitation* ConvertGroupInvitationToPlayfab(TSharedPtr<const FPFGroupsGroupInvitation> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupInvitationsResponse> ConvertListGroupInvitationsResponseToUnreal(const PFGroupsListGroupInvitationsResponse* Datatype);
+const PFGroupsListGroupInvitationsResponse* ConvertListGroupInvitationsResponseToPlayfab(TSharedPtr<const FPFGroupsListGroupInvitationsResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupMembersRequest> ConvertListGroupMembersRequestToUnreal(const PFGroupsListGroupMembersRequest* Datatype);
+const PFGroupsListGroupMembersRequest* ConvertListGroupMembersRequestToPlayfab(TSharedPtr<const FPFGroupsListGroupMembersRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsEntityMemberRole> ConvertEntityMemberRoleToUnreal(const PFGroupsEntityMemberRole* Datatype);
+const PFGroupsEntityMemberRole* ConvertEntityMemberRoleToPlayfab(TSharedPtr<const FPFGroupsEntityMemberRole> Datatype);
+	
+TSharedPtr<const FPFGroupsListGroupMembersResponse> ConvertListGroupMembersResponseToUnreal(const PFGroupsListGroupMembersResponse* Datatype);
+const PFGroupsListGroupMembersResponse* ConvertListGroupMembersResponseToPlayfab(TSharedPtr<const FPFGroupsListGroupMembersResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsListMembershipRequest> ConvertListMembershipRequestToUnreal(const PFGroupsListMembershipRequest* Datatype);
+const PFGroupsListMembershipRequest* ConvertListMembershipRequestToPlayfab(TSharedPtr<const FPFGroupsListMembershipRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsGroupRole> ConvertGroupRoleToUnreal(const PFGroupsGroupRole* Datatype);
+const PFGroupsGroupRole* ConvertGroupRoleToPlayfab(TSharedPtr<const FPFGroupsGroupRole> Datatype);
+	
+TSharedPtr<const FPFGroupsGroupWithRoles> ConvertGroupWithRolesToUnreal(const PFGroupsGroupWithRoles* Datatype);
+const PFGroupsGroupWithRoles* ConvertGroupWithRolesToPlayfab(TSharedPtr<const FPFGroupsGroupWithRoles> Datatype);
+	
+TSharedPtr<const FPFGroupsListMembershipResponse> ConvertListMembershipResponseToUnreal(const PFGroupsListMembershipResponse* Datatype);
+const PFGroupsListMembershipResponse* ConvertListMembershipResponseToPlayfab(TSharedPtr<const FPFGroupsListMembershipResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsListMembershipOpportunitiesRequest> ConvertListMembershipOpportunitiesRequestToUnreal(const PFGroupsListMembershipOpportunitiesRequest* Datatype);
+const PFGroupsListMembershipOpportunitiesRequest* ConvertListMembershipOpportunitiesRequestToPlayfab(TSharedPtr<const FPFGroupsListMembershipOpportunitiesRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsListMembershipOpportunitiesResponse> ConvertListMembershipOpportunitiesResponseToUnreal(const PFGroupsListMembershipOpportunitiesResponse* Datatype);
+const PFGroupsListMembershipOpportunitiesResponse* ConvertListMembershipOpportunitiesResponseToPlayfab(TSharedPtr<const FPFGroupsListMembershipOpportunitiesResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsRemoveGroupApplicationRequest> ConvertRemoveGroupApplicationRequestToUnreal(const PFGroupsRemoveGroupApplicationRequest* Datatype);
+const PFGroupsRemoveGroupApplicationRequest* ConvertRemoveGroupApplicationRequestToPlayfab(TSharedPtr<const FPFGroupsRemoveGroupApplicationRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsRemoveGroupInvitationRequest> ConvertRemoveGroupInvitationRequestToUnreal(const PFGroupsRemoveGroupInvitationRequest* Datatype);
+const PFGroupsRemoveGroupInvitationRequest* ConvertRemoveGroupInvitationRequestToPlayfab(TSharedPtr<const FPFGroupsRemoveGroupInvitationRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsRemoveMembersRequest> ConvertRemoveMembersRequestToUnreal(const PFGroupsRemoveMembersRequest* Datatype);
+const PFGroupsRemoveMembersRequest* ConvertRemoveMembersRequestToPlayfab(TSharedPtr<const FPFGroupsRemoveMembersRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsUnblockEntityRequest> ConvertUnblockEntityRequestToUnreal(const PFGroupsUnblockEntityRequest* Datatype);
+const PFGroupsUnblockEntityRequest* ConvertUnblockEntityRequestToPlayfab(TSharedPtr<const FPFGroupsUnblockEntityRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsUpdateGroupRequest> ConvertUpdateGroupRequestToUnreal(const PFGroupsUpdateGroupRequest* Datatype);
+const PFGroupsUpdateGroupRequest* ConvertUpdateGroupRequestToPlayfab(TSharedPtr<const FPFGroupsUpdateGroupRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsUpdateGroupResponse> ConvertUpdateGroupResponseToUnreal(const PFGroupsUpdateGroupResponse* Datatype);
+const PFGroupsUpdateGroupResponse* ConvertUpdateGroupResponseToPlayfab(TSharedPtr<const FPFGroupsUpdateGroupResponse> Datatype);
+	
+TSharedPtr<const FPFGroupsUpdateGroupRoleRequest> ConvertUpdateGroupRoleRequestToUnreal(const PFGroupsUpdateGroupRoleRequest* Datatype);
+const PFGroupsUpdateGroupRoleRequest* ConvertUpdateGroupRoleRequestToPlayfab(TSharedPtr<const FPFGroupsUpdateGroupRoleRequest> Datatype);
+	
+TSharedPtr<const FPFGroupsUpdateGroupRoleResponse> ConvertUpdateGroupRoleResponseToUnreal(const PFGroupsUpdateGroupRoleResponse* Datatype);
+const PFGroupsUpdateGroupRoleResponse* ConvertUpdateGroupRoleResponseToPlayfab(TSharedPtr<const FPFGroupsUpdateGroupRoleResponse> Datatype);
+
+
+#pragma pop_macro("IN")

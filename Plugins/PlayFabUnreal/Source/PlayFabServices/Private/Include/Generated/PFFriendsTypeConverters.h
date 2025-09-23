@@ -1,0 +1,54 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFFriendsUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+
+const FPFFriendsExternalFriendSources ConvertExternalFriendSourcesToUnreal(const PFFriendsExternalFriendSources* enumVal);
+const PFFriendsExternalFriendSources ConvertExternalFriendSourcesToPlayfab(TSharedPtr<const FPFFriendsExternalFriendSources> enumVal);
+	
+TSharedPtr<const FPFFriendsClientAddFriendRequest> ConvertClientAddFriendRequestToUnreal(const PFFriendsClientAddFriendRequest* Datatype);
+const PFFriendsClientAddFriendRequest* ConvertClientAddFriendRequestToPlayfab(TSharedPtr<const FPFFriendsClientAddFriendRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsAddFriendResult> ConvertAddFriendResultToUnreal(const PFFriendsAddFriendResult* Datatype);
+const PFFriendsAddFriendResult* ConvertAddFriendResultToPlayfab(TSharedPtr<const FPFFriendsAddFriendResult> Datatype);
+	
+TSharedPtr<const FPFFriendsClientGetFriendsListRequest> ConvertClientGetFriendsListRequestToUnreal(const PFFriendsClientGetFriendsListRequest* Datatype);
+const PFFriendsClientGetFriendsListRequest* ConvertClientGetFriendsListRequestToPlayfab(TSharedPtr<const FPFFriendsClientGetFriendsListRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsFriendInfo> ConvertFriendInfoToUnreal(const PFFriendsFriendInfo* Datatype);
+const PFFriendsFriendInfo* ConvertFriendInfoToPlayfab(TSharedPtr<const FPFFriendsFriendInfo> Datatype);
+	
+TSharedPtr<const FPFFriendsGetFriendsListResult> ConvertGetFriendsListResultToUnreal(const PFFriendsGetFriendsListResult* Datatype);
+const PFFriendsGetFriendsListResult* ConvertGetFriendsListResultToPlayfab(TSharedPtr<const FPFFriendsGetFriendsListResult> Datatype);
+	
+TSharedPtr<const FPFFriendsClientRemoveFriendRequest> ConvertClientRemoveFriendRequestToUnreal(const PFFriendsClientRemoveFriendRequest* Datatype);
+const PFFriendsClientRemoveFriendRequest* ConvertClientRemoveFriendRequestToPlayfab(TSharedPtr<const FPFFriendsClientRemoveFriendRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsClientSetFriendTagsRequest> ConvertClientSetFriendTagsRequestToUnreal(const PFFriendsClientSetFriendTagsRequest* Datatype);
+const PFFriendsClientSetFriendTagsRequest* ConvertClientSetFriendTagsRequestToPlayfab(TSharedPtr<const FPFFriendsClientSetFriendTagsRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsServerAddFriendRequest> ConvertServerAddFriendRequestToUnreal(const PFFriendsServerAddFriendRequest* Datatype);
+const PFFriendsServerAddFriendRequest* ConvertServerAddFriendRequestToPlayfab(TSharedPtr<const FPFFriendsServerAddFriendRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsServerGetFriendsListRequest> ConvertServerGetFriendsListRequestToUnreal(const PFFriendsServerGetFriendsListRequest* Datatype);
+const PFFriendsServerGetFriendsListRequest* ConvertServerGetFriendsListRequestToPlayfab(TSharedPtr<const FPFFriendsServerGetFriendsListRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsServerRemoveFriendRequest> ConvertServerRemoveFriendRequestToUnreal(const PFFriendsServerRemoveFriendRequest* Datatype);
+const PFFriendsServerRemoveFriendRequest* ConvertServerRemoveFriendRequestToPlayfab(TSharedPtr<const FPFFriendsServerRemoveFriendRequest> Datatype);
+	
+TSharedPtr<const FPFFriendsServerSetFriendTagsRequest> ConvertServerSetFriendTagsRequestToUnreal(const PFFriendsServerSetFriendTagsRequest* Datatype);
+const PFFriendsServerSetFriendTagsRequest* ConvertServerSetFriendTagsRequestToPlayfab(TSharedPtr<const FPFFriendsServerSetFriendTagsRequest> Datatype);
+
+
+#pragma pop_macro("IN")

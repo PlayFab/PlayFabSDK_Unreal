@@ -1,0 +1,60 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFCloudScriptUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+
+const FPFCloudScriptCloudScriptRevisionOption ConvertCloudScriptRevisionOptionToUnreal(const PFCloudScriptCloudScriptRevisionOption* enumVal);
+const PFCloudScriptCloudScriptRevisionOption ConvertCloudScriptRevisionOptionToPlayfab(TSharedPtr<const FPFCloudScriptCloudScriptRevisionOption> enumVal);
+	
+TSharedPtr<const FPFCloudScriptExecuteCloudScriptRequest> ConvertExecuteCloudScriptRequestToUnreal(const PFCloudScriptExecuteCloudScriptRequest* Datatype);
+const PFCloudScriptExecuteCloudScriptRequest* ConvertExecuteCloudScriptRequestToPlayfab(TSharedPtr<const FPFCloudScriptExecuteCloudScriptRequest> Datatype);
+	
+TSharedPtr<const FPFCloudScriptScriptExecutionError> ConvertScriptExecutionErrorToUnreal(const PFCloudScriptScriptExecutionError* Datatype);
+const PFCloudScriptScriptExecutionError* ConvertScriptExecutionErrorToPlayfab(TSharedPtr<const FPFCloudScriptScriptExecutionError> Datatype);
+	
+TSharedPtr<const FPFCloudScriptLogStatement> ConvertLogStatementToUnreal(const PFCloudScriptLogStatement* Datatype);
+const PFCloudScriptLogStatement* ConvertLogStatementToPlayfab(TSharedPtr<const FPFCloudScriptLogStatement> Datatype);
+	
+TSharedPtr<const FPFCloudScriptExecuteCloudScriptResult> ConvertExecuteCloudScriptResultToUnreal(const PFCloudScriptExecuteCloudScriptResult* Datatype);
+const PFCloudScriptExecuteCloudScriptResult* ConvertExecuteCloudScriptResultToPlayfab(TSharedPtr<const FPFCloudScriptExecuteCloudScriptResult> Datatype);
+	
+TSharedPtr<const FPFCloudScriptExecuteCloudScriptServerRequest> ConvertExecuteCloudScriptServerRequestToUnreal(const PFCloudScriptExecuteCloudScriptServerRequest* Datatype);
+const PFCloudScriptExecuteCloudScriptServerRequest* ConvertExecuteCloudScriptServerRequestToPlayfab(TSharedPtr<const FPFCloudScriptExecuteCloudScriptServerRequest> Datatype);
+	
+TSharedPtr<const FPFCloudScriptExecuteEntityCloudScriptRequest> ConvertExecuteEntityCloudScriptRequestToUnreal(const PFCloudScriptExecuteEntityCloudScriptRequest* Datatype);
+const PFCloudScriptExecuteEntityCloudScriptRequest* ConvertExecuteEntityCloudScriptRequestToPlayfab(TSharedPtr<const FPFCloudScriptExecuteEntityCloudScriptRequest> Datatype);
+	
+TSharedPtr<const FPFCloudScriptExecuteFunctionRequest> ConvertExecuteFunctionRequestToUnreal(const PFCloudScriptExecuteFunctionRequest* Datatype);
+const PFCloudScriptExecuteFunctionRequest* ConvertExecuteFunctionRequestToPlayfab(TSharedPtr<const FPFCloudScriptExecuteFunctionRequest> Datatype);
+	
+TSharedPtr<const FPFCloudScriptFunctionExecutionError> ConvertFunctionExecutionErrorToUnreal(const PFCloudScriptFunctionExecutionError* Datatype);
+const PFCloudScriptFunctionExecutionError* ConvertFunctionExecutionErrorToPlayfab(TSharedPtr<const FPFCloudScriptFunctionExecutionError> Datatype);
+	
+TSharedPtr<const FPFCloudScriptExecuteFunctionResult> ConvertExecuteFunctionResultToUnreal(const PFCloudScriptExecuteFunctionResult* Datatype);
+const PFCloudScriptExecuteFunctionResult* ConvertExecuteFunctionResultToPlayfab(TSharedPtr<const FPFCloudScriptExecuteFunctionResult> Datatype);
+	
+TSharedPtr<const FPFCloudScriptListFunctionsRequest> ConvertListFunctionsRequestToUnreal(const PFCloudScriptListFunctionsRequest* Datatype);
+const PFCloudScriptListFunctionsRequest* ConvertListFunctionsRequestToPlayfab(TSharedPtr<const FPFCloudScriptListFunctionsRequest> Datatype);
+	
+TSharedPtr<const FPFCloudScriptEventHubFunctionModel> ConvertEventHubFunctionModelToUnreal(const PFCloudScriptEventHubFunctionModel* Datatype);
+const PFCloudScriptEventHubFunctionModel* ConvertEventHubFunctionModelToPlayfab(TSharedPtr<const FPFCloudScriptEventHubFunctionModel> Datatype);
+	
+TSharedPtr<const FPFCloudScriptListEventHubFunctionsResult> ConvertListEventHubFunctionsResultToUnreal(const PFCloudScriptListEventHubFunctionsResult* Datatype);
+const PFCloudScriptListEventHubFunctionsResult* ConvertListEventHubFunctionsResultToPlayfab(TSharedPtr<const FPFCloudScriptListEventHubFunctionsResult> Datatype);
+	
+TSharedPtr<const FPFCloudScriptRegisterEventHubFunctionRequest> ConvertRegisterEventHubFunctionRequestToUnreal(const PFCloudScriptRegisterEventHubFunctionRequest* Datatype);
+const PFCloudScriptRegisterEventHubFunctionRequest* ConvertRegisterEventHubFunctionRequestToPlayfab(TSharedPtr<const FPFCloudScriptRegisterEventHubFunctionRequest> Datatype);
+
+
+#pragma pop_macro("IN")

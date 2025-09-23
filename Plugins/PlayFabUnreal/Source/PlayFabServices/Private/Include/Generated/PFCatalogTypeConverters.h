@@ -1,0 +1,258 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFCatalogUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+
+const FPFCatalogModerationStatus ConvertModerationStatusToUnreal(const PFCatalogModerationStatus* enumVal);
+const PFCatalogModerationStatus ConvertModerationStatusToPlayfab(TSharedPtr<const FPFCatalogModerationStatus> enumVal);
+
+const FPFCatalogDisplayPropertyType ConvertDisplayPropertyTypeToUnreal(const PFCatalogDisplayPropertyType* enumVal);
+const PFCatalogDisplayPropertyType ConvertDisplayPropertyTypeToPlayfab(TSharedPtr<const FPFCatalogDisplayPropertyType> enumVal);
+
+const FPFCatalogPublishResult ConvertPublishResultToUnreal(const PFCatalogPublishResult* enumVal);
+const PFCatalogPublishResult ConvertPublishResultToPlayfab(TSharedPtr<const FPFCatalogPublishResult> enumVal);
+
+const FPFCatalogConcernCategory ConvertConcernCategoryToUnreal(const PFCatalogConcernCategory* enumVal);
+const PFCatalogConcernCategory ConvertConcernCategoryToPlayfab(TSharedPtr<const FPFCatalogConcernCategory> enumVal);
+
+const FPFCatalogHelpfulnessVote ConvertHelpfulnessVoteToUnreal(const PFCatalogHelpfulnessVote* enumVal);
+const PFCatalogHelpfulnessVote ConvertHelpfulnessVoteToPlayfab(TSharedPtr<const FPFCatalogHelpfulnessVote> enumVal);
+	
+TSharedPtr<const FPFCatalogCatalogAlternateId> ConvertCatalogAlternateIdToUnreal(const PFCatalogCatalogAlternateId* Datatype);
+const PFCatalogCatalogAlternateId* ConvertCatalogAlternateIdToPlayfab(TSharedPtr<const FPFCatalogCatalogAlternateId> Datatype);
+	
+TSharedPtr<const FPFCatalogContent> ConvertContentToUnreal(const PFCatalogContent* Datatype);
+const PFCatalogContent* ConvertContentToPlayfab(TSharedPtr<const FPFCatalogContent> Datatype);
+	
+TSharedPtr<const FPFCatalogDeepLink> ConvertDeepLinkToUnreal(const PFCatalogDeepLink* Datatype);
+const PFCatalogDeepLink* ConvertDeepLinkToPlayfab(TSharedPtr<const FPFCatalogDeepLink> Datatype);
+	
+TSharedPtr<const FPFCatalogImage> ConvertImageToUnreal(const PFCatalogImage* Datatype);
+const PFCatalogImage* ConvertImageToPlayfab(TSharedPtr<const FPFCatalogImage> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogPriceAmount> ConvertCatalogPriceAmountToUnreal(const PFCatalogCatalogPriceAmount* Datatype);
+const PFCatalogCatalogPriceAmount* ConvertCatalogPriceAmountToPlayfab(TSharedPtr<const FPFCatalogCatalogPriceAmount> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogPrice> ConvertCatalogPriceToUnreal(const PFCatalogCatalogPrice* Datatype);
+const PFCatalogCatalogPrice* ConvertCatalogPriceToPlayfab(TSharedPtr<const FPFCatalogCatalogPrice> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogPriceOptions> ConvertCatalogPriceOptionsToUnreal(const PFCatalogCatalogPriceOptions* Datatype);
+const PFCatalogCatalogPriceOptions* ConvertCatalogPriceOptionsToPlayfab(TSharedPtr<const FPFCatalogCatalogPriceOptions> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogItemReference> ConvertCatalogItemReferenceToUnreal(const PFCatalogCatalogItemReference* Datatype);
+const PFCatalogCatalogItemReference* ConvertCatalogItemReferenceToPlayfab(TSharedPtr<const FPFCatalogCatalogItemReference> Datatype);
+	
+TSharedPtr<const FPFCatalogKeywordSet> ConvertKeywordSetToUnreal(const PFCatalogKeywordSet* Datatype);
+const PFCatalogKeywordSet* ConvertKeywordSetToPlayfab(TSharedPtr<const FPFCatalogKeywordSet> Datatype);
+	
+TSharedPtr<const FPFCatalogModerationState> ConvertModerationStateToUnreal(const PFCatalogModerationState* Datatype);
+const PFCatalogModerationState* ConvertModerationStateToPlayfab(TSharedPtr<const FPFCatalogModerationState> Datatype);
+	
+TSharedPtr<const FPFCatalogRating> ConvertRatingToUnreal(const PFCatalogRating* Datatype);
+const PFCatalogRating* ConvertRatingToPlayfab(TSharedPtr<const FPFCatalogRating> Datatype);
+	
+TSharedPtr<const FPFCatalogRealMoneyPriceDetails> ConvertRealMoneyPriceDetailsToUnreal(const PFCatalogRealMoneyPriceDetails* Datatype);
+const PFCatalogRealMoneyPriceDetails* ConvertRealMoneyPriceDetailsToPlayfab(TSharedPtr<const FPFCatalogRealMoneyPriceDetails> Datatype);
+	
+TSharedPtr<const FPFCatalogFilterOptions> ConvertFilterOptionsToUnreal(const PFCatalogFilterOptions* Datatype);
+const PFCatalogFilterOptions* ConvertFilterOptionsToPlayfab(TSharedPtr<const FPFCatalogFilterOptions> Datatype);
+	
+TSharedPtr<const FPFCatalogPermissions> ConvertPermissionsToUnreal(const PFCatalogPermissions* Datatype);
+const PFCatalogPermissions* ConvertPermissionsToPlayfab(TSharedPtr<const FPFCatalogPermissions> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogPriceAmountOverride> ConvertCatalogPriceAmountOverrideToUnreal(const PFCatalogCatalogPriceAmountOverride* Datatype);
+const PFCatalogCatalogPriceAmountOverride* ConvertCatalogPriceAmountOverrideToPlayfab(TSharedPtr<const FPFCatalogCatalogPriceAmountOverride> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogPriceOverride> ConvertCatalogPriceOverrideToUnreal(const PFCatalogCatalogPriceOverride* Datatype);
+const PFCatalogCatalogPriceOverride* ConvertCatalogPriceOverrideToPlayfab(TSharedPtr<const FPFCatalogCatalogPriceOverride> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogPriceOptionsOverride> ConvertCatalogPriceOptionsOverrideToUnreal(const PFCatalogCatalogPriceOptionsOverride* Datatype);
+const PFCatalogCatalogPriceOptionsOverride* ConvertCatalogPriceOptionsOverrideToPlayfab(TSharedPtr<const FPFCatalogCatalogPriceOptionsOverride> Datatype);
+	
+TSharedPtr<const FPFCatalogStoreDetails> ConvertStoreDetailsToUnreal(const PFCatalogStoreDetails* Datatype);
+const PFCatalogStoreDetails* ConvertStoreDetailsToPlayfab(TSharedPtr<const FPFCatalogStoreDetails> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogItem> ConvertCatalogItemToUnreal(const PFCatalogCatalogItem* Datatype);
+const PFCatalogCatalogItem* ConvertCatalogItemToPlayfab(TSharedPtr<const FPFCatalogCatalogItem> Datatype);
+	
+TSharedPtr<const FPFCatalogCreateDraftItemRequest> ConvertCreateDraftItemRequestToUnreal(const PFCatalogCreateDraftItemRequest* Datatype);
+const PFCatalogCreateDraftItemRequest* ConvertCreateDraftItemRequestToPlayfab(TSharedPtr<const FPFCatalogCreateDraftItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogCreateDraftItemResponse> ConvertCreateDraftItemResponseToUnreal(const PFCatalogCreateDraftItemResponse* Datatype);
+const PFCatalogCreateDraftItemResponse* ConvertCreateDraftItemResponseToPlayfab(TSharedPtr<const FPFCatalogCreateDraftItemResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogUploadInfo> ConvertUploadInfoToUnreal(const PFCatalogUploadInfo* Datatype);
+const PFCatalogUploadInfo* ConvertUploadInfoToPlayfab(TSharedPtr<const FPFCatalogUploadInfo> Datatype);
+	
+TSharedPtr<const FPFCatalogCreateUploadUrlsRequest> ConvertCreateUploadUrlsRequestToUnreal(const PFCatalogCreateUploadUrlsRequest* Datatype);
+const PFCatalogCreateUploadUrlsRequest* ConvertCreateUploadUrlsRequestToPlayfab(TSharedPtr<const FPFCatalogCreateUploadUrlsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogUploadUrlMetadata> ConvertUploadUrlMetadataToUnreal(const PFCatalogUploadUrlMetadata* Datatype);
+const PFCatalogUploadUrlMetadata* ConvertUploadUrlMetadataToPlayfab(TSharedPtr<const FPFCatalogUploadUrlMetadata> Datatype);
+	
+TSharedPtr<const FPFCatalogCreateUploadUrlsResponse> ConvertCreateUploadUrlsResponseToUnreal(const PFCatalogCreateUploadUrlsResponse* Datatype);
+const PFCatalogCreateUploadUrlsResponse* ConvertCreateUploadUrlsResponseToPlayfab(TSharedPtr<const FPFCatalogCreateUploadUrlsResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogDeleteEntityItemReviewsRequest> ConvertDeleteEntityItemReviewsRequestToUnreal(const PFCatalogDeleteEntityItemReviewsRequest* Datatype);
+const PFCatalogDeleteEntityItemReviewsRequest* ConvertDeleteEntityItemReviewsRequestToPlayfab(TSharedPtr<const FPFCatalogDeleteEntityItemReviewsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogDeleteItemRequest> ConvertDeleteItemRequestToUnreal(const PFCatalogDeleteItemRequest* Datatype);
+const PFCatalogDeleteItemRequest* ConvertDeleteItemRequestToPlayfab(TSharedPtr<const FPFCatalogDeleteItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetCatalogConfigRequest> ConvertGetCatalogConfigRequestToUnreal(const PFCatalogGetCatalogConfigRequest* Datatype);
+const PFCatalogGetCatalogConfigRequest* ConvertGetCatalogConfigRequestToPlayfab(TSharedPtr<const FPFCatalogGetCatalogConfigRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogSpecificConfig> ConvertCatalogSpecificConfigToUnreal(const PFCatalogCatalogSpecificConfig* Datatype);
+const PFCatalogCatalogSpecificConfig* ConvertCatalogSpecificConfigToPlayfab(TSharedPtr<const FPFCatalogCatalogSpecificConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogDeepLinkFormat> ConvertDeepLinkFormatToUnreal(const PFCatalogDeepLinkFormat* Datatype);
+const PFCatalogDeepLinkFormat* ConvertDeepLinkFormatToPlayfab(TSharedPtr<const FPFCatalogDeepLinkFormat> Datatype);
+	
+TSharedPtr<const FPFCatalogDisplayPropertyIndexInfo> ConvertDisplayPropertyIndexInfoToUnreal(const PFCatalogDisplayPropertyIndexInfo* Datatype);
+const PFCatalogDisplayPropertyIndexInfo* ConvertDisplayPropertyIndexInfoToPlayfab(TSharedPtr<const FPFCatalogDisplayPropertyIndexInfo> Datatype);
+	
+TSharedPtr<const FPFCatalogFileConfig> ConvertFileConfigToUnreal(const PFCatalogFileConfig* Datatype);
+const PFCatalogFileConfig* ConvertFileConfigToPlayfab(TSharedPtr<const FPFCatalogFileConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogImageConfig> ConvertImageConfigToUnreal(const PFCatalogImageConfig* Datatype);
+const PFCatalogImageConfig* ConvertImageConfigToPlayfab(TSharedPtr<const FPFCatalogImageConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogCategoryRatingConfig> ConvertCategoryRatingConfigToUnreal(const PFCatalogCategoryRatingConfig* Datatype);
+const PFCatalogCategoryRatingConfig* ConvertCategoryRatingConfigToPlayfab(TSharedPtr<const FPFCatalogCategoryRatingConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogReviewConfig> ConvertReviewConfigToUnreal(const PFCatalogReviewConfig* Datatype);
+const PFCatalogReviewConfig* ConvertReviewConfigToPlayfab(TSharedPtr<const FPFCatalogReviewConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogUserGeneratedContentSpecificConfig> ConvertUserGeneratedContentSpecificConfigToUnreal(const PFCatalogUserGeneratedContentSpecificConfig* Datatype);
+const PFCatalogUserGeneratedContentSpecificConfig* ConvertUserGeneratedContentSpecificConfigToPlayfab(TSharedPtr<const FPFCatalogUserGeneratedContentSpecificConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogCatalogConfig> ConvertCatalogConfigToUnreal(const PFCatalogCatalogConfig* Datatype);
+const PFCatalogCatalogConfig* ConvertCatalogConfigToPlayfab(TSharedPtr<const FPFCatalogCatalogConfig> Datatype);
+	
+TSharedPtr<const FPFCatalogGetCatalogConfigResponse> ConvertGetCatalogConfigResponseToUnreal(const PFCatalogGetCatalogConfigResponse* Datatype);
+const PFCatalogGetCatalogConfigResponse* ConvertGetCatalogConfigResponseToPlayfab(TSharedPtr<const FPFCatalogGetCatalogConfigResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetDraftItemRequest> ConvertGetDraftItemRequestToUnreal(const PFCatalogGetDraftItemRequest* Datatype);
+const PFCatalogGetDraftItemRequest* ConvertGetDraftItemRequestToPlayfab(TSharedPtr<const FPFCatalogGetDraftItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetDraftItemResponse> ConvertGetDraftItemResponseToUnreal(const PFCatalogGetDraftItemResponse* Datatype);
+const PFCatalogGetDraftItemResponse* ConvertGetDraftItemResponseToPlayfab(TSharedPtr<const FPFCatalogGetDraftItemResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetDraftItemsRequest> ConvertGetDraftItemsRequestToUnreal(const PFCatalogGetDraftItemsRequest* Datatype);
+const PFCatalogGetDraftItemsRequest* ConvertGetDraftItemsRequestToPlayfab(TSharedPtr<const FPFCatalogGetDraftItemsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetDraftItemsResponse> ConvertGetDraftItemsResponseToUnreal(const PFCatalogGetDraftItemsResponse* Datatype);
+const PFCatalogGetDraftItemsResponse* ConvertGetDraftItemsResponseToPlayfab(TSharedPtr<const FPFCatalogGetDraftItemsResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetEntityDraftItemsRequest> ConvertGetEntityDraftItemsRequestToUnreal(const PFCatalogGetEntityDraftItemsRequest* Datatype);
+const PFCatalogGetEntityDraftItemsRequest* ConvertGetEntityDraftItemsRequestToPlayfab(TSharedPtr<const FPFCatalogGetEntityDraftItemsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetEntityDraftItemsResponse> ConvertGetEntityDraftItemsResponseToUnreal(const PFCatalogGetEntityDraftItemsResponse* Datatype);
+const PFCatalogGetEntityDraftItemsResponse* ConvertGetEntityDraftItemsResponseToPlayfab(TSharedPtr<const FPFCatalogGetEntityDraftItemsResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetEntityItemReviewRequest> ConvertGetEntityItemReviewRequestToUnreal(const PFCatalogGetEntityItemReviewRequest* Datatype);
+const PFCatalogGetEntityItemReviewRequest* ConvertGetEntityItemReviewRequestToPlayfab(TSharedPtr<const FPFCatalogGetEntityItemReviewRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogReview> ConvertReviewToUnreal(const PFCatalogReview* Datatype);
+const PFCatalogReview* ConvertReviewToPlayfab(TSharedPtr<const FPFCatalogReview> Datatype);
+	
+TSharedPtr<const FPFCatalogGetEntityItemReviewResponse> ConvertGetEntityItemReviewResponseToUnreal(const PFCatalogGetEntityItemReviewResponse* Datatype);
+const PFCatalogGetEntityItemReviewResponse* ConvertGetEntityItemReviewResponseToPlayfab(TSharedPtr<const FPFCatalogGetEntityItemReviewResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemRequest> ConvertGetItemRequestToUnreal(const PFCatalogGetItemRequest* Datatype);
+const PFCatalogGetItemRequest* ConvertGetItemRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemResponse> ConvertGetItemResponseToUnreal(const PFCatalogGetItemResponse* Datatype);
+const PFCatalogGetItemResponse* ConvertGetItemResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemContainersRequest> ConvertGetItemContainersRequestToUnreal(const PFCatalogGetItemContainersRequest* Datatype);
+const PFCatalogGetItemContainersRequest* ConvertGetItemContainersRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemContainersRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemContainersResponse> ConvertGetItemContainersResponseToUnreal(const PFCatalogGetItemContainersResponse* Datatype);
+const PFCatalogGetItemContainersResponse* ConvertGetItemContainersResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemContainersResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemModerationStateRequest> ConvertGetItemModerationStateRequestToUnreal(const PFCatalogGetItemModerationStateRequest* Datatype);
+const PFCatalogGetItemModerationStateRequest* ConvertGetItemModerationStateRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemModerationStateRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemModerationStateResponse> ConvertGetItemModerationStateResponseToUnreal(const PFCatalogGetItemModerationStateResponse* Datatype);
+const PFCatalogGetItemModerationStateResponse* ConvertGetItemModerationStateResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemModerationStateResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemPublishStatusRequest> ConvertGetItemPublishStatusRequestToUnreal(const PFCatalogGetItemPublishStatusRequest* Datatype);
+const PFCatalogGetItemPublishStatusRequest* ConvertGetItemPublishStatusRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemPublishStatusRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemPublishStatusResponse> ConvertGetItemPublishStatusResponseToUnreal(const PFCatalogGetItemPublishStatusResponse* Datatype);
+const PFCatalogGetItemPublishStatusResponse* ConvertGetItemPublishStatusResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemPublishStatusResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemReviewsRequest> ConvertGetItemReviewsRequestToUnreal(const PFCatalogGetItemReviewsRequest* Datatype);
+const PFCatalogGetItemReviewsRequest* ConvertGetItemReviewsRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemReviewsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemReviewsResponse> ConvertGetItemReviewsResponseToUnreal(const PFCatalogGetItemReviewsResponse* Datatype);
+const PFCatalogGetItemReviewsResponse* ConvertGetItemReviewsResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemReviewsResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemReviewSummaryRequest> ConvertGetItemReviewSummaryRequestToUnreal(const PFCatalogGetItemReviewSummaryRequest* Datatype);
+const PFCatalogGetItemReviewSummaryRequest* ConvertGetItemReviewSummaryRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemReviewSummaryRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemReviewSummaryResponse> ConvertGetItemReviewSummaryResponseToUnreal(const PFCatalogGetItemReviewSummaryResponse* Datatype);
+const PFCatalogGetItemReviewSummaryResponse* ConvertGetItemReviewSummaryResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemReviewSummaryResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemsRequest> ConvertGetItemsRequestToUnreal(const PFCatalogGetItemsRequest* Datatype);
+const PFCatalogGetItemsRequest* ConvertGetItemsRequestToPlayfab(TSharedPtr<const FPFCatalogGetItemsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogGetItemsResponse> ConvertGetItemsResponseToUnreal(const PFCatalogGetItemsResponse* Datatype);
+const PFCatalogGetItemsResponse* ConvertGetItemsResponseToPlayfab(TSharedPtr<const FPFCatalogGetItemsResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogPublishDraftItemRequest> ConvertPublishDraftItemRequestToUnreal(const PFCatalogPublishDraftItemRequest* Datatype);
+const PFCatalogPublishDraftItemRequest* ConvertPublishDraftItemRequestToPlayfab(TSharedPtr<const FPFCatalogPublishDraftItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogReportItemRequest> ConvertReportItemRequestToUnreal(const PFCatalogReportItemRequest* Datatype);
+const PFCatalogReportItemRequest* ConvertReportItemRequestToPlayfab(TSharedPtr<const FPFCatalogReportItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogReportItemReviewRequest> ConvertReportItemReviewRequestToUnreal(const PFCatalogReportItemReviewRequest* Datatype);
+const PFCatalogReportItemReviewRequest* ConvertReportItemReviewRequestToPlayfab(TSharedPtr<const FPFCatalogReportItemReviewRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogReviewItemRequest> ConvertReviewItemRequestToUnreal(const PFCatalogReviewItemRequest* Datatype);
+const PFCatalogReviewItemRequest* ConvertReviewItemRequestToPlayfab(TSharedPtr<const FPFCatalogReviewItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogStoreReference> ConvertStoreReferenceToUnreal(const PFCatalogStoreReference* Datatype);
+const PFCatalogStoreReference* ConvertStoreReferenceToPlayfab(TSharedPtr<const FPFCatalogStoreReference> Datatype);
+	
+TSharedPtr<const FPFCatalogSearchItemsRequest> ConvertSearchItemsRequestToUnreal(const PFCatalogSearchItemsRequest* Datatype);
+const PFCatalogSearchItemsRequest* ConvertSearchItemsRequestToPlayfab(TSharedPtr<const FPFCatalogSearchItemsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogSearchItemsResponse> ConvertSearchItemsResponseToUnreal(const PFCatalogSearchItemsResponse* Datatype);
+const PFCatalogSearchItemsResponse* ConvertSearchItemsResponseToPlayfab(TSharedPtr<const FPFCatalogSearchItemsResponse> Datatype);
+	
+TSharedPtr<const FPFCatalogSetItemModerationStateRequest> ConvertSetItemModerationStateRequestToUnreal(const PFCatalogSetItemModerationStateRequest* Datatype);
+const PFCatalogSetItemModerationStateRequest* ConvertSetItemModerationStateRequestToPlayfab(TSharedPtr<const FPFCatalogSetItemModerationStateRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogSubmitItemReviewVoteRequest> ConvertSubmitItemReviewVoteRequestToUnreal(const PFCatalogSubmitItemReviewVoteRequest* Datatype);
+const PFCatalogSubmitItemReviewVoteRequest* ConvertSubmitItemReviewVoteRequestToPlayfab(TSharedPtr<const FPFCatalogSubmitItemReviewVoteRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogReviewTakedown> ConvertReviewTakedownToUnreal(const PFCatalogReviewTakedown* Datatype);
+const PFCatalogReviewTakedown* ConvertReviewTakedownToPlayfab(TSharedPtr<const FPFCatalogReviewTakedown> Datatype);
+	
+TSharedPtr<const FPFCatalogTakedownItemReviewsRequest> ConvertTakedownItemReviewsRequestToUnreal(const PFCatalogTakedownItemReviewsRequest* Datatype);
+const PFCatalogTakedownItemReviewsRequest* ConvertTakedownItemReviewsRequestToPlayfab(TSharedPtr<const FPFCatalogTakedownItemReviewsRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogUpdateCatalogConfigRequest> ConvertUpdateCatalogConfigRequestToUnreal(const PFCatalogUpdateCatalogConfigRequest* Datatype);
+const PFCatalogUpdateCatalogConfigRequest* ConvertUpdateCatalogConfigRequestToPlayfab(TSharedPtr<const FPFCatalogUpdateCatalogConfigRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogUpdateDraftItemRequest> ConvertUpdateDraftItemRequestToUnreal(const PFCatalogUpdateDraftItemRequest* Datatype);
+const PFCatalogUpdateDraftItemRequest* ConvertUpdateDraftItemRequestToPlayfab(TSharedPtr<const FPFCatalogUpdateDraftItemRequest> Datatype);
+	
+TSharedPtr<const FPFCatalogUpdateDraftItemResponse> ConvertUpdateDraftItemResponseToUnreal(const PFCatalogUpdateDraftItemResponse* Datatype);
+const PFCatalogUpdateDraftItemResponse* ConvertUpdateDraftItemResponseToPlayfab(TSharedPtr<const FPFCatalogUpdateDraftItemResponse> Datatype);
+
+
+#pragma pop_macro("IN")

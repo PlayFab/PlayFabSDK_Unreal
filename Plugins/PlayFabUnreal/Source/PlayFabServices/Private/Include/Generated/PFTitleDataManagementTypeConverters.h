@@ -1,0 +1,48 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFTitleDataManagementUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+	
+TSharedPtr<const FPFTitleDataManagementGetPublisherDataRequest> ConvertGetPublisherDataRequestToUnreal(const PFTitleDataManagementGetPublisherDataRequest* Datatype);
+const PFTitleDataManagementGetPublisherDataRequest* ConvertGetPublisherDataRequestToPlayfab(TSharedPtr<const FPFTitleDataManagementGetPublisherDataRequest> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementGetPublisherDataResult> ConvertGetPublisherDataResultToUnreal(const PFTitleDataManagementGetPublisherDataResult* Datatype);
+const PFTitleDataManagementGetPublisherDataResult* ConvertGetPublisherDataResultToPlayfab(TSharedPtr<const FPFTitleDataManagementGetPublisherDataResult> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementGetTimeResult> ConvertGetTimeResultToUnreal(const PFTitleDataManagementGetTimeResult* Datatype);
+const PFTitleDataManagementGetTimeResult* ConvertGetTimeResultToPlayfab(TSharedPtr<const FPFTitleDataManagementGetTimeResult> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementGetTitleDataRequest> ConvertGetTitleDataRequestToUnreal(const PFTitleDataManagementGetTitleDataRequest* Datatype);
+const PFTitleDataManagementGetTitleDataRequest* ConvertGetTitleDataRequestToPlayfab(TSharedPtr<const FPFTitleDataManagementGetTitleDataRequest> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementGetTitleDataResult> ConvertGetTitleDataResultToUnreal(const PFTitleDataManagementGetTitleDataResult* Datatype);
+const PFTitleDataManagementGetTitleDataResult* ConvertGetTitleDataResultToPlayfab(TSharedPtr<const FPFTitleDataManagementGetTitleDataResult> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementGetTitleNewsRequest> ConvertGetTitleNewsRequestToUnreal(const PFTitleDataManagementGetTitleNewsRequest* Datatype);
+const PFTitleDataManagementGetTitleNewsRequest* ConvertGetTitleNewsRequestToPlayfab(TSharedPtr<const FPFTitleDataManagementGetTitleNewsRequest> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementTitleNewsItem> ConvertTitleNewsItemToUnreal(const PFTitleDataManagementTitleNewsItem* Datatype);
+const PFTitleDataManagementTitleNewsItem* ConvertTitleNewsItemToPlayfab(TSharedPtr<const FPFTitleDataManagementTitleNewsItem> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementGetTitleNewsResult> ConvertGetTitleNewsResultToUnreal(const PFTitleDataManagementGetTitleNewsResult* Datatype);
+const PFTitleDataManagementGetTitleNewsResult* ConvertGetTitleNewsResultToPlayfab(TSharedPtr<const FPFTitleDataManagementGetTitleNewsResult> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementSetPublisherDataRequest> ConvertSetPublisherDataRequestToUnreal(const PFTitleDataManagementSetPublisherDataRequest* Datatype);
+const PFTitleDataManagementSetPublisherDataRequest* ConvertSetPublisherDataRequestToPlayfab(TSharedPtr<const FPFTitleDataManagementSetPublisherDataRequest> Datatype);
+	
+TSharedPtr<const FPFTitleDataManagementSetTitleDataRequest> ConvertSetTitleDataRequestToUnreal(const PFTitleDataManagementSetTitleDataRequest* Datatype);
+const PFTitleDataManagementSetTitleDataRequest* ConvertSetTitleDataRequestToPlayfab(TSharedPtr<const FPFTitleDataManagementSetTitleDataRequest> Datatype);
+
+
+#pragma pop_macro("IN")

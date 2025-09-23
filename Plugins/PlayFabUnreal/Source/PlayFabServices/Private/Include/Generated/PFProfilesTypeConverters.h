@@ -1,0 +1,66 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFProfilesUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+
+const FPFProfilesEffectType ConvertEffectTypeToUnreal(const PFProfilesEffectType* enumVal);
+const PFProfilesEffectType ConvertEffectTypeToPlayfab(TSharedPtr<const FPFProfilesEffectType> enumVal);
+	
+TSharedPtr<const FPFProfilesGetEntityProfileRequest> ConvertGetEntityProfileRequestToUnreal(const PFProfilesGetEntityProfileRequest* Datatype);
+const PFProfilesGetEntityProfileRequest* ConvertGetEntityProfileRequestToPlayfab(TSharedPtr<const FPFProfilesGetEntityProfileRequest> Datatype);
+	
+TSharedPtr<const FPFProfilesEntityProfileFileMetadata> ConvertEntityProfileFileMetadataToUnreal(const PFProfilesEntityProfileFileMetadata* Datatype);
+const PFProfilesEntityProfileFileMetadata* ConvertEntityProfileFileMetadataToPlayfab(TSharedPtr<const FPFProfilesEntityProfileFileMetadata> Datatype);
+	
+TSharedPtr<const FPFProfilesEntityDataObject> ConvertEntityDataObjectToUnreal(const PFProfilesEntityDataObject* Datatype);
+const PFProfilesEntityDataObject* ConvertEntityDataObjectToPlayfab(TSharedPtr<const FPFProfilesEntityDataObject> Datatype);
+	
+TSharedPtr<const FPFProfilesEntityPermissionStatement> ConvertEntityPermissionStatementToUnreal(const PFProfilesEntityPermissionStatement* Datatype);
+const PFProfilesEntityPermissionStatement* ConvertEntityPermissionStatementToPlayfab(TSharedPtr<const FPFProfilesEntityPermissionStatement> Datatype);
+	
+TSharedPtr<const FPFEntityStatisticValue> ConvertEntityStatisticValueToUnreal(const PFEntityStatisticValue* Datatype);
+const PFEntityStatisticValue* ConvertEntityStatisticValueToPlayfab(TSharedPtr<const FPFEntityStatisticValue> Datatype);
+	
+TSharedPtr<const FPFProfilesEntityProfileBody> ConvertEntityProfileBodyToUnreal(const PFProfilesEntityProfileBody* Datatype);
+const PFProfilesEntityProfileBody* ConvertEntityProfileBodyToPlayfab(TSharedPtr<const FPFProfilesEntityProfileBody> Datatype);
+	
+TSharedPtr<const FPFProfilesGetEntityProfileResponse> ConvertGetEntityProfileResponseToUnreal(const PFProfilesGetEntityProfileResponse* Datatype);
+const PFProfilesGetEntityProfileResponse* ConvertGetEntityProfileResponseToPlayfab(TSharedPtr<const FPFProfilesGetEntityProfileResponse> Datatype);
+	
+TSharedPtr<const FPFProfilesGetEntityProfilesRequest> ConvertGetEntityProfilesRequestToUnreal(const PFProfilesGetEntityProfilesRequest* Datatype);
+const PFProfilesGetEntityProfilesRequest* ConvertGetEntityProfilesRequestToPlayfab(TSharedPtr<const FPFProfilesGetEntityProfilesRequest> Datatype);
+	
+TSharedPtr<const FPFProfilesGetEntityProfilesResponse> ConvertGetEntityProfilesResponseToUnreal(const PFProfilesGetEntityProfilesResponse* Datatype);
+const PFProfilesGetEntityProfilesResponse* ConvertGetEntityProfilesResponseToPlayfab(TSharedPtr<const FPFProfilesGetEntityProfilesResponse> Datatype);
+	
+TSharedPtr<const FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsRequest> ConvertGetTitlePlayersFromMasterPlayerAccountIdsRequestToUnreal(const PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsRequest* Datatype);
+const PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsRequest* ConvertGetTitlePlayersFromMasterPlayerAccountIdsRequestToPlayfab(TSharedPtr<const FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsRequest> Datatype);
+	
+TSharedPtr<const FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse> ConvertGetTitlePlayersFromMasterPlayerAccountIdsResponseToUnreal(const PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse* Datatype);
+const PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse* ConvertGetTitlePlayersFromMasterPlayerAccountIdsResponseToPlayfab(TSharedPtr<const FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse> Datatype);
+	
+TSharedPtr<const FPFProfilesSetProfileLanguageRequest> ConvertSetProfileLanguageRequestToUnreal(const PFProfilesSetProfileLanguageRequest* Datatype);
+const PFProfilesSetProfileLanguageRequest* ConvertSetProfileLanguageRequestToPlayfab(TSharedPtr<const FPFProfilesSetProfileLanguageRequest> Datatype);
+	
+TSharedPtr<const FPFProfilesSetProfileLanguageResponse> ConvertSetProfileLanguageResponseToUnreal(const PFProfilesSetProfileLanguageResponse* Datatype);
+const PFProfilesSetProfileLanguageResponse* ConvertSetProfileLanguageResponseToPlayfab(TSharedPtr<const FPFProfilesSetProfileLanguageResponse> Datatype);
+	
+TSharedPtr<const FPFProfilesSetEntityProfilePolicyRequest> ConvertSetEntityProfilePolicyRequestToUnreal(const PFProfilesSetEntityProfilePolicyRequest* Datatype);
+const PFProfilesSetEntityProfilePolicyRequest* ConvertSetEntityProfilePolicyRequestToPlayfab(TSharedPtr<const FPFProfilesSetEntityProfilePolicyRequest> Datatype);
+	
+TSharedPtr<const FPFProfilesSetEntityProfilePolicyResponse> ConvertSetEntityProfilePolicyResponseToUnreal(const PFProfilesSetEntityProfilePolicyResponse* Datatype);
+const PFProfilesSetEntityProfilePolicyResponse* ConvertSetEntityProfilePolicyResponseToPlayfab(TSharedPtr<const FPFProfilesSetEntityProfilePolicyResponse> Datatype);
+
+
+#pragma pop_macro("IN")

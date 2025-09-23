@@ -1,0 +1,36 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFPlatformSpecificUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+	
+TSharedPtr<const FPFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest> ConvertAndroidDevicePushNotificationRegistrationRequestToUnreal(const PFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest* Datatype);
+const PFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest* ConvertAndroidDevicePushNotificationRegistrationRequestToPlayfab(TSharedPtr<const FPFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest> Datatype);
+	
+TSharedPtr<const FPFPlatformSpecificRefreshPSNAuthTokenRequest> ConvertRefreshPSNAuthTokenRequestToUnreal(const PFPlatformSpecificRefreshPSNAuthTokenRequest* Datatype);
+const PFPlatformSpecificRefreshPSNAuthTokenRequest* ConvertRefreshPSNAuthTokenRequestToPlayfab(TSharedPtr<const FPFPlatformSpecificRefreshPSNAuthTokenRequest> Datatype);
+	
+TSharedPtr<const FPFPlatformSpecificRegisterForIOSPushNotificationRequest> ConvertRegisterForIOSPushNotificationRequestToUnreal(const PFPlatformSpecificRegisterForIOSPushNotificationRequest* Datatype);
+const PFPlatformSpecificRegisterForIOSPushNotificationRequest* ConvertRegisterForIOSPushNotificationRequestToPlayfab(TSharedPtr<const FPFPlatformSpecificRegisterForIOSPushNotificationRequest> Datatype);
+	
+TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementItem> ConvertAwardSteamAchievementItemToUnreal(const PFPlatformSpecificAwardSteamAchievementItem* Datatype);
+const PFPlatformSpecificAwardSteamAchievementItem* ConvertAwardSteamAchievementItemToPlayfab(TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementItem> Datatype);
+	
+TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementRequest> ConvertAwardSteamAchievementRequestToUnreal(const PFPlatformSpecificAwardSteamAchievementRequest* Datatype);
+const PFPlatformSpecificAwardSteamAchievementRequest* ConvertAwardSteamAchievementRequestToPlayfab(TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementRequest> Datatype);
+	
+TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementResult> ConvertAwardSteamAchievementResultToUnreal(const PFPlatformSpecificAwardSteamAchievementResult* Datatype);
+const PFPlatformSpecificAwardSteamAchievementResult* ConvertAwardSteamAchievementResultToPlayfab(TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementResult> Datatype);
+
+
+#pragma pop_macro("IN")

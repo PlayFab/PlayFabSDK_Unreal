@@ -1,0 +1,72 @@
+// Copyright (c) Microsoft Corporation
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#if !defined(__cplusplus)
+#error C++11 required
+#endif
+
+#pragma once
+#include "PFUnrealTypes.h"
+#include "PFSegmentsUnrealTypes.h"
+#include "PFTypeConverters.h"
+#include "PFCoreTypeConverters.h"
+
+#pragma push_macro("IN")
+#undef IN
+
+const FPFSegmentsChurnRiskLevel ConvertChurnRiskLevelToUnreal(const PFSegmentsChurnRiskLevel* enumVal);
+const PFSegmentsChurnRiskLevel ConvertChurnRiskLevelToPlayfab(TSharedPtr<const FPFSegmentsChurnRiskLevel> enumVal);
+	
+TSharedPtr<const FPFSegmentsGetSegmentResult> ConvertGetSegmentResultToUnreal(const PFSegmentsGetSegmentResult* Datatype);
+const PFSegmentsGetSegmentResult* ConvertGetSegmentResultToPlayfab(TSharedPtr<const FPFSegmentsGetSegmentResult> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetPlayerSegmentsResult> ConvertGetPlayerSegmentsResultToUnreal(const PFSegmentsGetPlayerSegmentsResult* Datatype);
+const PFSegmentsGetPlayerSegmentsResult* ConvertGetPlayerSegmentsResultToPlayfab(TSharedPtr<const FPFSegmentsGetPlayerSegmentsResult> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetPlayerTagsRequest> ConvertGetPlayerTagsRequestToUnreal(const PFSegmentsGetPlayerTagsRequest* Datatype);
+const PFSegmentsGetPlayerTagsRequest* ConvertGetPlayerTagsRequestToPlayfab(TSharedPtr<const FPFSegmentsGetPlayerTagsRequest> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetPlayerTagsResult> ConvertGetPlayerTagsResultToUnreal(const PFSegmentsGetPlayerTagsResult* Datatype);
+const PFSegmentsGetPlayerTagsResult* ConvertGetPlayerTagsResultToPlayfab(TSharedPtr<const FPFSegmentsGetPlayerTagsResult> Datatype);
+	
+TSharedPtr<const FPFSegmentsAddPlayerTagRequest> ConvertAddPlayerTagRequestToUnreal(const PFSegmentsAddPlayerTagRequest* Datatype);
+const PFSegmentsAddPlayerTagRequest* ConvertAddPlayerTagRequestToPlayfab(TSharedPtr<const FPFSegmentsAddPlayerTagRequest> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetAllSegmentsResult> ConvertGetAllSegmentsResultToUnreal(const PFSegmentsGetAllSegmentsResult* Datatype);
+const PFSegmentsGetAllSegmentsResult* ConvertGetAllSegmentsResultToPlayfab(TSharedPtr<const FPFSegmentsGetAllSegmentsResult> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetPlayersSegmentsRequest> ConvertGetPlayersSegmentsRequestToUnreal(const PFSegmentsGetPlayersSegmentsRequest* Datatype);
+const PFSegmentsGetPlayersSegmentsRequest* ConvertGetPlayersSegmentsRequestToPlayfab(TSharedPtr<const FPFSegmentsGetPlayersSegmentsRequest> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetPlayersInSegmentRequest> ConvertGetPlayersInSegmentRequestToUnreal(const PFSegmentsGetPlayersInSegmentRequest* Datatype);
+const PFSegmentsGetPlayersInSegmentRequest* ConvertGetPlayersInSegmentRequestToPlayfab(TSharedPtr<const FPFSegmentsGetPlayersInSegmentRequest> Datatype);
+	
+TSharedPtr<const FPFSegmentsAdCampaignAttribution> ConvertAdCampaignAttributionToUnreal(const PFSegmentsAdCampaignAttribution* Datatype);
+const PFSegmentsAdCampaignAttribution* ConvertAdCampaignAttributionToPlayfab(TSharedPtr<const FPFSegmentsAdCampaignAttribution> Datatype);
+	
+TSharedPtr<const FPFSegmentsContactEmailInfo> ConvertContactEmailInfoToUnreal(const PFSegmentsContactEmailInfo* Datatype);
+const PFSegmentsContactEmailInfo* ConvertContactEmailInfoToPlayfab(TSharedPtr<const FPFSegmentsContactEmailInfo> Datatype);
+	
+TSharedPtr<const FPFSegmentsPlayerLinkedAccount> ConvertPlayerLinkedAccountToUnreal(const PFSegmentsPlayerLinkedAccount* Datatype);
+const PFSegmentsPlayerLinkedAccount* ConvertPlayerLinkedAccountToPlayfab(TSharedPtr<const FPFSegmentsPlayerLinkedAccount> Datatype);
+	
+TSharedPtr<const FPFSegmentsPlayerLocation> ConvertPlayerLocationToUnreal(const PFSegmentsPlayerLocation* Datatype);
+const PFSegmentsPlayerLocation* ConvertPlayerLocationToPlayfab(TSharedPtr<const FPFSegmentsPlayerLocation> Datatype);
+	
+TSharedPtr<const FPFSegmentsPlayerStatistic> ConvertPlayerStatisticToUnreal(const PFSegmentsPlayerStatistic* Datatype);
+const PFSegmentsPlayerStatistic* ConvertPlayerStatisticToPlayfab(TSharedPtr<const FPFSegmentsPlayerStatistic> Datatype);
+	
+TSharedPtr<const FPFSegmentsPushNotificationRegistration> ConvertPushNotificationRegistrationToUnreal(const PFSegmentsPushNotificationRegistration* Datatype);
+const PFSegmentsPushNotificationRegistration* ConvertPushNotificationRegistrationToPlayfab(TSharedPtr<const FPFSegmentsPushNotificationRegistration> Datatype);
+	
+TSharedPtr<const FPFSegmentsPlayerProfile> ConvertPlayerProfileToUnreal(const PFSegmentsPlayerProfile* Datatype);
+const PFSegmentsPlayerProfile* ConvertPlayerProfileToPlayfab(TSharedPtr<const FPFSegmentsPlayerProfile> Datatype);
+	
+TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> ConvertGetPlayersInSegmentResultToUnreal(const PFSegmentsGetPlayersInSegmentResult* Datatype);
+const PFSegmentsGetPlayersInSegmentResult* ConvertGetPlayersInSegmentResultToPlayfab(TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> Datatype);
+	
+TSharedPtr<const FPFSegmentsRemovePlayerTagRequest> ConvertRemovePlayerTagRequestToUnreal(const PFSegmentsRemovePlayerTagRequest* Datatype);
+const PFSegmentsRemovePlayerTagRequest* ConvertRemovePlayerTagRequestToPlayfab(TSharedPtr<const FPFSegmentsRemovePlayerTagRequest> Datatype);
+
+
+#pragma pop_macro("IN")

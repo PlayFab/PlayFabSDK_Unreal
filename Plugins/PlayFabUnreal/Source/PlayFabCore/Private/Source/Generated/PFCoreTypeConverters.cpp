@@ -1926,7 +1926,7 @@ TSharedPtr<const FPFUserAccountInfo> ConvertUserAccountInfoToUnreal(const PFUser
 		.kongregateInfo = ConvertUserKongregateInfoToUnreal(Datatype->kongregateInfo),
 		.nintendoSwitchAccountInfo = ConvertUserNintendoSwitchAccountIdInfoToUnreal(Datatype->nintendoSwitchAccountInfo),
 		.nintendoSwitchDeviceIdInfo = ConvertUserNintendoSwitchDeviceIdInfoToUnreal(Datatype->nintendoSwitchDeviceIdInfo),
-		.openIdInfo = ConvertPlayfabArrayToUnreal(Datatype->openIdInfo, Datatype->openIdInfoCount, ConvertUserOpenIdInfoToUnreal),
+		.openIdInfo = ConvertPlayfabArrayToUnreal<PFUserOpenIdInfo, FPFUserOpenIdInfo>(Datatype->openIdInfo, Datatype->openIdInfoCount, ConvertUserOpenIdInfoToUnreal),
 		.openIdInfoCount = Datatype->openIdInfoCount,
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.privateInfo = ConvertUserPrivateAccountInfoToUnreal(Datatype->privateInfo),
@@ -1963,7 +1963,7 @@ const PFUserAccountInfo* ConvertUserAccountInfoToPlayfab(TSharedPtr<const FPFUse
 		.kongregateInfo = ConvertUserKongregateInfoToPlayfab(Datatype->kongregateInfo),
 		.nintendoSwitchAccountInfo = ConvertUserNintendoSwitchAccountIdInfoToPlayfab(Datatype->nintendoSwitchAccountInfo),
 		.nintendoSwitchDeviceIdInfo = ConvertUserNintendoSwitchDeviceIdInfoToPlayfab(Datatype->nintendoSwitchDeviceIdInfo),
-		.openIdInfo = ConvertUnrealArrayToPlayfab(Datatype->openIdInfo, ConvertUserOpenIdInfoToPlayfab),
+		.openIdInfo = ConvertUnrealArrayToPlayfab<PFUserOpenIdInfo, FPFUserOpenIdInfo>(Datatype->openIdInfo, ConvertUserOpenIdInfoToPlayfab),
 		.openIdInfoCount = (uint32_t)Datatype->openIdInfo.Num(),
 		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId),
 		.privateInfo = ConvertUserPrivateAccountInfoToPlayfab(Datatype->privateInfo),
@@ -2302,7 +2302,7 @@ TSharedPtr<const FPFMembershipModel> ConvertMembershipModelToUnreal(const PFMemb
 		.membershipExpiration = FDateTime::FromUnixTimestamp((int64)Datatype->membershipExpiration),
 		.membershipId = Datatype->membershipId == nullptr ? FString() : FString(Datatype->membershipId),
 		.overrideExpiration = ConvertTimeToUnreal(Datatype->overrideExpiration),
-		.subscriptions = ConvertPlayfabArrayToUnreal(Datatype->subscriptions, Datatype->subscriptionsCount, ConvertSubscriptionModelToUnreal),
+		.subscriptions = ConvertPlayfabArrayToUnreal<PFSubscriptionModel, FPFSubscriptionModel>(Datatype->subscriptions, Datatype->subscriptionsCount, ConvertSubscriptionModelToUnreal),
 		.subscriptionsCount = Datatype->subscriptionsCount
 	});
 
@@ -2320,7 +2320,7 @@ const PFMembershipModel* ConvertMembershipModelToPlayfab(TSharedPtr<const FPFMem
 		.membershipExpiration = Datatype->membershipExpiration.ToUnixTimestamp(),
 		.membershipId = ConvertFStringToCharPtr(Datatype->membershipId),
 		.overrideExpiration = ConvertFDateTimeToPlayfab(Datatype->overrideExpiration),
-		.subscriptions = ConvertUnrealArrayToPlayfab(Datatype->subscriptions, ConvertSubscriptionModelToPlayfab),
+		.subscriptions = ConvertUnrealArrayToPlayfab<PFSubscriptionModel, FPFSubscriptionModel>(Datatype->subscriptions, ConvertSubscriptionModelToPlayfab),
 		.subscriptionsCount = (uint32_t)Datatype->subscriptions.Num()
 	};
 
@@ -2448,35 +2448,35 @@ TSharedPtr<const FPFPlayerProfileModel> ConvertPlayerProfileModelToUnreal(const 
 	}
 
 	TSharedPtr<const FPFPlayerProfileModel> ConvertedType = MakeShared<FPFPlayerProfileModel>(FPFPlayerProfileModel{
-		.adCampaignAttributions = ConvertPlayfabArrayToUnreal(Datatype->adCampaignAttributions, Datatype->adCampaignAttributionsCount, ConvertAdCampaignAttributionModelToUnreal),
+		.adCampaignAttributions = ConvertPlayfabArrayToUnreal<PFAdCampaignAttributionModel, FPFAdCampaignAttributionModel>(Datatype->adCampaignAttributions, Datatype->adCampaignAttributionsCount, ConvertAdCampaignAttributionModelToUnreal),
 		.adCampaignAttributionsCount = Datatype->adCampaignAttributionsCount,
 		.avatarUrl = Datatype->avatarUrl == nullptr ? FString() : FString(Datatype->avatarUrl),
 		.bannedUntil = ConvertTimeToUnreal(Datatype->bannedUntil),
-		.contactEmailAddresses = ConvertPlayfabArrayToUnreal(Datatype->contactEmailAddresses, Datatype->contactEmailAddressesCount, ConvertContactEmailInfoModelToUnreal),
+		.contactEmailAddresses = ConvertPlayfabArrayToUnreal<PFContactEmailInfoModel, FPFContactEmailInfoModel>(Datatype->contactEmailAddresses, Datatype->contactEmailAddressesCount, ConvertContactEmailInfoModelToUnreal),
 		.contactEmailAddressesCount = Datatype->contactEmailAddressesCount,
 		.created = ConvertTimeToUnreal(Datatype->created),
 		.displayName = Datatype->displayName == nullptr ? FString() : FString(Datatype->displayName),
 		.experimentVariants = ConvertCharArrayToUnreal(Datatype->experimentVariants, Datatype->experimentVariantsCount),
 		.experimentVariantsCount = Datatype->experimentVariantsCount,
 		.lastLogin = ConvertTimeToUnreal(Datatype->lastLogin),
-		.linkedAccounts = ConvertPlayfabArrayToUnreal(Datatype->linkedAccounts, Datatype->linkedAccountsCount, ConvertLinkedPlatformAccountModelToUnreal),
+		.linkedAccounts = ConvertPlayfabArrayToUnreal<PFLinkedPlatformAccountModel, FPFLinkedPlatformAccountModel>(Datatype->linkedAccounts, Datatype->linkedAccountsCount, ConvertLinkedPlatformAccountModelToUnreal),
 		.linkedAccountsCount = Datatype->linkedAccountsCount,
-		.locations = ConvertPlayfabArrayToUnreal(Datatype->locations, Datatype->locationsCount, ConvertLocationModelToUnreal),
+		.locations = ConvertPlayfabArrayToUnreal<PFLocationModel, FPFLocationModel>(Datatype->locations, Datatype->locationsCount, ConvertLocationModelToUnreal),
 		.locationsCount = Datatype->locationsCount,
-		.memberships = ConvertPlayfabArrayToUnreal(Datatype->memberships, Datatype->membershipsCount, ConvertMembershipModelToUnreal),
+		.memberships = ConvertPlayfabArrayToUnreal<PFMembershipModel, FPFMembershipModel>(Datatype->memberships, Datatype->membershipsCount, ConvertMembershipModelToUnreal),
 		.membershipsCount = Datatype->membershipsCount,
 		.origination = MakeShared<FPFLoginIdentityProvider>(ConvertLoginIdentityProviderToUnreal(Datatype->origination)),
 		.playerId = Datatype->playerId == nullptr ? FString() : FString(Datatype->playerId),
 		.publisherId = Datatype->publisherId == nullptr ? FString() : FString(Datatype->publisherId),
-		.pushNotificationRegistrations = ConvertPlayfabArrayToUnreal(Datatype->pushNotificationRegistrations, Datatype->pushNotificationRegistrationsCount, ConvertPushNotificationRegistrationModelToUnreal),
+		.pushNotificationRegistrations = ConvertPlayfabArrayToUnreal<PFPushNotificationRegistrationModel, FPFPushNotificationRegistrationModel>(Datatype->pushNotificationRegistrations, Datatype->pushNotificationRegistrationsCount, ConvertPushNotificationRegistrationModelToUnreal),
 		.pushNotificationRegistrationsCount = Datatype->pushNotificationRegistrationsCount,
-		.statistics = ConvertPlayfabArrayToUnreal(Datatype->statistics, Datatype->statisticsCount, ConvertStatisticModelToUnreal),
+		.statistics = ConvertPlayfabArrayToUnreal<PFStatisticModel, FPFStatisticModel>(Datatype->statistics, Datatype->statisticsCount, ConvertStatisticModelToUnreal),
 		.statisticsCount = Datatype->statisticsCount,
-		.tags = ConvertPlayfabArrayToUnreal(Datatype->tags, Datatype->tagsCount, ConvertTagModelToUnreal),
+		.tags = ConvertPlayfabArrayToUnreal<PFTagModel, FPFTagModel>(Datatype->tags, Datatype->tagsCount, ConvertTagModelToUnreal),
 		.tagsCount = Datatype->tagsCount,
 		.titleId = Datatype->titleId == nullptr ? FString() : FString(Datatype->titleId),
 		.totalValueToDateInUSD = TSharedPtr<const uint32>(Datatype->totalValueToDateInUSD),
-		.valuesToDate = ConvertPlayfabArrayToUnreal(Datatype->valuesToDate, Datatype->valuesToDateCount, ConvertValueToDateModelToUnreal),
+		.valuesToDate = ConvertPlayfabArrayToUnreal<PFValueToDateModel, FPFValueToDateModel>(Datatype->valuesToDate, Datatype->valuesToDateCount, ConvertValueToDateModelToUnreal),
 		.valuesToDateCount = Datatype->valuesToDateCount
 	});
 
@@ -2490,35 +2490,35 @@ const PFPlayerProfileModel* ConvertPlayerProfileModelToPlayfab(TSharedPtr<const 
 	}
 
 	const PFPlayerProfileModel* ConvertedType = new PFPlayerProfileModel{
-		.adCampaignAttributions = ConvertUnrealArrayToPlayfab(Datatype->adCampaignAttributions, ConvertAdCampaignAttributionModelToPlayfab),
+		.adCampaignAttributions = ConvertUnrealArrayToPlayfab<PFAdCampaignAttributionModel, FPFAdCampaignAttributionModel>(Datatype->adCampaignAttributions, ConvertAdCampaignAttributionModelToPlayfab),
 		.adCampaignAttributionsCount = (uint32_t)Datatype->adCampaignAttributions.Num(),
 		.avatarUrl = ConvertFStringToCharPtr(Datatype->avatarUrl),
 		.bannedUntil = ConvertFDateTimeToPlayfab(Datatype->bannedUntil),
-		.contactEmailAddresses = ConvertUnrealArrayToPlayfab(Datatype->contactEmailAddresses, ConvertContactEmailInfoModelToPlayfab),
+		.contactEmailAddresses = ConvertUnrealArrayToPlayfab<PFContactEmailInfoModel, FPFContactEmailInfoModel>(Datatype->contactEmailAddresses, ConvertContactEmailInfoModelToPlayfab),
 		.contactEmailAddressesCount = (uint32_t)Datatype->contactEmailAddresses.Num(),
 		.created = ConvertFDateTimeToPlayfab(Datatype->created),
 		.displayName = ConvertFStringToCharPtr(Datatype->displayName),
 		.experimentVariants = ConvertFStringArrayToPlayfab(Datatype->experimentVariants),
 		.experimentVariantsCount = (uint32_t)Datatype->experimentVariants.Num(),
 		.lastLogin = ConvertFDateTimeToPlayfab(Datatype->lastLogin),
-		.linkedAccounts = ConvertUnrealArrayToPlayfab(Datatype->linkedAccounts, ConvertLinkedPlatformAccountModelToPlayfab),
+		.linkedAccounts = ConvertUnrealArrayToPlayfab<PFLinkedPlatformAccountModel, FPFLinkedPlatformAccountModel>(Datatype->linkedAccounts, ConvertLinkedPlatformAccountModelToPlayfab),
 		.linkedAccountsCount = (uint32_t)Datatype->linkedAccounts.Num(),
-		.locations = ConvertUnrealArrayToPlayfab(Datatype->locations, ConvertLocationModelToPlayfab),
+		.locations = ConvertUnrealArrayToPlayfab<PFLocationModel, FPFLocationModel>(Datatype->locations, ConvertLocationModelToPlayfab),
 		.locationsCount = (uint32_t)Datatype->locations.Num(),
-		.memberships = ConvertUnrealArrayToPlayfab(Datatype->memberships, ConvertMembershipModelToPlayfab),
+		.memberships = ConvertUnrealArrayToPlayfab<PFMembershipModel, FPFMembershipModel>(Datatype->memberships, ConvertMembershipModelToPlayfab),
 		.membershipsCount = (uint32_t)Datatype->memberships.Num(),
 		.origination = new PFLoginIdentityProvider(ConvertLoginIdentityProviderToPlayfab(Datatype->origination)),
 		.playerId = ConvertFStringToCharPtr(Datatype->playerId),
 		.publisherId = ConvertFStringToCharPtr(Datatype->publisherId),
-		.pushNotificationRegistrations = ConvertUnrealArrayToPlayfab(Datatype->pushNotificationRegistrations, ConvertPushNotificationRegistrationModelToPlayfab),
+		.pushNotificationRegistrations = ConvertUnrealArrayToPlayfab<PFPushNotificationRegistrationModel, FPFPushNotificationRegistrationModel>(Datatype->pushNotificationRegistrations, ConvertPushNotificationRegistrationModelToPlayfab),
 		.pushNotificationRegistrationsCount = (uint32_t)Datatype->pushNotificationRegistrations.Num(),
-		.statistics = ConvertUnrealArrayToPlayfab(Datatype->statistics, ConvertStatisticModelToPlayfab),
+		.statistics = ConvertUnrealArrayToPlayfab<PFStatisticModel, FPFStatisticModel>(Datatype->statistics, ConvertStatisticModelToPlayfab),
 		.statisticsCount = (uint32_t)Datatype->statistics.Num(),
-		.tags = ConvertUnrealArrayToPlayfab(Datatype->tags, ConvertTagModelToPlayfab),
+		.tags = ConvertUnrealArrayToPlayfab<PFTagModel, FPFTagModel>(Datatype->tags, ConvertTagModelToPlayfab),
 		.tagsCount = (uint32_t)Datatype->tags.Num(),
 		.titleId = ConvertFStringToCharPtr(Datatype->titleId),
 		.totalValueToDateInUSD = new uint32(*Datatype->totalValueToDateInUSD),
-		.valuesToDate = ConvertUnrealArrayToPlayfab(Datatype->valuesToDate, ConvertValueToDateModelToPlayfab),
+		.valuesToDate = ConvertUnrealArrayToPlayfab<PFValueToDateModel, FPFValueToDateModel>(Datatype->valuesToDate, ConvertValueToDateModelToPlayfab),
 		.valuesToDateCount = (uint32_t)Datatype->valuesToDate.Num()
 	};
 
@@ -2595,7 +2595,7 @@ TSharedPtr<const FPFCharacterInventory> ConvertCharacterInventoryToUnreal(const 
 
 	TSharedPtr<const FPFCharacterInventory> ConvertedType = MakeShared<FPFCharacterInventory>(FPFCharacterInventory{
 		.characterId = Datatype->characterId == nullptr ? FString() : FString(Datatype->characterId),
-		.inventory = ConvertPlayfabArrayToUnreal(Datatype->inventory, Datatype->inventoryCount, ConvertItemInstanceToUnreal),
+		.inventory = ConvertPlayfabArrayToUnreal<PFItemInstance, FPFItemInstance>(Datatype->inventory, Datatype->inventoryCount, ConvertItemInstanceToUnreal),
 		.inventoryCount = Datatype->inventoryCount
 	});
 
@@ -2610,7 +2610,7 @@ const PFCharacterInventory* ConvertCharacterInventoryToPlayfab(TSharedPtr<const 
 
 	const PFCharacterInventory* ConvertedType = new PFCharacterInventory{
 		.characterId = ConvertFStringToCharPtr(Datatype->characterId),
-		.inventory = ConvertUnrealArrayToPlayfab(Datatype->inventory, ConvertItemInstanceToPlayfab),
+		.inventory = ConvertUnrealArrayToPlayfab<PFItemInstance, FPFItemInstance>(Datatype->inventory, ConvertItemInstanceToPlayfab),
 		.inventoryCount = (uint32_t)Datatype->inventory.Num()
 	};
 
@@ -2655,19 +2655,19 @@ TSharedPtr<const FPFGetPlayerCombinedInfoResultPayload> ConvertGetPlayerCombined
 
 	TSharedPtr<const FPFGetPlayerCombinedInfoResultPayload> ConvertedType = MakeShared<FPFGetPlayerCombinedInfoResultPayload>(FPFGetPlayerCombinedInfoResultPayload{
 		.accountInfo = ConvertUserAccountInfoToUnreal(Datatype->accountInfo),
-		.characterInventories = ConvertPlayfabArrayToUnreal(Datatype->characterInventories, Datatype->characterInventoriesCount, ConvertCharacterInventoryToUnreal),
+		.characterInventories = ConvertPlayfabArrayToUnreal<PFCharacterInventory, FPFCharacterInventory>(Datatype->characterInventories, Datatype->characterInventoriesCount, ConvertCharacterInventoryToUnreal),
 		.characterInventoriesCount = Datatype->characterInventoriesCount,
-		.characterList = ConvertPlayfabArrayToUnreal(Datatype->characterList, Datatype->characterListCount, ConvertCharacterResultToUnreal),
+		.characterList = ConvertPlayfabArrayToUnreal<PFCharacterResult, FPFCharacterResult>(Datatype->characterList, Datatype->characterListCount, ConvertCharacterResultToUnreal),
 		.characterListCount = Datatype->characterListCount,
 		.playerProfile = ConvertPlayerProfileModelToUnreal(Datatype->playerProfile),
-		.playerStatistics = ConvertPlayfabArrayToUnreal(Datatype->playerStatistics, Datatype->playerStatisticsCount, ConvertStatisticValueToUnreal),
+		.playerStatistics = ConvertPlayfabArrayToUnreal<PFStatisticValue, FPFStatisticValue>(Datatype->playerStatistics, Datatype->playerStatisticsCount, ConvertStatisticValueToUnreal),
 		.playerStatisticsCount = Datatype->playerStatisticsCount,
 		.titleData = ConvertCharMapToUnreal(Datatype->titleData, Datatype->titleDataCount),
 		.titleDataCount = Datatype->titleDataCount,
 		.userData = ConvertPlayfabMapToUnreal<PFUserDataRecordDictionaryEntry, FPFUserDataRecord, PFUserDataRecord>(Datatype->userData, Datatype->userDataCount, ConvertUserDataRecordToUnreal),
 		.userDataCount = Datatype->userDataCount,
 		.userDataVersion = Datatype->userDataVersion,
-		.userInventory = ConvertPlayfabArrayToUnreal(Datatype->userInventory, Datatype->userInventoryCount, ConvertItemInstanceToUnreal),
+		.userInventory = ConvertPlayfabArrayToUnreal<PFItemInstance, FPFItemInstance>(Datatype->userInventory, Datatype->userInventoryCount, ConvertItemInstanceToUnreal),
 		.userInventoryCount = Datatype->userInventoryCount,
 		.userReadOnlyData = ConvertPlayfabMapToUnreal<PFUserDataRecordDictionaryEntry, FPFUserDataRecord, PFUserDataRecord>(Datatype->userReadOnlyData, Datatype->userReadOnlyDataCount, ConvertUserDataRecordToUnreal),
 		.userReadOnlyDataCount = Datatype->userReadOnlyDataCount,
@@ -2689,19 +2689,19 @@ const PFGetPlayerCombinedInfoResultPayload* ConvertGetPlayerCombinedInfoResultPa
 
 	const PFGetPlayerCombinedInfoResultPayload* ConvertedType = new PFGetPlayerCombinedInfoResultPayload{
 		.accountInfo = ConvertUserAccountInfoToPlayfab(Datatype->accountInfo),
-		.characterInventories = ConvertUnrealArrayToPlayfab(Datatype->characterInventories, ConvertCharacterInventoryToPlayfab),
+		.characterInventories = ConvertUnrealArrayToPlayfab<PFCharacterInventory, FPFCharacterInventory>(Datatype->characterInventories, ConvertCharacterInventoryToPlayfab),
 		.characterInventoriesCount = (uint32_t)Datatype->characterInventories.Num(),
-		.characterList = ConvertUnrealArrayToPlayfab(Datatype->characterList, ConvertCharacterResultToPlayfab),
+		.characterList = ConvertUnrealArrayToPlayfab<PFCharacterResult, FPFCharacterResult>(Datatype->characterList, ConvertCharacterResultToPlayfab),
 		.characterListCount = (uint32_t)Datatype->characterList.Num(),
 		.playerProfile = ConvertPlayerProfileModelToPlayfab(Datatype->playerProfile),
-		.playerStatistics = ConvertUnrealArrayToPlayfab(Datatype->playerStatistics, ConvertStatisticValueToPlayfab),
+		.playerStatistics = ConvertUnrealArrayToPlayfab<PFStatisticValue, FPFStatisticValue>(Datatype->playerStatistics, ConvertStatisticValueToPlayfab),
 		.playerStatisticsCount = (uint32_t)Datatype->playerStatistics.Num(),
 		.titleData = ConvertFStringMapToPlayfab(Datatype->titleData),
 		.titleDataCount = (uint32_t)Datatype->titleData.Num(),
 		.userData = ConvertUnrealMapToPlayfab<PFUserDataRecordDictionaryEntry, FPFUserDataRecord, PFUserDataRecord>(Datatype->userData, ConvertUserDataRecordToPlayfab),
 		.userDataCount = (uint32_t)Datatype->userData.Num(),
 		.userDataVersion = Datatype->userDataVersion,
-		.userInventory = ConvertUnrealArrayToPlayfab(Datatype->userInventory, ConvertItemInstanceToPlayfab),
+		.userInventory = ConvertUnrealArrayToPlayfab<PFItemInstance, FPFItemInstance>(Datatype->userInventory, ConvertItemInstanceToPlayfab),
 		.userInventoryCount = (uint32_t)Datatype->userInventory.Num(),
 		.userReadOnlyData = ConvertUnrealMapToPlayfab<PFUserDataRecordDictionaryEntry, FPFUserDataRecord, PFUserDataRecord>(Datatype->userReadOnlyData, ConvertUserDataRecordToPlayfab),
 		.userReadOnlyDataCount = (uint32_t)Datatype->userReadOnlyData.Num(),
@@ -2750,7 +2750,7 @@ TSharedPtr<const FPFTreatmentAssignment> ConvertTreatmentAssignmentToUnreal(cons
 	}
 
 	TSharedPtr<const FPFTreatmentAssignment> ConvertedType = MakeShared<FPFTreatmentAssignment>(FPFTreatmentAssignment{
-		.variables = ConvertPlayfabArrayToUnreal(Datatype->variables, Datatype->variablesCount, ConvertVariableToUnreal),
+		.variables = ConvertPlayfabArrayToUnreal<PFVariable, FPFVariable>(Datatype->variables, Datatype->variablesCount, ConvertVariableToUnreal),
 		.variablesCount = Datatype->variablesCount,
 		.variants = ConvertCharArrayToUnreal(Datatype->variants, Datatype->variantsCount),
 		.variantsCount = Datatype->variantsCount
@@ -2766,7 +2766,7 @@ const PFTreatmentAssignment* ConvertTreatmentAssignmentToPlayfab(TSharedPtr<cons
 	}
 
 	const PFTreatmentAssignment* ConvertedType = new PFTreatmentAssignment{
-		.variables = ConvertUnrealArrayToPlayfab(Datatype->variables, ConvertVariableToPlayfab),
+		.variables = ConvertUnrealArrayToPlayfab<PFVariable, FPFVariable>(Datatype->variables, ConvertVariableToPlayfab),
 		.variablesCount = (uint32_t)Datatype->variables.Num(),
 		.variants = ConvertFStringArrayToPlayfab(Datatype->variants),
 		.variantsCount = (uint32_t)Datatype->variants.Num()

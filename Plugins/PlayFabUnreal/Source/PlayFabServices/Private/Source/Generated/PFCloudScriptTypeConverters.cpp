@@ -147,7 +147,7 @@ TSharedPtr<const FPFCloudScriptExecuteCloudScriptResult> ConvertExecuteCloudScri
 		.functionResult = FPFJsonObject{ .stringValue = FString(Datatype->functionResult.stringValue) },
 		.functionResultTooLarge = TSharedPtr<const bool>(Datatype->functionResultTooLarge),
 		.httpRequestsIssued = Datatype->httpRequestsIssued,
-		.logs = ConvertPlayfabArrayToUnreal(Datatype->logs, Datatype->logsCount, ConvertLogStatementToUnreal),
+		.logs = ConvertPlayfabArrayToUnreal<PFCloudScriptLogStatement, FPFCloudScriptLogStatement>(Datatype->logs, Datatype->logsCount, ConvertLogStatementToUnreal),
 		.logsCount = Datatype->logsCount,
 		.logsTooLarge = TSharedPtr<const bool>(Datatype->logsTooLarge),
 		.memoryConsumedBytes = Datatype->memoryConsumedBytes,
@@ -172,7 +172,7 @@ const PFCloudScriptExecuteCloudScriptResult* ConvertExecuteCloudScriptResultToPl
 		.functionResult = PFJsonObject{ .stringValue = ConvertFStringToCharPtr(Datatype->functionResult.stringValue) },
 		.functionResultTooLarge = Datatype->functionResultTooLarge ? new bool(*Datatype->functionResultTooLarge) : nullptr,
 		.httpRequestsIssued = Datatype->httpRequestsIssued,
-		.logs = ConvertUnrealArrayToPlayfab(Datatype->logs, ConvertLogStatementToPlayfab),
+		.logs = ConvertUnrealArrayToPlayfab<PFCloudScriptLogStatement, FPFCloudScriptLogStatement>(Datatype->logs, ConvertLogStatementToPlayfab),
 		.logsCount = (uint32_t)Datatype->logs.Num(),
 		.logsTooLarge = Datatype->logsTooLarge ? new bool(*Datatype->logsTooLarge) : nullptr,
 		.memoryConsumedBytes = Datatype->memoryConsumedBytes,
@@ -430,7 +430,7 @@ TSharedPtr<const FPFCloudScriptListEventHubFunctionsResult> ConvertListEventHubF
 	}
 
 	TSharedPtr<const FPFCloudScriptListEventHubFunctionsResult> ConvertedType = MakeShared<FPFCloudScriptListEventHubFunctionsResult>(FPFCloudScriptListEventHubFunctionsResult{
-		.functions = ConvertPlayfabArrayToUnreal(Datatype->functions, Datatype->functionsCount, ConvertEventHubFunctionModelToUnreal),
+		.functions = ConvertPlayfabArrayToUnreal<PFCloudScriptEventHubFunctionModel, FPFCloudScriptEventHubFunctionModel>(Datatype->functions, Datatype->functionsCount, ConvertEventHubFunctionModelToUnreal),
 		.functionsCount = Datatype->functionsCount
 	});
 
@@ -444,7 +444,7 @@ const PFCloudScriptListEventHubFunctionsResult* ConvertListEventHubFunctionsResu
 	}
 
 	const PFCloudScriptListEventHubFunctionsResult* ConvertedType = new PFCloudScriptListEventHubFunctionsResult{
-		.functions = ConvertUnrealArrayToPlayfab(Datatype->functions, ConvertEventHubFunctionModelToPlayfab),
+		.functions = ConvertUnrealArrayToPlayfab<PFCloudScriptEventHubFunctionModel, FPFCloudScriptEventHubFunctionModel>(Datatype->functions, ConvertEventHubFunctionModelToPlayfab),
 		.functionsCount = (uint32_t)Datatype->functions.Num()
 	};
 

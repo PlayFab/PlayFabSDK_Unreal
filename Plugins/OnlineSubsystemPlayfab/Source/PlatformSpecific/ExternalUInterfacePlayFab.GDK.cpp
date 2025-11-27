@@ -2,7 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "OnlineExternalUIInterfacePlayFab.h"
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "GDKTaskQueueHelpers.h"
@@ -15,7 +15,14 @@ THIRD_PARTY_INCLUDES_START
 THIRD_PARTY_INCLUDES_END
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#if defined(OSS_PLAYFAB_GDK)
 bool FOnlineExternalUIPlayFab::ShowInviteUI(int32 InLocalUserNum, FName InSessionName)
+{
+	return ShowInviteUIGDK(InLocalUserNum, InSessionName);
+}
+#endif // OSS_PLAYFAB_GDK
+
+bool FOnlineExternalUIPlayFab::ShowInviteUIGDK(int32 InLocalUserNum, FName InSessionName)
 {
 	UE_LOG_ONLINE_EXTERNALUI(Verbose, TEXT("FOnlineExternalUIPlayFab::ShowInviteUI()"));
 
@@ -57,4 +64,4 @@ bool FOnlineExternalUIPlayFab::ShowInviteUI(int32 InLocalUserNum, FName InSessio
 
 	return true;
 }
-#endif // OSS_PLAYFAB_GDK
+#endif // OSS_PLAYFAB_GDK_SUPPORT

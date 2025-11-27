@@ -15,9 +15,9 @@
 #include "Misc/EngineVersion.h"
 #include "Misc/NetworkVersion.h"
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "grdk.h"
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 static constexpr const char* EventNamespace = "playfab.party";
 static constexpr const char* RequestPathTelemetry = "/Event/WriteTelemetryEvents";
@@ -114,6 +114,11 @@ FString PlayFabEventTracer::GetPlatformSDKVersion() const
 	#if defined(OSS_PLAYFAB_GDK)
 	return FString::FromInt(_GRDK_EDITION);
 	#elif defined(OSS_PLAYFAB_WIN64)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return FString::FromInt(_GRDK_EDITION);
+	}
+
 	//TODO: use STEAM_SDK_VER
 	return "1.51";
 	#elif defined(OSS_PLAYFAB_SWITCH)

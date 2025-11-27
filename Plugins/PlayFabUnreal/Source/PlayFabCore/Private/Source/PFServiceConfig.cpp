@@ -55,9 +55,7 @@ bool PLAYFABCORE_API FPFServiceConfigGetAPIEndpointSize(
 {
 	RETURN_FALSE_IF_NULL(handle);
 
-	size_t* apiEndpointSizePtr = apiEndpointSize.Get();
-
-	RETURN_FALSE_IF_FAILED(PFServiceConfigGetAPIEndpointSize(handle.Get(), apiEndpointSizePtr));
+	RETURN_FALSE_IF_FAILED(PFServiceConfigGetAPIEndpointSize(handle.Get(), reinterpret_cast<size_t*>(apiEndpointSize.Get())));
 
 	return true;
 }
@@ -72,13 +70,13 @@ bool PLAYFABCORE_API FPFServiceConfigGetAPIEndpoint(
 	RETURN_FALSE_IF_NULL(handle);
 	RETURN_FALSE_IF_NULL(apiEndpointSize);
 
-	const char* converted = StringCast<ANSICHAR>(*apiEndpoint).Get();
+	// Fix dangling pointer by managing StringCast lifetime properly
+	auto convertedString = StringCast<ANSICHAR>(*apiEndpoint);
+	const char* converted = convertedString.Get();
 	char* apiEndpointCStr = new char[apiEndpointSize];
 	FCStringAnsi::Strncpy(apiEndpointCStr, converted, apiEndpointSize);
 
-	size_t* apiEndpointUsedPtr = apiEndpointUsed.Get();
-
-	RETURN_FALSE_IF_FAILED(PFServiceConfigGetAPIEndpoint(handle.Get(), apiEndpointSize, apiEndpointCStr, apiEndpointUsedPtr));
+	RETURN_FALSE_IF_FAILED(PFServiceConfigGetAPIEndpoint(handle.Get(), static_cast<size_t>(apiEndpointSize), apiEndpointCStr, reinterpret_cast<size_t*>(apiEndpointUsed.Get())));
 
 	return true;
 }
@@ -90,9 +88,7 @@ bool PLAYFABCORE_API FPFServiceConfigGetTitleIdSize(
 {
 	RETURN_FALSE_IF_NULL(handle);
 
-	size_t* titleIdSizePtr = titleIdSize.Get();
-
-	RETURN_FALSE_IF_FAILED(PFServiceConfigGetTitleIdSize(handle.Get(), titleIdSizePtr));
+	RETURN_FALSE_IF_FAILED(PFServiceConfigGetTitleIdSize(handle.Get(), reinterpret_cast<size_t*>(titleIdSize.Get())));
 
 	return true;
 }
@@ -106,13 +102,13 @@ bool PLAYFABCORE_API FPFServiceConfigGetTitleId(
 {
 	RETURN_FALSE_IF_NULL(handle);
 
-	const char* converted = StringCast<ANSICHAR>(*titleId).Get();
+	// Fix dangling pointer by managing StringCast lifetime properly  
+	auto convertedString = StringCast<ANSICHAR>(*titleId);
+	const char* converted = convertedString.Get();
 	char* titleIdCStr = new char[titleIdSize];
 	FCStringAnsi::Strncpy(titleIdCStr, converted, titleIdSize);
 
-	size_t* titleIdUsedPtr = titleIdUsed.Get();
-
-	RETURN_FALSE_IF_FAILED(PFServiceConfigGetTitleId(handle.Get(), titleIdSize, titleIdCStr, titleIdUsedPtr));
+	RETURN_FALSE_IF_FAILED(PFServiceConfigGetTitleId(handle.Get(), static_cast<size_t>(titleIdSize), titleIdCStr, reinterpret_cast<size_t*>(titleIdUsed.Get())));
 
 	return true;
 }

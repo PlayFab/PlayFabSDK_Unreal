@@ -33,7 +33,7 @@ void FClientDeletePlayerCustomPropertiesAsyncTask::DoWork()
 
 void FClientDeletePlayerCustomPropertiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientDeletePlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -83,7 +83,7 @@ void FClientGetPlayerCustomPropertyAsyncTask::DoWork()
 
 void FClientGetPlayerCustomPropertyAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientGetPlayerCustomPropertyGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -136,7 +136,7 @@ void FClientGetUserDataAsyncTask::DoWork()
 
 void FClientGetUserDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientGetUserDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -189,7 +189,7 @@ void FClientGetUserPublisherDataAsyncTask::DoWork()
 
 void FClientGetUserPublisherDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientGetUserPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -242,7 +242,7 @@ void FClientGetUserPublisherReadOnlyDataAsyncTask::DoWork()
 
 void FClientGetUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientGetUserPublisherReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -295,7 +295,7 @@ void FClientGetUserReadOnlyDataAsyncTask::DoWork()
 
 void FClientGetUserReadOnlyDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientGetUserReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -341,7 +341,7 @@ void FClientListPlayerCustomPropertiesAsyncTask::DoWork()
 
 void FClientListPlayerCustomPropertiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementClientListPlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -382,7 +382,7 @@ void FClientUpdatePlayerCustomPropertiesAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.expectedPropertiesVersion = Request.expectedPropertiesVersion ? new int32(*Request.expectedPropertiesVersion) : nullptr,
-		.properties = ConvertUnrealArrayToPlayfab(Request.properties, ConvertUpdatePropertyToPlayfab),
+		.properties = ConvertUnrealArrayToPlayfab<PFPlayerDataManagementUpdateProperty, FPFPlayerDataManagementUpdateProperty>(Request.properties, ConvertUpdatePropertyToPlayfab),
 		.propertiesCount = (uint32_t)Request.properties.Num()
 	};
 	HResult = PFPlayerDataManagementClientUpdatePlayerCustomPropertiesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -533,7 +533,7 @@ void FServerDeletePlayerCustomPropertiesAsyncTask::DoWork()
 
 void FServerDeletePlayerCustomPropertiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerDeletePlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -586,7 +586,7 @@ void FServerGetPlayerCustomPropertyAsyncTask::DoWork()
 
 void FServerGetPlayerCustomPropertyAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetPlayerCustomPropertyGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -641,7 +641,7 @@ void FServerGetUserDataAsyncTask::DoWork()
 
 void FServerGetUserDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetUserDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -696,7 +696,7 @@ void FServerGetUserInternalDataAsyncTask::DoWork()
 
 void FServerGetUserInternalDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetUserInternalDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -751,7 +751,7 @@ void FServerGetUserPublisherDataAsyncTask::DoWork()
 
 void FServerGetUserPublisherDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetUserPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -806,7 +806,7 @@ void FServerGetUserPublisherInternalDataAsyncTask::DoWork()
 
 void FServerGetUserPublisherInternalDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetUserPublisherInternalDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -861,7 +861,7 @@ void FServerGetUserPublisherReadOnlyDataAsyncTask::DoWork()
 
 void FServerGetUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetUserPublisherReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -916,7 +916,7 @@ void FServerGetUserReadOnlyDataAsyncTask::DoWork()
 
 void FServerGetUserReadOnlyDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerGetUserReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -968,7 +968,7 @@ void FServerListPlayerCustomPropertiesAsyncTask::DoWork()
 
 void FServerListPlayerCustomPropertiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerListPlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1012,7 +1012,7 @@ void FServerUpdatePlayerCustomPropertiesAsyncTask::DoWork()
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.expectedPropertiesVersion = Request.expectedPropertiesVersion ? new int32(*Request.expectedPropertiesVersion) : nullptr,
 		.playFabId = ConvertFStringToCharPtr(Request.playFabId),
-		.properties = ConvertUnrealArrayToPlayfab(Request.properties, ConvertUpdatePropertyToPlayfab),
+		.properties = ConvertUnrealArrayToPlayfab<PFPlayerDataManagementUpdateProperty, FPFPlayerDataManagementUpdateProperty>(Request.properties, ConvertUpdatePropertyToPlayfab),
 		.propertiesCount = (uint32_t)Request.properties.Num()
 	};
 	HResult = PFPlayerDataManagementServerUpdatePlayerCustomPropertiesAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -1025,7 +1025,7 @@ void FServerUpdatePlayerCustomPropertiesAsyncTask::DoWork()
 
 void FServerUpdatePlayerCustomPropertiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlayerDataManagementServerUpdatePlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

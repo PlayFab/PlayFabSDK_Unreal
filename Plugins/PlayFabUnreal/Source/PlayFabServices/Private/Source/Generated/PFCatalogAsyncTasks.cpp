@@ -32,7 +32,7 @@ void FCreateDraftItemAsyncTask::DoWork()
 
 void FCreateDraftItemAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogCreateDraftItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -72,7 +72,7 @@ void FCreateUploadUrlsAsyncTask::DoWork()
 	const PFCatalogCreateUploadUrlsRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
-		.files = ConvertUnrealArrayToPlayfab(Request.files, ConvertUploadInfoToPlayfab),
+		.files = ConvertUnrealArrayToPlayfab<PFCatalogUploadInfo, FPFCatalogUploadInfo>(Request.files, ConvertUploadInfoToPlayfab),
 		.filesCount = (uint32_t)Request.files.Num()
 	};
 	HResult = PFCatalogCreateUploadUrlsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -85,7 +85,7 @@ void FCreateUploadUrlsAsyncTask::DoWork()
 
 void FCreateUploadUrlsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogCreateUploadUrlsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -217,7 +217,7 @@ void FGetCatalogConfigAsyncTask::DoWork()
 
 void FGetCatalogConfigAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetCatalogConfigGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -272,7 +272,7 @@ void FGetDraftItemAsyncTask::DoWork()
 
 void FGetDraftItemAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetDraftItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -310,7 +310,7 @@ FGetDraftItemsAsyncTask::FGetDraftItemsAsyncTask(
 void FGetDraftItemsAsyncTask::DoWork()
 {
 	const PFCatalogGetDraftItemsRequest RequestType = {
-		.alternateIds = ConvertUnrealArrayToPlayfab(Request.alternateIds, ConvertCatalogAlternateIdToPlayfab),
+		.alternateIds = ConvertUnrealArrayToPlayfab<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Request.alternateIds, ConvertCatalogAlternateIdToPlayfab),
 		.alternateIdsCount = (uint32_t)Request.alternateIds.Num(),
 		.continuationToken = ConvertFStringToCharPtr(Request.continuationToken),
 		.count = Request.count ? new int32(*Request.count) : nullptr,
@@ -330,7 +330,7 @@ void FGetDraftItemsAsyncTask::DoWork()
 
 void FGetDraftItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetDraftItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -385,7 +385,7 @@ void FGetEntityDraftItemsAsyncTask::DoWork()
 
 void FGetEntityDraftItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetEntityDraftItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -439,7 +439,7 @@ void FGetEntityItemReviewAsyncTask::DoWork()
 
 void FGetEntityItemReviewAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetEntityItemReviewGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -493,7 +493,7 @@ void FGetItemAsyncTask::DoWork()
 
 void FGetItemAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -549,7 +549,7 @@ void FGetItemContainersAsyncTask::DoWork()
 
 void FGetItemContainersAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemContainersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -603,7 +603,7 @@ void FGetItemModerationStateAsyncTask::DoWork()
 
 void FGetItemModerationStateAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemModerationStateGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -658,7 +658,7 @@ void FGetItemPublishStatusAsyncTask::DoWork()
 
 void FGetItemPublishStatusAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemPublishStatusGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -714,7 +714,7 @@ void FGetItemReviewsAsyncTask::DoWork()
 
 void FGetItemReviewsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemReviewsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -767,7 +767,7 @@ void FGetItemReviewSummaryAsyncTask::DoWork()
 
 void FGetItemReviewSummaryAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemReviewSummaryGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -805,7 +805,7 @@ FGetItemsAsyncTask::FGetItemsAsyncTask(
 void FGetItemsAsyncTask::DoWork()
 {
 	const PFCatalogGetItemsRequest RequestType = {
-		.alternateIds = ConvertUnrealArrayToPlayfab(Request.alternateIds, ConvertCatalogAlternateIdToPlayfab),
+		.alternateIds = ConvertUnrealArrayToPlayfab<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Request.alternateIds, ConvertCatalogAlternateIdToPlayfab),
 		.alternateIdsCount = (uint32_t)Request.alternateIds.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
@@ -823,7 +823,7 @@ void FGetItemsAsyncTask::DoWork()
 
 void FGetItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogGetItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1050,7 +1050,7 @@ void FSearchItemsAsyncTask::DoWork()
 
 void FSearchItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogSearchItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1176,7 +1176,7 @@ void FTakedownItemReviewsAsyncTask::DoWork()
 	const PFCatalogTakedownItemReviewsRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
-		.reviews = ConvertUnrealArrayToPlayfab(Request.reviews, ConvertReviewTakedownToPlayfab),
+		.reviews = ConvertUnrealArrayToPlayfab<PFCatalogReviewTakedown, FPFCatalogReviewTakedown>(Request.reviews, ConvertReviewTakedownToPlayfab),
 		.reviewsCount = (uint32_t)Request.reviews.Num()
 	};
 	HResult = PFCatalogTakedownItemReviewsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -1269,7 +1269,7 @@ void FUpdateDraftItemAsyncTask::DoWork()
 
 void FUpdateDraftItemAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCatalogUpdateDraftItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

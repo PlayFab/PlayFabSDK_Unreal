@@ -400,7 +400,7 @@ TSharedPtr<const FPFEventsListDataConnectionsResponse> ConvertListDataConnection
 	}
 
 	TSharedPtr<const FPFEventsListDataConnectionsResponse> ConvertedType = MakeShared<FPFEventsListDataConnectionsResponse>(FPFEventsListDataConnectionsResponse{
-		.dataConnections = ConvertPlayfabArrayToUnreal(Datatype->dataConnections, Datatype->dataConnectionsCount, ConvertDataConnectionDetailsToUnreal),
+		.dataConnections = ConvertPlayfabArrayToUnreal<PFEventsDataConnectionDetails, FPFEventsDataConnectionDetails>(Datatype->dataConnections, Datatype->dataConnectionsCount, ConvertDataConnectionDetailsToUnreal),
 		.dataConnectionsCount = Datatype->dataConnectionsCount
 	});
 
@@ -414,7 +414,7 @@ const PFEventsListDataConnectionsResponse* ConvertListDataConnectionsResponseToP
 	}
 
 	const PFEventsListDataConnectionsResponse* ConvertedType = new PFEventsListDataConnectionsResponse{
-		.dataConnections = ConvertUnrealArrayToPlayfab(Datatype->dataConnections, ConvertDataConnectionDetailsToPlayfab),
+		.dataConnections = ConvertUnrealArrayToPlayfab<PFEventsDataConnectionDetails, FPFEventsDataConnectionDetails>(Datatype->dataConnections, ConvertDataConnectionDetailsToPlayfab),
 		.dataConnectionsCount = (uint32_t)Datatype->dataConnections.Num()
 	};
 
@@ -594,7 +594,7 @@ TSharedPtr<const FPFEventsWriteEventsRequest> ConvertWriteEventsRequestToUnreal(
 	TSharedPtr<const FPFEventsWriteEventsRequest> ConvertedType = MakeShared<FPFEventsWriteEventsRequest>(FPFEventsWriteEventsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.events = ConvertPlayfabArrayToUnreal(Datatype->events, Datatype->eventsCount, ConvertEventContentsToUnreal),
+		.events = ConvertPlayfabArrayToUnreal<PFEventsEventContents, FPFEventsEventContents>(Datatype->events, Datatype->eventsCount, ConvertEventContentsToUnreal),
 		.eventsCount = Datatype->eventsCount
 	});
 
@@ -610,7 +610,7 @@ const PFEventsWriteEventsRequest* ConvertWriteEventsRequestToPlayfab(TSharedPtr<
 	const PFEventsWriteEventsRequest* ConvertedType = new PFEventsWriteEventsRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.events = ConvertUnrealArrayToPlayfab(Datatype->events, ConvertEventContentsToPlayfab),
+		.events = ConvertUnrealArrayToPlayfab<PFEventsEventContents, FPFEventsEventContents>(Datatype->events, ConvertEventContentsToPlayfab),
 		.eventsCount = (uint32_t)Datatype->events.Num()
 	};
 

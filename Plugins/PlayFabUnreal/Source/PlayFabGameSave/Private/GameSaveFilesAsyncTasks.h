@@ -46,3 +46,18 @@ private:
     FPFGameSaveFilesUploadOption m_options;
     FPFGameSaveFilesUploadWithUiAsyncComplete m_delegate;
 };
+
+class GameSaveFilesUninitializeAsyncTask : public FXAsyncTask
+{
+public:
+    GameSaveFilesUninitializeAsyncTask(
+        FPFGameSaveFilesUninitializeComplete delegate
+    );
+
+    void DoWork() override;
+
+    void ProcessResults() override;
+
+private:
+    FPFGameSaveFilesUninitializeComplete m_delegate;
+};

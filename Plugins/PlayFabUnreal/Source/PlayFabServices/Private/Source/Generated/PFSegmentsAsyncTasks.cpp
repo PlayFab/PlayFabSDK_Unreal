@@ -25,7 +25,7 @@ void FClientGetPlayerSegmentsAsyncTask::DoWork()
 
 void FClientGetPlayerSegmentsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFSegmentsClientGetPlayerSegmentsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -78,7 +78,7 @@ void FClientGetPlayerTagsAsyncTask::DoWork()
 
 void FClientGetPlayerTagsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFSegmentsClientGetPlayerTagsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -166,7 +166,7 @@ void FServerGetAllSegmentsAsyncTask::DoWork()
 
 void FServerGetAllSegmentsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFSegmentsServerGetAllSegmentsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -220,7 +220,7 @@ void FServerGetPlayerSegmentsAsyncTask::DoWork()
 
 void FServerGetPlayerSegmentsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFSegmentsServerGetPlayerSegmentsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -278,7 +278,7 @@ void FServerGetPlayersInSegmentAsyncTask::DoWork()
 
 void FServerGetPlayersInSegmentAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFSegmentsServerGetPlayersInSegmentGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -333,7 +333,7 @@ void FServerGetPlayerTagsAsyncTask::DoWork()
 
 void FServerGetPlayerTagsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFSegmentsServerGetPlayerTagsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

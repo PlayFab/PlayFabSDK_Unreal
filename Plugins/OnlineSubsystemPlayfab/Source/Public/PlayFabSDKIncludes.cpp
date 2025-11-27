@@ -7,8 +7,8 @@
 THIRD_PARTY_INCLUDES_START
 #include <PartyImpl.h>
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "PartyXboxLiveImpl.h"
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 THIRD_PARTY_INCLUDES_END

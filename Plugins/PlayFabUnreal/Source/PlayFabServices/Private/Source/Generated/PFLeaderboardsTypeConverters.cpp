@@ -218,7 +218,7 @@ TSharedPtr<const FPFLeaderboardsCreateLeaderboardDefinitionRequest> ConvertCreat
 	}
 
 	TSharedPtr<const FPFLeaderboardsCreateLeaderboardDefinitionRequest> ConvertedType = MakeShared<FPFLeaderboardsCreateLeaderboardDefinitionRequest>(FPFLeaderboardsCreateLeaderboardDefinitionRequest{
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
@@ -239,7 +239,7 @@ const PFLeaderboardsCreateLeaderboardDefinitionRequest* ConvertCreateLeaderboard
 	}
 
 	const PFLeaderboardsCreateLeaderboardDefinitionRequest* ConvertedType = new PFLeaderboardsCreateLeaderboardDefinitionRequest{
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
@@ -400,11 +400,11 @@ TSharedPtr<const FPFLeaderboardsGetEntityLeaderboardResponse> ConvertGetEntityLe
 	}
 
 	TSharedPtr<const FPFLeaderboardsGetEntityLeaderboardResponse> ConvertedType = MakeShared<FPFLeaderboardsGetEntityLeaderboardResponse>(FPFLeaderboardsGetEntityLeaderboardResponse{
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.entryCount = Datatype->entryCount,
 		.nextReset = ConvertTimeToUnreal(Datatype->nextReset),
-		.rankings = ConvertPlayfabArrayToUnreal(Datatype->rankings, Datatype->rankingsCount, ConvertEntityLeaderboardEntryToUnreal),
+		.rankings = ConvertPlayfabArrayToUnreal<PFLeaderboardsEntityLeaderboardEntry, FPFLeaderboardsEntityLeaderboardEntry>(Datatype->rankings, Datatype->rankingsCount, ConvertEntityLeaderboardEntryToUnreal),
 		.rankingsCount = Datatype->rankingsCount,
 		.version = Datatype->version
 	});
@@ -419,11 +419,11 @@ const PFLeaderboardsGetEntityLeaderboardResponse* ConvertGetEntityLeaderboardRes
 	}
 
 	const PFLeaderboardsGetEntityLeaderboardResponse* ConvertedType = new PFLeaderboardsGetEntityLeaderboardResponse{
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.entryCount = Datatype->entryCount,
 		.nextReset = ConvertFDateTimeToPlayfab(Datatype->nextReset),
-		.rankings = ConvertUnrealArrayToPlayfab(Datatype->rankings, ConvertEntityLeaderboardEntryToPlayfab),
+		.rankings = ConvertUnrealArrayToPlayfab<PFLeaderboardsEntityLeaderboardEntry, FPFLeaderboardsEntityLeaderboardEntry>(Datatype->rankings, ConvertEntityLeaderboardEntryToPlayfab),
 		.rankingsCount = (uint32_t)Datatype->rankings.Num(),
 		.version = Datatype->version
 	};
@@ -540,7 +540,7 @@ TSharedPtr<const FPFLeaderboardsGetLeaderboardDefinitionResponse> ConvertGetLead
 	}
 
 	TSharedPtr<const FPFLeaderboardsGetLeaderboardDefinitionResponse> ConvertedType = MakeShared<FPFLeaderboardsGetLeaderboardDefinitionResponse>(FPFLeaderboardsGetLeaderboardDefinitionResponse{
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.created = FDateTime::FromUnixTimestamp((int64)Datatype->created),
 		.entityType = Datatype->entityType == nullptr ? FString() : FString(Datatype->entityType),
@@ -562,7 +562,7 @@ const PFLeaderboardsGetLeaderboardDefinitionResponse* ConvertGetLeaderboardDefin
 	}
 
 	const PFLeaderboardsGetLeaderboardDefinitionResponse* ConvertedType = new PFLeaderboardsGetLeaderboardDefinitionResponse{
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.created = Datatype->created.ToUnixTimestamp(),
 		.entityType = ConvertFStringToCharPtr(Datatype->entityType),
@@ -704,7 +704,7 @@ TSharedPtr<const FPFLeaderboardsLeaderboardDefinition> ConvertLeaderboardDefinit
 	}
 
 	TSharedPtr<const FPFLeaderboardsLeaderboardDefinition> ConvertedType = MakeShared<FPFLeaderboardsLeaderboardDefinition>(FPFLeaderboardsLeaderboardDefinition{
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, Datatype->columnsCount, ConvertLeaderboardColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.created = FDateTime::FromUnixTimestamp((int64)Datatype->created),
 		.entityType = Datatype->entityType == nullptr ? FString() : FString(Datatype->entityType),
@@ -726,7 +726,7 @@ const PFLeaderboardsLeaderboardDefinition* ConvertLeaderboardDefinitionToPlayfab
 	}
 
 	const PFLeaderboardsLeaderboardDefinition* ConvertedType = new PFLeaderboardsLeaderboardDefinition{
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Datatype->columns, ConvertLeaderboardColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.created = Datatype->created.ToUnixTimestamp(),
 		.entityType = ConvertFStringToCharPtr(Datatype->entityType),
@@ -748,7 +748,7 @@ TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsResponse> ConvertListL
 	}
 
 	TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsResponse> ConvertedType = MakeShared<FPFLeaderboardsListLeaderboardDefinitionsResponse>(FPFLeaderboardsListLeaderboardDefinitionsResponse{
-		.leaderboardDefinitions = ConvertPlayfabArrayToUnreal(Datatype->leaderboardDefinitions, Datatype->leaderboardDefinitionsCount, ConvertLeaderboardDefinitionToUnreal),
+		.leaderboardDefinitions = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardDefinition, FPFLeaderboardsLeaderboardDefinition>(Datatype->leaderboardDefinitions, Datatype->leaderboardDefinitionsCount, ConvertLeaderboardDefinitionToUnreal),
 		.leaderboardDefinitionsCount = Datatype->leaderboardDefinitionsCount
 	});
 
@@ -762,7 +762,7 @@ const PFLeaderboardsListLeaderboardDefinitionsResponse* ConvertListLeaderboardDe
 	}
 
 	const PFLeaderboardsListLeaderboardDefinitionsResponse* ConvertedType = new PFLeaderboardsListLeaderboardDefinitionsResponse{
-		.leaderboardDefinitions = ConvertUnrealArrayToPlayfab(Datatype->leaderboardDefinitions, ConvertLeaderboardDefinitionToPlayfab),
+		.leaderboardDefinitions = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardDefinition, FPFLeaderboardsLeaderboardDefinition>(Datatype->leaderboardDefinitions, ConvertLeaderboardDefinitionToPlayfab),
 		.leaderboardDefinitionsCount = (uint32_t)Datatype->leaderboardDefinitions.Num()
 	};
 
@@ -878,7 +878,7 @@ TSharedPtr<const FPFLeaderboardsUpdateLeaderboardEntriesRequest> ConvertUpdateLe
 	TSharedPtr<const FPFLeaderboardsUpdateLeaderboardEntriesRequest> ConvertedType = MakeShared<FPFLeaderboardsUpdateLeaderboardEntriesRequest>(FPFLeaderboardsUpdateLeaderboardEntriesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.entries = ConvertPlayfabArrayToUnreal(Datatype->entries, Datatype->entriesCount, ConvertLeaderboardEntryUpdateToUnreal),
+		.entries = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardEntryUpdate, FPFLeaderboardsLeaderboardEntryUpdate>(Datatype->entries, Datatype->entriesCount, ConvertLeaderboardEntryUpdateToUnreal),
 		.entriesCount = Datatype->entriesCount,
 		.leaderboardName = Datatype->leaderboardName == nullptr ? FString() : FString(Datatype->leaderboardName)
 	});
@@ -895,7 +895,7 @@ const PFLeaderboardsUpdateLeaderboardEntriesRequest* ConvertUpdateLeaderboardEnt
 	const PFLeaderboardsUpdateLeaderboardEntriesRequest* ConvertedType = new PFLeaderboardsUpdateLeaderboardEntriesRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.entries = ConvertUnrealArrayToPlayfab(Datatype->entries, ConvertLeaderboardEntryUpdateToPlayfab),
+		.entries = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardEntryUpdate, FPFLeaderboardsLeaderboardEntryUpdate>(Datatype->entries, ConvertLeaderboardEntryUpdateToPlayfab),
 		.entriesCount = (uint32_t)Datatype->entries.Num(),
 		.leaderboardName = ConvertFStringToCharPtr(Datatype->leaderboardName)
 	};

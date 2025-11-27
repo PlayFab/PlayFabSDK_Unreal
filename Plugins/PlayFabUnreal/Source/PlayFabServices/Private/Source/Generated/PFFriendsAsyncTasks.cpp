@@ -80,7 +80,7 @@ void FClientGetFriendsListAsyncTask::DoWork()
 
 void FClientGetFriendsListAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFFriendsClientGetFriendsListGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -252,7 +252,7 @@ void FServerGetFriendsListAsyncTask::DoWork()
 
 void FServerGetFriendsListAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFFriendsServerGetFriendsListGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

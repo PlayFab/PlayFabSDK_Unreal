@@ -76,7 +76,7 @@ TSharedPtr<const FPFPushNotificationsSendPushNotificationRequest> ConvertSendPus
 	}
 
 	TSharedPtr<const FPFPushNotificationsSendPushNotificationRequest> ConvertedType = MakeShared<FPFPushNotificationsSendPushNotificationRequest>(FPFPushNotificationsSendPushNotificationRequest{
-		.advancedPlatformDelivery = ConvertPlayfabArrayToUnreal(Datatype->advancedPlatformDelivery, Datatype->advancedPlatformDeliveryCount, ConvertAdvancedPushPlatformMsgToUnreal),
+		.advancedPlatformDelivery = ConvertPlayfabArrayToUnreal<PFPushNotificationsAdvancedPushPlatformMsg, FPFPushNotificationsAdvancedPushPlatformMsg>(Datatype->advancedPlatformDelivery, Datatype->advancedPlatformDeliveryCount, ConvertAdvancedPushPlatformMsgToUnreal),
 		.advancedPlatformDeliveryCount = Datatype->advancedPlatformDeliveryCount,
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
@@ -98,7 +98,7 @@ const PFPushNotificationsSendPushNotificationRequest* ConvertSendPushNotificatio
 	}
 
 	const PFPushNotificationsSendPushNotificationRequest* ConvertedType = new PFPushNotificationsSendPushNotificationRequest{
-		.advancedPlatformDelivery = ConvertUnrealArrayToPlayfab(Datatype->advancedPlatformDelivery, ConvertAdvancedPushPlatformMsgToPlayfab),
+		.advancedPlatformDelivery = ConvertUnrealArrayToPlayfab<PFPushNotificationsAdvancedPushPlatformMsg, FPFPushNotificationsAdvancedPushPlatformMsg>(Datatype->advancedPlatformDelivery, ConvertAdvancedPushPlatformMsgToPlayfab),
 		.advancedPlatformDeliveryCount = (uint32_t)Datatype->advancedPlatformDelivery.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),

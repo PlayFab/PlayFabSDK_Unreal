@@ -11,8 +11,8 @@
 
 #include "CoreMinimal.h"
 #include "XAsyncTaskManager.h"
-#include "Xbox/PFAuthenticationAsyncTasks_Xbox.h"
 #include "Generated/PFAuthenticationUnrealTypes.h"
+#include "Xbox/PFAuthenticationAsyncTasks_Xbox.h"
 #include "Xbox/PFAuthenticationTypes_Xbox.h"
 THIRD_PARTY_INCLUDES_START
 #include <playfab/core/PFAuthenticationTypes.h>

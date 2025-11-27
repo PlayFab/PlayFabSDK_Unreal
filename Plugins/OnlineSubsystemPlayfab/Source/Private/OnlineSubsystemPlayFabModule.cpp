@@ -4,6 +4,7 @@
 
 #include "OnlineSubsystemPlayFabModule.h"
 #include "CoreMinimal.h"
+#include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
 #include "Modules/ModuleManager.h"
@@ -78,6 +79,43 @@ public:
 
 void FOnlineSubsystemPlayFabModule::StartupModule()
 {
+	// Check if we should apply any config overrides specified by the command line
+	FString PlayFabConfigOverridePrefix;
+	if (FParse::Value(FCommandLine::Get(), TEXT("PlayFabConfigOverridePrefix="), PlayFabConfigOverridePrefix))
+	{
+		const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("OnlineSubsystemPlayFab"));
+		const FString PluginConfigDir = FPaths::GetPath(Plugin->GetDescriptorFileName()) / TEXT("Config/");
+
+		int32 ConfigsFound = 0;
+		TArray<FString> PluginConfigs;
+		IFileManager::Get().FindFiles(PluginConfigs, *PluginConfigDir, TEXT("ini"));
+		for (const FString& ConfigFile : PluginConfigs)
+		{
+			if (!ConfigFile.StartsWith(PlayFabConfigOverridePrefix, ESearchCase::IgnoreCase))
+			{
+				continue;
+			}
+
+			// Remove the prefix from the config file to get the usable name.
+			FString RenamedConfigFile(ConfigFile);
+			RenamedConfigFile.ReplaceInline(*PlayFabConfigOverridePrefix, TEXT(""), ESearchCase::IgnoreCase);
+
+			// Use GetConfigFilename to find the proper config file to combine into, since it manages command line overrides and path sanitization
+			FString PluginConfigFilename = GConfig->GetConfigFilename(*FPaths::GetBaseFilename(RenamedConfigFile));
+			FConfigFile* FoundConfig = GConfig->FindConfigFile(PluginConfigFilename);
+			if (FoundConfig != nullptr)
+			{
+				FoundConfig->Branch->AddDynamicLayerToHierarchy(FPaths::Combine(PluginConfigDir, ConfigFile));
+				ConfigsFound++;
+			}
+		}
+
+		if (ConfigsFound == 0)
+		{
+			UE_LOG_ONLINE(Warning, TEXT("[FOnlineSubsystemPlayFabModule::StartupModule] No configuration overrides found but the PlayFabConfigOverridePrefix command line argument was specified!"));
+		}
+	}
+
 	// Create and register our singleton factory with the main online subsystem for easy access
 	PlayFabFactory = new FOnlineFactoryPlayFab();
 

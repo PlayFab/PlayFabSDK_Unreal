@@ -367,7 +367,7 @@ TSharedPtr<const FPFInventoryPurchaseInventoryItemsOperation> ConvertPurchaseInv
 		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
 		.item = ConvertInventoryItemReferenceToUnreal(Datatype->item),
 		.newStackValues = ConvertInitialValuesToUnreal(Datatype->newStackValues),
-		.priceAmounts = ConvertPlayfabArrayToUnreal(Datatype->priceAmounts, Datatype->priceAmountsCount, ConvertPurchasePriceAmountToUnreal),
+		.priceAmounts = ConvertPlayfabArrayToUnreal<PFInventoryPurchasePriceAmount, FPFInventoryPurchasePriceAmount>(Datatype->priceAmounts, Datatype->priceAmountsCount, ConvertPurchasePriceAmountToUnreal),
 		.priceAmountsCount = Datatype->priceAmountsCount,
 		.storeId = Datatype->storeId == nullptr ? FString() : FString(Datatype->storeId)
 	});
@@ -387,7 +387,7 @@ const PFInventoryPurchaseInventoryItemsOperation* ConvertPurchaseInventoryItemsO
 		.durationInSeconds = Datatype->durationInSeconds ? new double(*Datatype->durationInSeconds) : nullptr,
 		.item = ConvertInventoryItemReferenceToPlayfab(Datatype->item),
 		.newStackValues = ConvertInitialValuesToPlayfab(Datatype->newStackValues),
-		.priceAmounts = ConvertUnrealArrayToPlayfab(Datatype->priceAmounts, ConvertPurchasePriceAmountToPlayfab),
+		.priceAmounts = ConvertUnrealArrayToPlayfab<PFInventoryPurchasePriceAmount, FPFInventoryPurchasePriceAmount>(Datatype->priceAmounts, ConvertPurchasePriceAmountToPlayfab),
 		.priceAmountsCount = (uint32_t)Datatype->priceAmounts.Num(),
 		.storeId = ConvertFStringToCharPtr(Datatype->storeId)
 	};
@@ -572,7 +572,7 @@ TSharedPtr<const FPFInventoryExecuteInventoryOperationsRequest> ConvertExecuteIn
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.eTag = Datatype->eTag == nullptr ? FString() : FString(Datatype->eTag),
 		.idempotencyId = Datatype->idempotencyId == nullptr ? FString() : FString(Datatype->idempotencyId),
-		.operations = ConvertPlayfabArrayToUnreal(Datatype->operations, Datatype->operationsCount, ConvertInventoryOperationToUnreal),
+		.operations = ConvertPlayfabArrayToUnreal<PFInventoryInventoryOperation, FPFInventoryInventoryOperation>(Datatype->operations, Datatype->operationsCount, ConvertInventoryOperationToUnreal),
 		.operationsCount = Datatype->operationsCount
 	});
 
@@ -592,7 +592,7 @@ const PFInventoryExecuteInventoryOperationsRequest* ConvertExecuteInventoryOpera
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
 		.eTag = ConvertFStringToCharPtr(Datatype->eTag),
 		.idempotencyId = ConvertFStringToCharPtr(Datatype->idempotencyId),
-		.operations = ConvertUnrealArrayToPlayfab(Datatype->operations, ConvertInventoryOperationToPlayfab),
+		.operations = ConvertUnrealArrayToPlayfab<PFInventoryInventoryOperation, FPFInventoryInventoryOperation>(Datatype->operations, ConvertInventoryOperationToPlayfab),
 		.operationsCount = (uint32_t)Datatype->operations.Num()
 	};
 
@@ -644,7 +644,7 @@ TSharedPtr<const FPFInventoryExecuteTransferOperationsRequest> ConvertExecuteTra
 		.givingEntity = ConvertEntityKeyToUnreal(Datatype->givingEntity),
 		.givingETag = Datatype->givingETag == nullptr ? FString() : FString(Datatype->givingETag),
 		.idempotencyId = Datatype->idempotencyId == nullptr ? FString() : FString(Datatype->idempotencyId),
-		.operations = ConvertPlayfabArrayToUnreal(Datatype->operations, Datatype->operationsCount, ConvertTransferInventoryItemsOperationToUnreal),
+		.operations = ConvertPlayfabArrayToUnreal<PFInventoryTransferInventoryItemsOperation, FPFInventoryTransferInventoryItemsOperation>(Datatype->operations, Datatype->operationsCount, ConvertTransferInventoryItemsOperationToUnreal),
 		.operationsCount = Datatype->operationsCount,
 		.receivingCollectionId = Datatype->receivingCollectionId == nullptr ? FString() : FString(Datatype->receivingCollectionId),
 		.receivingEntity = ConvertEntityKeyToUnreal(Datatype->receivingEntity)
@@ -666,7 +666,7 @@ const PFInventoryExecuteTransferOperationsRequest* ConvertExecuteTransferOperati
 		.givingEntity = ConvertEntityKeyToPlayfab(Datatype->givingEntity),
 		.givingETag = ConvertFStringToCharPtr(Datatype->givingETag),
 		.idempotencyId = ConvertFStringToCharPtr(Datatype->idempotencyId),
-		.operations = ConvertUnrealArrayToPlayfab(Datatype->operations, ConvertTransferInventoryItemsOperationToPlayfab),
+		.operations = ConvertUnrealArrayToPlayfab<PFInventoryTransferInventoryItemsOperation, FPFInventoryTransferInventoryItemsOperation>(Datatype->operations, ConvertTransferInventoryItemsOperationToPlayfab),
 		.operationsCount = (uint32_t)Datatype->operations.Num(),
 		.receivingCollectionId = ConvertFStringToCharPtr(Datatype->receivingCollectionId),
 		.receivingEntity = ConvertEntityKeyToPlayfab(Datatype->receivingEntity)
@@ -828,7 +828,7 @@ TSharedPtr<const FPFInventoryGetInventoryItemsResponse> ConvertGetInventoryItems
 	TSharedPtr<const FPFInventoryGetInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryGetInventoryItemsResponse>(FPFInventoryGetInventoryItemsResponse{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
 		.eTag = Datatype->eTag == nullptr ? FString() : FString(Datatype->eTag),
-		.items = ConvertPlayfabArrayToUnreal(Datatype->items, Datatype->itemsCount, ConvertInventoryItemToUnreal),
+		.items = ConvertPlayfabArrayToUnreal<PFInventoryInventoryItem, FPFInventoryInventoryItem>(Datatype->items, Datatype->itemsCount, ConvertInventoryItemToUnreal),
 		.itemsCount = Datatype->itemsCount
 	});
 
@@ -844,7 +844,7 @@ const PFInventoryGetInventoryItemsResponse* ConvertGetInventoryItemsResponseToPl
 	const PFInventoryGetInventoryItemsResponse* ConvertedType = new PFInventoryGetInventoryItemsResponse{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
 		.eTag = ConvertFStringToCharPtr(Datatype->eTag),
-		.items = ConvertUnrealArrayToPlayfab(Datatype->items, ConvertInventoryItemToPlayfab),
+		.items = ConvertUnrealArrayToPlayfab<PFInventoryInventoryItem, FPFInventoryInventoryItem>(Datatype->items, ConvertInventoryItemToPlayfab),
 		.itemsCount = (uint32_t)Datatype->items.Num()
 	};
 
@@ -861,7 +861,8 @@ TSharedPtr<const FPFInventoryGetInventoryOperationStatusRequest> ConvertGetInven
 		.collectionId = Datatype->collectionId == nullptr ? FString() : FString(Datatype->collectionId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.entity = ConvertEntityKeyToUnreal(Datatype->entity)
+		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
+		.operationToken = Datatype->operationToken == nullptr ? FString() : FString(Datatype->operationToken)
 	});
 
 	return ConvertedType;
@@ -877,7 +878,8 @@ const PFInventoryGetInventoryOperationStatusRequest* ConvertGetInventoryOperatio
 		.collectionId = ConvertFStringToCharPtr(Datatype->collectionId),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.entity = ConvertEntityKeyToPlayfab(Datatype->entity)
+		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
+		.operationToken = ConvertFStringToCharPtr(Datatype->operationToken)
 	};
 
 	return ConvertedType;
@@ -1177,7 +1179,7 @@ TSharedPtr<const FPFInventoryTransaction> ConvertTransactionToUnreal(const PFInv
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.itemType = Datatype->itemType == nullptr ? FString() : FString(Datatype->itemType),
-		.operations = ConvertPlayfabArrayToUnreal(Datatype->operations, Datatype->operationsCount, ConvertTransactionOperationToUnreal),
+		.operations = ConvertPlayfabArrayToUnreal<PFInventoryTransactionOperation, FPFInventoryTransactionOperation>(Datatype->operations, Datatype->operationsCount, ConvertTransactionOperationToUnreal),
 		.operationsCount = Datatype->operationsCount,
 		.operationType = Datatype->operationType == nullptr ? FString() : FString(Datatype->operationType),
 		.purchaseDetails = ConvertTransactionPurchaseDetailsToUnreal(Datatype->purchaseDetails),
@@ -1202,7 +1204,7 @@ const PFInventoryTransaction* ConvertTransactionToPlayfab(TSharedPtr<const FPFIn
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.itemType = ConvertFStringToCharPtr(Datatype->itemType),
-		.operations = ConvertUnrealArrayToPlayfab(Datatype->operations, ConvertTransactionOperationToPlayfab),
+		.operations = ConvertUnrealArrayToPlayfab<PFInventoryTransactionOperation, FPFInventoryTransactionOperation>(Datatype->operations, ConvertTransactionOperationToPlayfab),
 		.operationsCount = (uint32_t)Datatype->operations.Num(),
 		.operationType = ConvertFStringToCharPtr(Datatype->operationType),
 		.purchaseDetails = ConvertTransactionPurchaseDetailsToPlayfab(Datatype->purchaseDetails),
@@ -1223,7 +1225,7 @@ TSharedPtr<const FPFInventoryGetTransactionHistoryResponse> ConvertGetTransactio
 
 	TSharedPtr<const FPFInventoryGetTransactionHistoryResponse> ConvertedType = MakeShared<FPFInventoryGetTransactionHistoryResponse>(FPFInventoryGetTransactionHistoryResponse{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.transactions = ConvertPlayfabArrayToUnreal(Datatype->transactions, Datatype->transactionsCount, ConvertTransactionToUnreal),
+		.transactions = ConvertPlayfabArrayToUnreal<PFInventoryTransaction, FPFInventoryTransaction>(Datatype->transactions, Datatype->transactionsCount, ConvertTransactionToUnreal),
 		.transactionsCount = Datatype->transactionsCount
 	});
 
@@ -1238,7 +1240,7 @@ const PFInventoryGetTransactionHistoryResponse* ConvertGetTransactionHistoryResp
 
 	const PFInventoryGetTransactionHistoryResponse* ConvertedType = new PFInventoryGetTransactionHistoryResponse{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
-		.transactions = ConvertUnrealArrayToPlayfab(Datatype->transactions, ConvertTransactionToPlayfab),
+		.transactions = ConvertUnrealArrayToPlayfab<PFInventoryTransaction, FPFInventoryTransaction>(Datatype->transactions, ConvertTransactionToPlayfab),
 		.transactionsCount = (uint32_t)Datatype->transactions.Num()
 	};
 
@@ -1263,7 +1265,7 @@ TSharedPtr<const FPFInventoryPurchaseInventoryItemsRequest> ConvertPurchaseInven
 		.idempotencyId = Datatype->idempotencyId == nullptr ? FString() : FString(Datatype->idempotencyId),
 		.item = ConvertInventoryItemReferenceToUnreal(Datatype->item),
 		.newStackValues = ConvertInitialValuesToUnreal(Datatype->newStackValues),
-		.priceAmounts = ConvertPlayfabArrayToUnreal(Datatype->priceAmounts, Datatype->priceAmountsCount, ConvertPurchasePriceAmountToUnreal),
+		.priceAmounts = ConvertPlayfabArrayToUnreal<PFInventoryPurchasePriceAmount, FPFInventoryPurchasePriceAmount>(Datatype->priceAmounts, Datatype->priceAmountsCount, ConvertPurchasePriceAmountToUnreal),
 		.priceAmountsCount = Datatype->priceAmountsCount,
 		.storeId = Datatype->storeId == nullptr ? FString() : FString(Datatype->storeId)
 	});
@@ -1289,7 +1291,7 @@ const PFInventoryPurchaseInventoryItemsRequest* ConvertPurchaseInventoryItemsReq
 		.idempotencyId = ConvertFStringToCharPtr(Datatype->idempotencyId),
 		.item = ConvertInventoryItemReferenceToPlayfab(Datatype->item),
 		.newStackValues = ConvertInitialValuesToPlayfab(Datatype->newStackValues),
-		.priceAmounts = ConvertUnrealArrayToPlayfab(Datatype->priceAmounts, ConvertPurchasePriceAmountToPlayfab),
+		.priceAmounts = ConvertUnrealArrayToPlayfab<PFInventoryPurchasePriceAmount, FPFInventoryPurchasePriceAmount>(Datatype->priceAmounts, ConvertPurchasePriceAmountToPlayfab),
 		.priceAmountsCount = (uint32_t)Datatype->priceAmounts.Num(),
 		.storeId = ConvertFStringToCharPtr(Datatype->storeId)
 	};
@@ -1432,9 +1434,9 @@ TSharedPtr<const FPFInventoryRedeemAppleAppStoreInventoryItemsResponse> ConvertR
 	}
 
 	TSharedPtr<const FPFInventoryRedeemAppleAppStoreInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryRedeemAppleAppStoreInventoryItemsResponse>(FPFInventoryRedeemAppleAppStoreInventoryItemsResponse{
-		.failed = ConvertPlayfabArrayToUnreal(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
+		.failed = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
 		.failedCount = Datatype->failedCount,
-		.succeeded = ConvertPlayfabArrayToUnreal(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
+		.succeeded = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
 		.succeededCount = Datatype->succeededCount,
 		.transactionIds = ConvertCharArrayToUnreal(Datatype->transactionIds, Datatype->transactionIdsCount),
 		.transactionIdsCount = Datatype->transactionIdsCount
@@ -1450,9 +1452,9 @@ const PFInventoryRedeemAppleAppStoreInventoryItemsResponse* ConvertRedeemAppleAp
 	}
 
 	const PFInventoryRedeemAppleAppStoreInventoryItemsResponse* ConvertedType = new PFInventoryRedeemAppleAppStoreInventoryItemsResponse{
-		.failed = ConvertUnrealArrayToPlayfab(Datatype->failed, ConvertRedemptionFailureToPlayfab),
+		.failed = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, ConvertRedemptionFailureToPlayfab),
 		.failedCount = (uint32_t)Datatype->failed.Num(),
-		.succeeded = ConvertUnrealArrayToPlayfab(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
+		.succeeded = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
 		.succeededCount = (uint32_t)Datatype->succeeded.Num(),
 		.transactionIds = ConvertFStringArrayToPlayfab(Datatype->transactionIds),
 		.transactionIdsCount = (uint32_t)Datatype->transactionIds.Num()
@@ -1500,7 +1502,7 @@ TSharedPtr<const FPFInventoryRedeemGooglePlayInventoryItemsRequest> ConvertRedee
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.purchases = ConvertPlayfabArrayToUnreal(Datatype->purchases, Datatype->purchasesCount, ConvertGooglePlayProductPurchaseToUnreal),
+		.purchases = ConvertPlayfabArrayToUnreal<PFInventoryGooglePlayProductPurchase, FPFInventoryGooglePlayProductPurchase>(Datatype->purchases, Datatype->purchasesCount, ConvertGooglePlayProductPurchaseToUnreal),
 		.purchasesCount = Datatype->purchasesCount
 	});
 
@@ -1518,7 +1520,7 @@ const PFInventoryRedeemGooglePlayInventoryItemsRequest* ConvertRedeemGooglePlayI
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
-		.purchases = ConvertUnrealArrayToPlayfab(Datatype->purchases, ConvertGooglePlayProductPurchaseToPlayfab),
+		.purchases = ConvertUnrealArrayToPlayfab<PFInventoryGooglePlayProductPurchase, FPFInventoryGooglePlayProductPurchase>(Datatype->purchases, ConvertGooglePlayProductPurchaseToPlayfab),
 		.purchasesCount = (uint32_t)Datatype->purchases.Num()
 	};
 
@@ -1532,9 +1534,9 @@ TSharedPtr<const FPFInventoryRedeemGooglePlayInventoryItemsResponse> ConvertRede
 	}
 
 	TSharedPtr<const FPFInventoryRedeemGooglePlayInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryRedeemGooglePlayInventoryItemsResponse>(FPFInventoryRedeemGooglePlayInventoryItemsResponse{
-		.failed = ConvertPlayfabArrayToUnreal(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
+		.failed = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
 		.failedCount = Datatype->failedCount,
-		.succeeded = ConvertPlayfabArrayToUnreal(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
+		.succeeded = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
 		.succeededCount = Datatype->succeededCount,
 		.transactionIds = ConvertCharArrayToUnreal(Datatype->transactionIds, Datatype->transactionIdsCount),
 		.transactionIdsCount = Datatype->transactionIdsCount
@@ -1550,9 +1552,9 @@ const PFInventoryRedeemGooglePlayInventoryItemsResponse* ConvertRedeemGooglePlay
 	}
 
 	const PFInventoryRedeemGooglePlayInventoryItemsResponse* ConvertedType = new PFInventoryRedeemGooglePlayInventoryItemsResponse{
-		.failed = ConvertUnrealArrayToPlayfab(Datatype->failed, ConvertRedemptionFailureToPlayfab),
+		.failed = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, ConvertRedemptionFailureToPlayfab),
 		.failedCount = (uint32_t)Datatype->failed.Num(),
-		.succeeded = ConvertUnrealArrayToPlayfab(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
+		.succeeded = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
 		.succeededCount = (uint32_t)Datatype->succeeded.Num(),
 		.transactionIds = ConvertFStringArrayToPlayfab(Datatype->transactionIds),
 		.transactionIdsCount = (uint32_t)Datatype->transactionIds.Num()
@@ -1614,9 +1616,9 @@ TSharedPtr<const FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse> Convert
 	}
 
 	TSharedPtr<const FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse>(FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse{
-		.failed = ConvertPlayfabArrayToUnreal(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
+		.failed = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
 		.failedCount = Datatype->failedCount,
-		.succeeded = ConvertPlayfabArrayToUnreal(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
+		.succeeded = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
 		.succeededCount = Datatype->succeededCount,
 		.transactionIds = ConvertCharArrayToUnreal(Datatype->transactionIds, Datatype->transactionIdsCount),
 		.transactionIdsCount = Datatype->transactionIdsCount
@@ -1632,9 +1634,9 @@ const PFInventoryRedeemMicrosoftStoreInventoryItemsResponse* ConvertRedeemMicros
 	}
 
 	const PFInventoryRedeemMicrosoftStoreInventoryItemsResponse* ConvertedType = new PFInventoryRedeemMicrosoftStoreInventoryItemsResponse{
-		.failed = ConvertUnrealArrayToPlayfab(Datatype->failed, ConvertRedemptionFailureToPlayfab),
+		.failed = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, ConvertRedemptionFailureToPlayfab),
 		.failedCount = (uint32_t)Datatype->failed.Num(),
-		.succeeded = ConvertUnrealArrayToPlayfab(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
+		.succeeded = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
 		.succeededCount = (uint32_t)Datatype->succeeded.Num(),
 		.transactionIds = ConvertFStringArrayToPlayfab(Datatype->transactionIds),
 		.transactionIdsCount = (uint32_t)Datatype->transactionIds.Num()
@@ -1684,9 +1686,9 @@ TSharedPtr<const FPFInventoryRedeemNintendoEShopInventoryItemsResponse> ConvertR
 	}
 
 	TSharedPtr<const FPFInventoryRedeemNintendoEShopInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryRedeemNintendoEShopInventoryItemsResponse>(FPFInventoryRedeemNintendoEShopInventoryItemsResponse{
-		.failed = ConvertPlayfabArrayToUnreal(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
+		.failed = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
 		.failedCount = Datatype->failedCount,
-		.succeeded = ConvertPlayfabArrayToUnreal(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
+		.succeeded = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
 		.succeededCount = Datatype->succeededCount,
 		.transactionIds = ConvertCharArrayToUnreal(Datatype->transactionIds, Datatype->transactionIdsCount),
 		.transactionIdsCount = Datatype->transactionIdsCount
@@ -1702,9 +1704,9 @@ const PFInventoryRedeemNintendoEShopInventoryItemsResponse* ConvertRedeemNintend
 	}
 
 	const PFInventoryRedeemNintendoEShopInventoryItemsResponse* ConvertedType = new PFInventoryRedeemNintendoEShopInventoryItemsResponse{
-		.failed = ConvertUnrealArrayToPlayfab(Datatype->failed, ConvertRedemptionFailureToPlayfab),
+		.failed = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, ConvertRedemptionFailureToPlayfab),
 		.failedCount = (uint32_t)Datatype->failed.Num(),
-		.succeeded = ConvertUnrealArrayToPlayfab(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
+		.succeeded = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
 		.succeededCount = (uint32_t)Datatype->succeeded.Num(),
 		.transactionIds = ConvertFStringArrayToPlayfab(Datatype->transactionIds),
 		.transactionIdsCount = (uint32_t)Datatype->transactionIds.Num()
@@ -1758,9 +1760,9 @@ TSharedPtr<const FPFInventoryRedeemPlayStationStoreInventoryItemsResponse> Conve
 	}
 
 	TSharedPtr<const FPFInventoryRedeemPlayStationStoreInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryRedeemPlayStationStoreInventoryItemsResponse>(FPFInventoryRedeemPlayStationStoreInventoryItemsResponse{
-		.failed = ConvertPlayfabArrayToUnreal(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
+		.failed = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
 		.failedCount = Datatype->failedCount,
-		.succeeded = ConvertPlayfabArrayToUnreal(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
+		.succeeded = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
 		.succeededCount = Datatype->succeededCount,
 		.transactionIds = ConvertCharArrayToUnreal(Datatype->transactionIds, Datatype->transactionIdsCount),
 		.transactionIdsCount = Datatype->transactionIdsCount
@@ -1776,9 +1778,9 @@ const PFInventoryRedeemPlayStationStoreInventoryItemsResponse* ConvertRedeemPlay
 	}
 
 	const PFInventoryRedeemPlayStationStoreInventoryItemsResponse* ConvertedType = new PFInventoryRedeemPlayStationStoreInventoryItemsResponse{
-		.failed = ConvertUnrealArrayToPlayfab(Datatype->failed, ConvertRedemptionFailureToPlayfab),
+		.failed = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, ConvertRedemptionFailureToPlayfab),
 		.failedCount = (uint32_t)Datatype->failed.Num(),
-		.succeeded = ConvertUnrealArrayToPlayfab(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
+		.succeeded = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
 		.succeededCount = (uint32_t)Datatype->succeeded.Num(),
 		.transactionIds = ConvertFStringArrayToPlayfab(Datatype->transactionIds),
 		.transactionIdsCount = (uint32_t)Datatype->transactionIds.Num()
@@ -1826,9 +1828,9 @@ TSharedPtr<const FPFInventoryRedeemSteamInventoryItemsResponse> ConvertRedeemSte
 	}
 
 	TSharedPtr<const FPFInventoryRedeemSteamInventoryItemsResponse> ConvertedType = MakeShared<FPFInventoryRedeemSteamInventoryItemsResponse>(FPFInventoryRedeemSteamInventoryItemsResponse{
-		.failed = ConvertPlayfabArrayToUnreal(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
+		.failed = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, Datatype->failedCount, ConvertRedemptionFailureToUnreal),
 		.failedCount = Datatype->failedCount,
-		.succeeded = ConvertPlayfabArrayToUnreal(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
+		.succeeded = ConvertPlayfabArrayToUnreal<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, Datatype->succeededCount, ConvertRedemptionSuccessToUnreal),
 		.succeededCount = Datatype->succeededCount,
 		.transactionIds = ConvertCharArrayToUnreal(Datatype->transactionIds, Datatype->transactionIdsCount),
 		.transactionIdsCount = Datatype->transactionIdsCount
@@ -1844,9 +1846,9 @@ const PFInventoryRedeemSteamInventoryItemsResponse* ConvertRedeemSteamInventoryI
 	}
 
 	const PFInventoryRedeemSteamInventoryItemsResponse* ConvertedType = new PFInventoryRedeemSteamInventoryItemsResponse{
-		.failed = ConvertUnrealArrayToPlayfab(Datatype->failed, ConvertRedemptionFailureToPlayfab),
+		.failed = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionFailure, FPFInventoryRedemptionFailure>(Datatype->failed, ConvertRedemptionFailureToPlayfab),
 		.failedCount = (uint32_t)Datatype->failed.Num(),
-		.succeeded = ConvertUnrealArrayToPlayfab(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
+		.succeeded = ConvertUnrealArrayToPlayfab<PFInventoryRedemptionSuccess, FPFInventoryRedemptionSuccess>(Datatype->succeeded, ConvertRedemptionSuccessToPlayfab),
 		.succeededCount = (uint32_t)Datatype->succeeded.Num(),
 		.transactionIds = ConvertFStringArrayToPlayfab(Datatype->transactionIds),
 		.transactionIdsCount = (uint32_t)Datatype->transactionIds.Num()

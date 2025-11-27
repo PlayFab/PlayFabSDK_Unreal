@@ -190,14 +190,12 @@ TArray<TSharedPtr<const U>> ConvertPlayfabArrayToUnreal(const T* const* Array, i
 template <typename T, typename U>
 const T* const* ConvertUnrealArrayToPlayfab(TArray<TSharedPtr<const U>> Array, const T* (*ConvertFunc)(TSharedPtr<const U>))
 {
-	TArray<const T*> ConvertedArray;
+	static TArray<const T*> ConvertedArray;
 	ConvertedArray.Reserve(Array.Num());
-
 	if (Array.Num() == 0)
 	{
 		return nullptr;
 	}
-
 	for (int32 i = 0; i < Array.Num(); ++i)
 	{
 		const T* ConvertedItem = ConvertFunc(Array[i]);
@@ -229,7 +227,8 @@ const TArray<U> ConvertPlayfabEnumArrayToUnreal(T const* Array, int32 ArraySize,
 template <typename T, typename U>
 T const* ConvertUnrealEnumArrayToPlayfab(const TArray<U> Array, const T (*ConvertFunc)(TSharedPtr<const U>))
 {
-	TArray<T> ConvertedArray;
+	static TArray<T> ConvertedArray;
+	ConvertedArray.Empty();
 	ConvertedArray.Reserve(Array.Num());
 
 	if (Array.Num() == 0)
@@ -273,7 +272,8 @@ TMap<const FString, TSharedPtr<const U>> ConvertPlayfabMapToUnreal(const T* Map,
 template <typename T, typename U, typename V> // DictionaryEntry, UnrealType, PlayFabType
 const T* ConvertUnrealMapToPlayfab(TMap<const FString, TSharedPtr<const U>> Map, const V* (*ConvertFunc)(TSharedPtr<const U>))
 {
-	TArray<T> ConvertedMap;
+	static TArray<T> ConvertedMap;
+	ConvertedMap.Empty();
 	ConvertedMap.Reserve(Map.Num());
 
 	if (Map.Num() == 0)

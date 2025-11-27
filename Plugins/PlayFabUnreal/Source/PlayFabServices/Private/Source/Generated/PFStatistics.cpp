@@ -100,6 +100,19 @@ bool PLAYFABSERVICES_API FPFStatisticsListStatisticDefinitionsAsync(
 }
 #endif
 
+#if 0
+bool PLAYFABSERVICES_API FPFStatisticsUnlinkAggregationSourceFromStatisticAsync(
+	_In_ FPFEntityHandle EntityHandle,
+	_In_ const FPFStatisticsUnlinkAggregationSourceFromStatisticRequest* request,
+	_Inout_ FOnUnlinkAggregationSourceFromStatisticCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FUnlinkAggregationSourceFromStatisticAsyncTask>(EntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK
 bool PLAYFABSERVICES_API FPFStatisticsUpdateStatisticDefinitionAsync(
 	_In_ FPFEntityHandle EntityHandle,

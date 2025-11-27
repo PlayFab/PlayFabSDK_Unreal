@@ -130,7 +130,7 @@ TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementRequest> ConvertAwardSt
 	}
 
 	TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementRequest> ConvertedType = MakeShared<FPFPlatformSpecificAwardSteamAchievementRequest>(FPFPlatformSpecificAwardSteamAchievementRequest{
-		.achievements = ConvertPlayfabArrayToUnreal(Datatype->achievements, Datatype->achievementsCount, ConvertAwardSteamAchievementItemToUnreal),
+		.achievements = ConvertPlayfabArrayToUnreal<PFPlatformSpecificAwardSteamAchievementItem, FPFPlatformSpecificAwardSteamAchievementItem>(Datatype->achievements, Datatype->achievementsCount, ConvertAwardSteamAchievementItemToUnreal),
 		.achievementsCount = Datatype->achievementsCount
 	});
 
@@ -144,7 +144,7 @@ const PFPlatformSpecificAwardSteamAchievementRequest* ConvertAwardSteamAchieveme
 	}
 
 	const PFPlatformSpecificAwardSteamAchievementRequest* ConvertedType = new PFPlatformSpecificAwardSteamAchievementRequest{
-		.achievements = ConvertUnrealArrayToPlayfab(Datatype->achievements, ConvertAwardSteamAchievementItemToPlayfab),
+		.achievements = ConvertUnrealArrayToPlayfab<PFPlatformSpecificAwardSteamAchievementItem, FPFPlatformSpecificAwardSteamAchievementItem>(Datatype->achievements, ConvertAwardSteamAchievementItemToPlayfab),
 		.achievementsCount = (uint32_t)Datatype->achievements.Num()
 	};
 
@@ -158,7 +158,7 @@ TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementResult> ConvertAwardSte
 	}
 
 	TSharedPtr<const FPFPlatformSpecificAwardSteamAchievementResult> ConvertedType = MakeShared<FPFPlatformSpecificAwardSteamAchievementResult>(FPFPlatformSpecificAwardSteamAchievementResult{
-		.achievementResults = ConvertPlayfabArrayToUnreal(Datatype->achievementResults, Datatype->achievementResultsCount, ConvertAwardSteamAchievementItemToUnreal),
+		.achievementResults = ConvertPlayfabArrayToUnreal<PFPlatformSpecificAwardSteamAchievementItem, FPFPlatformSpecificAwardSteamAchievementItem>(Datatype->achievementResults, Datatype->achievementResultsCount, ConvertAwardSteamAchievementItemToUnreal),
 		.achievementResultsCount = Datatype->achievementResultsCount
 	});
 
@@ -172,7 +172,7 @@ const PFPlatformSpecificAwardSteamAchievementResult* ConvertAwardSteamAchievemen
 	}
 
 	const PFPlatformSpecificAwardSteamAchievementResult* ConvertedType = new PFPlatformSpecificAwardSteamAchievementResult{
-		.achievementResults = ConvertUnrealArrayToPlayfab(Datatype->achievementResults, ConvertAwardSteamAchievementItemToPlayfab),
+		.achievementResults = ConvertUnrealArrayToPlayfab<PFPlatformSpecificAwardSteamAchievementItem, FPFPlatformSpecificAwardSteamAchievementItem>(Datatype->achievementResults, ConvertAwardSteamAchievementItemToPlayfab),
 		.achievementResultsCount = (uint32_t)Datatype->achievementResults.Num()
 	};
 

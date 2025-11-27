@@ -11,7 +11,10 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesInitialize(
 {
     PFGameSaveInitArgs cArgs{};
     cArgs.options = args->options;
-    cArgs.saveFolder = TCHAR_TO_UTF8(*args->saveFolder);
+
+    // Use StringCast instead of TCHAR_TO_UTF8 to avoid dangling pointer
+    auto ConvertedSaveFolder = StringCast<UTF8CHAR>(*args->saveFolder);
+    cArgs.saveFolder = reinterpret_cast<const char*>(ConvertedSaveFolder.Get());
 
     RETURN_FALSE_IF_FAILED(PFGameSaveFilesInitialize(&cArgs));
 
@@ -59,7 +62,7 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesUploadWithUiAsync(
 
 bool PLAYFABGAMESAVE_API FPFGameSaveFilesGetRemainingQuota(
     _In_ FPFLocalUserHandle localUserHandle,
-    _Out_ int64* remainingQuota
+    _Out_ int64_t* remainingQuota
 ) noexcept
 {
     RETURN_FALSE_IF_FAILED(PFGameSaveFilesGetRemainingQuota(localUserHandle.Get(), remainingQuota));
@@ -105,5 +108,7 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesUninitializeAsync(
     _In_ FPFGameSaveFilesUninitializeComplete delegate
 ) noexcept
 {
-    return false;
+    FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+    taskManager->AddTask<GameSaveFilesUninitializeAsyncTask>(delegate);
+    return true;
 }

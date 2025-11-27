@@ -1,7 +1,14 @@
 #include "PlayFabHelpers.h"
 
 #include "GenericPlatform/GenericPlatformMisc.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemPlayFabPrivate.h"
+#include "OnlineSubsystemPlayFabTypes.h"
 #include "Serialization/JsonSerializer.h"
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+#include "OnlineSubsystemGDKTypes.h"
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 bool
 MakePlayFabRestRequest(
@@ -317,7 +324,12 @@ bool ParsePlayFabIdsFromPlatformIdsResponse(
 		return false;
 	}
 
-#ifdef OSS_PLAYFAB_WIN64	
+#ifdef OSS_PLAYFAB_WIN64
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return false;
+	}
+
 	return ParseSteamIdToPlayFabIdMappingDataObject(JsonDataObject, EntityIdMapping);
 #elif defined(OSS_PLAYFAB_SWITCH)
 	return ParseNsaIdToPlayFabIdMappingDataObject(JsonDataObject, EntityIdMapping);
@@ -453,4 +465,52 @@ void ParseDeviceMakeModel(FString& DeviceMake, FString& DeviceModel)
 	const int32 SecondIdx = DeviceMakeAndModel.Find(TEXT("|"), ESearchCase::IgnoreCase, ESearchDir::Type::FromStart, FirstIdx + 1);
 	const int32 EndSecondWord = SecondIdx == INDEX_NONE ? DeviceMakeAndModel.Len() : SecondIdx;
 	DeviceModel = DeviceMakeAndModel.Mid(FirstIdx + 1, (EndSecondWord - FirstIdx) - 1);
+}
+
+FName GetNativePlatformSubsystemName()
+{
+	IOnlineSubsystem* NativeOSS = IOnlineSubsystem::GetByPlatform(false);
+	return NativeOSS ? NativeOSS->GetSubsystemName() : FName();
+}
+
+bool IsNativePlatformSubsystem(FName ServiceType)
+{
+	return ServiceType == GetNativePlatformSubsystemName();
+}
+
+bool IsNativePlatformSubsystemGDK()
+{
+	return IsNativePlatformSubsystem(FName(TEXT("GDK")));
+}
+
+bool ShouldSubsystemUseNativeSession()
+{
+	const FName NativeSubsystemName = GetNativePlatformSubsystemName();
+	return NativeSubsystemName == FName(TEXT("Steam")) ||
+		NativeSubsystemName == FName(TEXT("PS4")) ||
+		NativeSubsystemName == FName(TEXT("PS5"));
+}
+
+FString GetPlatformModel()
+{
+#if defined(OSS_PLAYFAB_WIN64) && defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return PLATFORM_MODEL_WINGDK;
+	}
+#endif // OSS_PLAYFAB_WIN64 && OSS_PLAYFAB_GDK_SUPPORT
+
+	return PLATFORM_MODEL;
+}
+
+FUniqueNetIdRef CreatePlatformNetId(const FString& PlatformNetIdStr)
+{
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return FUniqueNetIdGDK::Create(PlatformNetIdStr);
+	}
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+
+	return FUniqueNetIdPlayFab::Create(PlatformNetIdStr);
 }

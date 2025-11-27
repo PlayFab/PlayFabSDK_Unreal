@@ -7,6 +7,7 @@ PRAGMA_DISABLE_UNDEFINED_IDENTIFIER_WARNINGS
 #if OSS_PLAYFAB_WIN64
 #include "OnlineSessionSettings.h"
 #include "PlatformDefines.h"
+#include "PlayFabHelpers.h"
 
 #include "OnlineVoiceInterfacePlayFab.h"
 #include "OnlineSessionInterfacePlayFab.h"
@@ -17,22 +18,22 @@ using namespace Party;
 
 namespace
 {
-	struct RemoteTalkerOptions
+	struct RemoteTalkerOptionsWin
 	{
 		ECrossNetworkType Type = ECrossNetworkType::DISABLED;
 		TMap<FString /*User ID*/, PartyChatPermissionOptions> OptionsMap;
 	};
 
-	TMap<FString /*User ID*/, RemoteTalkerOptions> TalkersOptions;
-	TMap<FString /*Entity ID*/, FString /*User ID*/> TalkerIdMapping;
+	TMap<FString /*User ID*/, RemoteTalkerOptionsWin> TalkersOptionsWin;
+	TMap<FString /*Entity ID*/, FString /*User ID*/> TalkerIdMappingWin;
 
 	FString LocalTalkerUserId;
 
-	TArray<FCrossNetworkTalkerPlayFab> CrossNetworkTalkers;
+	TArray<FCrossNetworkTalkerPlayFab> CrossNetworkTalkersWin;
 	
-	bool UpdateTalkerCrossNetworkPermission()
+	bool UpdateTalkerCrossNetworkPermissionWin()
 	{
-		if (CrossNetworkTalkers.Num() == 0)
+		if (CrossNetworkTalkersWin.Num() == 0)
 		{
 			return false;
 		}
@@ -43,10 +44,10 @@ namespace
 			return false;
 		}
 
-		auto CrossNetwork = CrossNetworkTalkers[0];
+		auto CrossNetwork = CrossNetworkTalkersWin[0];
 
 		Party::PartyChatPermissionOptions ChatPermissionMask = PartyChatPermissionOptions::None;
-		RemoteTalkerOptions* LocalTalker = TalkersOptions.Find(LocalTalkerUserId);
+		RemoteTalkerOptionsWin* LocalTalker = TalkersOptionsWin.Find(LocalTalkerUserId);
 		if (LocalTalker)
 		{
 			Party::PartyChatPermissionOptions* PermissionOptions = LocalTalker->OptionsMap.Find(CrossNetwork.RemoteUserId);
@@ -57,8 +58,8 @@ namespace
 		}
 		else
 		{
-			TalkersOptions.Emplace(LocalTalkerUserId, RemoteTalkerOptions());
-			LocalTalker = TalkersOptions.Find(LocalTalkerUserId);
+			TalkersOptionsWin.Emplace(LocalTalkerUserId, RemoteTalkerOptionsWin());
+			LocalTalker = TalkersOptionsWin.Find(LocalTalkerUserId);
 		}
 
 		if (CrossNetwork.Type != ECrossNetworkType::DISABLED)
@@ -71,31 +72,54 @@ namespace
 
 		UE_LOG_ONLINE(Verbose, TEXT("Set voice chat permission %s vs %s as %d, Type %d"), *LocalTalkerUserId, *CrossNetwork.RemoteUserId, ChatPermissionMask, CrossNetwork.Type);
 
-		CrossNetworkTalkers.RemoveAt(0, 1);
+		CrossNetworkTalkersWin.RemoveAt(0, 1);
 		return true;
 	}
 }
 
 void FOnlineVoicePlayFab::AddTalkerIdMapping(const FString& EntityId, const FString& UserId)
 {
-	TalkerIdMapping.Add(EntityId, UserId);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		AddTalkerIdMappingGDK(EntityId, UserId);
+		return;
+	}
+#endif
+
+	TalkerIdMappingWin.Add(EntityId, UserId);
 	UE_LOG_ONLINE(Verbose, TEXT("Talker ID Mapping %s to %s"), *UserId, *EntityId);
 }
 
 void FOnlineVoicePlayFab::SetTalkerCrossNetworkPermission(ECrossNetworkType VoiceChatType, const FString& RemoteUserId, const FString& PlatformModel)
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		SetTalkerCrossNetworkPermissionGDK(VoiceChatType, RemoteUserId, PlatformModel);
+		return;
+	}
+#endif
+
 	FCrossNetworkTalkerPlayFab CrossNetwork = {VoiceChatType, RemoteUserId, PlatformModel};
-	CrossNetworkTalkers.Emplace(CrossNetwork);
+	CrossNetworkTalkersWin.Emplace(CrossNetwork);
 }
 
 PartyChatPermissionOptions FOnlineVoicePlayFab::GetChatPermissionsForTalker(const FString& LocalId, const FString& RemoteId)
 {
-	RemoteTalkerOptions* AllOptions = nullptr;
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return GetChatPermissionsForTalkerGDK(LocalId, RemoteId);
+	}
+#endif
+
+	RemoteTalkerOptionsWin* AllOptions = nullptr;
 	PartyChatPermissionOptions* Options = nullptr;
 
 	UE_LOG_ONLINE(Verbose, TEXT("GetChatPermissionsForTalker %s vs. %s"), *LocalId, *RemoteId);
 
-	AllOptions = TalkersOptions.Find(LocalId);
+	AllOptions = TalkersOptionsWin.Find(LocalId);
 	if (AllOptions != nullptr)
 	{
 		Options = (*AllOptions).OptionsMap.Find(RemoteId);
@@ -112,9 +136,16 @@ PartyChatPermissionOptions FOnlineVoicePlayFab::GetChatPermissionsForTalker(cons
 
 FString FOnlineVoicePlayFab::GetPlatformIdFromEntityId(const FString& EntityId)
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return GetPlatformIdFromEntityIdGDK(EntityId);
+	}
+#endif
+
 	UE_LOG_ONLINE(Verbose, TEXT("GetPlatformIdFromEntityId %s"), *EntityId);
 
-	FString* Xuid = TalkerIdMapping.Find(EntityId);
+	FString* Xuid = TalkerIdMappingWin.Find(EntityId);
 	if (Xuid != nullptr)
 	{
 		return *Xuid;
@@ -127,6 +158,14 @@ FString FOnlineVoicePlayFab::GetPlatformIdFromEntityId(const FString& EntityId)
 
 void FOnlineVoicePlayFab::StartTrackingPermissionForTalker(const FString& UserId, bool IsRemote)
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		StartTrackingPermissionForTalkerGDK(UserId, IsRemote);
+		return;
+	}
+#endif
+
 	UE_LOG_ONLINE(Verbose, TEXT("StartTrackingPermissionForTalker %s %s"), *UserId, IsRemote ? TEXT("remote") : TEXT("local"));
 
 	if (!IsRemote)
@@ -137,13 +176,21 @@ void FOnlineVoicePlayFab::StartTrackingPermissionForTalker(const FString& UserId
 
 void FOnlineVoicePlayFab::StopTrackingPermissionForTalker(const FString& UserId)
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		StopTrackingPermissionForTalkerGDK(UserId);
+		return;
+	}
+#endif
+
 	UE_LOG_ONLINE(Verbose, TEXT("StopTrackingPermissionForTalker %s"), *UserId);
 
-	for (auto& TalkerIdKvPair : TalkerIdMapping)
+	for (auto& TalkerIdKvPair : TalkerIdMappingWin)
 	{
 		if (TalkerIdKvPair.Value == UserId)
 		{
-			TalkerIdMapping.Remove(TalkerIdKvPair.Key);
+			TalkerIdMappingWin.Remove(TalkerIdKvPair.Key);
 			break;
 		}
 	}
@@ -151,7 +198,15 @@ void FOnlineVoicePlayFab::StopTrackingPermissionForTalker(const FString& UserId)
 
 void FOnlineVoicePlayFab::TickTalkerPermissionTracking()
 {
-	if (UpdateTalkerCrossNetworkPermission())
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		TickTalkerPermissionTrackingGDK();
+		return;
+	}
+#endif
+
+	if (UpdateTalkerCrossNetworkPermissionWin())
 	{
 		UpdatePermissionsForAllControls();
 	}

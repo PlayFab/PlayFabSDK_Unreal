@@ -18,7 +18,7 @@ FServerSendPushNotificationAsyncTask::FServerSendPushNotificationAsyncTask(
 void FServerSendPushNotificationAsyncTask::DoWork()
 {
 	const PFPushNotificationsSendPushNotificationRequest RequestType = {
-		.advancedPlatformDelivery = ConvertUnrealArrayToPlayfab(Request.advancedPlatformDelivery, ConvertAdvancedPushPlatformMsgToPlayfab),
+		.advancedPlatformDelivery = ConvertUnrealArrayToPlayfab<PFPushNotificationsAdvancedPushPlatformMsg, FPFPushNotificationsAdvancedPushPlatformMsg>(Request.advancedPlatformDelivery, ConvertAdvancedPushPlatformMsgToPlayfab),
 		.advancedPlatformDeliveryCount = (uint32_t)Request.advancedPlatformDelivery.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),

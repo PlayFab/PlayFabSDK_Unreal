@@ -25,9 +25,9 @@ typedef long HRESULT;
 #include <Party.h>
 #include <PartyTypes.h>
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "PartyXboxLive.h"
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 #include <PFEntityKey.h>
 #include <PFMultiplayer.h>

@@ -72,7 +72,7 @@ void FListBuildAliasesAsyncTask::DoWork()
 
 void FListBuildAliasesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFMultiplayerServerListBuildAliasesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -125,7 +125,7 @@ void FListBuildSummariesV2AsyncTask::DoWork()
 
 void FListBuildSummariesV2AsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFMultiplayerServerListBuildSummariesV2GetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -178,7 +178,7 @@ void FListQosServersForTitleAsyncTask::DoWork()
 
 void FListQosServersForTitleAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFMultiplayerServerListQosServersForTitleGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -232,7 +232,7 @@ void FListSecretSummariesAsyncTask::DoWork()
 
 void FListSecretSummariesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFMultiplayerServerListSecretSummariesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -292,7 +292,7 @@ void FRequestMultiplayerServerAsyncTask::DoWork()
 
 void FRequestMultiplayerServerAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFMultiplayerServerRequestMultiplayerServerGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -335,6 +335,7 @@ void FRequestPartyServiceAsyncTask::DoWork()
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.networkConfiguration = ConvertPartyNetworkConfigurationToPlayfab(Request.networkConfiguration),
 		.partyId = ConvertFStringToCharPtr(Request.partyId),
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId),
 		.preferredRegions = ConvertFStringArrayToPlayfab(Request.preferredRegions),
 		.preferredRegionsCount = (uint32_t)Request.preferredRegions.Num()
 	};
@@ -348,7 +349,7 @@ void FRequestPartyServiceAsyncTask::DoWork()
 
 void FRequestPartyServiceAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFMultiplayerServerRequestPartyServiceGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

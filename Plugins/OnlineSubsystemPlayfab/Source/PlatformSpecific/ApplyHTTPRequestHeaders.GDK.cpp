@@ -5,7 +5,7 @@
 #include "HAL/Platform.h"
 PRAGMA_DISABLE_UNDEFINED_IDENTIFIER_WARNINGS
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "GDKTaskQueueHelpers.h"
 
 #include "Windows/AllowWindowsPlatformTypes.h"
@@ -19,7 +19,19 @@ THIRD_PARTY_INCLUDES_END
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "OnlineSubsystem.h"
 
+#if defined(OSS_PLAYFAB_GDK)
 void FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompleted(bool bWasSuccessful, const FString& PlatformUserID, TMap<FString, FString> PlatformHeaders/* = TMap<FString, FString>()*/, TSharedPtr<FJsonObject> RequestBodyJson/* = TSharedPtr<FJsonObject>(nullptr)*/)
+{
+	OnPopulatePlatformRequestDataCompletedGDK(bWasSuccessful, PlatformUserID, PlatformHeaders, RequestBodyJson);
+}
+
+bool FOnlineIdentityPlayFab::ApplyPlatformHTTPRequestData(const FString& PlatformUserID, const FString& URL, const FString& RequestVerb)
+{
+	return ApplyPlatformHTTPRequestDataGDK(PlatformUserID, URL, RequestVerb);
+}
+#endif // OSS_PLAYFAB_GDK
+
+void FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompletedGDK(bool bWasSuccessful, const FString& PlatformUserID, TMap<FString, FString> PlatformHeaders/* = TMap<FString, FString>()*/, TSharedPtr<FJsonObject> RequestBodyJson/* = TSharedPtr<FJsonObject>(nullptr)*/)
 {
 	IOnlineSubsystem* OSSPlayFab = IOnlineSubsystem::Get(PLAYFAB_SUBSYSTEM);
 	if (OSSPlayFab)
@@ -49,7 +61,7 @@ void FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompleted(bool bWasSuc
 }
 
 // NOTE: All error cases must call FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompleted so the request is handled and cleaned up in the shared OSS PF identity interface
-bool FOnlineIdentityPlayFab::ApplyPlatformHTTPRequestData(const FString& PlatformUserID, const FString& URL, const FString& RequestVerb)
+bool FOnlineIdentityPlayFab::ApplyPlatformHTTPRequestDataGDK(const FString& PlatformUserID, const FString& URL, const FString& RequestVerb)
 {
 	XAsyncBlock* pNewAsyncBlock = new XAsyncBlock();
 	int64 xuid = FCString::Atoi64(*PlatformUserID);
@@ -130,4 +142,4 @@ bool FOnlineIdentityPlayFab::ApplyPlatformHTTPRequestData(const FString& Platfor
 
 	return Result == S_OK;
 }
-#endif // OSS_PLAYFAB_GDK
+#endif // OSS_PLAYFAB_GDK_SUPPORT

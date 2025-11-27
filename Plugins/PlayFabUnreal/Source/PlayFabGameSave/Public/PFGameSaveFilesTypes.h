@@ -36,7 +36,6 @@ typedef struct FPFGameSaveInitArgs
     /// </summary>
     uint64 options;
 
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
     /// <summary>
     /// On some platforms, the game can store save files in various locations (e.g. My Docs, local app data, etc)
     /// On those platforms, this lets the game specify where save files are stored.
@@ -44,7 +43,6 @@ typedef struct FPFGameSaveInitArgs
     /// All its files and subfolders will be synchronized with the cloud.
     /// </summary>
     FString saveFolder;
-#endif
 
 } FPFGameSaveInitArgs;
 

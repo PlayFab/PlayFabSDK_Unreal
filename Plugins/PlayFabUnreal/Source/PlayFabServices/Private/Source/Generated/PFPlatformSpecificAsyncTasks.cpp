@@ -138,7 +138,7 @@ FServerAwardSteamAchievementAsyncTask::FServerAwardSteamAchievementAsyncTask(
 void FServerAwardSteamAchievementAsyncTask::DoWork()
 {
 	const PFPlatformSpecificAwardSteamAchievementRequest RequestType = {
-		.achievements = ConvertUnrealArrayToPlayfab(Request.achievements, ConvertAwardSteamAchievementItemToPlayfab),
+		.achievements = ConvertUnrealArrayToPlayfab<PFPlatformSpecificAwardSteamAchievementItem, FPFPlatformSpecificAwardSteamAchievementItem>(Request.achievements, ConvertAwardSteamAchievementItemToPlayfab),
 		.achievementsCount = (uint32_t)Request.achievements.Num()
 	};
 	HResult = PFPlatformSpecificServerAwardSteamAchievementAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -151,7 +151,7 @@ void FServerAwardSteamAchievementAsyncTask::DoWork()
 
 void FServerAwardSteamAchievementAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFPlatformSpecificServerAwardSteamAchievementGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

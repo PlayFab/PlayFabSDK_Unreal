@@ -2,27 +2,13 @@
 
 #include "PFEntity.h"
 #include "PFLocalUser.h"
-#include <exception>
 #include "Containers/StringConv.h"
 #include <playfab/core/PFEntity.h>
 #include <playfab/core/PFLocalUser.h>
+#include "Engine/Engine.h"
+#include "Logging/LogMacros.h"
 
-struct PlayFabWrapperException : public std::exception
-{
-    PlayFabWrapperException(HRESULT hr) : errorMessage{ FString::Printf(TEXT("Unexpected error in PlayFab handle type wrapper: %llu"), hr) }
-    {
-    }
-
-    const char* what() const noexcept override
-    {
-        auto test = StringCast<ANSICHAR>(*errorMessage);
-        return test.Get();
-    }
-
-    FString const errorMessage;
-};
-
-#define THROW_IF_FAILED(hr) do { HRESULT __hrRet = hr; if (FAILED(__hrRet)) { throw PlayFabWrapperException{ __hrRet }; }} while (0, 0)
+DECLARE_LOG_CATEGORY_EXTERN(LogPlayFabTypeWrappers, Log, All);
 
 class Entity
 {
@@ -38,7 +24,8 @@ public:
         FPFEntityHandle duplicatedEntityHandle;
         if (!FPFEntityDuplicateHandle(handle, duplicatedEntityHandle))
         {
-            throw PlayFabWrapperException(E_FAIL);
+            UE_LOG(LogPlayFabTypeWrappers, Error, TEXT("Failed to duplicate entity handle"));
+            return Entity{ nullptr }; // Return invalid entity instead of throwing
         }
         return Entity{ duplicatedEntityHandle };
     }
@@ -47,11 +34,12 @@ public:
     {
         if (!FPFEntityDuplicateHandle(other.m_handle, m_handle))
         {
-            throw PlayFabWrapperException(E_FAIL);
+            UE_LOG(LogPlayFabTypeWrappers, Error, TEXT("Failed to copy entity handle"));
+            m_handle = nullptr; // Set to null instead of throwing
         }
     }
 
-    Entity(Entity&& other)
+    Entity(Entity&& other) noexcept
     {
         std::swap(m_handle, other.m_handle);
     }
@@ -75,6 +63,11 @@ public:
         return m_handle;
     }
 
+    bool IsValid() const noexcept
+    {
+        return m_handle != nullptr;
+    }
+
 private:
     Entity(FPFEntityHandle handle) : m_handle{ handle }
     {
@@ -96,7 +89,8 @@ public:
         FPFLocalUserHandle duplicatedUserHandle;
         if (!FPFLocalUserDuplicateHandle(handle, duplicatedUserHandle))
         {
-            throw PlayFabWrapperException(E_FAIL);
+            UE_LOG(LogPlayFabTypeWrappers, Error, TEXT("Failed to duplicate local user handle"));
+            return LocalUser{ nullptr }; // Return invalid local user instead of throwing
         }
         return LocalUser{ duplicatedUserHandle };
     }
@@ -105,11 +99,12 @@ public:
     {
         if (!FPFLocalUserDuplicateHandle(other.m_handle, m_handle))
         {
-            throw PlayFabWrapperException(E_FAIL);
+            UE_LOG(LogPlayFabTypeWrappers, Error, TEXT("Failed to copy local user handle"));
+            m_handle = nullptr; // Set to null instead of throwing
         }
     }
 
-    LocalUser(LocalUser&& other)
+    LocalUser(LocalUser&& other) noexcept
     {
         std::swap(m_handle, other.m_handle);
     }
@@ -131,6 +126,11 @@ public:
     FPFLocalUserHandle Handle() const noexcept
     {
         return m_handle;
+    }
+
+    bool IsValid() const noexcept
+    {
+        return m_handle != nullptr;
     }
 
 private:

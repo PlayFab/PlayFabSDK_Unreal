@@ -196,7 +196,7 @@ TSharedPtr<const FPFFriendsGetFriendsListResult> ConvertGetFriendsListResultToUn
 	}
 
 	TSharedPtr<const FPFFriendsGetFriendsListResult> ConvertedType = MakeShared<FPFFriendsGetFriendsListResult>(FPFFriendsGetFriendsListResult{
-		.friends = ConvertPlayfabArrayToUnreal(Datatype->friends, Datatype->friendsCount, ConvertFriendInfoToUnreal),
+		.friends = ConvertPlayfabArrayToUnreal<PFFriendsFriendInfo, FPFFriendsFriendInfo>(Datatype->friends, Datatype->friendsCount, ConvertFriendInfoToUnreal),
 		.friendsCount = Datatype->friendsCount
 	});
 
@@ -210,7 +210,7 @@ const PFFriendsGetFriendsListResult* ConvertGetFriendsListResultToPlayfab(TShare
 	}
 
 	const PFFriendsGetFriendsListResult* ConvertedType = new PFFriendsGetFriendsListResult{
-		.friends = ConvertUnrealArrayToPlayfab(Datatype->friends, ConvertFriendInfoToPlayfab),
+		.friends = ConvertUnrealArrayToPlayfab<PFFriendsFriendInfo, FPFFriendsFriendInfo>(Datatype->friends, ConvertFriendInfoToPlayfab),
 		.friendsCount = (uint32_t)Datatype->friends.Num()
 	};
 

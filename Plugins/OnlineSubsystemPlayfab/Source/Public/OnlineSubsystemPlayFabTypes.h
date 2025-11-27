@@ -49,18 +49,14 @@ public:
 
 	virtual const FUniqueNetId& GetSessionId() const override { return *SessionId; }
 	void SetSessionId(FString InSessionId) { SessionId = FUniqueNetIdString::Create(InSessionId, PLAYFAB_SUBSYSTEM); }
-#if defined(USES_NATIVE_SESSION)
 	const FString GetNativeSessionIdString() const { return NativeSessionIdString; }
 	void SetNativeSessionIdString(FString InNativeSessionId) { NativeSessionIdString = InNativeSessionId; }
 	const FString GetNativePlatform() const { return NativePlatform; }
 	void SetNativePlatform(FString InNativePlatform) { NativePlatform = InNativePlatform; }
-#endif
 
 	FUniqueNetIdStringRef SessionId;
-#if defined(USES_NATIVE_SESSION)
 	FString NativeSessionIdString;
 	FString NativePlatform;
-#endif
 	FString ConnectionString;
 	PFLobbyHandle LobbyHandle{};
 	FName SessionName = NAME_None;

@@ -54,3 +54,26 @@ void GameSaveFilesUploadWithUIAsyncTask::ProcessResults()
     HRESULT hr = PFGameSaveFilesUploadWithUiResult(*mAsyncBlock);
     m_delegate.ExecuteIfBound(SUCCEEDED(hr));
 }
+
+GameSaveFilesUninitializeAsyncTask::GameSaveFilesUninitializeAsyncTask(
+    FPFGameSaveFilesUninitializeComplete delegate
+) :
+    FXAsyncTask{ TEXT("GameSaveFilesUninitializeAsyncTask") },
+    m_delegate{ delegate }
+{
+}
+
+void GameSaveFilesUninitializeAsyncTask::DoWork()
+{
+    HRESULT hr = PFGameSaveFilesUninitializeAsync(*mAsyncBlock);
+    if (FAILED(hr))
+    {
+        m_delegate.ExecuteIfBound(false);
+    }
+}
+
+void GameSaveFilesUninitializeAsyncTask::ProcessResults()
+{
+    HRESULT hr = PFGameSaveFilesUninitializeResult(*mAsyncBlock);
+    m_delegate.ExecuteIfBound(SUCCEEDED(hr));
+}

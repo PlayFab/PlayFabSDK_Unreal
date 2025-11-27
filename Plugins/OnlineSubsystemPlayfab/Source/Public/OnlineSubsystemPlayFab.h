@@ -196,6 +196,14 @@ private:
 	void InitializeEventTracer();
 	void SetMemoryCallbacks();
 	void CleanUpPlayFab();
+	void OnAppResumeDefault();
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	void OnAppResumeGDK();
+	void RegisterNetworkInitCallbacksGDK();
+	void UnregisterNetworkInitCallbacksGDK();
+	void TryInitializePlayFabPartyGDK();
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 #ifdef OSS_PLAYFAB_SWITCH
 	void* LibBufferParty;

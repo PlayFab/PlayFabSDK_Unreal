@@ -214,6 +214,53 @@ public class PlayFabCore : ModuleRules
     }
     #endregion
 
+    private class NuGetPackageLoader
+    {
+        public class NuGetPackageInformation
+        {
+            public string UnifiedSDKPackagePath = string.Empty;
+        }
+
+        // If want specific version to use, can specify the version in the packages.config file.
+        public void ParsingNuGetPackage(ref string PlatformDir, ref NuGetPackageInformation PackageInfo)
+        {
+            string[] Lines = System.IO.File.ReadAllLines(Path.Combine(PlatformDir, "packages.config"));
+            foreach (string Line in Lines)
+            {
+                Int32 BeginOfString = Line.IndexOf("Microsoft.PlayFab", 0);
+                if (BeginOfString > -1)
+                {
+                    Int32 EndOfString = Line.IndexOf("\"", BeginOfString);
+                    string Id = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+                    const string versionString = "version=\"";
+                    BeginOfString = Line.IndexOf(versionString, 0);
+                    if (BeginOfString > -1)
+                    {
+                        BeginOfString += versionString.Length;
+                        EndOfString = Line.IndexOf("\"", BeginOfString);
+                        string Version = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+                        if (Id.IndexOf("UnifiedSDK", 0) > -1)
+                        {
+                            PackageInfo.UnifiedSDKPackagePath = Id + "." + Version;
+                        }
+                        else
+                        {
+                            throw new BuildException("Unknown package id in package.config file.");
+                        }
+                    }
+                }
+            }
+            if (PackageInfo.UnifiedSDKPackagePath.Length == 0)
+            {
+                throw new BuildException("Can't find PlayFab Unified SDK package infomation in package.config file.");
+            }
+
+            LogPlayFabCore($"Unified SDK={PackageInfo.UnifiedSDKPackagePath}");
+        }
+    }
+
     private static void LogPlayFabCore(string message)
     {
         Console.WriteLine($"[PlayFabCore] {message}");
@@ -262,6 +309,7 @@ public class PlayFabCore : ModuleRules
                 Path.Combine(ModuleDirectory, "../PlayFabCore/Public/Generated"),
                 Path.Combine(ModuleDirectory, "../PlayFabCore/Private/Include"),
                 Path.Combine(ModuleDirectory, "../PlayFabCore/Private/Include/Generated"),
+                Path.Combine(ModuleDirectory, "../PlayFabCore/PlatformSpecific"),
             }
         );
 
@@ -281,7 +329,7 @@ public class PlayFabCore : ModuleRules
         LogPlayFabCore($"Configuring for platform: {Target.Platform}");
         
         // GDK Platform
-        if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX")
+        if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
             LogPlayFabCore("Using GDK platform configuration");
             ConfigureForGDKPlatform();
@@ -332,17 +380,18 @@ public class PlayFabCore : ModuleRules
         PublicDefinitions.Add("HC_DATAMODEL=HC_DATAMODEL_LLP64");
         LogPlayFabCore("Added definitions: HC_PLATFORM=HC_PLATFORM_GDK, HC_DATAMODEL=HC_DATAMODEL_LLP64");
 
-        // If Unreal GDK Flavor is installed
-        var validPlatforms = UnrealTargetPlatform.GetValidPlatformNames();
-        LogPlayFabCore($"Checking for WinGDK in valid platforms: {string.Join(", ", validPlatforms)}");
+		// If Unreal GDK Flavor is installed
+		MethodInfo IsGDKEditionValidFunction = System.Type.GetType("GRDK, UE5Rules", false)?.GetMethod("IsGDKEditionValid", BindingFlags.Public | BindingFlags.Static);
+		bool bHasValidGDK = (IsGDKEditionValidFunction != null) && (bool)IsGDKEditionValidFunction.Invoke(null, null);
         
-        if (validPlatforms.Contains("WinGDK"))
+        if (bHasValidGDK)
         {
             LogPlayFabCore("Unreal GDK Flavor detected - adding GDK support");
             PublicIncludePathModuleNames.Add("GDKRuntime");
             PublicDependencyModuleNames.Add("XCurl");
             PublicDefinitions.Add("PF_UE_GDK_SUPPORT");
-            
+            PublicDefinitions.Add("WITH_GRDK");
+
             string gdkRuntimePath = Path.Combine(Unreal.EngineDirectory.ToString(), "Platforms", "GDK", "Source/Runtime/GDKRuntime/Public");
             PublicIncludePaths.Add(gdkRuntimePath);
             LogPlayFabCore($"Added GDK runtime include path: {gdkRuntimePath}");
@@ -390,7 +439,7 @@ public class PlayFabCore : ModuleRules
             }
 
             // Import libs
-            string libFile = Path.Combine(LibPath, "PlayFabCore.GDK.lib");
+            string libFile = Path.Combine(LibPath, "PlayFabCore.lib");
             if (File.Exists(libFile))
             {
                 PublicAdditionalLibraries.Add(libFile);
@@ -412,6 +461,9 @@ public class PlayFabCore : ModuleRules
     private void ConfigureForGDKPlatform()
     {
         LogPlayFabCore("Configuring PlayFabCore for GDK Platform");
+
+		PublicIncludePathModuleNames.Add("GDKRuntime");
+		PublicDefinitions.Add("WITH_GRDK");
         
         // Try using real GDK first, fall back to environment variables
         string gdkPath = null;
@@ -496,37 +548,19 @@ public class PlayFabCore : ModuleRules
 
     private void ConfigureForPlayStation4Platform()
     {
-        LogPlayFabCore("Configuring PlayFabCore for PlayStation 4 Platform");
-        
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
         string PluginPath = Path.Combine(ModuleDirectory, "../../");
         string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS4");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-
-        LogPlayFabCore($"PS4 include path: {IncludePath}");
-        LogPlayFabCore($"PS4 library path: {LibPath}");
-
-        PublicIncludePaths.Add(IncludePath);
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabCore.a"));
-        
-        LogPlayFabCore("PlayStation 4 platform configuration completed");
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 
     private void ConfigureForPlayStation5Platform()
     {
-        LogPlayFabCore("Configuring PlayFabCore for PlayStation 5 Platform");
-        
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
         string PluginPath = Path.Combine(ModuleDirectory, "../../");
         string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS5");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-
-        LogPlayFabCore($"PS5 include path: {IncludePath}");
-        LogPlayFabCore($"PS5 library path: {LibPath}");
-
-        PublicIncludePaths.Add(IncludePath);
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabCore.a"));
-        
-        LogPlayFabCore("PlayStation 5 platform configuration completed");
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 }

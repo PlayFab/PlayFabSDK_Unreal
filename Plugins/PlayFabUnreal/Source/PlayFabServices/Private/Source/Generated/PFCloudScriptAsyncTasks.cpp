@@ -35,7 +35,7 @@ void FClientExecuteCloudScriptAsyncTask::DoWork()
 
 void FClientExecuteCloudScriptAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCloudScriptClientExecuteCloudScriptGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -93,7 +93,7 @@ void FServerExecuteCloudScriptAsyncTask::DoWork()
 
 void FServerExecuteCloudScriptAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCloudScriptServerExecuteCloudScriptGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -151,7 +151,7 @@ void FExecuteEntityCloudScriptAsyncTask::DoWork()
 
 void FExecuteEntityCloudScriptAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCloudScriptExecuteEntityCloudScriptGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -206,7 +206,7 @@ void FExecuteFunctionAsyncTask::DoWork()
 
 void FExecuteFunctionAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCloudScriptExecuteFunctionGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -258,7 +258,7 @@ void FListEventHubFunctionsAsyncTask::DoWork()
 
 void FListEventHubFunctionsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFCloudScriptListEventHubFunctionsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

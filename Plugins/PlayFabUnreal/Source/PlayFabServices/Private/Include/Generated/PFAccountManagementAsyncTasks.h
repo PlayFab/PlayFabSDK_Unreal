@@ -3523,6 +3523,47 @@ private:
 
 #endif
 
+#if 0
+
+/// <summary>
+/// Links the Xbox Live account associated with the provided Xbox ID and Sandbox to the user's PlayFab
+/// account
+/// </summary>
+/// <param name="titleEntityHandle">FPFEntityHandle for a title Entity obtained using PFAuthenticationGetEntityWithSecretKeyAsync.</param>
+/// <param name="request">Populated request object.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// See also ServerLinkXboxAccountAsync, ServerLoginWithXboxIdAsync, ServerUnlinkXboxAccountAsync.
+///
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_ACCOUNT_ALREADY_LINKED, E_PF_LINKED_ACCOUNT_ALREADY_CLAIMED or any of
+/// the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details on error
+/// handling.
+/// </remarks>
+class PLAYFABSERVICES_API FServerLinkXboxIdAsyncTask : public FXAsyncTask
+{
+public:
+	FServerLinkXboxIdAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementLinkXboxIdRequest InRequest,
+	const FOnServerLinkXboxIdCompleted& InDelegate);
+
+	virtual void DoWork() override;
+
+	virtual void ProcessResults() override;
+
+private:
+	FPFEntityHandle TitleEntityHandle;
+	
+	FPFAccountManagementLinkXboxIdRequest Request;
+	
+	FOnServerLinkXboxIdCompleted Delegate;
+
+	HRESULT HResult;
+};
+
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 
 /// <summary>

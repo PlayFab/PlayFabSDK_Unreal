@@ -5,7 +5,7 @@
 #include "HAL/Platform.h"
 PRAGMA_DISABLE_UNDEFINED_IDENTIFIER_WARNINGS
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "PlatformDefines.h"
 
 #include "OnlineSubsystemPlayFab.h"
@@ -18,7 +18,24 @@ namespace
 	XTaskQueueRegistrationToken NetworkInitRegistration;
 }
 
+#if defined(OSS_PLAYFAB_GDK)
 void FOnlineSubsystemPlayFab::RegisterNetworkInitCallbacks()
+{
+	RegisterNetworkInitCallbacksGDK();
+}
+
+void FOnlineSubsystemPlayFab::UnregisterNetworkInitCallbacks()
+{
+	UnregisterNetworkInitCallbacksGDK();
+}
+
+void FOnlineSubsystemPlayFab::TryInitializePlayFabParty()
+{
+	TryInitializePlayFabPartyGDK();
+}
+#endif // OSS_PLAYFAB_GDK
+
+void FOnlineSubsystemPlayFab::RegisterNetworkInitCallbacksGDK()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::RegisterNetworkInitCallbacks"));
 
@@ -44,14 +61,14 @@ void FOnlineSubsystemPlayFab::RegisterNetworkInitCallbacks()
 	& NetworkInitRegistration);
 }
 
-void FOnlineSubsystemPlayFab::UnregisterNetworkInitCallbacks()
+void FOnlineSubsystemPlayFab::UnregisterNetworkInitCallbacksGDK()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::UnregisterNetworkInitCallbacks"));
 
 	XNetworkingUnregisterConnectivityHintChanged(NetworkInitRegistration, true);
 }
 
-void FOnlineSubsystemPlayFab::TryInitializePlayFabParty()
+void FOnlineSubsystemPlayFab::TryInitializePlayFabPartyGDK()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::TryInitializePlayFabParty"));
 
@@ -77,4 +94,4 @@ void FOnlineSubsystemPlayFab::TryInitializePlayFabParty()
 	}
 }
 
-#endif // OSS_PLAYFAB_GDK
+#endif // OSS_PLAYFAB_GDK_SUPPORT

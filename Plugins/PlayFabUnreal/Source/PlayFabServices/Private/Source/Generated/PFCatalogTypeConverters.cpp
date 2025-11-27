@@ -348,7 +348,7 @@ TSharedPtr<const FPFCatalogCatalogPrice> ConvertCatalogPriceToUnreal(const PFCat
 	}
 
 	TSharedPtr<const FPFCatalogCatalogPrice> ConvertedType = MakeShared<FPFCatalogCatalogPrice>(FPFCatalogCatalogPrice{
-		.amounts = ConvertPlayfabArrayToUnreal(Datatype->amounts, Datatype->amountsCount, ConvertCatalogPriceAmountToUnreal),
+		.amounts = ConvertPlayfabArrayToUnreal<PFCatalogCatalogPriceAmount, FPFCatalogCatalogPriceAmount>(Datatype->amounts, Datatype->amountsCount, ConvertCatalogPriceAmountToUnreal),
 		.amountsCount = Datatype->amountsCount,
 		.unitAmount = TSharedPtr<const int32>(Datatype->unitAmount),
 		.unitDurationInSeconds = TSharedPtr<const double>(Datatype->unitDurationInSeconds)
@@ -364,7 +364,7 @@ const PFCatalogCatalogPrice* ConvertCatalogPriceToPlayfab(TSharedPtr<const FPFCa
 	}
 
 	const PFCatalogCatalogPrice* ConvertedType = new PFCatalogCatalogPrice{
-		.amounts = ConvertUnrealArrayToPlayfab(Datatype->amounts, ConvertCatalogPriceAmountToPlayfab),
+		.amounts = ConvertUnrealArrayToPlayfab<PFCatalogCatalogPriceAmount, FPFCatalogCatalogPriceAmount>(Datatype->amounts, ConvertCatalogPriceAmountToPlayfab),
 		.amountsCount = (uint32_t)Datatype->amounts.Num(),
 		.unitAmount = Datatype->unitAmount ? new int32(*Datatype->unitAmount) : nullptr,
 		.unitDurationInSeconds = Datatype->unitDurationInSeconds ? new double(*Datatype->unitDurationInSeconds) : nullptr
@@ -380,7 +380,7 @@ TSharedPtr<const FPFCatalogCatalogPriceOptions> ConvertCatalogPriceOptionsToUnre
 	}
 
 	TSharedPtr<const FPFCatalogCatalogPriceOptions> ConvertedType = MakeShared<FPFCatalogCatalogPriceOptions>(FPFCatalogCatalogPriceOptions{
-		.prices = ConvertPlayfabArrayToUnreal(Datatype->prices, Datatype->pricesCount, ConvertCatalogPriceToUnreal),
+		.prices = ConvertPlayfabArrayToUnreal<PFCatalogCatalogPrice, FPFCatalogCatalogPrice>(Datatype->prices, Datatype->pricesCount, ConvertCatalogPriceToUnreal),
 		.pricesCount = Datatype->pricesCount
 	});
 
@@ -394,7 +394,7 @@ const PFCatalogCatalogPriceOptions* ConvertCatalogPriceOptionsToPlayfab(TSharedP
 	}
 
 	const PFCatalogCatalogPriceOptions* ConvertedType = new PFCatalogCatalogPriceOptions{
-		.prices = ConvertUnrealArrayToPlayfab(Datatype->prices, ConvertCatalogPriceToPlayfab),
+		.prices = ConvertUnrealArrayToPlayfab<PFCatalogCatalogPrice, FPFCatalogCatalogPrice>(Datatype->prices, ConvertCatalogPriceToPlayfab),
 		.pricesCount = (uint32_t)Datatype->prices.Num()
 	};
 
@@ -668,7 +668,7 @@ TSharedPtr<const FPFCatalogCatalogPriceOverride> ConvertCatalogPriceOverrideToUn
 	}
 
 	TSharedPtr<const FPFCatalogCatalogPriceOverride> ConvertedType = MakeShared<FPFCatalogCatalogPriceOverride>(FPFCatalogCatalogPriceOverride{
-		.amounts = ConvertPlayfabArrayToUnreal(Datatype->amounts, Datatype->amountsCount, ConvertCatalogPriceAmountOverrideToUnreal),
+		.amounts = ConvertPlayfabArrayToUnreal<PFCatalogCatalogPriceAmountOverride, FPFCatalogCatalogPriceAmountOverride>(Datatype->amounts, Datatype->amountsCount, ConvertCatalogPriceAmountOverrideToUnreal),
 		.amountsCount = Datatype->amountsCount
 	});
 
@@ -682,7 +682,7 @@ const PFCatalogCatalogPriceOverride* ConvertCatalogPriceOverrideToPlayfab(TShare
 	}
 
 	const PFCatalogCatalogPriceOverride* ConvertedType = new PFCatalogCatalogPriceOverride{
-		.amounts = ConvertUnrealArrayToPlayfab(Datatype->amounts, ConvertCatalogPriceAmountOverrideToPlayfab),
+		.amounts = ConvertUnrealArrayToPlayfab<PFCatalogCatalogPriceAmountOverride, FPFCatalogCatalogPriceAmountOverride>(Datatype->amounts, ConvertCatalogPriceAmountOverrideToPlayfab),
 		.amountsCount = (uint32_t)Datatype->amounts.Num()
 	};
 
@@ -696,7 +696,7 @@ TSharedPtr<const FPFCatalogCatalogPriceOptionsOverride> ConvertCatalogPriceOptio
 	}
 
 	TSharedPtr<const FPFCatalogCatalogPriceOptionsOverride> ConvertedType = MakeShared<FPFCatalogCatalogPriceOptionsOverride>(FPFCatalogCatalogPriceOptionsOverride{
-		.prices = ConvertPlayfabArrayToUnreal(Datatype->prices, Datatype->pricesCount, ConvertCatalogPriceOverrideToUnreal),
+		.prices = ConvertPlayfabArrayToUnreal<PFCatalogCatalogPriceOverride, FPFCatalogCatalogPriceOverride>(Datatype->prices, Datatype->pricesCount, ConvertCatalogPriceOverrideToUnreal),
 		.pricesCount = Datatype->pricesCount
 	});
 
@@ -710,7 +710,7 @@ const PFCatalogCatalogPriceOptionsOverride* ConvertCatalogPriceOptionsOverrideTo
 	}
 
 	const PFCatalogCatalogPriceOptionsOverride* ConvertedType = new PFCatalogCatalogPriceOptionsOverride{
-		.prices = ConvertUnrealArrayToPlayfab(Datatype->prices, ConvertCatalogPriceOverrideToPlayfab),
+		.prices = ConvertUnrealArrayToPlayfab<PFCatalogCatalogPriceOverride, FPFCatalogCatalogPriceOverride>(Datatype->prices, ConvertCatalogPriceOverrideToPlayfab),
 		.pricesCount = (uint32_t)Datatype->prices.Num()
 	};
 
@@ -754,14 +754,14 @@ TSharedPtr<const FPFCatalogCatalogItem> ConvertCatalogItemToUnreal(const PFCatal
 	}
 
 	TSharedPtr<const FPFCatalogCatalogItem> ConvertedType = MakeShared<FPFCatalogCatalogItem>(FPFCatalogCatalogItem{
-		.alternateIds = ConvertPlayfabArrayToUnreal(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
+		.alternateIds = ConvertPlayfabArrayToUnreal<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
 		.alternateIdsCount = Datatype->alternateIdsCount,
-		.contents = ConvertPlayfabArrayToUnreal(Datatype->contents, Datatype->contentsCount, ConvertContentToUnreal),
+		.contents = ConvertPlayfabArrayToUnreal<PFCatalogContent, FPFCatalogContent>(Datatype->contents, Datatype->contentsCount, ConvertContentToUnreal),
 		.contentsCount = Datatype->contentsCount,
 		.contentType = Datatype->contentType == nullptr ? FString() : FString(Datatype->contentType),
 		.creationDate = ConvertTimeToUnreal(Datatype->creationDate),
 		.creatorEntity = ConvertEntityKeyToUnreal(Datatype->creatorEntity),
-		.deepLinks = ConvertPlayfabArrayToUnreal(Datatype->deepLinks, Datatype->deepLinksCount, ConvertDeepLinkToUnreal),
+		.deepLinks = ConvertPlayfabArrayToUnreal<PFCatalogDeepLink, FPFCatalogDeepLink>(Datatype->deepLinks, Datatype->deepLinksCount, ConvertDeepLinkToUnreal),
 		.deepLinksCount = Datatype->deepLinksCount,
 		.defaultStackId = Datatype->defaultStackId == nullptr ? FString() : FString(Datatype->defaultStackId),
 		.description = ConvertCharMapToUnreal(Datatype->description, Datatype->descriptionCount),
@@ -771,10 +771,10 @@ TSharedPtr<const FPFCatalogCatalogItem> ConvertCatalogItemToUnreal(const PFCatal
 		.endDate = ConvertTimeToUnreal(Datatype->endDate),
 		.eTag = Datatype->eTag == nullptr ? FString() : FString(Datatype->eTag),
 		.id = Datatype->id == nullptr ? FString() : FString(Datatype->id),
-		.images = ConvertPlayfabArrayToUnreal(Datatype->images, Datatype->imagesCount, ConvertImageToUnreal),
+		.images = ConvertPlayfabArrayToUnreal<PFCatalogImage, FPFCatalogImage>(Datatype->images, Datatype->imagesCount, ConvertImageToUnreal),
 		.imagesCount = Datatype->imagesCount,
 		.isHidden = TSharedPtr<const bool>(Datatype->isHidden),
-		.itemReferences = ConvertPlayfabArrayToUnreal(Datatype->itemReferences, Datatype->itemReferencesCount, ConvertCatalogItemReferenceToUnreal),
+		.itemReferences = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItemReference, FPFCatalogCatalogItemReference>(Datatype->itemReferences, Datatype->itemReferencesCount, ConvertCatalogItemReferenceToUnreal),
 		.itemReferencesCount = Datatype->itemReferencesCount,
 		.keywords = ConvertPlayfabMapToUnreal<PFCatalogKeywordSetDictionaryEntry, FPFCatalogKeywordSet, PFCatalogKeywordSet>(Datatype->keywords, Datatype->keywordsCount, ConvertKeywordSetToUnreal),
 		.keywordsCount = Datatype->keywordsCount,
@@ -804,14 +804,14 @@ const PFCatalogCatalogItem* ConvertCatalogItemToPlayfab(TSharedPtr<const FPFCata
 	}
 
 	const PFCatalogCatalogItem* ConvertedType = new PFCatalogCatalogItem{
-		.alternateIds = ConvertUnrealArrayToPlayfab(Datatype->alternateIds, ConvertCatalogAlternateIdToPlayfab),
+		.alternateIds = ConvertUnrealArrayToPlayfab<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, ConvertCatalogAlternateIdToPlayfab),
 		.alternateIdsCount = (uint32_t)Datatype->alternateIds.Num(),
-		.contents = ConvertUnrealArrayToPlayfab(Datatype->contents, ConvertContentToPlayfab),
+		.contents = ConvertUnrealArrayToPlayfab<PFCatalogContent, FPFCatalogContent>(Datatype->contents, ConvertContentToPlayfab),
 		.contentsCount = (uint32_t)Datatype->contents.Num(),
 		.contentType = ConvertFStringToCharPtr(Datatype->contentType),
 		.creationDate = ConvertFDateTimeToPlayfab(Datatype->creationDate),
 		.creatorEntity = ConvertEntityKeyToPlayfab(Datatype->creatorEntity),
-		.deepLinks = ConvertUnrealArrayToPlayfab(Datatype->deepLinks, ConvertDeepLinkToPlayfab),
+		.deepLinks = ConvertUnrealArrayToPlayfab<PFCatalogDeepLink, FPFCatalogDeepLink>(Datatype->deepLinks, ConvertDeepLinkToPlayfab),
 		.deepLinksCount = (uint32_t)Datatype->deepLinks.Num(),
 		.defaultStackId = ConvertFStringToCharPtr(Datatype->defaultStackId),
 		.description = ConvertFStringMapToPlayfab(Datatype->description),
@@ -821,10 +821,10 @@ const PFCatalogCatalogItem* ConvertCatalogItemToPlayfab(TSharedPtr<const FPFCata
 		.endDate = ConvertFDateTimeToPlayfab(Datatype->endDate),
 		.eTag = ConvertFStringToCharPtr(Datatype->eTag),
 		.id = ConvertFStringToCharPtr(Datatype->id),
-		.images = ConvertUnrealArrayToPlayfab(Datatype->images, ConvertImageToPlayfab),
+		.images = ConvertUnrealArrayToPlayfab<PFCatalogImage, FPFCatalogImage>(Datatype->images, ConvertImageToPlayfab),
 		.imagesCount = (uint32_t)Datatype->images.Num(),
 		.isHidden = Datatype->isHidden ? new bool(*Datatype->isHidden) : nullptr,
-		.itemReferences = ConvertUnrealArrayToPlayfab(Datatype->itemReferences, ConvertCatalogItemReferenceToPlayfab),
+		.itemReferences = ConvertUnrealArrayToPlayfab<PFCatalogCatalogItemReference, FPFCatalogCatalogItemReference>(Datatype->itemReferences, ConvertCatalogItemReferenceToPlayfab),
 		.itemReferencesCount = (uint32_t)Datatype->itemReferences.Num(),
 		.keywords = ConvertUnrealMapToPlayfab<PFCatalogKeywordSetDictionaryEntry, FPFCatalogKeywordSet, PFCatalogKeywordSet>(Datatype->keywords, ConvertKeywordSetToPlayfab),
 		.keywordsCount = (uint32_t)Datatype->keywords.Num(),
@@ -940,7 +940,7 @@ TSharedPtr<const FPFCatalogCreateUploadUrlsRequest> ConvertCreateUploadUrlsReque
 	TSharedPtr<const FPFCatalogCreateUploadUrlsRequest> ConvertedType = MakeShared<FPFCatalogCreateUploadUrlsRequest>(FPFCatalogCreateUploadUrlsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.files = ConvertPlayfabArrayToUnreal(Datatype->files, Datatype->filesCount, ConvertUploadInfoToUnreal),
+		.files = ConvertPlayfabArrayToUnreal<PFCatalogUploadInfo, FPFCatalogUploadInfo>(Datatype->files, Datatype->filesCount, ConvertUploadInfoToUnreal),
 		.filesCount = Datatype->filesCount
 	});
 
@@ -956,7 +956,7 @@ const PFCatalogCreateUploadUrlsRequest* ConvertCreateUploadUrlsRequestToPlayfab(
 	const PFCatalogCreateUploadUrlsRequest* ConvertedType = new PFCatalogCreateUploadUrlsRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.files = ConvertUnrealArrayToPlayfab(Datatype->files, ConvertUploadInfoToPlayfab),
+		.files = ConvertUnrealArrayToPlayfab<PFCatalogUploadInfo, FPFCatalogUploadInfo>(Datatype->files, ConvertUploadInfoToPlayfab),
 		.filesCount = (uint32_t)Datatype->files.Num()
 	};
 
@@ -1000,7 +1000,7 @@ TSharedPtr<const FPFCatalogCreateUploadUrlsResponse> ConvertCreateUploadUrlsResp
 	}
 
 	TSharedPtr<const FPFCatalogCreateUploadUrlsResponse> ConvertedType = MakeShared<FPFCatalogCreateUploadUrlsResponse>(FPFCatalogCreateUploadUrlsResponse{
-		.uploadUrls = ConvertPlayfabArrayToUnreal(Datatype->uploadUrls, Datatype->uploadUrlsCount, ConvertUploadUrlMetadataToUnreal),
+		.uploadUrls = ConvertPlayfabArrayToUnreal<PFCatalogUploadUrlMetadata, FPFCatalogUploadUrlMetadata>(Datatype->uploadUrls, Datatype->uploadUrlsCount, ConvertUploadUrlMetadataToUnreal),
 		.uploadUrlsCount = Datatype->uploadUrlsCount
 	});
 
@@ -1014,7 +1014,7 @@ const PFCatalogCreateUploadUrlsResponse* ConvertCreateUploadUrlsResponseToPlayfa
 	}
 
 	const PFCatalogCreateUploadUrlsResponse* ConvertedType = new PFCatalogCreateUploadUrlsResponse{
-		.uploadUrls = ConvertUnrealArrayToPlayfab(Datatype->uploadUrls, ConvertUploadUrlMetadataToPlayfab),
+		.uploadUrls = ConvertUnrealArrayToPlayfab<PFCatalogUploadUrlMetadata, FPFCatalogUploadUrlMetadata>(Datatype->uploadUrls, ConvertUploadUrlMetadataToPlayfab),
 		.uploadUrlsCount = (uint32_t)Datatype->uploadUrls.Num()
 	};
 
@@ -1294,7 +1294,7 @@ TSharedPtr<const FPFCatalogReviewConfig> ConvertReviewConfigToUnreal(const PFCat
 	}
 
 	TSharedPtr<const FPFCatalogReviewConfig> ConvertedType = MakeShared<FPFCatalogReviewConfig>(FPFCatalogReviewConfig{
-		.categoryRatings = ConvertPlayfabArrayToUnreal(Datatype->categoryRatings, Datatype->categoryRatingsCount, ConvertCategoryRatingConfigToUnreal),
+		.categoryRatings = ConvertPlayfabArrayToUnreal<PFCatalogCategoryRatingConfig, FPFCatalogCategoryRatingConfig>(Datatype->categoryRatings, Datatype->categoryRatingsCount, ConvertCategoryRatingConfigToUnreal),
 		.categoryRatingsCount = Datatype->categoryRatingsCount
 	});
 
@@ -1308,7 +1308,7 @@ const PFCatalogReviewConfig* ConvertReviewConfigToPlayfab(TSharedPtr<const FPFCa
 	}
 
 	const PFCatalogReviewConfig* ConvertedType = new PFCatalogReviewConfig{
-		.categoryRatings = ConvertUnrealArrayToPlayfab(Datatype->categoryRatings, ConvertCategoryRatingConfigToPlayfab),
+		.categoryRatings = ConvertUnrealArrayToPlayfab<PFCatalogCategoryRatingConfig, FPFCatalogCategoryRatingConfig>(Datatype->categoryRatings, ConvertCategoryRatingConfigToPlayfab),
 		.categoryRatingsCount = (uint32_t)Datatype->categoryRatings.Num()
 	};
 
@@ -1354,12 +1354,12 @@ TSharedPtr<const FPFCatalogCatalogConfig> ConvertCatalogConfigToUnreal(const PFC
 	}
 
 	TSharedPtr<const FPFCatalogCatalogConfig> ConvertedType = MakeShared<FPFCatalogCatalogConfig>(FPFCatalogCatalogConfig{
-		.adminEntities = ConvertPlayfabArrayToUnreal(Datatype->adminEntities, Datatype->adminEntitiesCount, ConvertEntityKeyToUnreal),
+		.adminEntities = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->adminEntities, Datatype->adminEntitiesCount, ConvertEntityKeyToUnreal),
 		.adminEntitiesCount = Datatype->adminEntitiesCount,
 		.catalog = ConvertCatalogSpecificConfigToUnreal(Datatype->catalog),
-		.deepLinkFormats = ConvertPlayfabArrayToUnreal(Datatype->deepLinkFormats, Datatype->deepLinkFormatsCount, ConvertDeepLinkFormatToUnreal),
+		.deepLinkFormats = ConvertPlayfabArrayToUnreal<PFCatalogDeepLinkFormat, FPFCatalogDeepLinkFormat>(Datatype->deepLinkFormats, Datatype->deepLinkFormatsCount, ConvertDeepLinkFormatToUnreal),
 		.deepLinkFormatsCount = Datatype->deepLinkFormatsCount,
-		.displayPropertyIndexInfos = ConvertPlayfabArrayToUnreal(Datatype->displayPropertyIndexInfos, Datatype->displayPropertyIndexInfosCount, ConvertDisplayPropertyIndexInfoToUnreal),
+		.displayPropertyIndexInfos = ConvertPlayfabArrayToUnreal<PFCatalogDisplayPropertyIndexInfo, FPFCatalogDisplayPropertyIndexInfo>(Datatype->displayPropertyIndexInfos, Datatype->displayPropertyIndexInfosCount, ConvertDisplayPropertyIndexInfoToUnreal),
 		.displayPropertyIndexInfosCount = Datatype->displayPropertyIndexInfosCount,
 		.file = ConvertFileConfigToUnreal(Datatype->file),
 		.image = ConvertImageConfigToUnreal(Datatype->image),
@@ -1367,7 +1367,7 @@ TSharedPtr<const FPFCatalogCatalogConfig> ConvertCatalogConfigToUnreal(const PFC
 		.platforms = ConvertCharArrayToUnreal(Datatype->platforms, Datatype->platformsCount),
 		.platformsCount = Datatype->platformsCount,
 		.review = ConvertReviewConfigToUnreal(Datatype->review),
-		.reviewerEntities = ConvertPlayfabArrayToUnreal(Datatype->reviewerEntities, Datatype->reviewerEntitiesCount, ConvertEntityKeyToUnreal),
+		.reviewerEntities = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->reviewerEntities, Datatype->reviewerEntitiesCount, ConvertEntityKeyToUnreal),
 		.reviewerEntitiesCount = Datatype->reviewerEntitiesCount,
 		.userGeneratedContent = ConvertUserGeneratedContentSpecificConfigToUnreal(Datatype->userGeneratedContent)
 	});
@@ -1382,12 +1382,12 @@ const PFCatalogCatalogConfig* ConvertCatalogConfigToPlayfab(TSharedPtr<const FPF
 	}
 
 	const PFCatalogCatalogConfig* ConvertedType = new PFCatalogCatalogConfig{
-		.adminEntities = ConvertUnrealArrayToPlayfab(Datatype->adminEntities, ConvertEntityKeyToPlayfab),
+		.adminEntities = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->adminEntities, ConvertEntityKeyToPlayfab),
 		.adminEntitiesCount = (uint32_t)Datatype->adminEntities.Num(),
 		.catalog = ConvertCatalogSpecificConfigToPlayfab(Datatype->catalog),
-		.deepLinkFormats = ConvertUnrealArrayToPlayfab(Datatype->deepLinkFormats, ConvertDeepLinkFormatToPlayfab),
+		.deepLinkFormats = ConvertUnrealArrayToPlayfab<PFCatalogDeepLinkFormat, FPFCatalogDeepLinkFormat>(Datatype->deepLinkFormats, ConvertDeepLinkFormatToPlayfab),
 		.deepLinkFormatsCount = (uint32_t)Datatype->deepLinkFormats.Num(),
-		.displayPropertyIndexInfos = ConvertUnrealArrayToPlayfab(Datatype->displayPropertyIndexInfos, ConvertDisplayPropertyIndexInfoToPlayfab),
+		.displayPropertyIndexInfos = ConvertUnrealArrayToPlayfab<PFCatalogDisplayPropertyIndexInfo, FPFCatalogDisplayPropertyIndexInfo>(Datatype->displayPropertyIndexInfos, ConvertDisplayPropertyIndexInfoToPlayfab),
 		.displayPropertyIndexInfosCount = (uint32_t)Datatype->displayPropertyIndexInfos.Num(),
 		.file = ConvertFileConfigToPlayfab(Datatype->file),
 		.image = ConvertImageConfigToPlayfab(Datatype->image),
@@ -1395,7 +1395,7 @@ const PFCatalogCatalogConfig* ConvertCatalogConfigToPlayfab(TSharedPtr<const FPF
 		.platforms = ConvertFStringArrayToPlayfab(Datatype->platforms),
 		.platformsCount = (uint32_t)Datatype->platforms.Num(),
 		.review = ConvertReviewConfigToPlayfab(Datatype->review),
-		.reviewerEntities = ConvertUnrealArrayToPlayfab(Datatype->reviewerEntities, ConvertEntityKeyToPlayfab),
+		.reviewerEntities = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->reviewerEntities, ConvertEntityKeyToPlayfab),
 		.reviewerEntitiesCount = (uint32_t)Datatype->reviewerEntities.Num(),
 		.userGeneratedContent = ConvertUserGeneratedContentSpecificConfigToPlayfab(Datatype->userGeneratedContent)
 	};
@@ -1496,7 +1496,7 @@ TSharedPtr<const FPFCatalogGetDraftItemsRequest> ConvertGetDraftItemsRequestToUn
 	}
 
 	TSharedPtr<const FPFCatalogGetDraftItemsRequest> ConvertedType = MakeShared<FPFCatalogGetDraftItemsRequest>(FPFCatalogGetDraftItemsRequest{
-		.alternateIds = ConvertPlayfabArrayToUnreal(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
+		.alternateIds = ConvertPlayfabArrayToUnreal<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
 		.alternateIdsCount = Datatype->alternateIdsCount,
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
 		.count = TSharedPtr<const int32>(Datatype->count),
@@ -1517,7 +1517,7 @@ const PFCatalogGetDraftItemsRequest* ConvertGetDraftItemsRequestToPlayfab(TShare
 	}
 
 	const PFCatalogGetDraftItemsRequest* ConvertedType = new PFCatalogGetDraftItemsRequest{
-		.alternateIds = ConvertUnrealArrayToPlayfab(Datatype->alternateIds, ConvertCatalogAlternateIdToPlayfab),
+		.alternateIds = ConvertUnrealArrayToPlayfab<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, ConvertCatalogAlternateIdToPlayfab),
 		.alternateIdsCount = (uint32_t)Datatype->alternateIds.Num(),
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
 		.count = Datatype->count ? new int32(*Datatype->count) : nullptr,
@@ -1539,7 +1539,7 @@ TSharedPtr<const FPFCatalogGetDraftItemsResponse> ConvertGetDraftItemsResponseTo
 
 	TSharedPtr<const FPFCatalogGetDraftItemsResponse> ConvertedType = MakeShared<FPFCatalogGetDraftItemsResponse>(FPFCatalogGetDraftItemsResponse{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.items = ConvertPlayfabArrayToUnreal(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
+		.items = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
 		.itemsCount = Datatype->itemsCount
 	});
 
@@ -1554,7 +1554,7 @@ const PFCatalogGetDraftItemsResponse* ConvertGetDraftItemsResponseToPlayfab(TSha
 
 	const PFCatalogGetDraftItemsResponse* ConvertedType = new PFCatalogGetDraftItemsResponse{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
-		.items = ConvertUnrealArrayToPlayfab(Datatype->items, ConvertCatalogItemToPlayfab),
+		.items = ConvertUnrealArrayToPlayfab<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, ConvertCatalogItemToPlayfab),
 		.itemsCount = (uint32_t)Datatype->items.Num()
 	};
 
@@ -1605,7 +1605,7 @@ TSharedPtr<const FPFCatalogGetEntityDraftItemsResponse> ConvertGetEntityDraftIte
 
 	TSharedPtr<const FPFCatalogGetEntityDraftItemsResponse> ConvertedType = MakeShared<FPFCatalogGetEntityDraftItemsResponse>(FPFCatalogGetEntityDraftItemsResponse{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.items = ConvertPlayfabArrayToUnreal(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
+		.items = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
 		.itemsCount = Datatype->itemsCount
 	});
 
@@ -1620,7 +1620,7 @@ const PFCatalogGetEntityDraftItemsResponse* ConvertGetEntityDraftItemsResponseTo
 
 	const PFCatalogGetEntityDraftItemsResponse* ConvertedType = new PFCatalogGetEntityDraftItemsResponse{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
-		.items = ConvertUnrealArrayToPlayfab(Datatype->items, ConvertCatalogItemToPlayfab),
+		.items = ConvertUnrealArrayToPlayfab<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, ConvertCatalogItemToPlayfab),
 		.itemsCount = (uint32_t)Datatype->items.Num()
 	};
 
@@ -1844,7 +1844,7 @@ TSharedPtr<const FPFCatalogGetItemContainersResponse> ConvertGetItemContainersRe
 	}
 
 	TSharedPtr<const FPFCatalogGetItemContainersResponse> ConvertedType = MakeShared<FPFCatalogGetItemContainersResponse>(FPFCatalogGetItemContainersResponse{
-		.containers = ConvertPlayfabArrayToUnreal(Datatype->containers, Datatype->containersCount, ConvertCatalogItemToUnreal),
+		.containers = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->containers, Datatype->containersCount, ConvertCatalogItemToUnreal),
 		.containersCount = Datatype->containersCount,
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken)
 	});
@@ -1859,7 +1859,7 @@ const PFCatalogGetItemContainersResponse* ConvertGetItemContainersResponseToPlay
 	}
 
 	const PFCatalogGetItemContainersResponse* ConvertedType = new PFCatalogGetItemContainersResponse{
-		.containers = ConvertUnrealArrayToPlayfab(Datatype->containers, ConvertCatalogItemToPlayfab),
+		.containers = ConvertUnrealArrayToPlayfab<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->containers, ConvertCatalogItemToPlayfab),
 		.containersCount = (uint32_t)Datatype->containers.Num(),
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken)
 	};
@@ -2033,7 +2033,7 @@ TSharedPtr<const FPFCatalogGetItemReviewsResponse> ConvertGetItemReviewsResponse
 
 	TSharedPtr<const FPFCatalogGetItemReviewsResponse> ConvertedType = MakeShared<FPFCatalogGetItemReviewsResponse>(FPFCatalogGetItemReviewsResponse{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.reviews = ConvertPlayfabArrayToUnreal(Datatype->reviews, Datatype->reviewsCount, ConvertReviewToUnreal),
+		.reviews = ConvertPlayfabArrayToUnreal<PFCatalogReview, FPFCatalogReview>(Datatype->reviews, Datatype->reviewsCount, ConvertReviewToUnreal),
 		.reviewsCount = Datatype->reviewsCount
 	});
 
@@ -2048,7 +2048,7 @@ const PFCatalogGetItemReviewsResponse* ConvertGetItemReviewsResponseToPlayfab(TS
 
 	const PFCatalogGetItemReviewsResponse* ConvertedType = new PFCatalogGetItemReviewsResponse{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
-		.reviews = ConvertUnrealArrayToPlayfab(Datatype->reviews, ConvertReviewToPlayfab),
+		.reviews = ConvertUnrealArrayToPlayfab<PFCatalogReview, FPFCatalogReview>(Datatype->reviews, ConvertReviewToPlayfab),
 		.reviewsCount = (uint32_t)Datatype->reviews.Num()
 	};
 
@@ -2126,7 +2126,7 @@ TSharedPtr<const FPFCatalogGetItemsRequest> ConvertGetItemsRequestToUnreal(const
 	}
 
 	TSharedPtr<const FPFCatalogGetItemsRequest> ConvertedType = MakeShared<FPFCatalogGetItemsRequest>(FPFCatalogGetItemsRequest{
-		.alternateIds = ConvertPlayfabArrayToUnreal(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
+		.alternateIds = ConvertPlayfabArrayToUnreal<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
 		.alternateIdsCount = Datatype->alternateIdsCount,
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
@@ -2145,7 +2145,7 @@ const PFCatalogGetItemsRequest* ConvertGetItemsRequestToPlayfab(TSharedPtr<const
 	}
 
 	const PFCatalogGetItemsRequest* ConvertedType = new PFCatalogGetItemsRequest{
-		.alternateIds = ConvertUnrealArrayToPlayfab(Datatype->alternateIds, ConvertCatalogAlternateIdToPlayfab),
+		.alternateIds = ConvertUnrealArrayToPlayfab<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, ConvertCatalogAlternateIdToPlayfab),
 		.alternateIdsCount = (uint32_t)Datatype->alternateIds.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
@@ -2164,7 +2164,7 @@ TSharedPtr<const FPFCatalogGetItemsResponse> ConvertGetItemsResponseToUnreal(con
 	}
 
 	TSharedPtr<const FPFCatalogGetItemsResponse> ConvertedType = MakeShared<FPFCatalogGetItemsResponse>(FPFCatalogGetItemsResponse{
-		.items = ConvertPlayfabArrayToUnreal(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
+		.items = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
 		.itemsCount = Datatype->itemsCount
 	});
 
@@ -2178,7 +2178,7 @@ const PFCatalogGetItemsResponse* ConvertGetItemsResponseToPlayfab(TSharedPtr<con
 	}
 
 	const PFCatalogGetItemsResponse* ConvertedType = new PFCatalogGetItemsResponse{
-		.items = ConvertUnrealArrayToPlayfab(Datatype->items, ConvertCatalogItemToPlayfab),
+		.items = ConvertUnrealArrayToPlayfab<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, ConvertCatalogItemToPlayfab),
 		.itemsCount = (uint32_t)Datatype->items.Num()
 	};
 
@@ -2417,7 +2417,7 @@ TSharedPtr<const FPFCatalogSearchItemsResponse> ConvertSearchItemsResponseToUnre
 
 	TSharedPtr<const FPFCatalogSearchItemsResponse> ConvertedType = MakeShared<FPFCatalogSearchItemsResponse>(FPFCatalogSearchItemsResponse{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.items = ConvertPlayfabArrayToUnreal(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
+		.items = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, Datatype->itemsCount, ConvertCatalogItemToUnreal),
 		.itemsCount = Datatype->itemsCount
 	});
 
@@ -2432,7 +2432,7 @@ const PFCatalogSearchItemsResponse* ConvertSearchItemsResponseToPlayfab(TSharedP
 
 	const PFCatalogSearchItemsResponse* ConvertedType = new PFCatalogSearchItemsResponse{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
-		.items = ConvertUnrealArrayToPlayfab(Datatype->items, ConvertCatalogItemToPlayfab),
+		.items = ConvertUnrealArrayToPlayfab<PFCatalogCatalogItem, FPFCatalogCatalogItem>(Datatype->items, ConvertCatalogItemToPlayfab),
 		.itemsCount = (uint32_t)Datatype->items.Num()
 	};
 
@@ -2552,7 +2552,7 @@ TSharedPtr<const FPFCatalogTakedownItemReviewsRequest> ConvertTakedownItemReview
 	TSharedPtr<const FPFCatalogTakedownItemReviewsRequest> ConvertedType = MakeShared<FPFCatalogTakedownItemReviewsRequest>(FPFCatalogTakedownItemReviewsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.reviews = ConvertPlayfabArrayToUnreal(Datatype->reviews, Datatype->reviewsCount, ConvertReviewTakedownToUnreal),
+		.reviews = ConvertPlayfabArrayToUnreal<PFCatalogReviewTakedown, FPFCatalogReviewTakedown>(Datatype->reviews, Datatype->reviewsCount, ConvertReviewTakedownToUnreal),
 		.reviewsCount = Datatype->reviewsCount
 	});
 
@@ -2568,7 +2568,7 @@ const PFCatalogTakedownItemReviewsRequest* ConvertTakedownItemReviewsRequestToPl
 	const PFCatalogTakedownItemReviewsRequest* ConvertedType = new PFCatalogTakedownItemReviewsRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.reviews = ConvertUnrealArrayToPlayfab(Datatype->reviews, ConvertReviewTakedownToPlayfab),
+		.reviews = ConvertUnrealArrayToPlayfab<PFCatalogReviewTakedown, FPFCatalogReviewTakedown>(Datatype->reviews, ConvertReviewTakedownToPlayfab),
 		.reviewsCount = (uint32_t)Datatype->reviews.Num()
 	};
 

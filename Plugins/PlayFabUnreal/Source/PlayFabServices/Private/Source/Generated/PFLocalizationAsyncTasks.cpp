@@ -31,7 +31,7 @@ void FGetLanguageListAsyncTask::DoWork()
 
 void FGetLanguageListAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLocalizationGetLanguageListGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

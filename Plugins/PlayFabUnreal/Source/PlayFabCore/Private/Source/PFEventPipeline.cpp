@@ -37,7 +37,7 @@ TSharedPtr<const FPFEvent> ConvertPFEventToUnreal(const PFEvent* Datatype)
 
 static void CALLBACK OnBatchUploadedHandler(void* context, PFUploadedEvent const* const* events, size_t eventsCount)
 {
-	TSharedPtr<void> contextRef = MakeShareable(context);
+	TSharedPtr<void> contextRef = MakeShareable(context, [](void*) {});
 	TArray<TSharedPtr<const FPFUploadedEvent>> eventsRef = ConvertPlayfabArrayToUnreal(events, eventsCount, ConvertPFUploadedEventToUnreal);
 
 	EventPipelineBatchUploadedEventDelegate.ExecuteIfBound(contextRef, eventsRef, eventsCount);
@@ -45,7 +45,7 @@ static void CALLBACK OnBatchUploadedHandler(void* context, PFUploadedEvent const
 
 static void CALLBACK OnBatchUploadFailedHandler(void* context, HRESULT hr, const char* errorMessage, PFEvent const* const* events, size_t eventsCount)
 {
-	TSharedPtr<void> contextRef = MakeShareable(context);
+	TSharedPtr<void> contextRef = MakeShareable(context, [](void*) {});
 	FString errorMessageFStr = FString(errorMessage);
 	TArray<TSharedPtr<const FPFEvent>> eventsRef = ConvertPlayfabArrayToUnreal(events, eventsCount, ConvertPFEventToUnreal);
 
@@ -64,8 +64,10 @@ bool PLAYFABCORE_API FPFEventPipelineCreateTelemetryPipelineHandleWithKey(
 
 	const FPFEventPipelineTelemetryKeyConfig* fpfTelemetryKeyConfig = eventPipelineTelemetryKeyConfig.Get();
 
+	auto telemetryKeyConverted = StringCast<ANSICHAR>(*fpfTelemetryKeyConfig->telemetryKey);
+
 	PFEventPipelineTelemetryKeyConfig pfTelemetryKeyConfig = {
-		.telemetryKey = StringCast<ANSICHAR>(*fpfTelemetryKeyConfig->telemetryKey).Get(),
+		.telemetryKey = telemetryKeyConverted.Get(),
 		.serviceConfigHandle = fpfTelemetryKeyConfig->serviceConfigHandle.Get(),
 	};
 

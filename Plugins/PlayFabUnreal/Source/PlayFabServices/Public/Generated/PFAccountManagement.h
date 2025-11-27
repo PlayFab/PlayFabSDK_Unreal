@@ -2054,6 +2054,31 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxAccountAsync(
 #endif
 
 /// <summary>
+/// Links the Xbox Live account associated with the provided Xbox ID and Sandbox to the user's PlayFab
+/// account
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// See also ServerLinkXboxAccountAsync, ServerLoginWithXboxIdAsync, ServerUnlinkXboxAccountAsync.
+///
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_ACCOUNT_ALREADY_LINKED, E_PF_LINKED_ACCOUNT_ALREADY_CLAIMED or any of
+/// the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details on error
+/// handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxIdAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementLinkXboxIdRequest* request,
+	_Inout_ FOnServerLinkXboxIdCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
 /// Revoke all active bans for a user.
 /// </summary>
 /// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>

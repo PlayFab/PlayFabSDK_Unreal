@@ -32,7 +32,7 @@ void FGetProfileAsyncTask::DoWork()
 
 void FGetProfileAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFProfilesGetProfileGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -73,7 +73,7 @@ void FGetProfilesAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.dataAsObject = Request.dataAsObject ? new bool(*Request.dataAsObject) : nullptr,
-		.entities = ConvertUnrealArrayToPlayfab(Request.entities, ConvertEntityKeyToPlayfab),
+		.entities = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Request.entities, ConvertEntityKeyToPlayfab),
 		.entitiesCount = (uint32_t)Request.entities.Num()
 	};
 	HResult = PFProfilesGetProfilesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -86,7 +86,7 @@ void FGetProfilesAsyncTask::DoWork()
 
 void FGetProfilesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFProfilesGetProfilesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -140,7 +140,7 @@ void FGetTitlePlayersFromMasterPlayerAccountIdsAsyncTask::DoWork()
 
 void FGetTitlePlayersFromMasterPlayerAccountIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -194,7 +194,7 @@ void FSetProfileLanguageAsyncTask::DoWork()
 
 void FSetProfileLanguageAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFProfilesSetProfileLanguageGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -235,7 +235,7 @@ void FSetProfilePolicyAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),
-		.statements = ConvertUnrealArrayToPlayfab(Request.statements, ConvertEntityPermissionStatementToPlayfab),
+		.statements = ConvertUnrealArrayToPlayfab<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Request.statements, ConvertEntityPermissionStatementToPlayfab),
 		.statementsCount = (uint32_t)Request.statements.Num()
 	};
 	HResult = PFProfilesSetProfilePolicyAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -248,7 +248,7 @@ void FSetProfilePolicyAsyncTask::DoWork()
 
 void FSetProfilePolicyAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFProfilesSetProfilePolicyGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

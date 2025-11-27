@@ -1,13 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#ifdef PF_GDK_AVAILABLE
 #include "Windows/WindowsHWrapper.h"
+#endif
 #include "CoreTypes.h"
 #include "Templates/Function.h"
 #include "Templates/SharedPointer.h"
 #include "Tasks/Task.h"
 #include "Logging.h"
 THIRD_PARTY_INCLUDES_START
+#include <httpClient/pal.h>
 #include <XTaskQueue.h>
 #include <XAsync.h>
 THIRD_PARTY_INCLUDES_END

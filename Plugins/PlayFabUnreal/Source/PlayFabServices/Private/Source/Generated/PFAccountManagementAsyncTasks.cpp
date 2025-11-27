@@ -74,7 +74,7 @@ void FClientAddUsernamePasswordAsyncTask::DoWork()
 
 void FClientAddUsernamePasswordAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientAddUsernamePasswordGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -128,7 +128,7 @@ void FClientGetAccountInfoAsyncTask::DoWork()
 
 void FClientGetAccountInfoAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetAccountInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -181,7 +181,7 @@ void FClientGetPlayerCombinedInfoAsyncTask::DoWork()
 
 void FClientGetPlayerCombinedInfoAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayerCombinedInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -234,7 +234,7 @@ void FClientGetPlayerProfileAsyncTask::DoWork()
 
 void FClientGetPlayerProfileAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayerProfileGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -285,7 +285,7 @@ void FClientGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromBattleNetAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -337,7 +337,7 @@ void FClientGetPlayFabIDsFromFacebookIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromFacebookIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -390,7 +390,7 @@ void FClientGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookInstantGamesIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -443,7 +443,7 @@ void FClientGetPlayFabIDsFromGameCenterIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromGameCenterIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGameCenterIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -496,7 +496,7 @@ void FClientGetPlayFabIDsFromGoogleIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromGoogleIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGoogleIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -549,7 +549,7 @@ void FClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -602,7 +602,7 @@ void FClientGetPlayFabIDsFromKongregateIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromKongregateIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromKongregateIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -655,7 +655,7 @@ void FClientGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoServiceAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -708,7 +708,7 @@ void FClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoSwitchDeviceIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -762,7 +762,7 @@ void FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNAccountIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -815,7 +815,7 @@ void FClientGetPlayFabIDsFromPSNOnlineIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromPSNOnlineIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNOnlineIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -867,7 +867,7 @@ void FClientGetPlayFabIDsFromSteamIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromSteamIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -919,7 +919,7 @@ void FClientGetPlayFabIDsFromSteamNamesAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromSteamNamesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamNamesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -971,7 +971,7 @@ void FClientGetPlayFabIDsFromTwitchIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromTwitchIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromTwitchIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1025,7 +1025,7 @@ void FClientGetPlayFabIDsFromXboxLiveIDsAsyncTask::DoWork()
 
 void FClientGetPlayFabIDsFromXboxLiveIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientGetPlayFabIDsFromXboxLiveIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -2696,7 +2696,7 @@ void FClientUpdateUserTitleDisplayNameAsyncTask::DoWork()
 
 void FClientUpdateUserTitleDisplayNameAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementClientUpdateUserTitleDisplayNameGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -2736,7 +2736,7 @@ FServerBanUsersAsyncTask::FServerBanUsersAsyncTask(
 void FServerBanUsersAsyncTask::DoWork()
 {
 	const PFAccountManagementBanUsersRequest RequestType = {
-		.bans = ConvertUnrealArrayToPlayfab(Request.bans, ConvertBanRequestToPlayfab),
+		.bans = ConvertUnrealArrayToPlayfab<PFAccountManagementBanRequest, FPFAccountManagementBanRequest>(Request.bans, ConvertBanRequestToPlayfab),
 		.bansCount = (uint32_t)Request.bans.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num()
@@ -2751,7 +2751,7 @@ void FServerBanUsersAsyncTask::DoWork()
 
 void FServerBanUsersAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerBanUsersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -2844,7 +2844,7 @@ void FServerGetPlayerCombinedInfoAsyncTask::DoWork()
 
 void FServerGetPlayerCombinedInfoAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayerCombinedInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -2899,7 +2899,7 @@ void FServerGetPlayerProfileAsyncTask::DoWork()
 
 void FServerGetPlayerProfileAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayerProfileGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -2952,7 +2952,7 @@ void FServerGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromBattleNetAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3005,7 +3005,7 @@ void FServerGetPlayFabIDsFromFacebookIDsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromFacebookIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3058,7 +3058,7 @@ void FServerGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookInstantGamesIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3111,7 +3111,7 @@ void FServerGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoServiceAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3164,7 +3164,7 @@ void FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoSwitchDeviceIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3218,7 +3218,7 @@ void FServerGetPlayFabIDsFromPSNAccountIDsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromPSNAccountIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNAccountIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3272,7 +3272,7 @@ void FServerGetPlayFabIDsFromPSNOnlineIDsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromPSNOnlineIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNOnlineIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3325,7 +3325,7 @@ void FServerGetPlayFabIDsFromSteamIDsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromSteamIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3378,7 +3378,7 @@ void FServerGetPlayFabIDsFromSteamNamesAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromSteamNamesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamNamesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3431,7 +3431,7 @@ void FServerGetPlayFabIDsFromTwitchIDsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromTwitchIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromTwitchIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3485,7 +3485,7 @@ void FServerGetPlayFabIDsFromXboxLiveIDsAsyncTask::DoWork()
 
 void FServerGetPlayFabIDsFromXboxLiveIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetPlayFabIDsFromXboxLiveIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3538,7 +3538,7 @@ void FServerGetServerCustomIDsFromPlayFabIDsAsyncTask::DoWork()
 
 void FServerGetServerCustomIDsFromPlayFabIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetServerCustomIDsFromPlayFabIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3590,7 +3590,7 @@ void FServerGetUserAccountInfoAsyncTask::DoWork()
 
 void FServerGetUserAccountInfoAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetUserAccountInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -3642,7 +3642,7 @@ void FServerGetUserBansAsyncTask::DoWork()
 
 void FServerGetUserBansAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerGetUserBansGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -4048,6 +4048,49 @@ void FServerLinkXboxAccountAsyncTask::ProcessResults()
 }
 #endif
 
+#if 0
+FServerLinkXboxIdAsyncTask::FServerLinkXboxIdAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementLinkXboxIdRequest InRequest,
+	const FOnServerLinkXboxIdCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerLinkXboxIdAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerLinkXboxIdAsyncTask::DoWork()
+{
+	const PFAccountManagementLinkXboxIdRequest RequestType = {
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.forceLink = Request.forceLink ? new bool(*Request.forceLink) : nullptr,
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId),
+		.sandbox = ConvertFStringToCharPtr(Request.sandbox),
+		.xboxId = ConvertFStringToCharPtr(Request.xboxId)
+	};
+	HResult = PFAccountManagementServerLinkXboxIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FServerLinkXboxIdAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FServerRevokeAllBansForUserAsyncTask::FServerRevokeAllBansForUserAsyncTask(
 	_In_ FPFEntityHandle TitleEntityHandle,
@@ -4075,7 +4118,7 @@ void FServerRevokeAllBansForUserAsyncTask::DoWork()
 
 void FServerRevokeAllBansForUserAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerRevokeAllBansForUserGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -4128,7 +4171,7 @@ void FServerRevokeBansAsyncTask::DoWork()
 
 void FServerRevokeBansAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerRevokeBansGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -4572,7 +4615,7 @@ FServerUpdateBansAsyncTask::FServerUpdateBansAsyncTask(
 void FServerUpdateBansAsyncTask::DoWork()
 {
 	const PFAccountManagementUpdateBansRequest RequestType = {
-		.bans = ConvertUnrealArrayToPlayfab(Request.bans, ConvertUpdateBanRequestToPlayfab),
+		.bans = ConvertUnrealArrayToPlayfab<PFAccountManagementUpdateBanRequest, FPFAccountManagementUpdateBanRequest>(Request.bans, ConvertUpdateBanRequestToPlayfab),
 		.bansCount = (uint32_t)Request.bans.Num()
 	};
 	HResult = PFAccountManagementServerUpdateBansAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -4585,7 +4628,7 @@ void FServerUpdateBansAsyncTask::DoWork()
 
 void FServerUpdateBansAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementServerUpdateBansGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -4642,7 +4685,7 @@ void FGetTitlePlayersFromXboxLiveIDsAsyncTask::DoWork()
 
 void FGetTitlePlayersFromXboxLiveIDsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementGetTitlePlayersFromXboxLiveIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -4697,7 +4740,7 @@ void FSetDisplayNameAsyncTask::DoWork()
 
 void FSetDisplayNameAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFAccountManagementSetDisplayNameGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

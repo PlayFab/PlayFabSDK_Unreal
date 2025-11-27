@@ -38,7 +38,7 @@ void FAddInventoryItemsAsyncTask::DoWork()
 
 void FAddInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryAddInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -134,7 +134,7 @@ void FDeleteInventoryItemsAsyncTask::DoWork()
 
 void FDeleteInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryDeleteInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -178,7 +178,7 @@ void FExecuteInventoryOperationsAsyncTask::DoWork()
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),
 		.eTag = ConvertFStringToCharPtr(Request.eTag),
 		.idempotencyId = ConvertFStringToCharPtr(Request.idempotencyId),
-		.operations = ConvertUnrealArrayToPlayfab(Request.operations, ConvertInventoryOperationToPlayfab),
+		.operations = ConvertUnrealArrayToPlayfab<PFInventoryInventoryOperation, FPFInventoryInventoryOperation>(Request.operations, ConvertInventoryOperationToPlayfab),
 		.operationsCount = (uint32_t)Request.operations.Num()
 	};
 	HResult = PFInventoryExecuteInventoryOperationsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -191,7 +191,7 @@ void FExecuteInventoryOperationsAsyncTask::DoWork()
 
 void FExecuteInventoryOperationsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryExecuteInventoryOperationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -236,7 +236,7 @@ void FExecuteTransferOperationsAsyncTask::DoWork()
 		.givingEntity = ConvertEntityKeyToPlayfab(Request.givingEntity),
 		.givingETag = ConvertFStringToCharPtr(Request.givingETag),
 		.idempotencyId = ConvertFStringToCharPtr(Request.idempotencyId),
-		.operations = ConvertUnrealArrayToPlayfab(Request.operations, ConvertTransferInventoryItemsOperationToPlayfab),
+		.operations = ConvertUnrealArrayToPlayfab<PFInventoryTransferInventoryItemsOperation, FPFInventoryTransferInventoryItemsOperation>(Request.operations, ConvertTransferInventoryItemsOperationToPlayfab),
 		.operationsCount = (uint32_t)Request.operations.Num(),
 		.receivingCollectionId = ConvertFStringToCharPtr(Request.receivingCollectionId),
 		.receivingEntity = ConvertEntityKeyToPlayfab(Request.receivingEntity)
@@ -251,7 +251,7 @@ void FExecuteTransferOperationsAsyncTask::DoWork()
 
 void FExecuteTransferOperationsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryExecuteTransferOperationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -306,7 +306,7 @@ void FGetInventoryCollectionIdsAsyncTask::DoWork()
 
 void FGetInventoryCollectionIdsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryGetInventoryCollectionIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -362,7 +362,7 @@ void FGetInventoryItemsAsyncTask::DoWork()
 
 void FGetInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryGetInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -404,7 +404,8 @@ void FGetInventoryOperationStatusAsyncTask::DoWork()
 		.collectionId = ConvertFStringToCharPtr(Request.collectionId),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
-		.entity = ConvertEntityKeyToPlayfab(Request.entity)
+		.entity = ConvertEntityKeyToPlayfab(Request.entity),
+		.operationToken = ConvertFStringToCharPtr(Request.operationToken)
 	};
 	HResult = PFInventoryGetInventoryOperationStatusAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
@@ -416,7 +417,7 @@ void FGetInventoryOperationStatusAsyncTask::DoWork()
 
 void FGetInventoryOperationStatusAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryGetInventoryOperationStatusGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -469,7 +470,7 @@ void FGetMicrosoftStoreAccessTokensAsyncTask::DoWork()
 
 void FGetMicrosoftStoreAccessTokensAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryGetMicrosoftStoreAccessTokensGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -528,7 +529,7 @@ void FGetTransactionHistoryAsyncTask::DoWork()
 
 void FGetTransactionHistoryAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryGetTransactionHistoryGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -578,7 +579,7 @@ void FPurchaseInventoryItemsAsyncTask::DoWork()
 		.idempotencyId = ConvertFStringToCharPtr(Request.idempotencyId),
 		.item = ConvertInventoryItemReferenceToPlayfab(Request.item),
 		.newStackValues = ConvertInitialValuesToPlayfab(Request.newStackValues),
-		.priceAmounts = ConvertUnrealArrayToPlayfab(Request.priceAmounts, ConvertPurchasePriceAmountToPlayfab),
+		.priceAmounts = ConvertUnrealArrayToPlayfab<PFInventoryPurchasePriceAmount, FPFInventoryPurchasePriceAmount>(Request.priceAmounts, ConvertPurchasePriceAmountToPlayfab),
 		.priceAmountsCount = (uint32_t)Request.priceAmounts.Num(),
 		.storeId = ConvertFStringToCharPtr(Request.storeId)
 	};
@@ -592,7 +593,7 @@ void FPurchaseInventoryItemsAsyncTask::DoWork()
 
 void FPurchaseInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryPurchaseInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -647,7 +648,7 @@ void FRedeemAppleAppStoreInventoryItemsAsyncTask::DoWork()
 
 void FRedeemAppleAppStoreInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryRedeemAppleAppStoreInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -691,7 +692,7 @@ void FRedeemGooglePlayInventoryItemsAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),
-		.purchases = ConvertUnrealArrayToPlayfab(Request.purchases, ConvertGooglePlayProductPurchaseToPlayfab),
+		.purchases = ConvertUnrealArrayToPlayfab<PFInventoryGooglePlayProductPurchase, FPFInventoryGooglePlayProductPurchase>(Request.purchases, ConvertGooglePlayProductPurchaseToPlayfab),
 		.purchasesCount = (uint32_t)Request.purchases.Num()
 	};
 	HResult = PFInventoryRedeemGooglePlayInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -704,7 +705,7 @@ void FRedeemGooglePlayInventoryItemsAsyncTask::DoWork()
 
 void FRedeemGooglePlayInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryRedeemGooglePlayInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -765,7 +766,7 @@ void FRedeemMicrosoftStoreInventoryItemsAsyncTask::DoWork()
 
 void FRedeemMicrosoftStoreInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryRedeemMicrosoftStoreInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -821,7 +822,7 @@ void FRedeemNintendoEShopInventoryItemsAsyncTask::DoWork()
 
 void FRedeemNintendoEShopInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryRedeemNintendoEShopInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -879,7 +880,7 @@ void FRedeemPlayStationStoreInventoryItemsAsyncTask::DoWork()
 
 void FRedeemPlayStationStoreInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryRedeemPlayStationStoreInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -934,7 +935,7 @@ void FRedeemSteamInventoryItemsAsyncTask::DoWork()
 
 void FRedeemSteamInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryRedeemSteamInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -994,7 +995,7 @@ void FSubtractInventoryItemsAsyncTask::DoWork()
 
 void FSubtractInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventorySubtractInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1056,7 +1057,7 @@ void FTransferInventoryItemsAsyncTask::DoWork()
 
 void FTransferInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryTransferInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1112,7 +1113,7 @@ void FUpdateInventoryItemsAsyncTask::DoWork()
 
 void FUpdateInventoryItemsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFInventoryUpdateInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

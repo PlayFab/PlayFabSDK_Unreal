@@ -22,7 +22,7 @@ void FPFEntityGetEntityTokenAsyncTask::DoWork()
 void FPFEntityGetEntityTokenAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEntityGetEntityTokenResultSize(*mAsyncBlock, &resultSize);
 

@@ -25,4 +25,5 @@ private:
     LocalUser m_localUser;
     bool m_createAccount;
     FOnPFAuthenticationLoginCompleteDelegate m_delegate;
+    FPFEntityHandle m_entityHandle;
 };

@@ -18,7 +18,7 @@ FCreateLeaderboardDefinitionAsyncTask::FCreateLeaderboardDefinitionAsyncTask(
 void FCreateLeaderboardDefinitionAsyncTask::DoWork()
 {
 	const PFLeaderboardsCreateLeaderboardDefinitionRequest RequestType = {
-		.columns = ConvertUnrealArrayToPlayfab(Request.columns, ConvertLeaderboardColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardColumn, FPFLeaderboardsLeaderboardColumn>(Request.columns, ConvertLeaderboardColumnToPlayfab),
 		.columnsCount = (uint32_t)Request.columns.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
@@ -163,7 +163,7 @@ void FGetFriendLeaderboardForEntityAsyncTask::DoWork()
 
 void FGetFriendLeaderboardForEntityAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLeaderboardsGetFriendLeaderboardForEntityGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -218,7 +218,7 @@ void FGetLeaderboardAsyncTask::DoWork()
 
 void FGetLeaderboardAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLeaderboardsGetLeaderboardGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -273,7 +273,7 @@ void FGetLeaderboardAroundEntityAsyncTask::DoWork()
 
 void FGetLeaderboardAroundEntityAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLeaderboardsGetLeaderboardAroundEntityGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -326,7 +326,7 @@ void FGetLeaderboardDefinitionAsyncTask::DoWork()
 
 void FGetLeaderboardDefinitionAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLeaderboardsGetLeaderboardDefinitionGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -383,7 +383,7 @@ void FGetLeaderboardForEntitiesAsyncTask::DoWork()
 
 void FGetLeaderboardForEntitiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLeaderboardsGetLeaderboardForEntitiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -480,7 +480,7 @@ void FListLeaderboardDefinitionsAsyncTask::DoWork()
 
 void FListLeaderboardDefinitionsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFLeaderboardsListLeaderboardDefinitionsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -606,7 +606,7 @@ void FUpdateLeaderboardEntriesAsyncTask::DoWork()
 	const PFLeaderboardsUpdateLeaderboardEntriesRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
-		.entries = ConvertUnrealArrayToPlayfab(Request.entries, ConvertLeaderboardEntryUpdateToPlayfab),
+		.entries = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardEntryUpdate, FPFLeaderboardsLeaderboardEntryUpdate>(Request.entries, ConvertLeaderboardEntryUpdateToPlayfab),
 		.entriesCount = (uint32_t)Request.entries.Num(),
 		.leaderboardName = ConvertFStringToCharPtr(Request.leaderboardName)
 	};

@@ -2,7 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //--------------------------------------------------------------------------------------
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "OnlineSessionInterfacePlayFab.h"
 #include "OnlineIdentityInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
@@ -113,7 +113,14 @@ void FOnlineSessionPlayFab::UnregisterForInvites()
 	XGameInviteUnregisterForEvent(InviteAcceptedHandler, true /* Wait for pending event callbacks to complete.*/);
 }
 
+#if defined(OSS_PLAYFAB_GDK)
 bool FOnlineSessionPlayFab::SendInvite(const FUniqueNetId& SenderId, FName SessionName, const TArray< TSharedRef<const FUniqueNetId> >& RemoteUserNetIds)
+{
+	return SendInviteGDK(SenderId, SessionName, RemoteUserNetIds);
+}
+#endif // OSS_PLAYFAB_GDK
+
+bool FOnlineSessionPlayFab::SendInviteGDK(const FUniqueNetId& SenderId, FName SessionName, const TArray< TSharedRef<const FUniqueNetId> >& RemoteUserNetIds)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::SendInvite()"));
 
@@ -482,4 +489,4 @@ void FOnlineSessionPlayFab::RecordRecentlyMetPlayer(PFLobbyHandle LobbyHandle, c
 		}
 	}
 }
-#endif // OSS_PLAYFAB_GDK
+#endif // OSS_PLAYFAB_GDK_SUPPORT

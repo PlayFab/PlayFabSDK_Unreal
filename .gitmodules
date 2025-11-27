@@ -1,0 +1,6 @@
+[submodule "External/SDKGenerator"]
+	path = External/SDKGenerator
+	url = https://github.com/PlayFab/SDKGenerator.git
+[submodule "Plugins/PlayFabUnreal/Source/PlayFabCore/PlatformSpecific/PlayStation"]
+	path = Plugins/PlayFabUnreal/Source/PlayFabCore/PlatformSpecific/PlayStation
+	url = https://PlayFabPrivate@dev.azure.com/PlayFabPrivate/PS5/_git/PlayFab.Unreal.PS

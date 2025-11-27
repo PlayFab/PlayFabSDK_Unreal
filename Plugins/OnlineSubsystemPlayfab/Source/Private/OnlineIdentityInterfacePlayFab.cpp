@@ -271,7 +271,7 @@ void FOnlineIdentityPlayFab::Tick(float DeltaTime)
 				UsersToAuth.Add(PlatformUserIdStr);
 			}
 #if defined(OSS_PLAYFAB_WIN64) || defined(OSS_PLAYFAB_PLAYSTATION)
-			if (OSSPlayFab->bForceAutoLogin)
+			if (OSSPlayFab->bForceAutoLogin && !IsNativePlatformSubsystemGDK())
 			{
 				UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("AutoLogin"));
 				AutoLogin(0);
@@ -463,6 +463,57 @@ bool FOnlineIdentityPlayFab::AuthenticateUser(const FString& PlatformUserIdStr)
 	return bAppliedPlatformData;
 }
 
+#if defined(OSS_PLAYFAB_WIN64)
+void FOnlineIdentityPlayFab::FinishRequestSteam(const FString& PlatformUserIdStr, TSharedPtr<FJsonObject> RequestBodyJson, FPFServiceConfigHandle ServiceConfigHandle)
+{
+	// TODO modify to use LocalUserHandle
+	FString SteamToken = RequestBodyJson->GetStringField(TEXT("SteamTicket"));
+	auto strSteamToken = StringCast<UTF8CHAR>(*SteamToken);
+	bool bTicketIsServiceSpecific = true;
+	TSharedPtr<const bool> ticketIsServiceSpecific = MakeShareable(new bool(bTicketIsServiceSpecific));
+	FPFAuthenticationLoginWithSteamRequest request = {
+		.createAccount = true,
+		.steamTicket = SteamToken,
+		.ticketIsServiceSpecific = ticketIsServiceSpecific,
+	};
+
+	FPFAuthenticationLoginWithSteamAsync(
+		ServiceConfigHandle,
+		request,
+		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
+			{
+				// TODO check login results
+				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
+				UE_LOG(LogTemp, Display, TEXT("LoginWithSteam Complete"));
+			})
+	);
+}
+#endif // OSS_PLAYFAB_WIN64
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+void FOnlineIdentityPlayFab::FinishRequestGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle)
+{
+	int64 xuid = FCString::Atoi64(*PlatformUserIdStr);
+	FGDKUserHandle XboxUser = IGDKRuntimeModule::Get().GetUserHandleByXUserId(xuid);
+
+	if (!FPFLocalUserCreateHandleWithXboxUser(ServiceConfigHandle, XboxUser, nullptr, LocalUserHandle))
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab:FPFLocalUserCreateHandleWithXboxUser was unable to create PlayFab LocalUser"));
+		return;
+	}
+
+	FPFLocalUserLoginAsync(
+		LocalUserHandle,
+		true,
+		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
+			{
+				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
+				UE_LOG(LogTemp, Display, TEXT("LoginWithXbox Complete"));
+			})
+	);
+}
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+
 // Called after platform has appended its headers/body
 void FOnlineIdentityPlayFab::FinishRequest(bool bPlatformDataSuccess, const FString& PlatformUserIdStr, TMap<FString, FString> PlatformHeaders, TSharedPtr<FJsonObject> RequestBodyJson)
 {
@@ -509,48 +560,22 @@ void FOnlineIdentityPlayFab::FinishRequest(bool bPlatformDataSuccess, const FStr
 				})
 		);
 #elif defined(OSS_PLAYFAB_WIN64)
-		// TODO modify to use LocalUserHandle
-		FString SteamToken = RequestBodyJson->GetStringField("SteamTicket");
-		auto strSteamToken = StringCast<UTF8CHAR>(*SteamToken);
-		bool bTicketIsServiceSpecific = true;
-		TSharedPtr<const bool> ticketIsServiceSpecific = MakeShareable(new bool(bTicketIsServiceSpecific));
-		FPFAuthenticationLoginWithSteamRequest request = {
-			.createAccount = true,
-			.steamTicket = SteamToken,
-			.ticketIsServiceSpecific = ticketIsServiceSpecific,
-		};
-
-		FPFAuthenticationLoginWithSteamAsync(
-			m_serviceConfigHandle,
-			request,
-			FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
-				{
-					// TODO check login results
-					Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
-					UE_LOG(LogTemp, Display, TEXT("LoginWithSteam Complete"));
-				})
-		);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+		if (IsNativePlatformSubsystemGDK())
+		{
+			FinishRequestGDK(PlatformUserIdStr, m_serviceConfigHandle);
+		}
+		else
+		{
+			FinishRequestSteam(PlatformUserIdStr, RequestBodyJson, m_serviceConfigHandle);
+		}
+#else
+		FinishRequestSteam(PlatformUserIdStr, RequestBodyJson, m_serviceConfigHandle);
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
 		
-#else
-        int64 xuid = FCString::Atoi64(*PlatformUserIdStr);
-        FGDKUserHandle XboxUser = IGDKRuntimeModule::Get().GetUserHandleByXUserId(xuid);
-
-        if (!FPFLocalUserCreateHandleWithXboxUser(m_serviceConfigHandle, XboxUser, nullptr, LocalUserHandle))
-        {
-            UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab:FPFLocalUserCreateHandleWithXboxUser was unable to create PlayFab LocalUser"));
-            return;
-        }
-
-        FPFLocalUserLoginAsync(
-            LocalUserHandle,
-        	true,
-        	FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
-        		{
-        			Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
-        			UE_LOG(LogTemp, Display, TEXT("LoginWithXbox Complete"));
-        		})
-        );
+#elif defined(OSS_PLAYFAB_GDK)
+		FinishRequestGDK(PlatformUserIdStr, m_serviceConfigHandle);
 #endif // OSS_PLAYFAB_SWITCH
 #else // USE_PFCORE_SDK
 			// PlayFab auth request
@@ -580,12 +605,8 @@ void FOnlineIdentityPlayFab::FinishRequest(bool bPlatformDataSuccess, const FStr
 
 #ifdef OSS_PLAYFAB_SWITCH
 			const FString LoginApi = "LoginWithNintendoServiceAccount";
-#elif defined(OSS_PLAYFAB_WIN64)
-			const FString LoginApi = "LoginWithSteam";
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
 			const FString LoginApi = "LoginWithPSN";
-#else
-			const FString LoginApi = "LoginWithXbox";
 #endif // OSS_PLAYFAB_SWITCH
 
 			const FString URI = FString::Printf(TEXT("https://%s.playfabapi.com/Client/%s"), *TitleIdStr, *LoginApi);

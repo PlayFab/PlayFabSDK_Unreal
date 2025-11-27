@@ -998,6 +998,11 @@ struct PLAYFABSERVICES_API FPFMultiplayerServerRequestPartyServiceRequest
 	_Maybenull_ const FString partyId;
 
 	/// <summary>
+	/// (Optional) A player entity Id on behalf of whom the request is being made.
+	/// </summary>
+	_Maybenull_ const FString playFabId;
+
+	/// <summary>
 	/// The preferred regions to request a party session from. The party service will iterate through the
 	/// regions in the specified order and allocate a party session from the first one that is available.
 	/// </summary>

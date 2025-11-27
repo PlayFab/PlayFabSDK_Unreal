@@ -34,7 +34,7 @@ void FPFEventsDeleteDataConnectionAsyncTask::DoWork()
 void FPFEventsDeleteDataConnectionAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsDeleteDataConnectionGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -96,7 +96,7 @@ void FPFEventsGetDataConnectionAsyncTask::DoWork()
 void FPFEventsGetDataConnectionAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsGetDataConnectionGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -104,7 +104,7 @@ void FPFEventsGetDataConnectionAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFEventsGetDataConnectionResponse* result;
 		hr = PFEventsGetDataConnectionGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 
@@ -159,7 +159,7 @@ void FPFEventsListDataConnectionsAsyncTask::DoWork()
 void FPFEventsListDataConnectionsAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsListDataConnectionsGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -167,7 +167,7 @@ void FPFEventsListDataConnectionsAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFEventsListDataConnectionsResponse* result;
 		hr = PFEventsListDataConnectionsGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 
@@ -226,7 +226,7 @@ void FPFEventsSetDataConnectionAsyncTask::DoWork()
 void FPFEventsSetDataConnectionAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsSetDataConnectionGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -234,7 +234,7 @@ void FPFEventsSetDataConnectionAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFEventsSetDataConnectionResponse* result;
 		hr = PFEventsSetDataConnectionGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 
@@ -291,7 +291,7 @@ void FPFEventsSetDataConnectionActiveAsyncTask::DoWork()
 void FPFEventsSetDataConnectionActiveAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsSetDataConnectionActiveGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -299,7 +299,7 @@ void FPFEventsSetDataConnectionActiveAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFEventsSetDataConnectionActiveResponse* result;
 		hr = PFEventsSetDataConnectionActiveGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 
@@ -341,7 +341,7 @@ void FPFEventsWriteEventsAsyncTask::DoWork()
 	const PFEventsWriteEventsRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(request.customTags),
 		.customTagsCount = (uint32_t)request.customTags.Num(),
-		.events = ConvertUnrealArrayToPlayfab(request.events, ConvertEventContentsToPlayfab),
+		.events = ConvertUnrealArrayToPlayfab<PFEventsEventContents, FPFEventsEventContents>(request.events, ConvertEventContentsToPlayfab),
 		.eventsCount = (uint32_t)request.events.Num()
 	};
 	HRESULT hr = PFEventsWriteEventsAsync(entityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -355,7 +355,7 @@ void FPFEventsWriteEventsAsyncTask::DoWork()
 void FPFEventsWriteEventsAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsWriteEventsGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -363,7 +363,7 @@ void FPFEventsWriteEventsAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFEventsWriteEventsResponse* result;
 		hr = PFEventsWriteEventsGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 
@@ -404,7 +404,7 @@ void FPFEventsWriteTelemetryEventsAsyncTask::DoWork()
 	const PFEventsWriteEventsRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(request.customTags),
 		.customTagsCount = (uint32_t)request.customTags.Num(),
-		.events = ConvertUnrealArrayToPlayfab(request.events, ConvertEventContentsToPlayfab),
+		.events = ConvertUnrealArrayToPlayfab<PFEventsEventContents, FPFEventsEventContents>(request.events, ConvertEventContentsToPlayfab),
 		.eventsCount = (uint32_t)request.events.Num()
 	};
 	HRESULT hr = PFEventsWriteTelemetryEventsAsync(entityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -418,7 +418,7 @@ void FPFEventsWriteTelemetryEventsAsyncTask::DoWork()
 void FPFEventsWriteTelemetryEventsAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFEventsWriteTelemetryEventsGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -426,7 +426,7 @@ void FPFEventsWriteTelemetryEventsAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFEventsWriteEventsResponse* result;
 		hr = PFEventsWriteTelemetryEventsGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 

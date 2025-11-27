@@ -4,6 +4,8 @@
 #include "Modules/ModuleInterface.h"
 THIRD_PARTY_INCLUDES_START
 #include "httpClient/pal.h"
+#include <httpClient/httpClient.h>
+#include <httpClient/async.h>
 THIRD_PARTY_INCLUDES_END
 
 class PLAYFABCORE_API FPlayFabCore : public FDefaultModuleImpl

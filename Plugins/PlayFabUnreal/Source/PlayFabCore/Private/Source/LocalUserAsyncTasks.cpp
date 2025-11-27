@@ -25,7 +25,7 @@ void LocalUserLoginAsyncTask::DoWork()
 void LocalUserLoginAsyncTask::ProcessResults()
 {
     TArray<uint8> bufferArray;
-    uint64 resultSize = 0;
+    size_t resultSize = 0;
 
     HRESULT hr = PFLocalUserLoginGetResultSize(*mAsyncBlock, &resultSize);
 
@@ -41,8 +41,8 @@ void LocalUserLoginAsyncTask::ProcessResults()
         {
             TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(loginResult);
 
-            FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&entityHandle);
-            m_delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+            *reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = entityHandle;
+            m_delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
         }
         else
         {

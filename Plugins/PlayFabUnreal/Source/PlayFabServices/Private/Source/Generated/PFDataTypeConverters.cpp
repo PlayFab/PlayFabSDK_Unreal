@@ -462,7 +462,7 @@ TSharedPtr<const FPFDataInitiateFileUploadsResponse> ConvertInitiateFileUploadsR
 	TSharedPtr<const FPFDataInitiateFileUploadsResponse> ConvertedType = MakeShared<FPFDataInitiateFileUploadsResponse>(FPFDataInitiateFileUploadsResponse{
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.profileVersion = Datatype->profileVersion,
-		.uploadDetails = ConvertPlayfabArrayToUnreal(Datatype->uploadDetails, Datatype->uploadDetailsCount, ConvertInitiateFileUploadMetadataToUnreal),
+		.uploadDetails = ConvertPlayfabArrayToUnreal<PFDataInitiateFileUploadMetadata, FPFDataInitiateFileUploadMetadata>(Datatype->uploadDetails, Datatype->uploadDetailsCount, ConvertInitiateFileUploadMetadataToUnreal),
 		.uploadDetailsCount = Datatype->uploadDetailsCount
 	});
 
@@ -478,7 +478,7 @@ const PFDataInitiateFileUploadsResponse* ConvertInitiateFileUploadsResponseToPla
 	const PFDataInitiateFileUploadsResponse* ConvertedType = new PFDataInitiateFileUploadsResponse{
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
 		.profileVersion = Datatype->profileVersion,
-		.uploadDetails = ConvertUnrealArrayToPlayfab(Datatype->uploadDetails, ConvertInitiateFileUploadMetadataToPlayfab),
+		.uploadDetails = ConvertUnrealArrayToPlayfab<PFDataInitiateFileUploadMetadata, FPFDataInitiateFileUploadMetadata>(Datatype->uploadDetails, ConvertInitiateFileUploadMetadataToPlayfab),
 		.uploadDetailsCount = (uint32_t)Datatype->uploadDetails.Num()
 	};
 
@@ -528,7 +528,7 @@ TSharedPtr<const FPFDataSetObjectsRequest> ConvertSetObjectsRequestToUnreal(cons
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.expectedProfileVersion = TSharedPtr<const int32>(Datatype->expectedProfileVersion),
-		.objects = ConvertPlayfabArrayToUnreal(Datatype->objects, Datatype->objectsCount, ConvertSetObjectToUnreal),
+		.objects = ConvertPlayfabArrayToUnreal<PFDataSetObject, FPFDataSetObject>(Datatype->objects, Datatype->objectsCount, ConvertSetObjectToUnreal),
 		.objectsCount = Datatype->objectsCount
 	});
 
@@ -546,7 +546,7 @@ const PFDataSetObjectsRequest* ConvertSetObjectsRequestToPlayfab(TSharedPtr<cons
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
 		.expectedProfileVersion = Datatype->expectedProfileVersion ? new int32(*Datatype->expectedProfileVersion) : nullptr,
-		.objects = ConvertUnrealArrayToPlayfab(Datatype->objects, ConvertSetObjectToPlayfab),
+		.objects = ConvertUnrealArrayToPlayfab<PFDataSetObject, FPFDataSetObject>(Datatype->objects, ConvertSetObjectToPlayfab),
 		.objectsCount = (uint32_t)Datatype->objects.Num()
 	};
 
@@ -591,7 +591,7 @@ TSharedPtr<const FPFDataSetObjectsResponse> ConvertSetObjectsResponseToUnreal(co
 
 	TSharedPtr<const FPFDataSetObjectsResponse> ConvertedType = MakeShared<FPFDataSetObjectsResponse>(FPFDataSetObjectsResponse{
 		.profileVersion = Datatype->profileVersion,
-		.setResults = ConvertPlayfabArrayToUnreal(Datatype->setResults, Datatype->setResultsCount, ConvertSetObjectInfoToUnreal),
+		.setResults = ConvertPlayfabArrayToUnreal<PFDataSetObjectInfo, FPFDataSetObjectInfo>(Datatype->setResults, Datatype->setResultsCount, ConvertSetObjectInfoToUnreal),
 		.setResultsCount = Datatype->setResultsCount
 	});
 
@@ -606,7 +606,7 @@ const PFDataSetObjectsResponse* ConvertSetObjectsResponseToPlayfab(TSharedPtr<co
 
 	const PFDataSetObjectsResponse* ConvertedType = new PFDataSetObjectsResponse{
 		.profileVersion = Datatype->profileVersion,
-		.setResults = ConvertUnrealArrayToPlayfab(Datatype->setResults, ConvertSetObjectInfoToPlayfab),
+		.setResults = ConvertUnrealArrayToPlayfab<PFDataSetObjectInfo, FPFDataSetObjectInfo>(Datatype->setResults, ConvertSetObjectInfoToPlayfab),
 		.setResultsCount = (uint32_t)Datatype->setResults.Num()
 	};
 

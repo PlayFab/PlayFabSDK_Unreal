@@ -29,12 +29,15 @@ extern "C"
 /// See also StatisticDeleteStatisticDefinitionAsync.
 ///
 /// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
-/// the async result will be E_PF_AGGREGATION_TYPE_NOT_ALLOWED_FOR_MULTI_COLUMN_STATISTIC, E_PF_API_NOT_ENABLED_FOR_TITLE,
-/// E_PF_DUPLICATE_COLUMN_NAME_FOUND, E_PF_DUPLICATE_STATISTIC_NAME, E_PF_EXTERNAL_ENTITY_NOT_ALLOWED_FOR_TIER,
-/// E_PF_INVALID_BASE_TIME_FOR_INTERVAL, E_PF_MAX_QUERYABLE_VERSIONS_VALUE_NOT_ALLOWED_FOR_TIER, E_PF_STATISTIC_COUNT_LIMIT_EXCEEDED,
-/// E_PF_STATISTIC_DEFINITION_HAS_NULL_OR_EMPTY_VERSION_CONFIGURATION, E_PF_STATISTIC_NAME_CONFLICT, E_PF_VERSION_CONFIGURATION_IS_REQUIRED
-/// or any of the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details
-/// on error handling.
+/// the async result will be E_PF_AGGREGATION_TYPE_NOT_ALLOWED_FOR_LINKED_STAT, E_PF_AGGREGATION_TYPE_NOT_ALLOWED_FOR_MULTI_COLUMN_STATISTIC,
+/// E_PF_API_NOT_ENABLED_FOR_TITLE, E_PF_DUPLICATE_COLUMN_NAME_FOUND, E_PF_DUPLICATE_STATISTIC_NAME, E_PF_ENTITY_TYPE_SPECIFIED_REQUIRES_AGGREGATION_SOURCE,
+/// E_PF_EXTERNAL_ENTITY_NOT_ALLOWED_FOR_TIER, E_PF_INVALID_BASE_TIME_FOR_INTERVAL, E_PF_INVALID_ENTITY_TYPE_FOR_AGGREGATION,
+/// E_PF_MAX_QUERYABLE_VERSIONS_VALUE_NOT_ALLOWED_FOR_TIER, E_PF_MULTI_LEVEL_AGGREGATION_NOT_ALLOWED,
+/// E_PF_PLAY_FAB_ERROR_EVENT_NOT_SUPPORTED_FOR_ENTITY_TYPE, E_PF_STATISTIC_COLUMN_AGGREGATION_MISMATCH,
+/// E_PF_STATISTIC_COLUMN_LENGTH_MISMATCH, E_PF_STATISTIC_COUNT_LIMIT_EXCEEDED, E_PF_STATISTIC_DEFINITION_HAS_NULL_OR_EMPTY_VERSION_CONFIGURATION,
+/// E_PF_STATISTIC_NAME_CONFLICT, E_PF_STATISTIC_NOT_FOUND, E_PF_VERSION_CONFIGURATION_CANNOT_BE_SPECIFIED_FOR_LINKED_STAT,
+/// E_PF_VERSION_CONFIGURATION_IS_REQUIRED or any of the global PlayFab Service errors. See doc page "Handling
+/// PlayFab Errors" for more details on error handling.
 /// </remarks>
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFStatisticsCreateStatisticDefinitionAsync(
@@ -193,6 +196,28 @@ bool PLAYFABSERVICES_API FPFStatisticsListStatisticDefinitionsAsync(
 	_In_ FPFEntityHandle EntityHandle,
 	_In_ const FPFStatisticsListStatisticDefinitionsRequest* request,
 	_Inout_ FOnListStatisticDefinitionsCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
+/// Unlinks an aggregation source from a statistic definition.
+/// </summary>
+/// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// See also StatisticCreateStatisticDefinitionAsync.
+///
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_API_NOT_ENABLED_FOR_TITLE, E_PF_STATISTIC_NOT_FOUND or any of the global
+/// PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details on error handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFStatisticsUnlinkAggregationSourceFromStatisticAsync(
+	_In_ FPFEntityHandle EntityHandle,
+	_In_ const FPFStatisticsUnlinkAggregationSourceFromStatisticRequest* request,
+	_Inout_ FOnUnlinkAggregationSourceFromStatisticCompleted delegate
 ) noexcept;
 #endif
 

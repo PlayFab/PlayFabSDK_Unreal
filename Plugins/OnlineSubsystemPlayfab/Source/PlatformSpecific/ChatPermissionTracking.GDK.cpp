@@ -5,7 +5,7 @@
 #include "HAL/Platform.h"
 PRAGMA_DISABLE_UNDEFINED_IDENTIFIER_WARNINGS
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "PlatformDefines.h"
 
 #include "OnlineVoiceInterfacePlayFab.h"
@@ -15,19 +15,19 @@ namespace
 {
 	bool bPartyXblManagerInitialized = false;
 
-	struct RemoteTalkerOptions
+	struct RemoteTalkerOptionsGDK
 	{
 		ECrossNetworkType Type = ECrossNetworkType::DISABLED;
 		TMap<FString /*User ID*/, PartyChatPermissionOptions> OptionsMap;
 	};
 
 	TMap<FString /*User ID*/, PartyXblChatUser*> TalkersMap;
-	TMap<FString /*User ID*/, RemoteTalkerOptions> TalkersOptions;
-	TMap<FString /*Entity ID*/, FString /*User ID*/> TalkerIdMapping;
+	TMap<FString /*User ID*/, RemoteTalkerOptionsGDK> TalkersOptionsGDK;
+	TMap<FString /*Entity ID*/, FString /*User ID*/> TalkerIdMappingGDK;
 
 	PartyXblLocalChatUser* LocalChatUser = nullptr;
 
-	TArray<FCrossNetworkTalkerPlayFab> CrossNetworkTalkers;
+	TArray<FCrossNetworkTalkerPlayFab> CrossNetworkTalkersGDK;
 
 	PartyString GetXblErrorMessage(PartyError error)
 	{
@@ -43,9 +43,9 @@ namespace
 		return errString;
 	}
 
-	bool UpdateTalkerCrossNetworkPermission()
+	bool UpdateTalkerCrossNetworkPermissionGDK()
 	{
-		if (CrossNetworkTalkers.Num() == 0)
+		if (CrossNetworkTalkersGDK.Num() == 0)
 		{
 			return false;
 		}
@@ -62,10 +62,10 @@ namespace
 			
 			FString LocalTalkerUserId = FString::Printf(TEXT("%llu"), LocalUserId);
 
-			auto CrossNetwork = CrossNetworkTalkers[0];
+			auto CrossNetwork = CrossNetworkTalkersGDK[0];
 			
 			Party::PartyChatPermissionOptions ChatPermissionMask = PartyChatPermissionOptions::None;
-			RemoteTalkerOptions* LocalTalker = TalkersOptions.Find(LocalTalkerUserId);
+			RemoteTalkerOptionsGDK* LocalTalker = TalkersOptionsGDK.Find(LocalTalkerUserId);
 			if (LocalTalker)
 			{
 				Party::PartyChatPermissionOptions* PermissionOptions = LocalTalker->OptionsMap.Find(CrossNetwork.RemoteUserId);
@@ -76,8 +76,8 @@ namespace
 			}
 			else
 			{
-				TalkersOptions.Emplace(LocalTalkerUserId, RemoteTalkerOptions());
-				LocalTalker = TalkersOptions.Find(LocalTalkerUserId);
+				TalkersOptionsGDK.Emplace(LocalTalkerUserId, RemoteTalkerOptionsGDK());
+				LocalTalker = TalkersOptionsGDK.Find(LocalTalkerUserId);
 			}
 
 			switch(CrossNetwork.Type)
@@ -113,7 +113,7 @@ namespace
 
 			UE_LOG_ONLINE(Verbose, TEXT("Set voice chat permission %s vs %s as %d, Type %d"), *LocalTalkerUserId, *CrossNetwork.RemoteUserId, ChatPermissionMask, CrossNetwork.Type);
 
-			CrossNetworkTalkers.RemoveAt(0, 1);
+			CrossNetworkTalkersGDK.RemoveAt(0, 1);
 			return true;
 		}
 		else
@@ -124,26 +124,63 @@ namespace
 	}
 }
 
+#if defined(OSS_PLAYFAB_GDK)
 void FOnlineVoicePlayFab::AddTalkerIdMapping(const FString& EntityId, const FString& UserId)
 {
-	TalkerIdMapping.Add(EntityId, UserId);
-	UE_LOG_ONLINE(Verbose, TEXT("Talker ID Mapping %s to %s"), *UserId, *EntityId);
+	AddTalkerIdMappingGDK(EntityId, UserId);
 }
 
 void FOnlineVoicePlayFab::SetTalkerCrossNetworkPermission(ECrossNetworkType VoiceChatType, const FString& RemoteUserId, const FString& PlatformModel)
 {
-	FCrossNetworkTalkerPlayFab CrossNetwork = {VoiceChatType, RemoteUserId, PlatformModel};
-	CrossNetworkTalkers.Emplace(CrossNetwork);
+	SetTalkerCrossNetworkPermissionGDK(VoiceChatType, RemoteUserId, PlatformModel);
 }
 
 PartyChatPermissionOptions FOnlineVoicePlayFab::GetChatPermissionsForTalker(const FString& LocalId, const FString& RemoteId)
 {
-	RemoteTalkerOptions* AllOptions = nullptr;
+	return GetChatPermissionsForTalkerGDK(LocalId, RemoteId);
+}
+
+FString FOnlineVoicePlayFab::GetPlatformIdFromEntityId(const FString& EntityId)
+{
+	return GetPlatformIdFromEntityIdGDK(EntityId);
+}
+
+void FOnlineVoicePlayFab::StartTrackingPermissionForTalker(const FString& UserId, bool IsRemote)
+{
+	StartTrackingPermissionForTalkerGDK(UserId, IsRemote);
+}
+
+void FOnlineVoicePlayFab::StopTrackingPermissionForTalker(const FString& UserId)
+{
+	StopTrackingPermissionForTalkerGDK(UserId);
+}
+
+void FOnlineVoicePlayFab::TickTalkerPermissionTracking()
+{
+	TickTalkerPermissionTrackingGDK();
+}
+#endif // OSS_PLAYFAB_GDK
+
+void FOnlineVoicePlayFab::AddTalkerIdMappingGDK(const FString& EntityId, const FString& UserId)
+{
+	TalkerIdMappingGDK.Add(EntityId, UserId);
+	UE_LOG_ONLINE(Verbose, TEXT("Talker ID Mapping %s to %s"), *UserId, *EntityId);
+}
+
+void FOnlineVoicePlayFab::SetTalkerCrossNetworkPermissionGDK(ECrossNetworkType VoiceChatType, const FString& RemoteUserId, const FString& PlatformModel)
+{
+	FCrossNetworkTalkerPlayFab CrossNetwork = {VoiceChatType, RemoteUserId, PlatformModel};
+	CrossNetworkTalkersGDK.Emplace(CrossNetwork);
+}
+
+PartyChatPermissionOptions FOnlineVoicePlayFab::GetChatPermissionsForTalkerGDK(const FString& LocalId, const FString& RemoteId)
+{
+	RemoteTalkerOptionsGDK* AllOptions = nullptr;
 	PartyChatPermissionOptions* Options = nullptr;
 
 	UE_LOG_ONLINE(Verbose, TEXT("GetChatPermissionsForTalker %s vs. %s"), *LocalId, *RemoteId);
 
-	AllOptions = TalkersOptions.Find(LocalId);
+	AllOptions = TalkersOptionsGDK.Find(LocalId);
 	if (AllOptions != nullptr)
 	{
 		Options = (*AllOptions).OptionsMap.Find(RemoteId);
@@ -158,11 +195,11 @@ PartyChatPermissionOptions FOnlineVoicePlayFab::GetChatPermissionsForTalker(cons
 	return PartyChatPermissionOptions::None;
 }
 
-FString FOnlineVoicePlayFab::GetPlatformIdFromEntityId(const FString& EntityId)
+FString FOnlineVoicePlayFab::GetPlatformIdFromEntityIdGDK(const FString& EntityId)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("GetPlatformIdFromEntityId %s"), *EntityId);
 
-	FString* Xuid = TalkerIdMapping.Find(EntityId);
+	FString* Xuid = TalkerIdMappingGDK.Find(EntityId);
 	if (Xuid != nullptr)
 	{
 		return *Xuid;
@@ -173,7 +210,7 @@ FString FOnlineVoicePlayFab::GetPlatformIdFromEntityId(const FString& EntityId)
 	return FString();
 }
 
-void FOnlineVoicePlayFab::StartTrackingPermissionForTalker(const FString& UserId, bool IsRemote)
+void FOnlineVoicePlayFab::StartTrackingPermissionForTalkerGDK(const FString& UserId, bool IsRemote)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("StartTrackingPermissionForTalker %s %s"), *UserId, IsRemote ? TEXT("remote") : TEXT("local"));
 
@@ -222,9 +259,9 @@ void FOnlineVoicePlayFab::StartTrackingPermissionForTalker(const FString& UserId
 		}
 	}
 
-	if (TalkersOptions.Find(UserId) == nullptr)
+	if (TalkersOptionsGDK.Find(UserId) == nullptr)
 	{
-		TalkersOptions.Emplace(UserId, RemoteTalkerOptions());
+		TalkersOptionsGDK.Emplace(UserId, RemoteTalkerOptionsGDK());
 	}
 
 	PartyError err = PartyXblManager::GetSingleton().GetEntityIdsFromXboxLiveUserIds(1, &XboxId, LocalChatUser, nullptr);
@@ -234,7 +271,7 @@ void FOnlineVoicePlayFab::StartTrackingPermissionForTalker(const FString& UserId
 	}
 }
 
-void FOnlineVoicePlayFab::StopTrackingPermissionForTalker(const FString& UserId)
+void FOnlineVoicePlayFab::StopTrackingPermissionForTalkerGDK(const FString& UserId)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("StopTrackingPermissionForTalker %s"), *UserId);
 
@@ -248,13 +285,13 @@ void FOnlineVoicePlayFab::StopTrackingPermissionForTalker(const FString& UserId)
 		}
 
 		TalkersMap.Remove(UserId);
-		TalkersOptions.Remove(UserId);
+		TalkersOptionsGDK.Remove(UserId);
 
-		for (auto& TalkerIdKvPair : TalkerIdMapping)
+		for (auto& TalkerIdKvPair : TalkerIdMappingGDK)
 		{
 			if (TalkerIdKvPair.Value == UserId)
 			{
-				TalkerIdMapping.Remove(TalkerIdKvPair.Key);
+				TalkerIdMappingGDK.Remove(TalkerIdKvPair.Key);
 				break;
 			}
 		}
@@ -272,7 +309,7 @@ void FOnlineVoicePlayFab::StopTrackingPermissionForTalker(const FString& UserId)
 	}
 }
 
-void FOnlineVoicePlayFab::TickTalkerPermissionTracking()
+void FOnlineVoicePlayFab::TickTalkerPermissionTrackingGDK()
 {
 	if (bPartyXblManagerInitialized == false)
 	{
@@ -336,7 +373,7 @@ void FOnlineVoicePlayFab::TickTalkerPermissionTracking()
 				{
 					FString XboxLiveUserId = FString::Printf(TEXT("%llu"), userStateChange->entityIdMappings[j].xboxLiveUserId);
 					FString EntityId(userStateChange->entityIdMappings[j].playfabEntityId);
-					TalkerIdMapping.Add(EntityId, XboxLiveUserId);
+					TalkerIdMappingGDK.Add(EntityId, XboxLiveUserId);
 					UE_LOG_ONLINE(Verbose, TEXT("TalkerIdMapping: %s to %s"), *XboxLiveUserId, *EntityId);
 				}
 				else
@@ -377,7 +414,7 @@ void FOnlineVoicePlayFab::TickTalkerPermissionTracking()
 
 			FString UserXuid = FString::Printf(TEXT("%llu"), userXuid);
 
-			RemoteTalkerOptions* LocalTalker = TalkersOptions.Find(UserXuid);
+			RemoteTalkerOptionsGDK* LocalTalker = TalkersOptionsGDK.Find(UserXuid);
 			if (LocalTalker == nullptr)
 			{
 				UE_LOG_ONLINE(Error, TEXT("Can't find TalkersOptions entry for %s!"), *UserXuid);
@@ -521,7 +558,7 @@ void FOnlineVoicePlayFab::TickTalkerPermissionTracking()
 
 	err = PartyXblManager::GetSingleton().FinishProcessingStateChanges(count, xblChanges);
 
-	if (UpdateTalkerCrossNetworkPermission())
+	if (UpdateTalkerCrossNetworkPermissionGDK())
 	{
 		UpdatePermissionsForAllControls();
 	}
@@ -548,4 +585,4 @@ void FOnlineVoicePlayFab::CleanUpPartyXblManager()
 	}
 }
 
-#endif // OSS_PLAYFAB_GDK
+#endif // OSS_PLAYFAB_GDK_SUPPORT

@@ -213,6 +213,53 @@ public class PlayFabUnreal : ModuleRules
     }
     #endregion
 
+    private class NuGetPackageLoader
+    {
+        public class NuGetPackageInformation
+        {
+            public string UnifiedSDKPackagePath = string.Empty;
+        }
+
+        // If want specific version to use, can specify the version in the packages.config file.
+        public void ParsingNuGetPackage(ref string PlatformDir, ref NuGetPackageInformation PackageInfo)
+        {
+            string[] Lines = System.IO.File.ReadAllLines(Path.Combine(PlatformDir, "packages.config"));
+            foreach (string Line in Lines)
+            {
+                Int32 BeginOfString = Line.IndexOf("Microsoft.PlayFab", 0);
+                if (BeginOfString > -1)
+                {
+                    Int32 EndOfString = Line.IndexOf("\"", BeginOfString);
+                    string Id = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+                    const string versionString = "version=\"";
+                    BeginOfString = Line.IndexOf(versionString, 0);
+                    if (BeginOfString > -1)
+                    {
+                        BeginOfString += versionString.Length;
+                        EndOfString = Line.IndexOf("\"", BeginOfString);
+                        string Version = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+                        if (Id.IndexOf("UnifiedSDK", 0) > -1)
+                        {
+                            PackageInfo.UnifiedSDKPackagePath = Id + "." + Version;
+                        }
+                        else
+                        {
+                            throw new BuildException("Unknown package id in package.config file.");
+                        }
+                    }
+                }
+            }
+            if (PackageInfo.UnifiedSDKPackagePath.Length == 0)
+            {
+                throw new BuildException("Can't find PlayFab Unified SDK package infomation in package.config file.");
+            }
+
+            LogPlayFabUnreal($"Unified SDK={PackageInfo.UnifiedSDKPackagePath}");
+        }
+    }
+
     private static void LogPlayFabUnreal(string message)
     {
         Console.WriteLine($"[PlayFabUnreal] {message}");
@@ -262,6 +309,7 @@ public class PlayFabUnreal : ModuleRules
                 Path.Combine(ModuleDirectory, "../PlayFabCore/Public/Generated"),
                 Path.Combine(ModuleDirectory, "../PlayFabCore/Private/Include"),
                 Path.Combine(ModuleDirectory, "../PlayFabCore/Private/Include/Generated"),
+                Path.Combine(ModuleDirectory, "../PlayFabCore/PlatformSpecific"),
 
                 // PlayFabServices Headers
                 Path.Combine(ModuleDirectory, "../PlayFabServices/Public"),
@@ -282,7 +330,7 @@ public class PlayFabUnreal : ModuleRules
         LogPlayFabUnreal($"Configuring for platform: {Target.Platform}");
         
         // GDK Platform
-        if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX")
+        if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
             LogPlayFabUnreal("Using GDK platform configuration");
             ConfigureForGDKPlatform();
@@ -340,7 +388,10 @@ public class PlayFabUnreal : ModuleRules
         string LibPath = Path.Combine(gdkPath, @"windows\lib\x64");
         string IncludePath = Path.Combine(gdkPath, @"windows\include");
 
-        if (UnrealTargetPlatform.GetValidPlatformNames().Contains("WinGDK"))
+		MethodInfo IsGDKEditionValidFunction = System.Type.GetType("GRDK, UE5Rules", false)?.GetMethod("IsGDKEditionValid", BindingFlags.Public | BindingFlags.Static);
+		bool bHasValidGDK = (IsGDKEditionValidFunction != null) && (bool)IsGDKEditionValidFunction.Invoke(null, null);
+
+		if (bHasValidGDK)
         {
             // Loading XCurl from legacy folder structure (GRDK)
             PublicDependencyModuleNames.Add("GDKRuntime");
@@ -359,21 +410,21 @@ public class PlayFabUnreal : ModuleRules
         PublicIncludePaths.Add(IncludePath);
 
         // Binaries
-        RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.GDK.dll", Path.Combine(BinPath, "LibHttpClient.GDK.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.GDK.pdb", Path.Combine(BinPath, "LibHttpClient.GDK.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.GDK.dll", Path.Combine(BinPath, "PlayFabCore.GDK.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.GDK.pdb", Path.Combine(BinPath, "PlayFabCore.GDK.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.GDK.dll", Path.Combine(BinPath, "PlayFabServices.GDK.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.GDK.pdb", Path.Combine(BinPath, "PlayFabServices.GDK.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.GDK.dll", Path.Combine(BinPath, "PlayFabGameSave.GDK.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.GDK.pdb", Path.Combine(BinPath, "PlayFabGameSave.GDK.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.dll", Path.Combine(BinPath, "LibHttpClient.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.pdb", Path.Combine(BinPath, "LibHttpClient.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
 
         // Import libs
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "LibHttpClient.GDK.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "LibHttpClient.lib"));
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "xgameruntime.lib"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.GDK.lib"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.GDK.lib"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabGameSave.GDK.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabGameSave.lib"));
 
         // Copy MicrosoftGame.config for Win64 builds
         string ProjectRoot = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../../.."));
@@ -410,24 +461,21 @@ public class PlayFabUnreal : ModuleRules
             PublicIncludePaths.Add(IncludePath);
 
             // Binaries
-
-            // LibHttpClient is already being loaded by XSAPI for WinGDK
-            //RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.GDK.dll", Path.Combine(BinPath, "LibHttpClient.GDK.dll"), StagedFileType.SystemNonUFS);
-            //RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.GDK.pdb", Path.Combine(BinPath, "LibHttpClient.GDK.pdb"), StagedFileType.DebugNonUFS);
-
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.GDK.dll", Path.Combine(BinPath, "PlayFabCore.GDK.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.GDK.pdb", Path.Combine(BinPath, "PlayFabCore.GDK.pdb"), StagedFileType.DebugNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.GDK.dll", Path.Combine(BinPath, "PlayFabServices.GDK.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.GDK.pdb", Path.Combine(BinPath, "PlayFabServices.GDK.pdb"), StagedFileType.DebugNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.GDK.dll", Path.Combine(BinPath, "PlayFabGameSave.GDK.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.GDK.pdb", Path.Combine(BinPath, "PlayFabGameSave.GDK.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.dll", Path.Combine(BinPath, "LibHttpClient.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.pdb", Path.Combine(BinPath, "LibHttpClient.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
 
             // Import libs
-            //PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.GDK.lib"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.lib"));
             PublicAdditionalLibraries.Add(Path.Combine(LibPath, "xgameruntime.lib"));
-            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.GDK.lib"));
-            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.GDK.lib"));
-            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabGameSave.GDK.lib"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.lib"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.lib"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabGameSave.lib"));
         }
     }
 
@@ -447,29 +495,19 @@ public class PlayFabUnreal : ModuleRules
 
     private void ConfigureForPlayStation4Platform()
     {
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
         string PluginPath = Path.Combine(ModuleDirectory, "../../");
         string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS4");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-
-        PublicIncludePaths.Add(IncludePath);
-
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.a"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabCore.a"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabServices.a"));
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 
     private void ConfigureForPlayStation5Platform()
     {
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
         string PluginPath = Path.Combine(ModuleDirectory, "../../");
         string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS5");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-
-        PublicIncludePaths.Add(IncludePath);
-
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.a"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabCore.a"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabServices.a"));
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 }

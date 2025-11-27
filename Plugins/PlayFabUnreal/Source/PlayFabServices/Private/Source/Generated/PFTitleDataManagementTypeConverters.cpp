@@ -208,7 +208,7 @@ TSharedPtr<const FPFTitleDataManagementGetTitleNewsResult> ConvertGetTitleNewsRe
 	}
 
 	TSharedPtr<const FPFTitleDataManagementGetTitleNewsResult> ConvertedType = MakeShared<FPFTitleDataManagementGetTitleNewsResult>(FPFTitleDataManagementGetTitleNewsResult{
-		.news = ConvertPlayfabArrayToUnreal(Datatype->news, Datatype->newsCount, ConvertTitleNewsItemToUnreal),
+		.news = ConvertPlayfabArrayToUnreal<PFTitleDataManagementTitleNewsItem, FPFTitleDataManagementTitleNewsItem>(Datatype->news, Datatype->newsCount, ConvertTitleNewsItemToUnreal),
 		.newsCount = Datatype->newsCount
 	});
 
@@ -222,7 +222,7 @@ const PFTitleDataManagementGetTitleNewsResult* ConvertGetTitleNewsResultToPlayfa
 	}
 
 	const PFTitleDataManagementGetTitleNewsResult* ConvertedType = new PFTitleDataManagementGetTitleNewsResult{
-		.news = ConvertUnrealArrayToPlayfab(Datatype->news, ConvertTitleNewsItemToPlayfab),
+		.news = ConvertUnrealArrayToPlayfab<PFTitleDataManagementTitleNewsItem, FPFTitleDataManagementTitleNewsItem>(Datatype->news, ConvertTitleNewsItemToPlayfab),
 		.newsCount = (uint32_t)Datatype->news.Num()
 	};
 

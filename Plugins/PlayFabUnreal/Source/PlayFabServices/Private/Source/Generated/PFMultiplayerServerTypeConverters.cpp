@@ -324,7 +324,7 @@ TSharedPtr<const FPFMultiplayerServerBuildAliasDetailsResponse> ConvertBuildAlia
 	TSharedPtr<const FPFMultiplayerServerBuildAliasDetailsResponse> ConvertedType = MakeShared<FPFMultiplayerServerBuildAliasDetailsResponse>(FPFMultiplayerServerBuildAliasDetailsResponse{
 		.aliasId = Datatype->aliasId == nullptr ? FString() : FString(Datatype->aliasId),
 		.aliasName = Datatype->aliasName == nullptr ? FString() : FString(Datatype->aliasName),
-		.buildSelectionCriteria = ConvertPlayfabArrayToUnreal(Datatype->buildSelectionCriteria, Datatype->buildSelectionCriteriaCount, ConvertBuildSelectionCriterionToUnreal),
+		.buildSelectionCriteria = ConvertPlayfabArrayToUnreal<PFMultiplayerServerBuildSelectionCriterion, FPFMultiplayerServerBuildSelectionCriterion>(Datatype->buildSelectionCriteria, Datatype->buildSelectionCriteriaCount, ConvertBuildSelectionCriterionToUnreal),
 		.buildSelectionCriteriaCount = Datatype->buildSelectionCriteriaCount
 	});
 
@@ -340,7 +340,7 @@ const PFMultiplayerServerBuildAliasDetailsResponse* ConvertBuildAliasDetailsResp
 	const PFMultiplayerServerBuildAliasDetailsResponse* ConvertedType = new PFMultiplayerServerBuildAliasDetailsResponse{
 		.aliasId = ConvertFStringToCharPtr(Datatype->aliasId),
 		.aliasName = ConvertFStringToCharPtr(Datatype->aliasName),
-		.buildSelectionCriteria = ConvertUnrealArrayToPlayfab(Datatype->buildSelectionCriteria, ConvertBuildSelectionCriterionToPlayfab),
+		.buildSelectionCriteria = ConvertUnrealArrayToPlayfab<PFMultiplayerServerBuildSelectionCriterion, FPFMultiplayerServerBuildSelectionCriterion>(Datatype->buildSelectionCriteria, ConvertBuildSelectionCriterionToPlayfab),
 		.buildSelectionCriteriaCount = (uint32_t)Datatype->buildSelectionCriteria.Num()
 	};
 
@@ -354,7 +354,7 @@ TSharedPtr<const FPFMultiplayerServerListBuildAliasesResponse> ConvertListBuildA
 	}
 
 	TSharedPtr<const FPFMultiplayerServerListBuildAliasesResponse> ConvertedType = MakeShared<FPFMultiplayerServerListBuildAliasesResponse>(FPFMultiplayerServerListBuildAliasesResponse{
-		.buildAliases = ConvertPlayfabArrayToUnreal(Datatype->buildAliases, Datatype->buildAliasesCount, ConvertBuildAliasDetailsResponseToUnreal),
+		.buildAliases = ConvertPlayfabArrayToUnreal<PFMultiplayerServerBuildAliasDetailsResponse, FPFMultiplayerServerBuildAliasDetailsResponse>(Datatype->buildAliases, Datatype->buildAliasesCount, ConvertBuildAliasDetailsResponseToUnreal),
 		.buildAliasesCount = Datatype->buildAliasesCount,
 		.pageSize = Datatype->pageSize,
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
@@ -370,7 +370,7 @@ const PFMultiplayerServerListBuildAliasesResponse* ConvertListBuildAliasesRespon
 	}
 
 	const PFMultiplayerServerListBuildAliasesResponse* ConvertedType = new PFMultiplayerServerListBuildAliasesResponse{
-		.buildAliases = ConvertUnrealArrayToPlayfab(Datatype->buildAliases, ConvertBuildAliasDetailsResponseToPlayfab),
+		.buildAliases = ConvertUnrealArrayToPlayfab<PFMultiplayerServerBuildAliasDetailsResponse, FPFMultiplayerServerBuildAliasDetailsResponse>(Datatype->buildAliases, ConvertBuildAliasDetailsResponseToPlayfab),
 		.buildAliasesCount = (uint32_t)Datatype->buildAliases.Num(),
 		.pageSize = Datatype->pageSize,
 		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
@@ -478,7 +478,7 @@ TSharedPtr<const FPFMultiplayerServerDynamicStandbySettings> ConvertDynamicStand
 	}
 
 	TSharedPtr<const FPFMultiplayerServerDynamicStandbySettings> ConvertedType = MakeShared<FPFMultiplayerServerDynamicStandbySettings>(FPFMultiplayerServerDynamicStandbySettings{
-		.dynamicFloorMultiplierThresholds = ConvertPlayfabArrayToUnreal(Datatype->dynamicFloorMultiplierThresholds, Datatype->dynamicFloorMultiplierThresholdsCount, ConvertDynamicStandbyThresholdToUnreal),
+		.dynamicFloorMultiplierThresholds = ConvertPlayfabArrayToUnreal<PFMultiplayerServerDynamicStandbyThreshold, FPFMultiplayerServerDynamicStandbyThreshold>(Datatype->dynamicFloorMultiplierThresholds, Datatype->dynamicFloorMultiplierThresholdsCount, ConvertDynamicStandbyThresholdToUnreal),
 		.dynamicFloorMultiplierThresholdsCount = Datatype->dynamicFloorMultiplierThresholdsCount,
 		.isEnabled = Datatype->isEnabled,
 		.rampDownSeconds = TSharedPtr<const int32>(Datatype->rampDownSeconds)
@@ -494,7 +494,7 @@ const PFMultiplayerServerDynamicStandbySettings* ConvertDynamicStandbySettingsTo
 	}
 
 	const PFMultiplayerServerDynamicStandbySettings* ConvertedType = new PFMultiplayerServerDynamicStandbySettings{
-		.dynamicFloorMultiplierThresholds = ConvertUnrealArrayToPlayfab(Datatype->dynamicFloorMultiplierThresholds, ConvertDynamicStandbyThresholdToPlayfab),
+		.dynamicFloorMultiplierThresholds = ConvertUnrealArrayToPlayfab<PFMultiplayerServerDynamicStandbyThreshold, FPFMultiplayerServerDynamicStandbyThreshold>(Datatype->dynamicFloorMultiplierThresholds, ConvertDynamicStandbyThresholdToPlayfab),
 		.dynamicFloorMultiplierThresholdsCount = (uint32_t)Datatype->dynamicFloorMultiplierThresholds.Num(),
 		.isEnabled = Datatype->isEnabled,
 		.rampDownSeconds = Datatype->rampDownSeconds ? new int32(*Datatype->rampDownSeconds) : nullptr
@@ -547,7 +547,7 @@ TSharedPtr<const FPFMultiplayerServerScheduledStandbySettings> ConvertScheduledS
 
 	TSharedPtr<const FPFMultiplayerServerScheduledStandbySettings> ConvertedType = MakeShared<FPFMultiplayerServerScheduledStandbySettings>(FPFMultiplayerServerScheduledStandbySettings{
 		.isEnabled = Datatype->isEnabled,
-		.scheduleList = ConvertPlayfabArrayToUnreal(Datatype->scheduleList, Datatype->scheduleListCount, ConvertScheduleToUnreal),
+		.scheduleList = ConvertPlayfabArrayToUnreal<PFMultiplayerServerSchedule, FPFMultiplayerServerSchedule>(Datatype->scheduleList, Datatype->scheduleListCount, ConvertScheduleToUnreal),
 		.scheduleListCount = Datatype->scheduleListCount
 	});
 
@@ -562,7 +562,7 @@ const PFMultiplayerServerScheduledStandbySettings* ConvertScheduledStandbySettin
 
 	const PFMultiplayerServerScheduledStandbySettings* ConvertedType = new PFMultiplayerServerScheduledStandbySettings{
 		.isEnabled = Datatype->isEnabled,
-		.scheduleList = ConvertUnrealArrayToPlayfab(Datatype->scheduleList, ConvertScheduleToPlayfab),
+		.scheduleList = ConvertUnrealArrayToPlayfab<PFMultiplayerServerSchedule, FPFMultiplayerServerSchedule>(Datatype->scheduleList, ConvertScheduleToPlayfab),
 		.scheduleListCount = (uint32_t)Datatype->scheduleList.Num()
 	};
 
@@ -625,7 +625,7 @@ TSharedPtr<const FPFMultiplayerServerBuildSummary> ConvertBuildSummaryToUnreal(c
 		.creationTime = ConvertTimeToUnreal(Datatype->creationTime),
 		.metadata = ConvertCharMapToUnreal(Datatype->metadata, Datatype->metadataCount),
 		.metadataCount = Datatype->metadataCount,
-		.regionConfigurations = ConvertPlayfabArrayToUnreal(Datatype->regionConfigurations, Datatype->regionConfigurationsCount, ConvertBuildRegionToUnreal),
+		.regionConfigurations = ConvertPlayfabArrayToUnreal<PFMultiplayerServerBuildRegion, FPFMultiplayerServerBuildRegion>(Datatype->regionConfigurations, Datatype->regionConfigurationsCount, ConvertBuildRegionToUnreal),
 		.regionConfigurationsCount = Datatype->regionConfigurationsCount
 	});
 
@@ -644,7 +644,7 @@ const PFMultiplayerServerBuildSummary* ConvertBuildSummaryToPlayfab(TSharedPtr<c
 		.creationTime = ConvertFDateTimeToPlayfab(Datatype->creationTime),
 		.metadata = ConvertFStringMapToPlayfab(Datatype->metadata),
 		.metadataCount = (uint32_t)Datatype->metadata.Num(),
-		.regionConfigurations = ConvertUnrealArrayToPlayfab(Datatype->regionConfigurations, ConvertBuildRegionToPlayfab),
+		.regionConfigurations = ConvertUnrealArrayToPlayfab<PFMultiplayerServerBuildRegion, FPFMultiplayerServerBuildRegion>(Datatype->regionConfigurations, ConvertBuildRegionToPlayfab),
 		.regionConfigurationsCount = (uint32_t)Datatype->regionConfigurations.Num()
 	};
 
@@ -658,7 +658,7 @@ TSharedPtr<const FPFMultiplayerServerListBuildSummariesResponse> ConvertListBuil
 	}
 
 	TSharedPtr<const FPFMultiplayerServerListBuildSummariesResponse> ConvertedType = MakeShared<FPFMultiplayerServerListBuildSummariesResponse>(FPFMultiplayerServerListBuildSummariesResponse{
-		.buildSummaries = ConvertPlayfabArrayToUnreal(Datatype->buildSummaries, Datatype->buildSummariesCount, ConvertBuildSummaryToUnreal),
+		.buildSummaries = ConvertPlayfabArrayToUnreal<PFMultiplayerServerBuildSummary, FPFMultiplayerServerBuildSummary>(Datatype->buildSummaries, Datatype->buildSummariesCount, ConvertBuildSummaryToUnreal),
 		.buildSummariesCount = Datatype->buildSummariesCount,
 		.pageSize = Datatype->pageSize,
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
@@ -674,7 +674,7 @@ const PFMultiplayerServerListBuildSummariesResponse* ConvertListBuildSummariesRe
 	}
 
 	const PFMultiplayerServerListBuildSummariesResponse* ConvertedType = new PFMultiplayerServerListBuildSummariesResponse{
-		.buildSummaries = ConvertUnrealArrayToPlayfab(Datatype->buildSummaries, ConvertBuildSummaryToPlayfab),
+		.buildSummaries = ConvertUnrealArrayToPlayfab<PFMultiplayerServerBuildSummary, FPFMultiplayerServerBuildSummary>(Datatype->buildSummaries, ConvertBuildSummaryToPlayfab),
 		.buildSummariesCount = (uint32_t)Datatype->buildSummaries.Num(),
 		.pageSize = Datatype->pageSize,
 		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
@@ -751,7 +751,7 @@ TSharedPtr<const FPFMultiplayerServerListQosServersForTitleResponse> ConvertList
 
 	TSharedPtr<const FPFMultiplayerServerListQosServersForTitleResponse> ConvertedType = MakeShared<FPFMultiplayerServerListQosServersForTitleResponse>(FPFMultiplayerServerListQosServersForTitleResponse{
 		.pageSize = Datatype->pageSize,
-		.qosServers = ConvertPlayfabArrayToUnreal(Datatype->qosServers, Datatype->qosServersCount, ConvertQosServerToUnreal),
+		.qosServers = ConvertPlayfabArrayToUnreal<PFMultiplayerServerQosServer, FPFMultiplayerServerQosServer>(Datatype->qosServers, Datatype->qosServersCount, ConvertQosServerToUnreal),
 		.qosServersCount = Datatype->qosServersCount,
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
@@ -767,7 +767,7 @@ const PFMultiplayerServerListQosServersForTitleResponse* ConvertListQosServersFo
 
 	const PFMultiplayerServerListQosServersForTitleResponse* ConvertedType = new PFMultiplayerServerListQosServersForTitleResponse{
 		.pageSize = Datatype->pageSize,
-		.qosServers = ConvertUnrealArrayToPlayfab(Datatype->qosServers, ConvertQosServerToPlayfab),
+		.qosServers = ConvertUnrealArrayToPlayfab<PFMultiplayerServerQosServer, FPFMultiplayerServerQosServer>(Datatype->qosServers, ConvertQosServerToPlayfab),
 		.qosServersCount = (uint32_t)Datatype->qosServers.Num(),
 		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
 	};
@@ -845,7 +845,7 @@ TSharedPtr<const FPFMultiplayerServerListSecretSummariesResponse> ConvertListSec
 
 	TSharedPtr<const FPFMultiplayerServerListSecretSummariesResponse> ConvertedType = MakeShared<FPFMultiplayerServerListSecretSummariesResponse>(FPFMultiplayerServerListSecretSummariesResponse{
 		.pageSize = Datatype->pageSize,
-		.secretSummaries = ConvertPlayfabArrayToUnreal(Datatype->secretSummaries, Datatype->secretSummariesCount, ConvertSecretSummaryToUnreal),
+		.secretSummaries = ConvertPlayfabArrayToUnreal<PFMultiplayerServerSecretSummary, FPFMultiplayerServerSecretSummary>(Datatype->secretSummaries, Datatype->secretSummariesCount, ConvertSecretSummaryToUnreal),
 		.secretSummariesCount = Datatype->secretSummariesCount,
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
@@ -861,7 +861,7 @@ const PFMultiplayerServerListSecretSummariesResponse* ConvertListSecretSummaries
 
 	const PFMultiplayerServerListSecretSummariesResponse* ConvertedType = new PFMultiplayerServerListSecretSummariesResponse{
 		.pageSize = Datatype->pageSize,
-		.secretSummaries = ConvertUnrealArrayToPlayfab(Datatype->secretSummaries, ConvertSecretSummaryToPlayfab),
+		.secretSummaries = ConvertUnrealArrayToPlayfab<PFMultiplayerServerSecretSummary, FPFMultiplayerServerSecretSummary>(Datatype->secretSummaries, ConvertSecretSummaryToPlayfab),
 		.secretSummariesCount = (uint32_t)Datatype->secretSummaries.Num(),
 		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
 	};
@@ -1033,14 +1033,14 @@ TSharedPtr<const FPFMultiplayerServerRequestMultiplayerServerResponse> ConvertRe
 
 	TSharedPtr<const FPFMultiplayerServerRequestMultiplayerServerResponse> ConvertedType = MakeShared<FPFMultiplayerServerRequestMultiplayerServerResponse>(FPFMultiplayerServerRequestMultiplayerServerResponse{
 		.buildId = Datatype->buildId == nullptr ? FString() : FString(Datatype->buildId),
-		.connectedPlayers = ConvertPlayfabArrayToUnreal(Datatype->connectedPlayers, Datatype->connectedPlayersCount, ConvertConnectedPlayerToUnreal),
+		.connectedPlayers = ConvertPlayfabArrayToUnreal<PFMultiplayerServerConnectedPlayer, FPFMultiplayerServerConnectedPlayer>(Datatype->connectedPlayers, Datatype->connectedPlayersCount, ConvertConnectedPlayerToUnreal),
 		.connectedPlayersCount = Datatype->connectedPlayersCount,
 		.fQDN = Datatype->fQDN == nullptr ? FString() : FString(Datatype->fQDN),
 		.iPV4Address = Datatype->iPV4Address == nullptr ? FString() : FString(Datatype->iPV4Address),
 		.lastStateTransitionTime = ConvertTimeToUnreal(Datatype->lastStateTransitionTime),
-		.ports = ConvertPlayfabArrayToUnreal(Datatype->ports, Datatype->portsCount, ConvertPortToUnreal),
+		.ports = ConvertPlayfabArrayToUnreal<PFMultiplayerServerPort, FPFMultiplayerServerPort>(Datatype->ports, Datatype->portsCount, ConvertPortToUnreal),
 		.portsCount = Datatype->portsCount,
-		.publicIPV4Addresses = ConvertPlayfabArrayToUnreal(Datatype->publicIPV4Addresses, Datatype->publicIPV4AddressesCount, ConvertPublicIpAddressToUnreal),
+		.publicIPV4Addresses = ConvertPlayfabArrayToUnreal<PFMultiplayerServerPublicIpAddress, FPFMultiplayerServerPublicIpAddress>(Datatype->publicIPV4Addresses, Datatype->publicIPV4AddressesCount, ConvertPublicIpAddressToUnreal),
 		.publicIPV4AddressesCount = Datatype->publicIPV4AddressesCount,
 		.region = Datatype->region == nullptr ? FString() : FString(Datatype->region),
 		.serverId = Datatype->serverId == nullptr ? FString() : FString(Datatype->serverId),
@@ -1060,14 +1060,14 @@ const PFMultiplayerServerRequestMultiplayerServerResponse* ConvertRequestMultipl
 
 	const PFMultiplayerServerRequestMultiplayerServerResponse* ConvertedType = new PFMultiplayerServerRequestMultiplayerServerResponse{
 		.buildId = ConvertFStringToCharPtr(Datatype->buildId),
-		.connectedPlayers = ConvertUnrealArrayToPlayfab(Datatype->connectedPlayers, ConvertConnectedPlayerToPlayfab),
+		.connectedPlayers = ConvertUnrealArrayToPlayfab<PFMultiplayerServerConnectedPlayer, FPFMultiplayerServerConnectedPlayer>(Datatype->connectedPlayers, ConvertConnectedPlayerToPlayfab),
 		.connectedPlayersCount = (uint32_t)Datatype->connectedPlayers.Num(),
 		.fQDN = ConvertFStringToCharPtr(Datatype->fQDN),
 		.iPV4Address = ConvertFStringToCharPtr(Datatype->iPV4Address),
 		.lastStateTransitionTime = ConvertFDateTimeToPlayfab(Datatype->lastStateTransitionTime),
-		.ports = ConvertUnrealArrayToPlayfab(Datatype->ports, ConvertPortToPlayfab),
+		.ports = ConvertUnrealArrayToPlayfab<PFMultiplayerServerPort, FPFMultiplayerServerPort>(Datatype->ports, ConvertPortToPlayfab),
 		.portsCount = (uint32_t)Datatype->ports.Num(),
-		.publicIPV4Addresses = ConvertUnrealArrayToPlayfab(Datatype->publicIPV4Addresses, ConvertPublicIpAddressToPlayfab),
+		.publicIPV4Addresses = ConvertUnrealArrayToPlayfab<PFMultiplayerServerPublicIpAddress, FPFMultiplayerServerPublicIpAddress>(Datatype->publicIPV4Addresses, ConvertPublicIpAddressToPlayfab),
 		.publicIPV4AddressesCount = (uint32_t)Datatype->publicIPV4Addresses.Num(),
 		.region = ConvertFStringToCharPtr(Datatype->region),
 		.serverId = ConvertFStringToCharPtr(Datatype->serverId),
@@ -1086,7 +1086,7 @@ TSharedPtr<const FPFMultiplayerServerPartyInvitationConfiguration> ConvertPartyI
 	}
 
 	TSharedPtr<const FPFMultiplayerServerPartyInvitationConfiguration> ConvertedType = MakeShared<FPFMultiplayerServerPartyInvitationConfiguration>(FPFMultiplayerServerPartyInvitationConfiguration{
-		.entityKeys = ConvertPlayfabArrayToUnreal(Datatype->entityKeys, Datatype->entityKeysCount, ConvertEntityKeyToUnreal),
+		.entityKeys = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->entityKeys, Datatype->entityKeysCount, ConvertEntityKeyToUnreal),
 		.entityKeysCount = Datatype->entityKeysCount,
 		.identifier = Datatype->identifier == nullptr ? FString() : FString(Datatype->identifier),
 		.revocability = Datatype->revocability == nullptr ? FString() : FString(Datatype->revocability)
@@ -1102,7 +1102,7 @@ const PFMultiplayerServerPartyInvitationConfiguration* ConvertPartyInvitationCon
 	}
 
 	const PFMultiplayerServerPartyInvitationConfiguration* ConvertedType = new PFMultiplayerServerPartyInvitationConfiguration{
-		.entityKeys = ConvertUnrealArrayToPlayfab(Datatype->entityKeys, ConvertEntityKeyToPlayfab),
+		.entityKeys = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->entityKeys, ConvertEntityKeyToPlayfab),
 		.entityKeysCount = (uint32_t)Datatype->entityKeys.Num(),
 		.identifier = ConvertFStringToCharPtr(Datatype->identifier),
 		.revocability = ConvertFStringToCharPtr(Datatype->revocability)
@@ -1160,6 +1160,7 @@ TSharedPtr<const FPFMultiplayerServerRequestPartyServiceRequest> ConvertRequestP
 		.customTagsCount = Datatype->customTagsCount,
 		.networkConfiguration = ConvertPartyNetworkConfigurationToUnreal(Datatype->networkConfiguration),
 		.partyId = Datatype->partyId == nullptr ? FString() : FString(Datatype->partyId),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.preferredRegions = ConvertCharArrayToUnreal(Datatype->preferredRegions, Datatype->preferredRegionsCount),
 		.preferredRegionsCount = Datatype->preferredRegionsCount
 	});
@@ -1178,6 +1179,7 @@ const PFMultiplayerServerRequestPartyServiceRequest* ConvertRequestPartyServiceR
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.networkConfiguration = ConvertPartyNetworkConfigurationToPlayfab(Datatype->networkConfiguration),
 		.partyId = ConvertFStringToCharPtr(Datatype->partyId),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId),
 		.preferredRegions = ConvertFStringArrayToPlayfab(Datatype->preferredRegions),
 		.preferredRegionsCount = (uint32_t)Datatype->preferredRegions.Num()
 	};

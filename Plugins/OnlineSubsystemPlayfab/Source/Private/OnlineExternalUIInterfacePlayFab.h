@@ -51,6 +51,10 @@ public:
 
 private:
 	void HandleShowInviteUIComplete(bool bIsSuccess);
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	bool ShowInviteUIGDK(int32 LocalUserNum, FName SessionName = NAME_GameSession);
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 };
 
 typedef TSharedPtr<FOnlineExternalUIPlayFab, ESPMode::ThreadSafe> FOnlineExternalUIPlayFabPtr;

@@ -77,7 +77,7 @@ TSharedPtr<const FPFGroupsAddMembersRequest> ConvertAddMembersRequestToUnreal(co
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.group = ConvertEntityKeyToUnreal(Datatype->group),
-		.members = ConvertPlayfabArrayToUnreal(Datatype->members, Datatype->membersCount, ConvertEntityKeyToUnreal),
+		.members = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->members, Datatype->membersCount, ConvertEntityKeyToUnreal),
 		.membersCount = Datatype->membersCount,
 		.roleId = Datatype->roleId == nullptr ? FString() : FString(Datatype->roleId)
 	});
@@ -95,7 +95,7 @@ const PFGroupsAddMembersRequest* ConvertAddMembersRequestToPlayfab(TSharedPtr<co
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.group = ConvertEntityKeyToPlayfab(Datatype->group),
-		.members = ConvertUnrealArrayToPlayfab(Datatype->members, ConvertEntityKeyToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->members, ConvertEntityKeyToPlayfab),
 		.membersCount = (uint32_t)Datatype->members.Num(),
 		.roleId = ConvertFStringToCharPtr(Datatype->roleId)
 	};
@@ -240,7 +240,7 @@ TSharedPtr<const FPFGroupsChangeMemberRoleRequest> ConvertChangeMemberRoleReques
 		.customTagsCount = Datatype->customTagsCount,
 		.destinationRoleId = Datatype->destinationRoleId == nullptr ? FString() : FString(Datatype->destinationRoleId),
 		.group = ConvertEntityKeyToUnreal(Datatype->group),
-		.members = ConvertPlayfabArrayToUnreal(Datatype->members, Datatype->membersCount, ConvertEntityKeyToUnreal),
+		.members = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->members, Datatype->membersCount, ConvertEntityKeyToUnreal),
 		.membersCount = Datatype->membersCount,
 		.originRoleId = Datatype->originRoleId == nullptr ? FString() : FString(Datatype->originRoleId)
 	});
@@ -259,7 +259,7 @@ const PFGroupsChangeMemberRoleRequest* ConvertChangeMemberRoleRequestToPlayfab(T
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.destinationRoleId = ConvertFStringToCharPtr(Datatype->destinationRoleId),
 		.group = ConvertEntityKeyToPlayfab(Datatype->group),
-		.members = ConvertUnrealArrayToPlayfab(Datatype->members, ConvertEntityKeyToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->members, ConvertEntityKeyToPlayfab),
 		.membersCount = (uint32_t)Datatype->members.Num(),
 		.originRoleId = ConvertFStringToCharPtr(Datatype->originRoleId)
 	};
@@ -734,7 +734,7 @@ TSharedPtr<const FPFGroupsListGroupApplicationsResponse> ConvertListGroupApplica
 	}
 
 	TSharedPtr<const FPFGroupsListGroupApplicationsResponse> ConvertedType = MakeShared<FPFGroupsListGroupApplicationsResponse>(FPFGroupsListGroupApplicationsResponse{
-		.applications = ConvertPlayfabArrayToUnreal(Datatype->applications, Datatype->applicationsCount, ConvertGroupApplicationToUnreal),
+		.applications = ConvertPlayfabArrayToUnreal<PFGroupsGroupApplication, FPFGroupsGroupApplication>(Datatype->applications, Datatype->applicationsCount, ConvertGroupApplicationToUnreal),
 		.applicationsCount = Datatype->applicationsCount
 	});
 
@@ -748,7 +748,7 @@ const PFGroupsListGroupApplicationsResponse* ConvertListGroupApplicationsRespons
 	}
 
 	const PFGroupsListGroupApplicationsResponse* ConvertedType = new PFGroupsListGroupApplicationsResponse{
-		.applications = ConvertUnrealArrayToPlayfab(Datatype->applications, ConvertGroupApplicationToPlayfab),
+		.applications = ConvertUnrealArrayToPlayfab<PFGroupsGroupApplication, FPFGroupsGroupApplication>(Datatype->applications, ConvertGroupApplicationToPlayfab),
 		.applicationsCount = (uint32_t)Datatype->applications.Num()
 	};
 
@@ -820,7 +820,7 @@ TSharedPtr<const FPFGroupsListGroupBlocksResponse> ConvertListGroupBlocksRespons
 	}
 
 	TSharedPtr<const FPFGroupsListGroupBlocksResponse> ConvertedType = MakeShared<FPFGroupsListGroupBlocksResponse>(FPFGroupsListGroupBlocksResponse{
-		.blockedEntities = ConvertPlayfabArrayToUnreal(Datatype->blockedEntities, Datatype->blockedEntitiesCount, ConvertGroupBlockToUnreal),
+		.blockedEntities = ConvertPlayfabArrayToUnreal<PFGroupsGroupBlock, FPFGroupsGroupBlock>(Datatype->blockedEntities, Datatype->blockedEntitiesCount, ConvertGroupBlockToUnreal),
 		.blockedEntitiesCount = Datatype->blockedEntitiesCount
 	});
 
@@ -834,7 +834,7 @@ const PFGroupsListGroupBlocksResponse* ConvertListGroupBlocksResponseToPlayfab(T
 	}
 
 	const PFGroupsListGroupBlocksResponse* ConvertedType = new PFGroupsListGroupBlocksResponse{
-		.blockedEntities = ConvertUnrealArrayToPlayfab(Datatype->blockedEntities, ConvertGroupBlockToPlayfab),
+		.blockedEntities = ConvertUnrealArrayToPlayfab<PFGroupsGroupBlock, FPFGroupsGroupBlock>(Datatype->blockedEntities, ConvertGroupBlockToPlayfab),
 		.blockedEntitiesCount = (uint32_t)Datatype->blockedEntities.Num()
 	};
 
@@ -912,7 +912,7 @@ TSharedPtr<const FPFGroupsListGroupInvitationsResponse> ConvertListGroupInvitati
 	}
 
 	TSharedPtr<const FPFGroupsListGroupInvitationsResponse> ConvertedType = MakeShared<FPFGroupsListGroupInvitationsResponse>(FPFGroupsListGroupInvitationsResponse{
-		.invitations = ConvertPlayfabArrayToUnreal(Datatype->invitations, Datatype->invitationsCount, ConvertGroupInvitationToUnreal),
+		.invitations = ConvertPlayfabArrayToUnreal<PFGroupsGroupInvitation, FPFGroupsGroupInvitation>(Datatype->invitations, Datatype->invitationsCount, ConvertGroupInvitationToUnreal),
 		.invitationsCount = Datatype->invitationsCount
 	});
 
@@ -926,7 +926,7 @@ const PFGroupsListGroupInvitationsResponse* ConvertListGroupInvitationsResponseT
 	}
 
 	const PFGroupsListGroupInvitationsResponse* ConvertedType = new PFGroupsListGroupInvitationsResponse{
-		.invitations = ConvertUnrealArrayToPlayfab(Datatype->invitations, ConvertGroupInvitationToPlayfab),
+		.invitations = ConvertUnrealArrayToPlayfab<PFGroupsGroupInvitation, FPFGroupsGroupInvitation>(Datatype->invitations, ConvertGroupInvitationToPlayfab),
 		.invitationsCount = (uint32_t)Datatype->invitations.Num()
 	};
 
@@ -970,7 +970,7 @@ TSharedPtr<const FPFGroupsEntityMemberRole> ConvertEntityMemberRoleToUnreal(cons
 	}
 
 	TSharedPtr<const FPFGroupsEntityMemberRole> ConvertedType = MakeShared<FPFGroupsEntityMemberRole>(FPFGroupsEntityMemberRole{
-		.members = ConvertPlayfabArrayToUnreal(Datatype->members, Datatype->membersCount, ConvertEntityWithLineageToUnreal),
+		.members = ConvertPlayfabArrayToUnreal<PFGroupsEntityWithLineage, FPFGroupsEntityWithLineage>(Datatype->members, Datatype->membersCount, ConvertEntityWithLineageToUnreal),
 		.membersCount = Datatype->membersCount,
 		.roleId = Datatype->roleId == nullptr ? FString() : FString(Datatype->roleId),
 		.roleName = Datatype->roleName == nullptr ? FString() : FString(Datatype->roleName)
@@ -986,7 +986,7 @@ const PFGroupsEntityMemberRole* ConvertEntityMemberRoleToPlayfab(TSharedPtr<cons
 	}
 
 	const PFGroupsEntityMemberRole* ConvertedType = new PFGroupsEntityMemberRole{
-		.members = ConvertUnrealArrayToPlayfab(Datatype->members, ConvertEntityWithLineageToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFGroupsEntityWithLineage, FPFGroupsEntityWithLineage>(Datatype->members, ConvertEntityWithLineageToPlayfab),
 		.membersCount = (uint32_t)Datatype->members.Num(),
 		.roleId = ConvertFStringToCharPtr(Datatype->roleId),
 		.roleName = ConvertFStringToCharPtr(Datatype->roleName)
@@ -1002,7 +1002,7 @@ TSharedPtr<const FPFGroupsListGroupMembersResponse> ConvertListGroupMembersRespo
 	}
 
 	TSharedPtr<const FPFGroupsListGroupMembersResponse> ConvertedType = MakeShared<FPFGroupsListGroupMembersResponse>(FPFGroupsListGroupMembersResponse{
-		.members = ConvertPlayfabArrayToUnreal(Datatype->members, Datatype->membersCount, ConvertEntityMemberRoleToUnreal),
+		.members = ConvertPlayfabArrayToUnreal<PFGroupsEntityMemberRole, FPFGroupsEntityMemberRole>(Datatype->members, Datatype->membersCount, ConvertEntityMemberRoleToUnreal),
 		.membersCount = Datatype->membersCount
 	});
 
@@ -1016,7 +1016,7 @@ const PFGroupsListGroupMembersResponse* ConvertListGroupMembersResponseToPlayfab
 	}
 
 	const PFGroupsListGroupMembersResponse* ConvertedType = new PFGroupsListGroupMembersResponse{
-		.members = ConvertUnrealArrayToPlayfab(Datatype->members, ConvertEntityMemberRoleToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFGroupsEntityMemberRole, FPFGroupsEntityMemberRole>(Datatype->members, ConvertEntityMemberRoleToPlayfab),
 		.membersCount = (uint32_t)Datatype->members.Num()
 	};
 
@@ -1091,7 +1091,7 @@ TSharedPtr<const FPFGroupsGroupWithRoles> ConvertGroupWithRolesToUnreal(const PF
 		.group = ConvertEntityKeyToUnreal(Datatype->group),
 		.groupName = Datatype->groupName == nullptr ? FString() : FString(Datatype->groupName),
 		.profileVersion = Datatype->profileVersion,
-		.roles = ConvertPlayfabArrayToUnreal(Datatype->roles, Datatype->rolesCount, ConvertGroupRoleToUnreal),
+		.roles = ConvertPlayfabArrayToUnreal<PFGroupsGroupRole, FPFGroupsGroupRole>(Datatype->roles, Datatype->rolesCount, ConvertGroupRoleToUnreal),
 		.rolesCount = Datatype->rolesCount
 	});
 
@@ -1108,7 +1108,7 @@ const PFGroupsGroupWithRoles* ConvertGroupWithRolesToPlayfab(TSharedPtr<const FP
 		.group = ConvertEntityKeyToPlayfab(Datatype->group),
 		.groupName = ConvertFStringToCharPtr(Datatype->groupName),
 		.profileVersion = Datatype->profileVersion,
-		.roles = ConvertUnrealArrayToPlayfab(Datatype->roles, ConvertGroupRoleToPlayfab),
+		.roles = ConvertUnrealArrayToPlayfab<PFGroupsGroupRole, FPFGroupsGroupRole>(Datatype->roles, ConvertGroupRoleToPlayfab),
 		.rolesCount = (uint32_t)Datatype->roles.Num()
 	};
 
@@ -1122,7 +1122,7 @@ TSharedPtr<const FPFGroupsListMembershipResponse> ConvertListMembershipResponseT
 	}
 
 	TSharedPtr<const FPFGroupsListMembershipResponse> ConvertedType = MakeShared<FPFGroupsListMembershipResponse>(FPFGroupsListMembershipResponse{
-		.groups = ConvertPlayfabArrayToUnreal(Datatype->groups, Datatype->groupsCount, ConvertGroupWithRolesToUnreal),
+		.groups = ConvertPlayfabArrayToUnreal<PFGroupsGroupWithRoles, FPFGroupsGroupWithRoles>(Datatype->groups, Datatype->groupsCount, ConvertGroupWithRolesToUnreal),
 		.groupsCount = Datatype->groupsCount
 	});
 
@@ -1136,7 +1136,7 @@ const PFGroupsListMembershipResponse* ConvertListMembershipResponseToPlayfab(TSh
 	}
 
 	const PFGroupsListMembershipResponse* ConvertedType = new PFGroupsListMembershipResponse{
-		.groups = ConvertUnrealArrayToPlayfab(Datatype->groups, ConvertGroupWithRolesToPlayfab),
+		.groups = ConvertUnrealArrayToPlayfab<PFGroupsGroupWithRoles, FPFGroupsGroupWithRoles>(Datatype->groups, ConvertGroupWithRolesToPlayfab),
 		.groupsCount = (uint32_t)Datatype->groups.Num()
 	};
 
@@ -1180,9 +1180,9 @@ TSharedPtr<const FPFGroupsListMembershipOpportunitiesResponse> ConvertListMember
 	}
 
 	TSharedPtr<const FPFGroupsListMembershipOpportunitiesResponse> ConvertedType = MakeShared<FPFGroupsListMembershipOpportunitiesResponse>(FPFGroupsListMembershipOpportunitiesResponse{
-		.applications = ConvertPlayfabArrayToUnreal(Datatype->applications, Datatype->applicationsCount, ConvertGroupApplicationToUnreal),
+		.applications = ConvertPlayfabArrayToUnreal<PFGroupsGroupApplication, FPFGroupsGroupApplication>(Datatype->applications, Datatype->applicationsCount, ConvertGroupApplicationToUnreal),
 		.applicationsCount = Datatype->applicationsCount,
-		.invitations = ConvertPlayfabArrayToUnreal(Datatype->invitations, Datatype->invitationsCount, ConvertGroupInvitationToUnreal),
+		.invitations = ConvertPlayfabArrayToUnreal<PFGroupsGroupInvitation, FPFGroupsGroupInvitation>(Datatype->invitations, Datatype->invitationsCount, ConvertGroupInvitationToUnreal),
 		.invitationsCount = Datatype->invitationsCount
 	});
 
@@ -1196,9 +1196,9 @@ const PFGroupsListMembershipOpportunitiesResponse* ConvertListMembershipOpportun
 	}
 
 	const PFGroupsListMembershipOpportunitiesResponse* ConvertedType = new PFGroupsListMembershipOpportunitiesResponse{
-		.applications = ConvertUnrealArrayToPlayfab(Datatype->applications, ConvertGroupApplicationToPlayfab),
+		.applications = ConvertUnrealArrayToPlayfab<PFGroupsGroupApplication, FPFGroupsGroupApplication>(Datatype->applications, ConvertGroupApplicationToPlayfab),
 		.applicationsCount = (uint32_t)Datatype->applications.Num(),
-		.invitations = ConvertUnrealArrayToPlayfab(Datatype->invitations, ConvertGroupInvitationToPlayfab),
+		.invitations = ConvertUnrealArrayToPlayfab<PFGroupsGroupInvitation, FPFGroupsGroupInvitation>(Datatype->invitations, ConvertGroupInvitationToPlayfab),
 		.invitationsCount = (uint32_t)Datatype->invitations.Num()
 	};
 
@@ -1279,7 +1279,7 @@ TSharedPtr<const FPFGroupsRemoveMembersRequest> ConvertRemoveMembersRequestToUnr
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.group = ConvertEntityKeyToUnreal(Datatype->group),
-		.members = ConvertPlayfabArrayToUnreal(Datatype->members, Datatype->membersCount, ConvertEntityKeyToUnreal),
+		.members = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->members, Datatype->membersCount, ConvertEntityKeyToUnreal),
 		.membersCount = Datatype->membersCount,
 		.roleId = Datatype->roleId == nullptr ? FString() : FString(Datatype->roleId)
 	});
@@ -1297,7 +1297,7 @@ const PFGroupsRemoveMembersRequest* ConvertRemoveMembersRequestToPlayfab(TShared
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.group = ConvertEntityKeyToPlayfab(Datatype->group),
-		.members = ConvertUnrealArrayToPlayfab(Datatype->members, ConvertEntityKeyToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->members, ConvertEntityKeyToPlayfab),
 		.membersCount = (uint32_t)Datatype->members.Num(),
 		.roleId = ConvertFStringToCharPtr(Datatype->roleId)
 	};

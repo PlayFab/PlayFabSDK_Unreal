@@ -11,8 +11,6 @@
 #undef IN
 
 
-
- 
 /// <summary>
 /// FPFTitleActivationStatus enum.
 /// </summary>
@@ -25,8 +23,11 @@ enum class FPFTitleActivationStatus : uint32_t
 	RevokedSteam
 };
 
+#if HC_PLATFORM_IS_PLAYSTATION
+#pragma push_macro("BSD")
+#endif
+#undef BSD
 
- 
 /// <summary>
 /// FPFCurrency enum.
 /// </summary>
@@ -196,8 +197,6 @@ enum class FPFCurrency : uint32_t
 	ZWD
 };
 
-
- 
 /// <summary>
 /// FPFUserOrigination enum.
 /// </summary>
@@ -232,8 +231,6 @@ enum class FPFUserOrigination : uint32_t
 	BattleNet
 };
 
-
- 
 /// <summary>
 /// FPFUserDataPermission enum.
 /// </summary>
@@ -243,8 +240,6 @@ enum class FPFUserDataPermission : uint32_t
 	Public
 };
 
-
- 
 /// <summary>
 /// FPFEmailVerificationStatus enum.
 /// </summary>
@@ -255,8 +250,6 @@ enum class FPFEmailVerificationStatus : uint32_t
 	Confirmed
 };
 
-
- 
 /// <summary>
 /// FPFLoginIdentityProvider enum.
 /// </summary>
@@ -289,8 +282,6 @@ enum class FPFLoginIdentityProvider : uint32_t
 	BattleNet
 };
 
-
- 
 /// <summary>
 /// FPFContinentCode enum.
 /// </summary>
@@ -306,8 +297,6 @@ enum class FPFContinentCode : uint32_t
 	Unknown
 };
 
-
- 
 /// <summary>
 /// FPFCountryCode enum.
 /// </summary>
@@ -565,8 +554,6 @@ enum class FPFCountryCode : uint32_t
 	Unknown
 };
 
-
- 
 /// <summary>
 /// FPFSubscriptionProviderStatus enum.
 /// </summary>
@@ -582,8 +569,6 @@ enum class FPFSubscriptionProviderStatus : uint32_t
 	PaymentPending
 };
 
-
- 
 /// <summary>
 /// FPFPushNotificationPlatform enum.
 /// </summary>

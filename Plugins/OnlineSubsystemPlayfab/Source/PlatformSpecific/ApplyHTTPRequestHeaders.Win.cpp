@@ -5,9 +5,18 @@
 #if defined(OSS_PLAYFAB_WIN64)
 #include "OnlineSubsystem.h"
 #include "OnlineIdentityInterfacePlayFab.h"
+#include "PlayFabHelpers.h"
 
 void FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompleted(bool bWasSuccessful, const FString& PlatformUserID, TMap<FString, FString> PlatformHeaders, TSharedPtr<FJsonObject> RequestBodyJson)
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		OnPopulatePlatformRequestDataCompletedGDK(bWasSuccessful, PlatformUserID, PlatformHeaders, RequestBodyJson);
+		return;
+	}
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+
     IOnlineSubsystem* OSSPlayFab = IOnlineSubsystem::Get(PLAYFAB_SUBSYSTEM);
     if (OSSPlayFab)
     {
@@ -30,6 +39,13 @@ void FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompleted(bool bWasSuc
 // NOTE: All error cases must call FOnlineIdentityPlayFab::OnPopulatePlatformRequestDataCompleted so the request is handled and cleaned up in the shared OSS PF identity interface
 bool FOnlineIdentityPlayFab::ApplyPlatformHTTPRequestData(const FString& PlatformUserID, const FString& URL, const FString& RequestVerb)
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return ApplyPlatformHTTPRequestDataGDK(PlatformUserID, URL, RequestVerb);
+	}
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+
     IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();
     bool headersApplied = false;
     if (NativeSubsystem)

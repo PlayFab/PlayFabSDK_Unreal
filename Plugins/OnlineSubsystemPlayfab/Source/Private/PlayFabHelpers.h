@@ -91,3 +91,13 @@ bool ParseTitlePlayerAccountFromPlayerCombinedInfoResponse(
 	);
 
 void ParseDeviceMakeModel(FString& DeviceMake, FString& DeviceModel);
+
+FName GetNativePlatformSubsystemName();
+bool IsNativePlatformSubsystem(FName ServiceType);
+bool IsNativePlatformSubsystemGDK();
+
+bool ShouldSubsystemUseNativeSession();
+
+FString GetPlatformModel();
+
+FUniqueNetIdRef CreatePlatformNetId(const FString& PlatformNetIdStr);

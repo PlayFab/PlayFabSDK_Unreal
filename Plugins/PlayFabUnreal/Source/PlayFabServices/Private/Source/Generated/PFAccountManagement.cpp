@@ -1120,6 +1120,19 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxAccountAsync(
 }
 #endif
 
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxIdAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementLinkXboxIdRequest* request,
+	_Inout_ FOnServerLinkXboxIdCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerLinkXboxIdAsyncTask>(TitleEntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementServerRevokeAllBansForUserAsync(
 	_In_ FPFEntityHandle TitleEntityHandle,

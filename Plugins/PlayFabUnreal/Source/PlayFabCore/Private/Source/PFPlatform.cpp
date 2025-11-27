@@ -13,7 +13,7 @@ static FPFMemFreeFunctionDelegate MemFreeFunctionDelegate;
 
 static void CALLBACK OnMemFreeFunctionEvent(void* pointer, uint32_t memoryTypeId)
 {
-	TSharedPtr<void> pointerRef = MakeShareable(pointer);
+	TSharedPtr<void> pointerRef = MakeShareable(pointer, [](void*) {});
 
 	MemFreeFunctionDelegate.ExecuteIfBound(pointerRef, memoryTypeId);
 }
@@ -70,7 +70,7 @@ static FPFPlatformLocalStorageReadDelegate PlatformLocalStorageReadDelegate;
 
 static HRESULT CALLBACK OnPlatformLocalStorageReadEvent(void* context, const char* key, XAsyncBlock* async)
 {
-	TSharedPtr<void> contextPtr = MakeShareable(context);
+	TSharedPtr<void> contextPtr = MakeShareable(context, [](void*) {});
 	FString keyStr = UTF8_TO_TCHAR(key);
 
 	PlatformLocalStorageReadDelegate.ExecuteIfBound(contextPtr, keyStr);
@@ -82,9 +82,9 @@ static FPFPlatformLocalStorageWriteDelegate PlatformLocalStorageWriteDelegate;
 
 static HRESULT CALLBACK OnPlatformLocalStorageWriteEvent(void* context, const char* key, size_t dataSize, void const* data, XAsyncBlock* async)
 {
-	TSharedPtr<void> contextRef = MakeShareable(context);
+	TSharedPtr<void> contextRef = MakeShareable(context, [](void*) {});
 	FString keyStr = UTF8_TO_TCHAR(key);
-	TSharedPtr<void const> dataRef = MakeShareable(data);
+	TSharedPtr<void const> dataRef = MakeShareable(data, [](const void*) {});
 
 	PlatformLocalStorageWriteDelegate.ExecuteIfBound(contextRef, keyStr, dataSize, dataRef);
 
@@ -95,7 +95,7 @@ static FPFPlatformLocalStorageClearDelegate PlatformLocalStorageClearDelegate;
 
 static HRESULT CALLBACK OnPlatformLocalStorageClearEvent(void* context, const char* key, XAsyncBlock* async)
 {
-	TSharedPtr<void> contextPtr = MakeShareable(context);
+	TSharedPtr<void> contextPtr = MakeShareable(context, [](void*) {});
 	FString keyStr = UTF8_TO_TCHAR(key);
 
 	PlatformLocalStorageClearDelegate.ExecuteIfBound(contextPtr, keyStr);

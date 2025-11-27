@@ -68,8 +68,8 @@ private:
 /// Delete an Inventory Collection by the specified Id for an Entity.
 ///
 /// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
-/// the async result will be one of global PlayFab Service errors. See doc page "Handling PlayFab Errors"
-/// for more details on error handling.
+/// the async result will be E_PF_INVENTORY_COLLECTION_DELETION_DISALLOWED or any of the global PlayFab
+/// Service errors. See doc page "Handling PlayFab Errors" for more details on error handling.
 /// </remarks>
 class PLAYFABSERVICES_API FDeleteInventoryCollectionAsyncTask : public FXAsyncTask
 {

@@ -50,7 +50,7 @@ bool PLAYFABCORE_API FPFEntityGetSecretKeySize(
 {
 	RETURN_FALSE_IF_NULL(handle);
 
-	HRESULT hr = PFEntityGetSecretKeySize(handle, secretKeySize.Get());
+	HRESULT hr = PFEntityGetSecretKeySize(handle.Get(), reinterpret_cast<size_t*>(secretKeySize.Get()));
 
 	if (FAILED(hr))
 	{
@@ -69,11 +69,16 @@ bool PLAYFABCORE_API FPFEntityGetSecretKey(
 {
 	RETURN_FALSE_IF_NULL(handle);
 
-	const char* converted = StringCast<ANSICHAR>(*secretKey).Get();
 	char* secretKeyBuffer = new char[secretKeySize];
-	FCStringAnsi::Strncpy(secretKeyBuffer, converted, secretKeySize);
+	
+	HRESULT hr = PFEntityGetSecretKey(handle.Get(), static_cast<size_t>(secretKeySize), secretKeyBuffer, reinterpret_cast<size_t*>(secretKeyUsed.Get()));
 
-	HRESULT hr = PFEntityGetSecretKey(handle, secretKeySize, secretKeyBuffer, secretKeyUsed.Get());
+	if (SUCCEEDED(hr))
+	{
+		secretKey = FString(UTF8_TO_TCHAR(secretKeyBuffer));
+	}
+
+	delete[] secretKeyBuffer;
 
 	if (FAILED(hr))
 	{
@@ -91,7 +96,7 @@ bool PLAYFABCORE_API FPFEntityGetEntityKeySize(
 {
 	RETURN_FALSE_IF_NULL(entityHandle);
 
-	HRESULT hr = PFEntityGetEntityKeySize(entityHandle.Get(), bufferSize.Get());
+	HRESULT hr = PFEntityGetEntityKeySize(entityHandle.Get(), reinterpret_cast<size_t*>(bufferSize.Get()));
 
 	if (FAILED(hr))
 	{
@@ -113,7 +118,7 @@ bool PLAYFABCORE_API FPFEntityGetEntityKey(
 
 	PFEntityKey const* pfEntityKey{};
 
-	HRESULT hr = PFEntityGetEntityKey(entityHandle.Get(), bufferSize, buffer.Get(), &pfEntityKey, bufferUsed.Get());
+	HRESULT hr = PFEntityGetEntityKey(entityHandle.Get(), static_cast<size_t>(bufferSize), buffer.Get(), &pfEntityKey, reinterpret_cast<size_t*>(bufferUsed.Get()));
 
 	if (FAILED(hr))
 	{
@@ -149,7 +154,7 @@ bool PLAYFABCORE_API FPFEntityGetAPIEndpointSize(
 {
 	RETURN_FALSE_IF_NULL(entityHandle);
 
-	HRESULT hr = PFEntityGetAPIEndpointSize(entityHandle.Get(), apiEndpointSize.Get());
+	HRESULT hr = PFEntityGetAPIEndpointSize(entityHandle.Get(), reinterpret_cast<size_t*>(apiEndpointSize.Get()));
 
 	if (FAILED(hr))
 	{
@@ -168,11 +173,16 @@ bool PLAYFABCORE_API FPFEntityGetAPIEndpoint(
 {
 	RETURN_FALSE_IF_NULL(entityHandle);
 
-	const char* converted = StringCast<ANSICHAR>(*apiEndpoint).Get();
 	char* apiEndpointBuffer = new char[apiEndpointSize];
-	FCStringAnsi::Strncpy(apiEndpointBuffer, converted, apiEndpointSize);
 
-	HRESULT hr = PFEntityGetAPIEndpoint(entityHandle.Get(), apiEndpointSize, apiEndpointBuffer, apiEndpointUsed.Get());
+	HRESULT hr = PFEntityGetAPIEndpoint(entityHandle.Get(), static_cast<size_t>(apiEndpointSize), apiEndpointBuffer, reinterpret_cast<size_t*>(apiEndpointUsed.Get()));
+
+	if (SUCCEEDED(hr))
+	{
+		apiEndpoint = FString(UTF8_TO_TCHAR(apiEndpointBuffer));
+	}
+
+	delete[] apiEndpointBuffer;
 
 	if (FAILED(hr))
 	{
@@ -186,8 +196,6 @@ static FPFEntityTokenExpiredDelegate EntityTokenExpiredDelegate;
 
 static void CALLBACK OnPFEntityTokenExpiredEvent(void* context, const PFEntityKey* entityKey)
 {
-	TSharedPtr<void> contextRef = MakeShareable(context);
-
 	const FPFEntityKey fpfEntityKey = {
 		.id = FString(entityKey->id),
 		.type = FString(entityKey->type)
@@ -195,7 +203,7 @@ static void CALLBACK OnPFEntityTokenExpiredEvent(void* context, const PFEntityKe
 
 	TSharedPtr<const FPFEntityKey> fpfEntityKeyRef = MakeShared<FPFEntityKey>(fpfEntityKey);
 
-	EntityTokenExpiredDelegate.ExecuteIfBound(contextRef, fpfEntityKeyRef);
+	EntityTokenExpiredDelegate.ExecuteIfBound(nullptr, fpfEntityKeyRef);
 }
 
 bool PLAYFABCORE_API FPFEntityRegisterTokenExpiredEventHandler(
@@ -234,8 +242,6 @@ static FPFEntityTokenRefreshedDelegate EntityTokenRefreshedDelegate;
 
 static void CALLBACK OnPFEntityTokenRefrehedEvent(void* context, const PFEntityKey* entityKey, const PFEntityToken* newToken)
 {
-	TSharedPtr<void> contextRef = MakeShareable(context);
-
 	const FPFEntityKey fpfEntityKey = {
 		.id = UTF8_TO_TCHAR(entityKey->id),
 		.type = UTF8_TO_TCHAR(entityKey->type)
@@ -250,7 +256,7 @@ static void CALLBACK OnPFEntityTokenRefrehedEvent(void* context, const PFEntityK
 
 	TSharedPtr<const FPFEntityToken> fpfEntityTokenRef = MakeShared<FPFEntityToken>(fpfEntityToken);
 
-	EntityTokenRefreshedDelegate.ExecuteIfBound(contextRef, fpfEntityKeyRef, fpfEntityTokenRef);
+	EntityTokenRefreshedDelegate.ExecuteIfBound(nullptr, fpfEntityKeyRef, fpfEntityTokenRef);
 }
 
 bool PLAYFABCORE_API FPFEntityRegisterTokenRefreshedEventHandler(

@@ -11,9 +11,9 @@
 #include "PlayFabLobby.h"
 #include "MatchmakingInterfacePlayFab.h"
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 #include "OnlineSubsystemGDKTypes.h"
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 using FNamedOnlineSessionRef = TSharedRef<FNamedOnlineSession, ESPMode::ThreadSafe>;
 using FNamedOnlineSessionPtr = TSharedPtr<FNamedOnlineSession, ESPMode::ThreadSafe>;
@@ -218,12 +218,12 @@ private:
 	FString GetPlatformIdFromEntityId(const FString& EntityId);
 	FOnlineSessionSearchResult CreateSearchResultFromInvite(const PFLobbyInviteReceivedStateChange& StateChange);
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	XTaskQueueRegistrationToken InviteAcceptedHandler = { 0 };
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 #if defined(OSS_PLAYFAB_WIN64)
 	TSharedPtr<FOnlineSessionSearch> CachedSearchSettings;
-#endif
+#endif // OSS_PLAYFAB_WIN64
 
 	FPendingInviteData PendingInviteData;
 
@@ -250,14 +250,14 @@ private:
 
 private:
 	//Invites
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	void RegisterForInvites();
 	void UnregisterForInvites();
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 	bool SendInvite(const FUniqueNetId& SenderId, FName SessionName, const TArray< TSharedRef<const FUniqueNetId> >& RemoteUserNetIds);
 	void SaveInviteFromEvent(void* Context, const FString& ActivationUri);
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 public:
 	//Activity
 	void SetMultiplayerActivityForSession(const FNamedOnlineSessionPtr& ExistingNamedSession);
@@ -269,8 +269,9 @@ public:
 	void RecordRecentlyMetPlayer(PFLobbyHandle LobbyHandle, const TArray<PFEntityKey>& EntityKeys, const PFEntityKey& RecentPlayerEntityKey, const FString& RecentPlayerPlatformIdStr) const;
 
 private:
+	bool SendInviteGDK(const FUniqueNetId& SenderId, FName SessionName, const TArray< TSharedRef<const FUniqueNetId> >& RemoteUserNetIds);
 	void TickPendingInvites();
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 private:
 	//Helpers

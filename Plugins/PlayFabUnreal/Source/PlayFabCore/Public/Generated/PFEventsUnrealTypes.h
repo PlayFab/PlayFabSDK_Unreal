@@ -11,8 +11,6 @@
 #include "PFServiceConfig.h"
 
 
-
- 
 /// <summary>
 /// FPFEventsDataConnectionErrorState enum.
 /// </summary>
@@ -22,8 +20,6 @@ enum class FPFEventsDataConnectionErrorState : uint32_t
 	Error
 };
 
-
- 
 /// <summary>
 /// FPFEventsDataConnectionType enum.
 /// </summary>

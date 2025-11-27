@@ -4,6 +4,7 @@
 
 #include "OnlineCognitiveServicesInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabHelpers.h"
 
 FOnlineCognitiveServicesPlayFab::FOnlineCognitiveServicesPlayFab(class FOnlineSubsystemPlayFab* InSubsystem) 
 	: OSSPlayFab(InSubsystem)
@@ -299,7 +300,7 @@ void FOnlineCognitiveServicesPlayFab::OnChatTextReceived(const PartyStateChange*
 			}
 
 			FString PlatformNetIdStr = GetPlatformIdFromEntityId(EntityId);
-			PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(PlatformNetIdStr);
+			FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(PlatformNetIdStr);
 
 			UE_LOG_ONLINE(Verbose, TEXT("FOnlineCognitiveServicesPlayFab::OnChatTextReceived: PlatformNetIdStr:%s ChatText:%s"), *PlatformNetIdStr, *ChatText);
 
@@ -351,7 +352,7 @@ void FOnlineCognitiveServicesPlayFab::OnVoiceChatTranscriptionReceived(const Par
 				}
 
 				FString PlatformNetIdStr = GetPlatformIdFromEntityId(EntityId);
-				PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(PlatformNetIdStr);
+				FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(PlatformNetIdStr);
 
 				UE_LOG_ONLINE(Verbose, TEXT("FOnlineCognitiveServicesPlayFab::OnVoiceChatTranscriptionReceived: PlatformNetIdStr:%s TranscriptionSource:%s bFinalTranscription:%s TranscriptionText:%s"), 
 					*PlatformNetIdStr,

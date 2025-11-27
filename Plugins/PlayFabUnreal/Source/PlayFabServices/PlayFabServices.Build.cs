@@ -212,6 +212,53 @@ public class PlayFabServices : ModuleRules
     }
     #endregion
 
+    private class NuGetPackageLoader
+    {
+        public class NuGetPackageInformation
+        {
+            public string UnifiedSDKPackagePath = string.Empty;
+        }
+
+        // If want specific version to use, can specify the version in the packages.config file.
+        public void ParsingNuGetPackage(ref string PlatformDir, ref NuGetPackageInformation PackageInfo)
+        {
+            string[] Lines = System.IO.File.ReadAllLines(Path.Combine(PlatformDir, "packages.config"));
+            foreach (string Line in Lines)
+            {
+                Int32 BeginOfString = Line.IndexOf("Microsoft.PlayFab", 0);
+                if (BeginOfString > -1)
+                {
+                    Int32 EndOfString = Line.IndexOf("\"", BeginOfString);
+                    string Id = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+                    const string versionString = "version=\"";
+                    BeginOfString = Line.IndexOf(versionString, 0);
+                    if (BeginOfString > -1)
+                    {
+                        BeginOfString += versionString.Length;
+                        EndOfString = Line.IndexOf("\"", BeginOfString);
+                        string Version = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+                        if (Id.IndexOf("UnifiedSDK", 0) > -1)
+                        {
+                            PackageInfo.UnifiedSDKPackagePath = Id + "." + Version;
+                        }
+                        else
+                        {
+                            throw new BuildException("Unknown package id in package.config file.");
+                        }
+                    }
+                }
+            }
+            if (PackageInfo.UnifiedSDKPackagePath.Length == 0)
+            {
+                throw new BuildException("Can't find PlayFab Unified SDK package infomation in package.config file.");
+            }
+
+            LogPlayFabServices($"Unified SDK={PackageInfo.UnifiedSDKPackagePath}");
+        }
+    }
+
     private static void LogPlayFabServices(string message)
     {
         Console.WriteLine($"[PlayFabServices] {message}");
@@ -284,7 +331,7 @@ public class PlayFabServices : ModuleRules
         LogPlayFabServices($"Configuring for platform: {Target.Platform}");
         
         // GDK Platform
-        if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX")
+        if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
             LogPlayFabServices("Using GDK platform configuration");
             ConfigureForGDKPlatform();
@@ -341,9 +388,9 @@ public class PlayFabServices : ModuleRules
 
         PublicIncludePaths.Add(IncludePath);
 
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "LibHttpClient.GDK.lib"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.GDK.lib"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.GDK.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "LibHttpClient.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.lib"));
     }
 
     private void ConfigureForGDKPlatform()
@@ -373,23 +420,19 @@ public class PlayFabServices : ModuleRules
 
     private void ConfigureForPlayStation4Platform()
     {
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
         string PluginPath = Path.Combine(ModuleDirectory, "../../");
         string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS4");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-
-        PublicIncludePaths.Add(IncludePath);
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabServices.a"));
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 
     private void ConfigureForPlayStation5Platform()
     {
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
         string PluginPath = Path.Combine(ModuleDirectory, "../../");
         string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS5");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-
-        PublicIncludePaths.Add(IncludePath);
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabServices.a"));
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 }

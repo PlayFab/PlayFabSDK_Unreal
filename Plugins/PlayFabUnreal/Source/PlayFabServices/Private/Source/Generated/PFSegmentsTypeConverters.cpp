@@ -74,7 +74,7 @@ TSharedPtr<const FPFSegmentsGetPlayerSegmentsResult> ConvertGetPlayerSegmentsRes
 	}
 
 	TSharedPtr<const FPFSegmentsGetPlayerSegmentsResult> ConvertedType = MakeShared<FPFSegmentsGetPlayerSegmentsResult>(FPFSegmentsGetPlayerSegmentsResult{
-		.segments = ConvertPlayfabArrayToUnreal(Datatype->segments, Datatype->segmentsCount, ConvertGetSegmentResultToUnreal),
+		.segments = ConvertPlayfabArrayToUnreal<PFSegmentsGetSegmentResult, FPFSegmentsGetSegmentResult>(Datatype->segments, Datatype->segmentsCount, ConvertGetSegmentResultToUnreal),
 		.segmentsCount = Datatype->segmentsCount
 	});
 
@@ -88,7 +88,7 @@ const PFSegmentsGetPlayerSegmentsResult* ConvertGetPlayerSegmentsResultToPlayfab
 	}
 
 	const PFSegmentsGetPlayerSegmentsResult* ConvertedType = new PFSegmentsGetPlayerSegmentsResult{
-		.segments = ConvertUnrealArrayToPlayfab(Datatype->segments, ConvertGetSegmentResultToPlayfab),
+		.segments = ConvertUnrealArrayToPlayfab<PFSegmentsGetSegmentResult, FPFSegmentsGetSegmentResult>(Datatype->segments, ConvertGetSegmentResultToPlayfab),
 		.segmentsCount = (uint32_t)Datatype->segments.Num()
 	};
 
@@ -196,7 +196,7 @@ TSharedPtr<const FPFSegmentsGetAllSegmentsResult> ConvertGetAllSegmentsResultToU
 	}
 
 	TSharedPtr<const FPFSegmentsGetAllSegmentsResult> ConvertedType = MakeShared<FPFSegmentsGetAllSegmentsResult>(FPFSegmentsGetAllSegmentsResult{
-		.segments = ConvertPlayfabArrayToUnreal(Datatype->segments, Datatype->segmentsCount, ConvertGetSegmentResultToUnreal),
+		.segments = ConvertPlayfabArrayToUnreal<PFSegmentsGetSegmentResult, FPFSegmentsGetSegmentResult>(Datatype->segments, Datatype->segmentsCount, ConvertGetSegmentResultToUnreal),
 		.segmentsCount = Datatype->segmentsCount
 	});
 
@@ -210,7 +210,7 @@ const PFSegmentsGetAllSegmentsResult* ConvertGetAllSegmentsResultToPlayfab(TShar
 	}
 
 	const PFSegmentsGetAllSegmentsResult* ConvertedType = new PFSegmentsGetAllSegmentsResult{
-		.segments = ConvertUnrealArrayToPlayfab(Datatype->segments, ConvertGetSegmentResultToPlayfab),
+		.segments = ConvertUnrealArrayToPlayfab<PFSegmentsGetSegmentResult, FPFSegmentsGetSegmentResult>(Datatype->segments, ConvertGetSegmentResultToPlayfab),
 		.segmentsCount = (uint32_t)Datatype->segments.Num()
 	};
 
@@ -478,18 +478,18 @@ TSharedPtr<const FPFSegmentsPlayerProfile> ConvertPlayerProfileToUnreal(const PF
 	}
 
 	TSharedPtr<const FPFSegmentsPlayerProfile> ConvertedType = MakeShared<FPFSegmentsPlayerProfile>(FPFSegmentsPlayerProfile{
-		.adCampaignAttributions = ConvertPlayfabArrayToUnreal(Datatype->adCampaignAttributions, Datatype->adCampaignAttributionsCount, ConvertAdCampaignAttributionToUnreal),
+		.adCampaignAttributions = ConvertPlayfabArrayToUnreal<PFSegmentsAdCampaignAttribution, FPFSegmentsAdCampaignAttribution>(Datatype->adCampaignAttributions, Datatype->adCampaignAttributionsCount, ConvertAdCampaignAttributionToUnreal),
 		.adCampaignAttributionsCount = Datatype->adCampaignAttributionsCount,
 		.avatarUrl = Datatype->avatarUrl == nullptr ? FString() : FString(Datatype->avatarUrl),
 		.bannedUntil = ConvertTimeToUnreal(Datatype->bannedUntil),
 		.churnPrediction = MakeShared<FPFSegmentsChurnRiskLevel>(ConvertChurnRiskLevelToUnreal(Datatype->churnPrediction)),
-		.contactEmailAddresses = ConvertPlayfabArrayToUnreal(Datatype->contactEmailAddresses, Datatype->contactEmailAddressesCount, ConvertContactEmailInfoToUnreal),
+		.contactEmailAddresses = ConvertPlayfabArrayToUnreal<PFSegmentsContactEmailInfo, FPFSegmentsContactEmailInfo>(Datatype->contactEmailAddresses, Datatype->contactEmailAddressesCount, ConvertContactEmailInfoToUnreal),
 		.contactEmailAddressesCount = Datatype->contactEmailAddressesCount,
 		.created = ConvertTimeToUnreal(Datatype->created),
 		.customProperties = FPFJsonObject{ .stringValue = FString(Datatype->customProperties.stringValue) },
 		.displayName = Datatype->displayName == nullptr ? FString() : FString(Datatype->displayName),
 		.lastLogin = ConvertTimeToUnreal(Datatype->lastLogin),
-		.linkedAccounts = ConvertPlayfabArrayToUnreal(Datatype->linkedAccounts, Datatype->linkedAccountsCount, ConvertPlayerLinkedAccountToUnreal),
+		.linkedAccounts = ConvertPlayfabArrayToUnreal<PFSegmentsPlayerLinkedAccount, FPFSegmentsPlayerLinkedAccount>(Datatype->linkedAccounts, Datatype->linkedAccountsCount, ConvertPlayerLinkedAccountToUnreal),
 		.linkedAccountsCount = Datatype->linkedAccountsCount,
 		.locations = ConvertPlayfabMapToUnreal<PFSegmentsPlayerLocationDictionaryEntry, FPFSegmentsPlayerLocation, PFSegmentsPlayerLocation>(Datatype->locations, Datatype->locationsCount, ConvertPlayerLocationToUnreal),
 		.locationsCount = Datatype->locationsCount,
@@ -497,10 +497,10 @@ TSharedPtr<const FPFSegmentsPlayerProfile> ConvertPlayerProfileToUnreal(const PF
 		.playerExperimentVariants = ConvertCharArrayToUnreal(Datatype->playerExperimentVariants, Datatype->playerExperimentVariantsCount),
 		.playerExperimentVariantsCount = Datatype->playerExperimentVariantsCount,
 		.playerId = Datatype->playerId == nullptr ? FString() : FString(Datatype->playerId),
-		.playerStatistics = ConvertPlayfabArrayToUnreal(Datatype->playerStatistics, Datatype->playerStatisticsCount, ConvertPlayerStatisticToUnreal),
+		.playerStatistics = ConvertPlayfabArrayToUnreal<PFSegmentsPlayerStatistic, FPFSegmentsPlayerStatistic>(Datatype->playerStatistics, Datatype->playerStatisticsCount, ConvertPlayerStatisticToUnreal),
 		.playerStatisticsCount = Datatype->playerStatisticsCount,
 		.publisherId = Datatype->publisherId == nullptr ? FString() : FString(Datatype->publisherId),
-		.pushNotificationRegistrations = ConvertPlayfabArrayToUnreal(Datatype->pushNotificationRegistrations, Datatype->pushNotificationRegistrationsCount, ConvertPushNotificationRegistrationToUnreal),
+		.pushNotificationRegistrations = ConvertPlayfabArrayToUnreal<PFSegmentsPushNotificationRegistration, FPFSegmentsPushNotificationRegistration>(Datatype->pushNotificationRegistrations, Datatype->pushNotificationRegistrationsCount, ConvertPushNotificationRegistrationToUnreal),
 		.pushNotificationRegistrationsCount = Datatype->pushNotificationRegistrationsCount,
 		.statistics = ConvertIntMapToUnreal(Datatype->statistics, Datatype->statisticsCount),
 		.statisticsCount = Datatype->statisticsCount,
@@ -524,18 +524,18 @@ const PFSegmentsPlayerProfile* ConvertPlayerProfileToPlayfab(TSharedPtr<const FP
 	}
 
 	const PFSegmentsPlayerProfile* ConvertedType = new PFSegmentsPlayerProfile{
-		.adCampaignAttributions = ConvertUnrealArrayToPlayfab(Datatype->adCampaignAttributions, ConvertAdCampaignAttributionToPlayfab),
+		.adCampaignAttributions = ConvertUnrealArrayToPlayfab<PFSegmentsAdCampaignAttribution, FPFSegmentsAdCampaignAttribution>(Datatype->adCampaignAttributions, ConvertAdCampaignAttributionToPlayfab),
 		.adCampaignAttributionsCount = (uint32_t)Datatype->adCampaignAttributions.Num(),
 		.avatarUrl = ConvertFStringToCharPtr(Datatype->avatarUrl),
 		.bannedUntil = ConvertFDateTimeToPlayfab(Datatype->bannedUntil),
 		.churnPrediction = new PFSegmentsChurnRiskLevel(ConvertChurnRiskLevelToPlayfab(Datatype->churnPrediction)),
-		.contactEmailAddresses = ConvertUnrealArrayToPlayfab(Datatype->contactEmailAddresses, ConvertContactEmailInfoToPlayfab),
+		.contactEmailAddresses = ConvertUnrealArrayToPlayfab<PFSegmentsContactEmailInfo, FPFSegmentsContactEmailInfo>(Datatype->contactEmailAddresses, ConvertContactEmailInfoToPlayfab),
 		.contactEmailAddressesCount = (uint32_t)Datatype->contactEmailAddresses.Num(),
 		.created = ConvertFDateTimeToPlayfab(Datatype->created),
 		.customProperties = PFJsonObject{ .stringValue = ConvertFStringToCharPtr(Datatype->customProperties.stringValue) },
 		.displayName = ConvertFStringToCharPtr(Datatype->displayName),
 		.lastLogin = ConvertFDateTimeToPlayfab(Datatype->lastLogin),
-		.linkedAccounts = ConvertUnrealArrayToPlayfab(Datatype->linkedAccounts, ConvertPlayerLinkedAccountToPlayfab),
+		.linkedAccounts = ConvertUnrealArrayToPlayfab<PFSegmentsPlayerLinkedAccount, FPFSegmentsPlayerLinkedAccount>(Datatype->linkedAccounts, ConvertPlayerLinkedAccountToPlayfab),
 		.linkedAccountsCount = (uint32_t)Datatype->linkedAccounts.Num(),
 		.locations = ConvertUnrealMapToPlayfab<PFSegmentsPlayerLocationDictionaryEntry, FPFSegmentsPlayerLocation, PFSegmentsPlayerLocation>(Datatype->locations, ConvertPlayerLocationToPlayfab),
 		.locationsCount = (uint32_t)Datatype->locations.Num(),
@@ -543,10 +543,10 @@ const PFSegmentsPlayerProfile* ConvertPlayerProfileToPlayfab(TSharedPtr<const FP
 		.playerExperimentVariants = ConvertFStringArrayToPlayfab(Datatype->playerExperimentVariants),
 		.playerExperimentVariantsCount = (uint32_t)Datatype->playerExperimentVariants.Num(),
 		.playerId = ConvertFStringToCharPtr(Datatype->playerId),
-		.playerStatistics = ConvertUnrealArrayToPlayfab(Datatype->playerStatistics, ConvertPlayerStatisticToPlayfab),
+		.playerStatistics = ConvertUnrealArrayToPlayfab<PFSegmentsPlayerStatistic, FPFSegmentsPlayerStatistic>(Datatype->playerStatistics, ConvertPlayerStatisticToPlayfab),
 		.playerStatisticsCount = (uint32_t)Datatype->playerStatistics.Num(),
 		.publisherId = ConvertFStringToCharPtr(Datatype->publisherId),
-		.pushNotificationRegistrations = ConvertUnrealArrayToPlayfab(Datatype->pushNotificationRegistrations, ConvertPushNotificationRegistrationToPlayfab),
+		.pushNotificationRegistrations = ConvertUnrealArrayToPlayfab<PFSegmentsPushNotificationRegistration, FPFSegmentsPushNotificationRegistration>(Datatype->pushNotificationRegistrations, ConvertPushNotificationRegistrationToPlayfab),
 		.pushNotificationRegistrationsCount = (uint32_t)Datatype->pushNotificationRegistrations.Num(),
 		.statistics = ConvertIntMapToPlayfab(Datatype->statistics),
 		.statisticsCount = (uint32_t)Datatype->statistics.Num(),
@@ -571,7 +571,7 @@ TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> ConvertGetPlayersInSegmen
 
 	TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> ConvertedType = MakeShared<FPFSegmentsGetPlayersInSegmentResult>(FPFSegmentsGetPlayersInSegmentResult{
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.playerProfiles = ConvertPlayfabArrayToUnreal(Datatype->playerProfiles, Datatype->playerProfilesCount, ConvertPlayerProfileToUnreal),
+		.playerProfiles = ConvertPlayfabArrayToUnreal<PFSegmentsPlayerProfile, FPFSegmentsPlayerProfile>(Datatype->playerProfiles, Datatype->playerProfilesCount, ConvertPlayerProfileToUnreal),
 		.playerProfilesCount = Datatype->playerProfilesCount,
 		.profilesInSegment = Datatype->profilesInSegment
 	});
@@ -587,7 +587,7 @@ const PFSegmentsGetPlayersInSegmentResult* ConvertGetPlayersInSegmentResultToPla
 
 	const PFSegmentsGetPlayersInSegmentResult* ConvertedType = new PFSegmentsGetPlayersInSegmentResult{
 		.continuationToken = ConvertFStringToCharPtr(Datatype->continuationToken),
-		.playerProfiles = ConvertUnrealArrayToPlayfab(Datatype->playerProfiles, ConvertPlayerProfileToPlayfab),
+		.playerProfiles = ConvertUnrealArrayToPlayfab<PFSegmentsPlayerProfile, FPFSegmentsPlayerProfile>(Datatype->playerProfiles, ConvertPlayerProfileToPlayfab),
 		.playerProfilesCount = (uint32_t)Datatype->playerProfiles.Num(),
 		.profilesInSegment = Datatype->profilesInSegment
 	};

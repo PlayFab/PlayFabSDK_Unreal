@@ -11,8 +11,6 @@
 #include "PFServiceConfig.h"
 
 
-
- 
 /// <summary>
 /// FPFAuthenticationIdentifiedDeviceType enum.
 /// </summary>

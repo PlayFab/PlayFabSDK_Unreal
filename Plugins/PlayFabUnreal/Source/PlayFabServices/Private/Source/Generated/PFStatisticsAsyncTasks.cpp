@@ -20,7 +20,7 @@ void FCreateStatisticDefinitionAsyncTask::DoWork()
 	const PFStatisticsCreateStatisticDefinitionRequest RequestType = {
 		.aggregationSources = ConvertFStringArrayToPlayfab(Request.aggregationSources),
 		.aggregationSourcesCount = (uint32_t)Request.aggregationSources.Num(),
-		.columns = ConvertUnrealArrayToPlayfab(Request.columns, ConvertStatisticColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Request.columns, ConvertStatisticColumnToPlayfab),
 		.columnsCount = (uint32_t)Request.columns.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
@@ -107,7 +107,7 @@ void FDeleteStatisticsAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),
-		.statistics = ConvertUnrealArrayToPlayfab(Request.statistics, ConvertStatisticDeleteToPlayfab),
+		.statistics = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticDelete, FPFStatisticsStatisticDelete>(Request.statistics, ConvertStatisticDeleteToPlayfab),
 		.statisticsCount = (uint32_t)Request.statistics.Num()
 	};
 	HResult = PFStatisticsDeleteStatisticsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -120,7 +120,7 @@ void FDeleteStatisticsAsyncTask::DoWork()
 
 void FDeleteStatisticsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFStatisticsDeleteStatisticsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -173,7 +173,7 @@ void FGetStatisticDefinitionAsyncTask::DoWork()
 
 void FGetStatisticDefinitionAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFStatisticsGetStatisticDefinitionGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -228,7 +228,7 @@ void FGetStatisticsAsyncTask::DoWork()
 
 void FGetStatisticsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFStatisticsGetStatisticsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -269,7 +269,7 @@ void FGetStatisticsForEntitiesAsyncTask::DoWork()
 	const PFStatisticsGetStatisticsForEntitiesRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
-		.entities = ConvertUnrealArrayToPlayfab(Request.entities, ConvertEntityKeyToPlayfab),
+		.entities = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Request.entities, ConvertEntityKeyToPlayfab),
 		.entitiesCount = (uint32_t)Request.entities.Num(),
 		.statisticNames = ConvertFStringArrayToPlayfab(Request.statisticNames),
 		.statisticNamesCount = (uint32_t)Request.statisticNames.Num()
@@ -284,7 +284,7 @@ void FGetStatisticsForEntitiesAsyncTask::DoWork()
 
 void FGetStatisticsForEntitiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFStatisticsGetStatisticsForEntitiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -381,7 +381,7 @@ void FListStatisticDefinitionsAsyncTask::DoWork()
 
 void FListStatisticDefinitionsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFStatisticsListStatisticDefinitionsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -403,6 +403,47 @@ void FListStatisticDefinitionsAsyncTask::ProcessResults()
 	TSharedPtr<const FPFStatisticsListStatisticDefinitionsResponse> ResultType = ConvertListStatisticDefinitionsResponseToUnreal(Result);
 
 	Delegate.Execute(*ResultType, true);
+}
+#endif
+
+#if 0
+FUnlinkAggregationSourceFromStatisticAsyncTask::FUnlinkAggregationSourceFromStatisticAsyncTask(
+	_In_ FPFEntityHandle EntityHandle,
+	FPFStatisticsUnlinkAggregationSourceFromStatisticRequest InRequest,
+	const FOnUnlinkAggregationSourceFromStatisticCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FUnlinkAggregationSourceFromStatisticAsyncTask")),
+	EntityHandle(EntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FUnlinkAggregationSourceFromStatisticAsyncTask::DoWork()
+{
+	const PFStatisticsUnlinkAggregationSourceFromStatisticRequest RequestType = {
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.name = ConvertFStringToCharPtr(Request.name),
+		.sourceStatisticName = ConvertFStringToCharPtr(Request.sourceStatisticName)
+	};
+	HResult = PFStatisticsUnlinkAggregationSourceFromStatisticAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FUnlinkAggregationSourceFromStatisticAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
 }
 #endif
 
@@ -465,7 +506,7 @@ void FUpdateStatisticsAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),
-		.statistics = ConvertUnrealArrayToPlayfab(Request.statistics, ConvertStatisticUpdateToPlayfab),
+		.statistics = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticUpdate, FPFStatisticsStatisticUpdate>(Request.statistics, ConvertStatisticUpdateToPlayfab),
 		.statisticsCount = (uint32_t)Request.statistics.Num(),
 		.transactionId = ConvertFStringToCharPtr(Request.transactionId)
 	};
@@ -479,7 +520,7 @@ void FUpdateStatisticsAsyncTask::DoWork()
 
 void FUpdateStatisticsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFStatisticsUpdateStatisticsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

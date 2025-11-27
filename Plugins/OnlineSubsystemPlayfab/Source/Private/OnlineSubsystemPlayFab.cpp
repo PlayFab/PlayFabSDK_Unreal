@@ -10,6 +10,7 @@
 #include "IpConnection.h"
 #include "PlayFabNetDriver.h"
 #include "OnlineExternalUIInterfacePlayFab.h"
+#include "PlayFabHelpers.h"
 
 #include "EngineLogs.h"
 #include "CoreGlobals.h"
@@ -451,11 +452,8 @@ void FOnlineSubsystemPlayFab::OnAppSuspend()
 	}
 }
 
-void FOnlineSubsystemPlayFab::OnAppResume()
+void FOnlineSubsystemPlayFab::OnAppResumeDefault()
 {
-	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnAppResume"));
-
-#if !defined(OSS_PLAYFAB_GDK)
 	TryInitializePlayFabParty();
 
 	if (IdentityInterface.IsValid())
@@ -467,7 +465,11 @@ void FOnlineSubsystemPlayFab::OnAppResume()
 	{
 		VoiceInterface->OnAppResume();
 	}
-#else // OSS_PLAYFAB_GDK
+}
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+void FOnlineSubsystemPlayFab::OnAppResumeGDK()
+{
 	if (SessionInterface.IsValid())
 	{
 		FOnSessionsRemovedDelegate OnSessionsRemovedDelegate;
@@ -501,7 +503,25 @@ void FOnlineSubsystemPlayFab::OnAppResume()
 
 		SessionInterface->OnAppResume(OnSessionsRemovedDelegate);
 	}
-#endif //!OSS_PLAYFAB_GDK
+}
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+
+void FOnlineSubsystemPlayFab::OnAppResume()
+{
+	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnAppResume"));
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		OnAppResumeGDK();
+	}
+	else
+	{
+		OnAppResumeDefault();
+	}
+#else
+	OnAppResumeDefault();
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 }
 
 bool FOnlineSubsystemPlayFab::Tick(float DeltaTime)

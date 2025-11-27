@@ -40,6 +40,8 @@ private:
 	const FPFAuthenticationLoginWithAndroidDeviceIDRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -66,6 +68,8 @@ private:
 	const FPFAuthenticationLoginWithAppleRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -92,6 +96,8 @@ private:
 	const FPFAuthenticationLoginWithBattleNetRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -117,6 +123,8 @@ private:
 	const FPFAuthenticationLoginWithCustomIDRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 
@@ -142,6 +150,8 @@ private:
 	const FPFAuthenticationLoginWithEmailAddressRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -168,6 +178,8 @@ private:
 	const FPFAuthenticationLoginWithFacebookRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -194,6 +206,8 @@ private:
 	const FPFAuthenticationLoginWithFacebookInstantGamesIdRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -220,6 +234,8 @@ private:
 	const FPFAuthenticationLoginWithGameCenterRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -246,6 +262,8 @@ private:
 	const FPFAuthenticationLoginWithGoogleAccountRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -272,6 +290,8 @@ private:
 	const FPFAuthenticationLoginWithGooglePlayGamesServicesRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -298,6 +318,8 @@ private:
 	const FPFAuthenticationLoginWithIOSDeviceIDRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -324,6 +346,8 @@ private:
 	const FPFAuthenticationLoginWithKongregateRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -350,6 +374,8 @@ private:
 	const FPFAuthenticationLoginWithNintendoServiceAccountRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -376,6 +402,8 @@ private:
 	const FPFAuthenticationLoginWithNintendoSwitchDeviceIdRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -401,6 +429,8 @@ private:
 	const FPFAuthenticationLoginWithOpenIdConnectRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 
@@ -426,6 +456,8 @@ private:
 	const FPFAuthenticationLoginWithPlayFabRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -452,6 +484,8 @@ private:
 	const FPFAuthenticationLoginWithPSNRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -478,6 +512,8 @@ private:
 	const FPFAuthenticationLoginWithSteamRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -504,6 +540,8 @@ private:
 	const FPFAuthenticationLoginWithTwitchRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -530,6 +568,8 @@ private:
 	const FPFAuthenticationLoginWithXboxRequest request;
 
 	FOnPFAuthenticationLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -585,6 +625,8 @@ private:
 	const FPFAuthenticationServerLoginWithAndroidDeviceIDRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -614,6 +656,8 @@ private:
 	const FPFAuthenticationServerLoginWithBattleNetRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -643,6 +687,8 @@ private:
 	const FPFAuthenticationServerLoginWithCustomIDRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -672,6 +718,8 @@ private:
 	const FPFAuthenticationServerLoginWithIOSDeviceIDRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -701,6 +749,8 @@ private:
 	const FPFAuthenticationServerLoginWithPSNRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -730,6 +780,8 @@ private:
 	const FPFAuthenticationLoginWithServerCustomIdRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -759,6 +811,8 @@ private:
 	const FPFAuthenticationLoginWithSteamIdRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -788,6 +842,8 @@ private:
 	const FPFAuthenticationServerLoginWithXboxRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -817,6 +873,8 @@ private:
 	const FPFAuthenticationLoginWithXboxIdRequest request;
 
 	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -843,6 +901,8 @@ private:
 	const FPFAuthenticationAuthenticateCustomIdRequest request;
 
 	FOnAuthenticateGameServerWithCustomIdDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -895,6 +955,8 @@ private:
 	const FPFAuthenticationGetEntityRequest request;
 
 	FOnGetEntityDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif
@@ -924,6 +986,8 @@ private:
 	const FPFAuthenticationGetEntityRequest request;
 
 	FOnGetEntityWithSecretKeyDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
 };
 
 #endif

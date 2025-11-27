@@ -226,6 +226,7 @@ PF Services,AccountManagement,PFAccountManagementServerLinkPSNIdAsync,SecretKey,
 PF Services,AccountManagement,PFAccountManagementServerLinkServerCustomIdAsync,SecretKey,Account Management,ServerLinkServerCustomId,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerLinkSteamIdAsync,SecretKey,Account Management,ServerLinkSteamId,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerLinkXboxAccountAsync,SecretKey,Account Management,ServerLinkXboxAccount,false,Yes,No,No,Yes,No,No,Yes
+PF Services,AccountManagement,PFAccountManagementServerLinkXboxIdAsync,SecretKey,Account Management,ServerLinkXboxId,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerRemoveGenericIDAsync,SecretKey,Account Management,ServerRemoveGenericID,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerRevokeAllBansForUserAsync,SecretKey,Account Management,ServerRevokeAllBansForUser,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerRevokeBansAsync,SecretKey,Account Management,ServerRevokeBans,false,Yes,No,No,Yes,No,No,Yes
@@ -440,6 +441,7 @@ PF Services,Inventory,PFInventoryGetMicrosoftStoreAccessTokensAsync,EntityToken,
 PF Services,Inventory,PFInventoryGetTransactionHistoryAsync,EntityToken,Inventory,GetTransactionHistory,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Inventory,PFInventoryPurchaseInventoryItemsAsync,EntityToken,Inventory,PurchaseInventoryItems,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,Inventory,PFInventoryRedeemAppleAppStoreInventoryItemsAsync,EntityToken,Inventory,RedeemAppleAppStoreInventoryItems,false,Yes,No,No,No,No,Yes,No
+PF Services,Inventory,PFInventoryRedeemAppleAppStoreWithJwsInventoryItemsAsync,EntityToken,Inventory,RedeemAppleAppStoreWithJwsInventoryItems,false,No,No,No,No,No,No,No
 PF Services,Inventory,PFInventoryRedeemGooglePlayInventoryItemsAsync,EntityToken,Inventory,RedeemGooglePlayInventoryItems,false,Yes,No,No,No,Yes,No,No
 PF Services,Inventory,PFInventoryRedeemMicrosoftStoreInventoryItemsAsync,EntityToken,Inventory,RedeemMicrosoftStoreInventoryItems,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Inventory,PFInventoryRedeemNintendoEShopInventoryItemsAsync,EntityToken,Inventory,RedeemNintendoEShopInventoryItems,false,Yes,Yes,No,Yes,No,No,Yes
@@ -539,6 +541,7 @@ PF Services,Statistics,PFStatisticsGetStatisticsAsync,EntityToken,Statistics,Get
 PF Services,Statistics,PFStatisticsGetStatisticsForEntitiesAsync,EntityToken,Statistics,GetStatisticsForEntities,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Statistics,PFStatisticsIncrementStatisticVersionAsync,EntityToken,Statistics,IncrementStatisticVersion,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Statistics,PFStatisticsListStatisticDefinitionsAsync,EntityToken,Statistics,ListStatisticDefinitions,false,Yes,No,No,Yes,No,No,Yes
+PF Services,Statistics,PFStatisticsUnlinkAggregationSourceFromStatisticAsync,EntityToken,Statistics,UnlinkAggregationSourceFromStatistic,false,No,No,No,No,No,No,No
 PF Services,Statistics,PFStatisticsUpdateStatisticDefinitionAsync,EntityToken,Statistics,UpdateStatisticDefinition,false,Yes,No,No,No,No,No,No
 PF Services,Statistics,PFStatisticsUpdateStatisticsAsync,EntityToken,Statistics,UpdateStatistics,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,Localization,PFLocalizationGetLanguageListAsync,EntityToken,Localization,GetLanguageList,false,Yes,No,No,Yes,No,No,Yes

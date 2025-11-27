@@ -98,7 +98,7 @@ void FAddMembersAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.group = ConvertEntityKeyToPlayfab(Request.group),
-		.members = ConvertUnrealArrayToPlayfab(Request.members, ConvertEntityKeyToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Request.members, ConvertEntityKeyToPlayfab),
 		.membersCount = (uint32_t)Request.members.Num(),
 		.roleId = ConvertFStringToCharPtr(Request.roleId)
 	};
@@ -152,7 +152,7 @@ void FApplyToGroupAsyncTask::DoWork()
 
 void FApplyToGroupAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsApplyToGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -233,7 +233,7 @@ void FChangeMemberRoleAsyncTask::DoWork()
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.destinationRoleId = ConvertFStringToCharPtr(Request.destinationRoleId),
 		.group = ConvertEntityKeyToPlayfab(Request.group),
-		.members = ConvertUnrealArrayToPlayfab(Request.members, ConvertEntityKeyToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Request.members, ConvertEntityKeyToPlayfab),
 		.membersCount = (uint32_t)Request.members.Num(),
 		.originRoleId = ConvertFStringToCharPtr(Request.originRoleId)
 	};
@@ -286,7 +286,7 @@ void FCreateGroupAsyncTask::DoWork()
 
 void FCreateGroupAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsCreateGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -340,7 +340,7 @@ void FCreateRoleAsyncTask::DoWork()
 
 void FCreateRoleAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsCreateRoleGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -470,7 +470,7 @@ void FGetGroupAsyncTask::DoWork()
 
 void FGetGroupAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsGetGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -525,7 +525,7 @@ void FInviteToGroupAsyncTask::DoWork()
 
 void FInviteToGroupAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsInviteToGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -621,7 +621,7 @@ void FListGroupApplicationsAsyncTask::DoWork()
 
 void FListGroupApplicationsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsListGroupApplicationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -673,7 +673,7 @@ void FListGroupBlocksAsyncTask::DoWork()
 
 void FListGroupBlocksAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsListGroupBlocksGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -725,7 +725,7 @@ void FListGroupInvitationsAsyncTask::DoWork()
 
 void FListGroupInvitationsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsListGroupInvitationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -777,7 +777,7 @@ void FListGroupMembersAsyncTask::DoWork()
 
 void FListGroupMembersAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsListGroupMembersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -829,7 +829,7 @@ void FListMembershipAsyncTask::DoWork()
 
 void FListMembershipAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsListMembershipGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -881,7 +881,7 @@ void FListMembershipOpportunitiesAsyncTask::DoWork()
 
 void FListMembershipOpportunitiesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsListMembershipOpportunitiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1000,7 +1000,7 @@ void FRemoveMembersAsyncTask::DoWork()
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.group = ConvertEntityKeyToPlayfab(Request.group),
-		.members = ConvertUnrealArrayToPlayfab(Request.members, ConvertEntityKeyToPlayfab),
+		.members = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Request.members, ConvertEntityKeyToPlayfab),
 		.membersCount = (uint32_t)Request.members.Num(),
 		.roleId = ConvertFStringToCharPtr(Request.roleId)
 	};
@@ -1095,7 +1095,7 @@ void FUpdateGroupAsyncTask::DoWork()
 
 void FUpdateGroupAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsUpdateGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -1150,7 +1150,7 @@ void FUpdateRoleAsyncTask::DoWork()
 
 void FUpdateRoleAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFGroupsUpdateRoleGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

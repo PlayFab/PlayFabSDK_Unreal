@@ -77,3 +77,16 @@ DerivedDataCache/*
 # Ignore extract PlayFab.C SDK. It should be downloaded and place into this directory manually.
 **/PlayFabUnrealSample/Plugins/PlayFabUnreal/External/GDK
 **/PlayFabUnrealSample/Plugins/PlayFabUnreal/External/Win32
+
+# Ignore NDA Platform Nuget packages and binaries
+**/Platforms/PS4/Microsoft.PlayFab.Multiplayer.Cpp.*
+**/Platforms/PS4/Microsoft.PlayFab.PlayFabParty.Cpp.*
+**/Platforms/PS4/Microsoft.PlayFab.UnifiedSDK.Cpp.*
+
+**/Platforms/PS5/Microsoft.PlayFab.Multiplayer.Cpp.*
+**/Platforms/PS5/Microsoft.PlayFab.PlayFabParty.Cpp.*
+**/Platforms/PS5/Microsoft.PlayFab.UnifiedSDK.Cpp.*
+
+**/Platforms/Switch/Microsoft.PlayFab.PlayFabParty.Cpp.*
+**/Platforms/Switch/Microsoft.PlayFab.Multiplayer.Cpp.*
+**/Platforms/Switch/Microsoft.PlayFab.UnifiedSDK.Cpp.*

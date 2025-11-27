@@ -364,7 +364,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult>
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult>(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertBattleNetAccountPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementBattleNetAccountPlayFabIdPair, FPFAccountManagementBattleNetAccountPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertBattleNetAccountPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -378,7 +378,7 @@ const PFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult* ConvertGetP
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertBattleNetAccountPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementBattleNetAccountPlayFabIdPair, FPFAccountManagementBattleNetAccountPlayFabIdPair>(Datatype->data, ConvertBattleNetAccountPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -448,7 +448,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult> Convert
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult>(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertFacebookPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementFacebookPlayFabIdPair, FPFAccountManagementFacebookPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertFacebookPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -462,7 +462,7 @@ const PFAccountManagementGetPlayFabIDsFromFacebookIDsResult* ConvertGetPlayFabID
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromFacebookIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromFacebookIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertFacebookPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementFacebookPlayFabIdPair, FPFAccountManagementFacebookPlayFabIdPair>(Datatype->data, ConvertFacebookPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -532,7 +532,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsRes
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult>(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertFacebookInstantGamesPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementFacebookInstantGamesPlayFabIdPair, FPFAccountManagementFacebookInstantGamesPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertFacebookInstantGamesPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -546,7 +546,7 @@ const PFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult* Convert
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertFacebookInstantGamesPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementFacebookInstantGamesPlayFabIdPair, FPFAccountManagementFacebookInstantGamesPlayFabIdPair>(Datatype->data, ConvertFacebookInstantGamesPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -616,7 +616,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult> Conve
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult>(FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertGameCenterPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementGameCenterPlayFabIdPair, FPFAccountManagementGameCenterPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertGameCenterPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -630,7 +630,7 @@ const PFAccountManagementGetPlayFabIDsFromGameCenterIDsResult* ConvertGetPlayFab
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromGameCenterIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromGameCenterIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertGameCenterPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementGameCenterPlayFabIdPair, FPFAccountManagementGameCenterPlayFabIdPair>(Datatype->data, ConvertGameCenterPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -700,7 +700,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult> ConvertGe
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult>(FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertGooglePlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementGooglePlayFabIdPair, FPFAccountManagementGooglePlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertGooglePlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -714,7 +714,7 @@ const PFAccountManagementGetPlayFabIDsFromGoogleIDsResult* ConvertGetPlayFabIDsF
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromGoogleIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromGoogleIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertGooglePlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementGooglePlayFabIdPair, FPFAccountManagementGooglePlayFabIdPair>(Datatype->data, ConvertGooglePlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -784,7 +784,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsRe
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult>(FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertGooglePlayGamesPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementGooglePlayGamesPlayFabIdPair, FPFAccountManagementGooglePlayGamesPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertGooglePlayGamesPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -798,7 +798,7 @@ const PFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult* Conver
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertGooglePlayGamesPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementGooglePlayGamesPlayFabIdPair, FPFAccountManagementGooglePlayGamesPlayFabIdPair>(Datatype->data, ConvertGooglePlayGamesPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -868,7 +868,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult> Conve
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult>(FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertKongregatePlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementKongregatePlayFabIdPair, FPFAccountManagementKongregatePlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertKongregatePlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -882,7 +882,7 @@ const PFAccountManagementGetPlayFabIDsFromKongregateIDsResult* ConvertGetPlayFab
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromKongregateIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromKongregateIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertKongregatePlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementKongregatePlayFabIdPair, FPFAccountManagementKongregatePlayFabIdPair>(Datatype->data, ConvertKongregatePlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -952,7 +952,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsR
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult>(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertNintendoServiceAccountPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementNintendoServiceAccountPlayFabIdPair, FPFAccountManagementNintendoServiceAccountPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertNintendoServiceAccountPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -966,7 +966,7 @@ const PFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult* Conve
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertNintendoServiceAccountPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementNintendoServiceAccountPlayFabIdPair, FPFAccountManagementNintendoServiceAccountPlayFabIdPair>(Datatype->data, ConvertNintendoServiceAccountPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1036,7 +1036,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsRes
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult>(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertNintendoSwitchPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementNintendoSwitchPlayFabIdPair, FPFAccountManagementNintendoSwitchPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertNintendoSwitchPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1050,7 +1050,7 @@ const PFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult* Convert
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertNintendoSwitchPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementNintendoSwitchPlayFabIdPair, FPFAccountManagementNintendoSwitchPlayFabIdPair>(Datatype->data, ConvertNintendoSwitchPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1122,7 +1122,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult> Conve
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult>(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertPSNAccountPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementPSNAccountPlayFabIdPair, FPFAccountManagementPSNAccountPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertPSNAccountPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1136,7 +1136,7 @@ const PFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult* ConvertGetPlayFab
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertPSNAccountPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementPSNAccountPlayFabIdPair, FPFAccountManagementPSNAccountPlayFabIdPair>(Datatype->data, ConvertPSNAccountPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1208,7 +1208,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult> Conver
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult>(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertPSNOnlinePlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementPSNOnlinePlayFabIdPair, FPFAccountManagementPSNOnlinePlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertPSNOnlinePlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1222,7 +1222,7 @@ const PFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult* ConvertGetPlayFabI
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertPSNOnlinePlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementPSNOnlinePlayFabIdPair, FPFAccountManagementPSNOnlinePlayFabIdPair>(Datatype->data, ConvertPSNOnlinePlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1292,7 +1292,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromSteamIDsResult> ConvertGet
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromSteamIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromSteamIDsResult>(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertSteamPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementSteamPlayFabIdPair, FPFAccountManagementSteamPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertSteamPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1306,7 +1306,7 @@ const PFAccountManagementGetPlayFabIDsFromSteamIDsResult* ConvertGetPlayFabIDsFr
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromSteamIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromSteamIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertSteamPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementSteamPlayFabIdPair, FPFAccountManagementSteamPlayFabIdPair>(Datatype->data, ConvertSteamPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1376,7 +1376,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromSteamNamesResult> ConvertG
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromSteamNamesResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromSteamNamesResult>(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertSteamNamePlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementSteamNamePlayFabIdPair, FPFAccountManagementSteamNamePlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertSteamNamePlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1390,7 +1390,7 @@ const PFAccountManagementGetPlayFabIDsFromSteamNamesResult* ConvertGetPlayFabIDs
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromSteamNamesResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromSteamNamesResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertSteamNamePlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementSteamNamePlayFabIdPair, FPFAccountManagementSteamNamePlayFabIdPair>(Datatype->data, ConvertSteamNamePlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1460,7 +1460,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult> ConvertGe
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult>(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertTwitchPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementTwitchPlayFabIdPair, FPFAccountManagementTwitchPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertTwitchPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1474,7 +1474,7 @@ const PFAccountManagementGetPlayFabIDsFromTwitchIDsResult* ConvertGetPlayFabIDsF
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromTwitchIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromTwitchIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertTwitchPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementTwitchPlayFabIdPair, FPFAccountManagementTwitchPlayFabIdPair>(Datatype->data, ConvertTwitchPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -1546,7 +1546,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult> Convert
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult>(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertXboxLiveAccountPlayFabIdPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementXboxLiveAccountPlayFabIdPair, FPFAccountManagementXboxLiveAccountPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertXboxLiveAccountPlayFabIdPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -1560,7 +1560,7 @@ const PFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult* ConvertGetPlayFabID
 	}
 
 	const PFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertXboxLiveAccountPlayFabIdPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementXboxLiveAccountPlayFabIdPair, FPFAccountManagementXboxLiveAccountPlayFabIdPair>(Datatype->data, ConvertXboxLiveAccountPlayFabIdPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -2942,7 +2942,7 @@ TSharedPtr<const FPFAccountManagementBanUsersRequest> ConvertBanUsersRequestToUn
 	}
 
 	TSharedPtr<const FPFAccountManagementBanUsersRequest> ConvertedType = MakeShared<FPFAccountManagementBanUsersRequest>(FPFAccountManagementBanUsersRequest{
-		.bans = ConvertPlayfabArrayToUnreal(Datatype->bans, Datatype->bansCount, ConvertBanRequestToUnreal),
+		.bans = ConvertPlayfabArrayToUnreal<PFAccountManagementBanRequest, FPFAccountManagementBanRequest>(Datatype->bans, Datatype->bansCount, ConvertBanRequestToUnreal),
 		.bansCount = Datatype->bansCount,
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount
@@ -2958,7 +2958,7 @@ const PFAccountManagementBanUsersRequest* ConvertBanUsersRequestToPlayfab(TShare
 	}
 
 	const PFAccountManagementBanUsersRequest* ConvertedType = new PFAccountManagementBanUsersRequest{
-		.bans = ConvertUnrealArrayToPlayfab(Datatype->bans, ConvertBanRequestToPlayfab),
+		.bans = ConvertUnrealArrayToPlayfab<PFAccountManagementBanRequest, FPFAccountManagementBanRequest>(Datatype->bans, ConvertBanRequestToPlayfab),
 		.bansCount = (uint32_t)Datatype->bans.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num()
@@ -3014,7 +3014,7 @@ TSharedPtr<const FPFAccountManagementBanUsersResult> ConvertBanUsersResultToUnre
 	}
 
 	TSharedPtr<const FPFAccountManagementBanUsersResult> ConvertedType = MakeShared<FPFAccountManagementBanUsersResult>(FPFAccountManagementBanUsersResult{
-		.banData = ConvertPlayfabArrayToUnreal(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
+		.banData = ConvertPlayfabArrayToUnreal<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
 		.banDataCount = Datatype->banDataCount
 	});
 
@@ -3028,7 +3028,7 @@ const PFAccountManagementBanUsersResult* ConvertBanUsersResultToPlayfab(TSharedP
 	}
 
 	const PFAccountManagementBanUsersResult* ConvertedType = new PFAccountManagementBanUsersResult{
-		.banData = ConvertUnrealArrayToPlayfab(Datatype->banData, ConvertBanInfoToPlayfab),
+		.banData = ConvertUnrealArrayToPlayfab<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, ConvertBanInfoToPlayfab),
 		.banDataCount = (uint32_t)Datatype->banData.Num()
 	};
 
@@ -3124,7 +3124,7 @@ TSharedPtr<const FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult> Con
 	}
 
 	TSharedPtr<const FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult> ConvertedType = MakeShared<FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult>(FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult{
-		.data = ConvertPlayfabArrayToUnreal(Datatype->data, Datatype->dataCount, ConvertServerCustomIDPlayFabIDPairToUnreal),
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementServerCustomIDPlayFabIDPair, FPFAccountManagementServerCustomIDPlayFabIDPair>(Datatype->data, Datatype->dataCount, ConvertServerCustomIDPlayFabIDPairToUnreal),
 		.dataCount = Datatype->dataCount
 	});
 
@@ -3138,7 +3138,7 @@ const PFAccountManagementGetServerCustomIDsFromPlayFabIDsResult* ConvertGetServe
 	}
 
 	const PFAccountManagementGetServerCustomIDsFromPlayFabIDsResult* ConvertedType = new PFAccountManagementGetServerCustomIDsFromPlayFabIDsResult{
-		.data = ConvertUnrealArrayToPlayfab(Datatype->data, ConvertServerCustomIDPlayFabIDPairToPlayfab),
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementServerCustomIDPlayFabIDPair, FPFAccountManagementServerCustomIDPlayFabIDPair>(Datatype->data, ConvertServerCustomIDPlayFabIDPairToPlayfab),
 		.dataCount = (uint32_t)Datatype->data.Num()
 	};
 
@@ -3230,7 +3230,7 @@ TSharedPtr<const FPFAccountManagementGetUserBansResult> ConvertGetUserBansResult
 	}
 
 	TSharedPtr<const FPFAccountManagementGetUserBansResult> ConvertedType = MakeShared<FPFAccountManagementGetUserBansResult>(FPFAccountManagementGetUserBansResult{
-		.banData = ConvertPlayfabArrayToUnreal(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
+		.banData = ConvertPlayfabArrayToUnreal<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
 		.banDataCount = Datatype->banDataCount
 	});
 
@@ -3244,7 +3244,7 @@ const PFAccountManagementGetUserBansResult* ConvertGetUserBansResultToPlayfab(TS
 	}
 
 	const PFAccountManagementGetUserBansResult* ConvertedType = new PFAccountManagementGetUserBansResult{
-		.banData = ConvertUnrealArrayToPlayfab(Datatype->banData, ConvertBanInfoToPlayfab),
+		.banData = ConvertUnrealArrayToPlayfab<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, ConvertBanInfoToPlayfab),
 		.banDataCount = (uint32_t)Datatype->banData.Num()
 	};
 
@@ -3563,6 +3563,42 @@ const PFAccountManagementServerLinkXboxAccountRequest* ConvertServerLinkXboxAcco
 	return ConvertedType;
 }
 
+TSharedPtr<const FPFAccountManagementLinkXboxIdRequest> ConvertLinkXboxIdRequestToUnreal(const PFAccountManagementLinkXboxIdRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementLinkXboxIdRequest> ConvertedType = MakeShared<FPFAccountManagementLinkXboxIdRequest>(FPFAccountManagementLinkXboxIdRequest{
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
+		.sandbox = Datatype->sandbox == nullptr ? FString() : FString(Datatype->sandbox),
+		.xboxId = Datatype->xboxId == nullptr ? FString() : FString(Datatype->xboxId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementLinkXboxIdRequest* ConvertLinkXboxIdRequestToPlayfab(TSharedPtr<const FPFAccountManagementLinkXboxIdRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementLinkXboxIdRequest* ConvertedType = new PFAccountManagementLinkXboxIdRequest{
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.forceLink = Datatype->forceLink ? new bool(*Datatype->forceLink) : nullptr,
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId),
+		.sandbox = ConvertFStringToCharPtr(Datatype->sandbox),
+		.xboxId = ConvertFStringToCharPtr(Datatype->xboxId)
+	};
+
+	return ConvertedType;
+}
+
 TSharedPtr<const FPFAccountManagementRevokeAllBansForUserRequest> ConvertRevokeAllBansForUserRequestToUnreal(const PFAccountManagementRevokeAllBansForUserRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
@@ -3596,7 +3632,7 @@ TSharedPtr<const FPFAccountManagementRevokeAllBansForUserResult> ConvertRevokeAl
 	}
 
 	TSharedPtr<const FPFAccountManagementRevokeAllBansForUserResult> ConvertedType = MakeShared<FPFAccountManagementRevokeAllBansForUserResult>(FPFAccountManagementRevokeAllBansForUserResult{
-		.banData = ConvertPlayfabArrayToUnreal(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
+		.banData = ConvertPlayfabArrayToUnreal<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
 		.banDataCount = Datatype->banDataCount
 	});
 
@@ -3610,7 +3646,7 @@ const PFAccountManagementRevokeAllBansForUserResult* ConvertRevokeAllBansForUser
 	}
 
 	const PFAccountManagementRevokeAllBansForUserResult* ConvertedType = new PFAccountManagementRevokeAllBansForUserResult{
-		.banData = ConvertUnrealArrayToPlayfab(Datatype->banData, ConvertBanInfoToPlayfab),
+		.banData = ConvertUnrealArrayToPlayfab<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, ConvertBanInfoToPlayfab),
 		.banDataCount = (uint32_t)Datatype->banData.Num()
 	};
 
@@ -3652,7 +3688,7 @@ TSharedPtr<const FPFAccountManagementRevokeBansResult> ConvertRevokeBansResultTo
 	}
 
 	TSharedPtr<const FPFAccountManagementRevokeBansResult> ConvertedType = MakeShared<FPFAccountManagementRevokeBansResult>(FPFAccountManagementRevokeBansResult{
-		.banData = ConvertPlayfabArrayToUnreal(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
+		.banData = ConvertPlayfabArrayToUnreal<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
 		.banDataCount = Datatype->banDataCount
 	});
 
@@ -3666,7 +3702,7 @@ const PFAccountManagementRevokeBansResult* ConvertRevokeBansResultToPlayfab(TSha
 	}
 
 	const PFAccountManagementRevokeBansResult* ConvertedType = new PFAccountManagementRevokeBansResult{
-		.banData = ConvertUnrealArrayToPlayfab(Datatype->banData, ConvertBanInfoToPlayfab),
+		.banData = ConvertUnrealArrayToPlayfab<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, ConvertBanInfoToPlayfab),
 		.banDataCount = (uint32_t)Datatype->banData.Num()
 	};
 
@@ -4026,7 +4062,7 @@ TSharedPtr<const FPFAccountManagementUpdateBansRequest> ConvertUpdateBansRequest
 	}
 
 	TSharedPtr<const FPFAccountManagementUpdateBansRequest> ConvertedType = MakeShared<FPFAccountManagementUpdateBansRequest>(FPFAccountManagementUpdateBansRequest{
-		.bans = ConvertPlayfabArrayToUnreal(Datatype->bans, Datatype->bansCount, ConvertUpdateBanRequestToUnreal),
+		.bans = ConvertPlayfabArrayToUnreal<PFAccountManagementUpdateBanRequest, FPFAccountManagementUpdateBanRequest>(Datatype->bans, Datatype->bansCount, ConvertUpdateBanRequestToUnreal),
 		.bansCount = Datatype->bansCount
 	});
 
@@ -4040,7 +4076,7 @@ const PFAccountManagementUpdateBansRequest* ConvertUpdateBansRequestToPlayfab(TS
 	}
 
 	const PFAccountManagementUpdateBansRequest* ConvertedType = new PFAccountManagementUpdateBansRequest{
-		.bans = ConvertUnrealArrayToPlayfab(Datatype->bans, ConvertUpdateBanRequestToPlayfab),
+		.bans = ConvertUnrealArrayToPlayfab<PFAccountManagementUpdateBanRequest, FPFAccountManagementUpdateBanRequest>(Datatype->bans, ConvertUpdateBanRequestToPlayfab),
 		.bansCount = (uint32_t)Datatype->bans.Num()
 	};
 
@@ -4054,7 +4090,7 @@ TSharedPtr<const FPFAccountManagementUpdateBansResult> ConvertUpdateBansResultTo
 	}
 
 	TSharedPtr<const FPFAccountManagementUpdateBansResult> ConvertedType = MakeShared<FPFAccountManagementUpdateBansResult>(FPFAccountManagementUpdateBansResult{
-		.banData = ConvertPlayfabArrayToUnreal(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
+		.banData = ConvertPlayfabArrayToUnreal<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, Datatype->banDataCount, ConvertBanInfoToUnreal),
 		.banDataCount = Datatype->banDataCount
 	});
 
@@ -4068,7 +4104,7 @@ const PFAccountManagementUpdateBansResult* ConvertUpdateBansResultToPlayfab(TSha
 	}
 
 	const PFAccountManagementUpdateBansResult* ConvertedType = new PFAccountManagementUpdateBansResult{
-		.banData = ConvertUnrealArrayToPlayfab(Datatype->banData, ConvertBanInfoToPlayfab),
+		.banData = ConvertUnrealArrayToPlayfab<PFAccountManagementBanInfo, FPFAccountManagementBanInfo>(Datatype->banData, ConvertBanInfoToPlayfab),
 		.banDataCount = (uint32_t)Datatype->banData.Num()
 	};
 

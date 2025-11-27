@@ -31,7 +31,7 @@ void FGetTreatmentAssignmentAsyncTask::DoWork()
 
 void FGetTreatmentAssignmentAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFExperimentationGetTreatmentAssignmentGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

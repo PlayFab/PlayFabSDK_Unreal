@@ -7,6 +7,7 @@
 #include "OnlineSessionSettings.h"
 #include "PlayFabSocketSubsystem.h"
 #include "../PlatformSpecific/PlatformDefines.h"
+#include "PlayFabHelpers.h"
 
 #include "OnlineSubsystemPlayFab.h"
 #include "OnlineSubsystemPlayFabPrivate.h"
@@ -20,14 +21,18 @@ FOnlineSessionPlayFab::FOnlineSessionPlayFab(class FOnlineSubsystemPlayFab* InSu
 {
 	check(OSSPlayFab);
 
-#if defined(USES_NATIVE_SESSION)
-	bUsesNativeSession = true;
-#endif
+	if (ShouldSubsystemUseNativeSession())
+	{
+		bUsesNativeSession = true;
+	}
 #if defined(OSS_PLAYFAB_PLAYSTATION)
 	UpdateNativeSessionName();
 #endif
-#if defined(OSS_PLAYFAB_GDK)
-	RegisterForInvites();
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		RegisterForInvites();
+	}
 #endif
 	RegisterForUpdates();
 	GenerateCrossNetworkVoiceChatPlatformPermissions();
@@ -35,8 +40,11 @@ FOnlineSessionPlayFab::FOnlineSessionPlayFab(class FOnlineSubsystemPlayFab* InSu
 
 FOnlineSessionPlayFab::~FOnlineSessionPlayFab()
 {
-#if defined(OSS_PLAYFAB_GDK)
-	UnregisterForInvites();
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		UnregisterForInvites();
+	}
 #endif
 
 	// Clean up delegates
@@ -414,9 +422,10 @@ bool FOnlineSessionPlayFab::EndSession(FName SessionName)
 	}
 
 	// Reset bUsesNativeSession to true for platforms using native session interface
-#if defined(USES_NATIVE_SESSION)
-	bUsesNativeSession = true;
-#endif
+	if (ShouldSubsystemUseNativeSession())
+	{
+		bUsesNativeSession = true;
+	}
 	FNamedOnlineSessionPtr Session = GetNamedSessionPtr(SessionName);
 	if (!Session.IsValid())
 	{
@@ -594,10 +603,9 @@ void FOnlineSessionPlayFab::OnMatchmakingComplete(FName SessionName, bool bWasSu
 			//kick off the join logic and give time for the session update
 			RetryJoinMatchmakingSession_Count = RetryJoinMatchmakingSession_MaxCount;
 		}
+
 		// Matchmaking does not use native interface
-#if defined(USES_NATIVE_SESSION)
 		bUsesNativeSession = false;
-#endif
 	}
 	else
 	{
@@ -836,23 +844,26 @@ bool FOnlineSessionPlayFab::FindSessions(const FUniqueNetId& SearchingPlayerId, 
 	}
 
 #if defined(OSS_PLAYFAB_WIN64)
-	CachedSearchSettings = MakeShared<FOnlineSessionSearch>(*SearchSettings);
-	CachedSearchSettings->SearchState = EOnlineAsyncTaskState::NotStarted;
-	if (bUsesNativeSession)
+	if (!IsNativePlatformSubsystemGDK())
 	{
-		OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
+		CachedSearchSettings = MakeShared<FOnlineSessionSearch>(*SearchSettings);
+		CachedSearchSettings->SearchState = EOnlineAsyncTaskState::NotStarted;
+		if (bUsesNativeSession)
 		{
-			OnNativeFindSessionsCompleteDelegateHandle = NativeSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(
-				FOnFindSessionsCompleteDelegate::CreateLambda([this, NativeSessionInterface](bool NativeSessionFindResult)
-					{
-						if (!NativeSessionFindResult)
+			OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
+			{
+				OnNativeFindSessionsCompleteDelegateHandle = NativeSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(
+					FOnFindSessionsCompleteDelegate::CreateLambda([this, NativeSessionInterface](bool NativeSessionFindResult)
 						{
-							UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeFindSessionComplete: Find Steam native sessions has failure"));
-						}
-						UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnNativeFindSessionComplete: Num of Search Results: %d"), CachedSearchSettings->SearchResults.Num());
-						NativeSessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(OnNativeFindSessionsCompleteDelegateHandle);
-					}));
-		return NativeSessionInterface->FindSessions(SearchingPlayerId, CachedSearchSettings.ToSharedRef());
+							if (!NativeSessionFindResult)
+							{
+								UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeFindSessionComplete: Find Steam native sessions has failure"));
+							}
+							UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnNativeFindSessionComplete: Num of Search Results: %d"), CachedSearchSettings->SearchResults.Num());
+							NativeSessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(OnNativeFindSessionsCompleteDelegateHandle);
+						}));
+			return NativeSessionInterface->FindSessions(SearchingPlayerId, CachedSearchSettings.ToSharedRef());
+			}
 		}
 	}
 #endif
@@ -1122,8 +1133,11 @@ void FOnlineSessionPlayFab::OnLobbyUpdate(FName SessionName, const PFLobbyUpdate
 		}
 	}
 
-#if defined(OSS_PLAYFAB_GDK)
-	SetMultiplayerActivityForSession(ExistingNamedSession);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		SetMultiplayerActivityForSession(ExistingNamedSession);
+	}
 #endif
 
 	TriggerOnSessionSettingsUpdatedDelegates(SessionName, ExistingNamedSession->SessionSettings);
@@ -1188,18 +1202,21 @@ void FOnlineSessionPlayFab::OnLobbyMemberAdded(FName SessionName, const PFLobbyM
 		}
 	}
 
-#if defined(OSS_PLAYFAB_GDK)
-	FOnlineIdentityPlayFabPtr PlayFabIdentityInt = OSSPlayFab ? OSSPlayFab->GetIdentityInterfacePlayFab() : nullptr;
-	if (PlayFabIdentityInt.IsValid())
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
 	{
-		RecordRecentlyMetPlayer(StateChange.lobby, PlayFabIdentityInt->GetLocalUserEntityKeys(), EntityKey, PlatformIdStr);
-	}
-	else
-	{
-		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnLobbyMemberAdded: Identity Interface is invalid"));
-	}
+		FOnlineIdentityPlayFabPtr PlayFabIdentityInt = OSSPlayFab ? OSSPlayFab->GetIdentityInterfacePlayFab() : nullptr;
+		if (PlayFabIdentityInt.IsValid())
+		{
+			RecordRecentlyMetPlayer(StateChange.lobby, PlayFabIdentityInt->GetLocalUserEntityKeys(), EntityKey, PlatformIdStr);
+		}
+		else
+		{
+			UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnLobbyMemberAdded: Identity Interface is invalid"));
+		}
 
-	SetMultiplayerActivityForSession(ExistingNamedSession);
+		SetMultiplayerActivityForSession(ExistingNamedSession);
+	}
 #endif
 
 	const TSharedRef<const FUniqueNetId> MemberAddedNetId = FUniqueNetIdPlayFab::Create(PlatformIdStr);
@@ -1233,8 +1250,11 @@ void FOnlineSessionPlayFab::OnLobbyMemberRemoved(FName SessionName, const PFLobb
 		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnLobbyMemberRemoved failed to get PlatformId for Entity:%s!"), *MemberRemovedEntityIdStr);
 	}
 
-#if defined(OSS_PLAYFAB_GDK)
-	SetMultiplayerActivityForSession(ExistingNamedSession);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		SetMultiplayerActivityForSession(ExistingNamedSession);
+	}
 #endif
 }
 
@@ -1496,48 +1516,51 @@ bool FOnlineSessionPlayFab::JoinSession(const FUniqueNetId& UserId, FName Sessio
 						bSuccess = false;
 					}
 #elif defined(OSS_PLAYFAB_WIN64)
-					if (PlayFabSessionInfo->GetNativePlatform() != PLATFORM_MODEL_WIN64)
+					if (!IsNativePlatformSubsystemGDK())
 					{
-						// The host is a not a Steam player and not joining host's native session is expected.
-						UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::JoinSession: Won't join a native session which is hosted by the player from different platform."));
-						bUsesNativeSession = false;
-						return true;
-					}
-					const FString SessionIdString(PlayFabSessionInfo->GetNativeSessionIdString());
-					if (!SessionIdString.IsEmpty())
-					{
-						const FOnlineSessionSearchResult* NativeDesiredSession = nullptr;
-						for (auto SearchResult : CachedSearchSettings->SearchResults)
+						if (PlayFabSessionInfo->GetNativePlatform() != PLATFORM_MODEL_WIN64)
 						{
-							if (SearchResult.Session.GetSessionIdStr() == SessionIdString)
-							{
-								NativeDesiredSession = &SearchResult;
-								break;
-							}
+							// The host is a not a Steam player and not joining host's native session is expected.
+							UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::JoinSession: Won't join a native session which is hosted by the player from different platform."));
+							bUsesNativeSession = false;
+							return true;
 						}
-						if (!NativeDesiredSession)
+						const FString SessionIdString(PlayFabSessionInfo->GetNativeSessionIdString());
+						if (!SessionIdString.IsEmpty())
 						{
-							UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::JoinSession: Failed to find Steam session with sessionId=%s"), *SessionIdString);
-							bSuccess = false;
+							const FOnlineSessionSearchResult* NativeDesiredSession = nullptr;
+							for (auto SearchResult : CachedSearchSettings->SearchResults)
+							{
+								if (SearchResult.Session.GetSessionIdStr() == SessionIdString)
+								{
+									NativeDesiredSession = &SearchResult;
+									break;
+								}
+							}
+							if (!NativeDesiredSession)
+							{
+								UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::JoinSession: Failed to find Steam session with sessionId=%s"), *SessionIdString);
+								bSuccess = false;
+							}
+							else
+							{
+								OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
+									FOnJoinSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, EOnJoinSessionCompleteResult::Type NativeSessionJoinedResult)
+										{
+											if (NativeSessionJoinedResult != EOnJoinSessionCompleteResult::Success)
+											{
+												UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeJoinSessionComplete: Failed to join native session due to %s"), LexToString(NativeSessionJoinedResult));
+											}
+											NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnNativeJoinSessionCompleteDelegateHandle);
+										}));
+								bSuccess = NativeSessionInterface->JoinSession(UserId, NativeSessionName, *NativeDesiredSession);
+							}
 						}
 						else
 						{
-							OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
-								FOnJoinSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, EOnJoinSessionCompleteResult::Type NativeSessionJoinedResult)
-									{
-										if (NativeSessionJoinedResult != EOnJoinSessionCompleteResult::Success)
-										{
-											UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeJoinSessionComplete: Failed to join native session due to %s"), LexToString(NativeSessionJoinedResult));
-										}
-										NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnNativeJoinSessionCompleteDelegateHandle);
-									}));
-							bSuccess = NativeSessionInterface->JoinSession(UserId, NativeSessionName, *NativeDesiredSession);
-							}
+							UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::JoinSession: SessionIdString is empty"));
+							bSuccess = false;
 						}
-					else
-					{
-						UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::JoinSession: SessionIdString is empty"));
-						bSuccess = false;
 					}
 #endif // !OSS_PLAYFAB_PLAYSTATION
 				}
@@ -2053,8 +2076,11 @@ void FOnlineSessionPlayFab::Tick(float DeltaTime)
 		}
 	}
 
-#if defined(OSS_PLAYFAB_GDK)
-	TickPendingInvites();
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		TickPendingInvites();
+	}
 #endif
 }
 
@@ -2138,7 +2164,10 @@ void FOnlineSessionPlayFab::OnCreateSessionCompleted(FName SessionName, bool bPl
 													{
 														ExistingNamedSession->SessionSettings.Set(FName(SEARCH_KEY_NATIVE_SESSIONID), NativeSessionId->ToString(), EOnlineDataAdvertisementType::ViaOnlineService);
 #if defined(OSS_PLAYFAB_WIN64)
-														ExistingNamedSession->SessionSettings.Set(FName(SEARCH_KEY_NATIVE_PLATFORM), PLATFORM_MODEL_WIN64, EOnlineDataAdvertisementType::ViaOnlineService);
+														if (!IsNativePlatformSubsystemGDK())
+														{
+															ExistingNamedSession->SessionSettings.Set(FName(SEARCH_KEY_NATIVE_PLATFORM), PLATFORM_MODEL_WIN64, EOnlineDataAdvertisementType::ViaOnlineService);
+														}
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
 														ExistingNamedSession->SessionSettings.Set(FName(SEARCH_KEY_NATIVE_PLATFORM), PLATFORM_MODEL_SONY, EOnlineDataAdvertisementType::ViaOnlineService);
 #endif

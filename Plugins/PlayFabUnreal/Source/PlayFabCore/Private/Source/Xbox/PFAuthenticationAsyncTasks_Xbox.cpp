@@ -1,5 +1,3 @@
-#pragma once
-
 #if defined(PF_GDK_AVAILABLE) || defined(PF_UE_GDK_SUPPORT)
 
 #include "Xbox/PFAuthenticationAsyncTasks_Xbox.h"

@@ -8,6 +8,8 @@
 #include "UObject/ObjectMacros.h"
 #include "httpClient/config.h"
 #include "httpClient/pal.h"
+#include "httpClient/httpClient.h"
+#include "httpClient/async.h"
 
 // PlayFab Common includes
 #include "XAsyncTaskQueueHelpers.h"
@@ -104,6 +106,11 @@
 #include "PFTitleDataManagement.h"
 #include "PFTitleDataManagementAsyncTasks.h"
 #include "PFTitleDataManagementUnrealTypes.h"
+
+#if HC_PLATFORM_IS_PLAYSTATION
+#include "PlayStation/PFAuthSettings_PS.h"
+#include "PlayStation/PFLocalUser_PS.h"
+#endif
 
 // PlayFab GameSave includes
 #include "PFGameSaveFiles.h"

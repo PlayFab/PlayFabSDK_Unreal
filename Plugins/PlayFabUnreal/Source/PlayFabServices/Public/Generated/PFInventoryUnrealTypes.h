@@ -885,6 +885,11 @@ struct PLAYFABSERVICES_API FPFInventoryGetInventoryOperationStatusRequest
 	/// (Optional) The entity to perform this action on.
 	/// </summary>
 	_Maybenull_ TSharedPtr<const FPFEntityKey> entity;
+
+	/// <summary>
+	/// (Optional) The token to get the status of the inventory operation.
+	/// </summary>
+	_Maybenull_ const FString operationToken;
 };
 
 /// <summary>

@@ -173,9 +173,9 @@ public:
 	void OnAppSuspend();
 	void OnAppResume();
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	void CleanUpPartyXblManager();
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 	void AddTalkerIdMapping(const FString& EntityId, const FString& UserId);
 	void SetTalkerCrossNetworkPermission(ECrossNetworkType VoiceChatType, const FString& RemoteUserId, const FString& PlatformModel);
@@ -202,6 +202,16 @@ private:
 #if OSS_PLAYFAB_VERBOSE_VOIP_LOGGING
 	void DumpState();
 #endif
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	void AddTalkerIdMappingGDK(const FString& EntityId, const FString& UserId);
+	void SetTalkerCrossNetworkPermissionGDK(ECrossNetworkType VoiceChatType, const FString& RemoteUserId, const FString& PlatformModel);
+	PartyChatPermissionOptions GetChatPermissionsForTalkerGDK(const FString& LocalId, const FString& RemoteId);
+	FString GetPlatformIdFromEntityIdGDK(const FString& EntityId);
+	void StartTrackingPermissionForTalkerGDK(const FString& UserId, bool IsRemote);
+	void StopTrackingPermissionForTalkerGDK(const FString& UserId);
+	void TickTalkerPermissionTrackingGDK();
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 	void ProcessTalkingDelegates(float DeltaTime);
 

@@ -4,8 +4,14 @@
 #ifdef PF_GDK_AVAILABLE
 #include <XGameRuntimeInit.h>
 #endif
+#if HC_PLATFORM_IS_PLAYSTATION
+#include "PlayStation/PlayFabCoreModule.PS.h"
+#endif
 
 IMPLEMENT_MODULE(FPlayFabCore, PlayFabCore);
+
+// Define the log category for TypeWrappers
+DEFINE_LOG_CATEGORY(LogPlayFabTypeWrappers);
 
 void FPlayFabCore::StartupModule()
 {
@@ -22,6 +28,11 @@ void FPlayFabCore::StartupModule()
 		UE_LOG(LogPlayFabUnreal, Log, TEXT("XGameRuntime initialized successfully"));
 	}
 #endif
+
+#if HC_PLATFORM_IS_PLAYSTATION
+	PlayFabCorePS::InitializePlatform();
+#endif
+
 }
 
 void FPlayFabCore::ShutdownModule()

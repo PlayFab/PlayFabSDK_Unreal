@@ -217,7 +217,7 @@ TSharedPtr<const FPFProfilesEntityProfileBody> ConvertEntityProfileBodyToUnreal(
 		.lineage = ConvertEntityLineageToUnreal(Datatype->lineage),
 		.objects = ConvertPlayfabMapToUnreal<PFProfilesEntityDataObjectDictionaryEntry, FPFProfilesEntityDataObject, PFProfilesEntityDataObject>(Datatype->objects, Datatype->objectsCount, ConvertEntityDataObjectToUnreal),
 		.objectsCount = Datatype->objectsCount,
-		.permissions = ConvertPlayfabArrayToUnreal(Datatype->permissions, Datatype->permissionsCount, ConvertEntityPermissionStatementToUnreal),
+		.permissions = ConvertPlayfabArrayToUnreal<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Datatype->permissions, Datatype->permissionsCount, ConvertEntityPermissionStatementToUnreal),
 		.permissionsCount = Datatype->permissionsCount,
 		.statistics = ConvertPlayfabMapToUnreal<PFEntityStatisticValueDictionaryEntry, FPFEntityStatisticValue, PFEntityStatisticValue>(Datatype->statistics, Datatype->statisticsCount, ConvertEntityStatisticValueToUnreal),
 		.statisticsCount = Datatype->statisticsCount,
@@ -247,7 +247,7 @@ const PFProfilesEntityProfileBody* ConvertEntityProfileBodyToPlayfab(TSharedPtr<
 		.lineage = ConvertEntityLineageToPlayfab(Datatype->lineage),
 		.objects = ConvertUnrealMapToPlayfab<PFProfilesEntityDataObjectDictionaryEntry, FPFProfilesEntityDataObject, PFProfilesEntityDataObject>(Datatype->objects, ConvertEntityDataObjectToPlayfab),
 		.objectsCount = (uint32_t)Datatype->objects.Num(),
-		.permissions = ConvertUnrealArrayToPlayfab(Datatype->permissions, ConvertEntityPermissionStatementToPlayfab),
+		.permissions = ConvertUnrealArrayToPlayfab<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Datatype->permissions, ConvertEntityPermissionStatementToPlayfab),
 		.permissionsCount = (uint32_t)Datatype->permissions.Num(),
 		.statistics = ConvertUnrealMapToPlayfab<PFEntityStatisticValueDictionaryEntry, FPFEntityStatisticValue, PFEntityStatisticValue>(Datatype->statistics, ConvertEntityStatisticValueToPlayfab),
 		.statisticsCount = (uint32_t)Datatype->statistics.Num(),
@@ -293,7 +293,7 @@ TSharedPtr<const FPFProfilesGetEntityProfilesRequest> ConvertGetEntityProfilesRe
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.dataAsObject = TSharedPtr<const bool>(Datatype->dataAsObject),
-		.entities = ConvertPlayfabArrayToUnreal(Datatype->entities, Datatype->entitiesCount, ConvertEntityKeyToUnreal),
+		.entities = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->entities, Datatype->entitiesCount, ConvertEntityKeyToUnreal),
 		.entitiesCount = Datatype->entitiesCount
 	});
 
@@ -310,7 +310,7 @@ const PFProfilesGetEntityProfilesRequest* ConvertGetEntityProfilesRequestToPlayf
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.dataAsObject = Datatype->dataAsObject ? new bool(*Datatype->dataAsObject) : nullptr,
-		.entities = ConvertUnrealArrayToPlayfab(Datatype->entities, ConvertEntityKeyToPlayfab),
+		.entities = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->entities, ConvertEntityKeyToPlayfab),
 		.entitiesCount = (uint32_t)Datatype->entities.Num()
 	};
 
@@ -324,7 +324,7 @@ TSharedPtr<const FPFProfilesGetEntityProfilesResponse> ConvertGetEntityProfilesR
 	}
 
 	TSharedPtr<const FPFProfilesGetEntityProfilesResponse> ConvertedType = MakeShared<FPFProfilesGetEntityProfilesResponse>(FPFProfilesGetEntityProfilesResponse{
-		.profiles = ConvertPlayfabArrayToUnreal(Datatype->profiles, Datatype->profilesCount, ConvertEntityProfileBodyToUnreal),
+		.profiles = ConvertPlayfabArrayToUnreal<PFProfilesEntityProfileBody, FPFProfilesEntityProfileBody>(Datatype->profiles, Datatype->profilesCount, ConvertEntityProfileBodyToUnreal),
 		.profilesCount = Datatype->profilesCount
 	});
 
@@ -338,7 +338,7 @@ const PFProfilesGetEntityProfilesResponse* ConvertGetEntityProfilesResponseToPla
 	}
 
 	const PFProfilesGetEntityProfilesResponse* ConvertedType = new PFProfilesGetEntityProfilesResponse{
-		.profiles = ConvertUnrealArrayToPlayfab(Datatype->profiles, ConvertEntityProfileBodyToPlayfab),
+		.profiles = ConvertUnrealArrayToPlayfab<PFProfilesEntityProfileBody, FPFProfilesEntityProfileBody>(Datatype->profiles, ConvertEntityProfileBodyToPlayfab),
 		.profilesCount = (uint32_t)Datatype->profiles.Num()
 	};
 
@@ -481,7 +481,7 @@ TSharedPtr<const FPFProfilesSetEntityProfilePolicyRequest> ConvertSetEntityProfi
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.statements = ConvertPlayfabArrayToUnreal(Datatype->statements, Datatype->statementsCount, ConvertEntityPermissionStatementToUnreal),
+		.statements = ConvertPlayfabArrayToUnreal<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Datatype->statements, Datatype->statementsCount, ConvertEntityPermissionStatementToUnreal),
 		.statementsCount = Datatype->statementsCount
 	});
 
@@ -498,7 +498,7 @@ const PFProfilesSetEntityProfilePolicyRequest* ConvertSetEntityProfilePolicyRequ
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
-		.statements = ConvertUnrealArrayToPlayfab(Datatype->statements, ConvertEntityPermissionStatementToPlayfab),
+		.statements = ConvertUnrealArrayToPlayfab<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Datatype->statements, ConvertEntityPermissionStatementToPlayfab),
 		.statementsCount = (uint32_t)Datatype->statements.Num()
 	};
 
@@ -512,7 +512,7 @@ TSharedPtr<const FPFProfilesSetEntityProfilePolicyResponse> ConvertSetEntityProf
 	}
 
 	TSharedPtr<const FPFProfilesSetEntityProfilePolicyResponse> ConvertedType = MakeShared<FPFProfilesSetEntityProfilePolicyResponse>(FPFProfilesSetEntityProfilePolicyResponse{
-		.permissions = ConvertPlayfabArrayToUnreal(Datatype->permissions, Datatype->permissionsCount, ConvertEntityPermissionStatementToUnreal),
+		.permissions = ConvertPlayfabArrayToUnreal<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Datatype->permissions, Datatype->permissionsCount, ConvertEntityPermissionStatementToUnreal),
 		.permissionsCount = Datatype->permissionsCount
 	});
 
@@ -526,7 +526,7 @@ const PFProfilesSetEntityProfilePolicyResponse* ConvertSetEntityProfilePolicyRes
 	}
 
 	const PFProfilesSetEntityProfilePolicyResponse* ConvertedType = new PFProfilesSetEntityProfilePolicyResponse{
-		.permissions = ConvertUnrealArrayToPlayfab(Datatype->permissions, ConvertEntityPermissionStatementToPlayfab),
+		.permissions = ConvertUnrealArrayToPlayfab<PFProfilesEntityPermissionStatement, FPFProfilesEntityPermissionStatement>(Datatype->permissions, ConvertEntityPermissionStatementToPlayfab),
 		.permissionsCount = (uint32_t)Datatype->permissions.Num()
 	};
 

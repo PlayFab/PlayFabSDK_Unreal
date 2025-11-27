@@ -30,7 +30,7 @@ void FClientGetPublisherDataAsyncTask::DoWork()
 
 void FClientGetPublisherDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementClientGetPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -118,7 +118,7 @@ void FClientGetTitleDataAsyncTask::DoWork()
 
 void FClientGetTitleDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementClientGetTitleDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -168,7 +168,7 @@ void FClientGetTitleNewsAsyncTask::DoWork()
 
 void FClientGetTitleNewsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementClientGetTitleNewsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -220,7 +220,7 @@ void FServerGetPublisherDataAsyncTask::DoWork()
 
 void FServerGetPublisherDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementServerGetPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -312,7 +312,7 @@ void FServerGetTitleDataAsyncTask::DoWork()
 
 void FServerGetTitleDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementServerGetTitleDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -366,7 +366,7 @@ void FServerGetTitleInternalDataAsyncTask::DoWork()
 
 void FServerGetTitleInternalDataAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementServerGetTitleInternalDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -418,7 +418,7 @@ void FServerGetTitleNewsAsyncTask::DoWork()
 
 void FServerGetTitleNewsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFTitleDataManagementServerGetTitleNewsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

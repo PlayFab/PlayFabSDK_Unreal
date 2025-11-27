@@ -693,6 +693,33 @@ struct PLAYFABSERVICES_API FPFStatisticsListStatisticDefinitionsResponse
 };
 
 /// <summary>
+/// FPFStatisticsUnlinkAggregationSourceFromStatisticRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFStatisticsUnlinkAggregationSourceFromStatisticRequest
+{
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// The name of the statistic to unlink.
+	/// </summary>
+	const FString name;
+
+	/// <summary>
+	/// The name of the aggregation source statistic to unlink.
+	/// </summary>
+	const FString sourceStatisticName;
+};
+
+/// <summary>
 /// FPFStatisticsUpdateStatisticDefinitionRequest data model.
 /// </summary>
 struct PLAYFABSERVICES_API FPFStatisticsUpdateStatisticDefinitionRequest
@@ -794,8 +821,7 @@ struct PLAYFABSERVICES_API FPFStatisticsUpdateStatisticsRequest
 	uint32 statisticsCount;
 
 	/// <summary>
-	/// (Optional) Optional transactionId of this update which can be used to ensure idempotence. Using
-	/// this field is still in testing stage.
+	/// (Optional) Optional transactionId of this update which can be used to ensure idempotence.
 	/// </summary>
 	_Maybenull_ const FString transactionId;
 };
@@ -864,6 +890,10 @@ DECLARE_DELEGATE_TwoParams(FOnIncrementStatisticVersionCompleted, const FPFStati
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnListStatisticDefinitionsCompleted, const FPFStatisticsListStatisticDefinitionsResponse&, bool);
+#endif
+
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnUnlinkAggregationSourceFromStatisticCompleted, const FString&, bool);
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK

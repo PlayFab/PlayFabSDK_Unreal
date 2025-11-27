@@ -156,7 +156,7 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesUiProgressGetProgress(
 ) noexcept
 {
     PFGameSaveFilesSyncState cSyncState{};
-    RETURN_FALSE_IF_FAILED(PFGameSaveFilesUiProgressGetProgress(localUserHandle.Get(), &cSyncState, current, total));
+    RETURN_FALSE_IF_FAILED(PFGameSaveFilesUiProgressGetProgress(localUserHandle.Get(), &cSyncState, reinterpret_cast<uint64_t*>(current), reinterpret_cast<uint64_t*>(total)));
     *syncState = static_cast<FPFGameSaveFilesSyncState>(cSyncState);
 
     return true;

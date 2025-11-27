@@ -5,6 +5,7 @@
 #include "OnlineVoiceInterfacePlayFab.h"
 #include "OnlineSessionInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabHelpers.h"
 
 FOnlineVoicePlayFab::FOnlineVoicePlayFab(class FOnlineSubsystemPlayFab* InSubsystem) :
 	OSSPlayFab(InSubsystem)
@@ -38,9 +39,9 @@ void FOnlineVoicePlayFab::OnAppSuspend()
 	LocalTalkers.Empty();
 	RemoteTalkers.Empty();
 
-#if defined(OSS_PLAYFAB_GDK)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	CleanUpPartyXblManager();
-#endif
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 }
 
 void FOnlineVoicePlayFab::OnAppResume()
@@ -189,8 +190,11 @@ bool FOnlineVoicePlayFab::RegisterLocalTalker(TSharedPtr<FPlayFabUser> LocalPlay
 	std::string PlatformUserId = TCHAR_TO_UTF8(*LocalPlayer->GetPlatformUserId());
 	PartyString AudioDeviceSelectionContext = PlatformUserId.c_str();
 #if defined(OSS_PLAYFAB_SWITCH) || defined(OSS_PLAYFAB_WIN64)
-	AudioDeviceSelectionType = PartyAudioDeviceSelectionType::SystemDefault;
-	AudioDeviceSelectionContext = nullptr;
+	if (!IsNativePlatformSubsystemGDK())
+	{
+		AudioDeviceSelectionType = PartyAudioDeviceSelectionType::SystemDefault;
+		AudioDeviceSelectionContext = nullptr;
+	}
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
 	if (!GetPlatformAudioDevice(AudioDeviceSelectionContext, PlatformUserId))
 	{
@@ -317,7 +321,7 @@ bool FOnlineVoicePlayFab::UnregisterLocalTalker(const FLocalTalkerPlayFab* Local
 
 	if (OnPlayerTalkingStateChangedDelegates.IsBound())
 	{
-		PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(LocalTalker->GetPlatformUserId());
+		FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(LocalTalker->GetPlatformUserId());
 		OnPlayerTalkingStateChangedDelegates.Broadcast(PlatformNetID, false);
 	}
 
@@ -349,7 +353,7 @@ void FOnlineVoicePlayFab::UnregisterLocalTalkers()
 
 		if (OnPlayerTalkingStateChangedDelegates.IsBound())
 		{
-			PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(LocalTalker.GetPlatformUserId());
+			FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(LocalTalker.GetPlatformUserId());
 			OnPlayerTalkingStateChangedDelegates.Broadcast(PlatformNetID, false);
 		}
 
@@ -372,7 +376,6 @@ bool FOnlineVoicePlayFab::UnregisterRemoteTalker(const FUniqueNetId& UniqueId)
 	{
 		if (OnPlayerTalkingStateChangedDelegates.IsBound() && (RemoteTalker->bIsTalking || RemoteTalker->bWasTalking))
 		{
-			PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(RemoteTalker->GetPlatformUserId());
 			OnPlayerTalkingStateChangedDelegates.Broadcast(RemoteTalker->TalkerId.ToSharedRef(), false);
 		}
 
@@ -394,7 +397,7 @@ void FOnlineVoicePlayFab::RemoveAllRemoteTalkers()
 		
 		if (OnPlayerTalkingStateChangedDelegates.IsBound() && (RemoteTalker.bIsTalking || RemoteTalker.bWasTalking))
 		{
-			PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(RemoteTalker.GetPlatformUserId());
+			FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(RemoteTalker.GetPlatformUserId());
 			OnPlayerTalkingStateChangedDelegates.Broadcast(PlatformNetID, false);
 		}
 	}
@@ -605,7 +608,7 @@ void FOnlineVoicePlayFab::ProcessTalkingDelegates(float DeltaTime)
 		{
 			if (OnPlayerTalkingStateChangedDelegates.IsBound())
 			{
-				PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(LocalTalker.GetPlatformUserId());
+				FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(LocalTalker.GetPlatformUserId());
 				OnPlayerTalkingStateChangedDelegates.Broadcast(PlatformNetID, LocalTalker.bIsTalking);
 			}
 
@@ -644,7 +647,7 @@ void FOnlineVoicePlayFab::ProcessTalkingDelegates(float DeltaTime)
 			{
 				if (OnPlayerTalkingStateChangedDelegates.IsBound())
 				{
-					PLATFORM_UNIQUE_NET_ID_REF PlatformNetID = PLATFORM_UNIQUE_NET_ID::Create(RemoteTalker.GetPlatformUserId());
+					FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(RemoteTalker.GetPlatformUserId());
 					OnPlayerTalkingStateChangedDelegates.Broadcast(PlatformNetID, RemoteTalker.bIsTalking);
 				}
 

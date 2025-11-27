@@ -16,13 +16,68 @@ Before integrating the PlayFab Unreal Plugin into your project, ensure you have 
 
 ### Software Requirements
 - **GDK 2510** (Gaming Development Kit) installed
-- **Unreal Engine 5.5** (either public version or built from source)
+- **Unreal Engine 5.6** (either public version or built from source)
 - **PlayFab Account** with a configured title
 
 ### Platform Support
 The plugin supports the following platforms:
 - **Win64** (Windows Desktop)
 - **WinGDK** (Windows Gaming Development Kit)
+- **XSX** (Xbox Series X)
+- **XB1** (Xbox One)
+- **PS5** (PlayStation 5)
+
+## Before Installation
+
+### Setting Up NDA Platforms (Switch, PlayStation®5, PlayStation®4)
+
+If you plan to develop for NDA platforms (Nintendo Switch, PlayStation®5, or PlayStation®4), you must complete these setup steps **before** proceeding with the standard installation:
+
+#### Prerequisites
+- **NuGet.exe**: Ensure `nuget.exe` is installed and added to your system's PATH environment variable
+- **Private Repository Access**: You must have [access to PlayFab's private repositories](https://learn.microsoft.com/gaming/playfab/sdks/request-access-for-sdks-samples) for NDA platforms
+- **Git**: Git must be installed and available in your PATH
+
+#### Setup Steps
+
+1. Clone the repository:
+   ```powershell
+   git clone <repository-url>
+   ```
+
+2. Navigate to the repository root directory:
+   ```powershell
+   cd <repository-folder>
+   ```
+
+3. Initialize and update submodules:
+   ```powershell
+   git submodule update --init --recursive
+   ```
+
+4. Navigate to the PlayFabUnreal plugin folder:
+   ```powershell
+   cd .\Plugins\PlayFabUnreal\
+   ```
+
+5. Run the setup script for your target NDA platform:
+   ```powershell
+   # For PlayStation (PS4 and PS5)
+   .\SetUpPrivate.ps1 -Platform "PlayStation"
+   
+   # For Nintendo Switch (coming soon)
+   # .\SetUpPrivate.ps1 -Platform "Switch"
+   ```
+
+This script downloads the necessary PlayFab Unified SDK libraries, binaries, and source code for your chosen NDA platform. The script will prompt you to specify the NuGet package version you want to use and will automatically handle all NuGet `packages.config` file updates.
+
+#### Troubleshooting
+
+**Patch Errors**: If you see patch errors on `Build.cs` files, check if the offending file has already been patched from a previous run of the script. If it has, you can safely ignore the patch error.
+
+---
+
+**Note**: "PlayStation" is a registered trademark or trademark of Sony Interactive Entertainment Inc. "PS4" and "PS5" are registered trademarks or trademarks of Sony Interactive Entertainment Inc.
 
 ## Installation
 
@@ -74,29 +129,56 @@ If you're building Unreal Engine from source, you'll need to update it to use GD
 
 * Open the Engine .sln (or the sln generated for your Unreal project), and make the following changes:
     * In /Engine/Platforms/GDK/Config/GDK_SDK.json change "MainVersion", "MinVersion", and "MaxVersion" all to "251000"
-    * Because the on disk layout of the GDK changed for 251000, some changes are needed in various Build.cs files. Specifically, the paths to the headers and binaries for Extension libraries shifted. To account for this, the following changes are needed:
-        * In /Engine/Platforms/GDK/Source/Programs/UnrealBuildTool/GDKPlatformSDK.cs, update the GetExtensionDirectory method to
-            ```
-            public static string GetExtensionDirectory(string ExtensionName, bool bIsForRedist = false)
+
+    * When using the PlayFab Online Subsystem, you may encounter the following runtime error: 
+    `Runtime dependency Party.dll is configured to be staged from C:\Program Files (x86)\Microsoft GDK\<version>\Party.dll and \Engine\Plugins\Online\OnlineSubsystemPlayFab\Platforms\GDK\Redist\Party.dll`
+
+        To resolve this issue, follow the steps below:
+
+        1. Modify `\Engine\Platforms\GDK\Plugins\Online\OnlineSubsystemGDK\OnlineSubsystemGDK.uplugin` by setting `PlayFabParty` to disabled:
+            ```json
             {
-                string BaseGDKExtensionPath = Path.Combine(GetCurrentGSDKDir(), "GRDK", "ExtensionLibraries");
-
-                if (bIsForRedist)
-                {
-                    return Path.Combine(BaseGDKExtensionPath, ExtensionName, "Redist", "x64");
-                }
-                else
-                {
-                    return Path.Combine(BaseGDKExtensionPath, ExtensionName);
-
-                }
+                "Name": "PlayFabParty",
+                "Enabled": false
             }
             ```
-        * In /Engine/Platforms/GDK/Plugins/Online/OnlineSubsystemGDK/Source/OnlineSubsystemGDK.Build.cs change path for the import libs from <ExtensionDir>/lib to <ExtensionDir>/lib/x64
-        * In /Engine/Platforms/GDK/Plugins/Online/PlayFabParty/Source/PlayFabParty.build.cs change path for the import libs from <ExtensionDir>/lib to <ExtensionDir>/lib/x64
-        * In /Engine/Platforms/GDK/Source/ThirdParty/XCurl/XCurl.build.cs change path for import libs from <ExtensionDir>/lib to <ExtensionDir>/Lib/x64
-        * In /Engine/Platforms/GDK/Source/ThirdParty/XSAPI/XSAPI.build.cs change path for XSAPI static libs from <ExtensionDir>/Lib/Release/<VCVersion> to <ExtensionDir>/Lib/x64/Release/<VCVersion>, and change path for LHC import lib from <ExtensionDir>/lib to <ExtensionDir>/lib/x64
+
+        2. Update `\Engine\Platforms\GDK\Plugins\Online\OnlineSubsystemGDK\Source\OnlineSubsystemGDK.Build.cs` by commenting out the inclusion of `PlayFabParty`:
+            ```csharp
+            if (Target.bCompileAgainstEngine)
+            {
+                //PublicDependencyModuleNames.Add("PlayFabParty");
+            }
+            ```
+
+        These updates should resolve the staging conflict for `Party.dll`.
+
     * Rebuild the engine (UE5.vxcproj)
+
+## Single Package for Multiple Stores
+
+Instead of creating multiple packages for different stores, a studio may prefer to have a single package that can be shipped in multiple stores and that typically requires slightly different settings. The OSS can support this through the `-PlayFabConfigOverridePrefix=<Prefix>` command line argument.
+
+The minimal steps are as follows along with an example for Win64 with Steam and GDK. You can specify additional settings in the Engine.ini and you can specify additional ini files as well like Game.ini as long as they have the same prefix.
+1. In your game's default or platform Engine.ini, `+AdditionalModulesToLoad=OnlineSubsystemPlayFab` under the`[OnlineSubsystem]` section.
+    * Update `DefaultEngine.ini` with
+        ```
+        [OnlineSubsystem]
+        +AdditionalModulesToLoad=OnlineSubsystemPlayFab
+        ```
+1. In your platform's Engine.ini, set `NativePlatformService` to your default value. 
+    * Set `NativePlatformService=Steam` in `WindowsEngine.ini`  
+1. Under OnlineSubsystemPlayFab/Config, create a `<Prefix>Engine.ini`.
+    * Create the file `OnlineSubsystemPlayFab/Config/GDKEngine.ini`
+1. In the newly created file, set `NativePlatformService` to another value.
+    * Update `OnlineSubsystemPlayFab/Config/GDKEngine.ini` with
+        ```
+        [OnlineSubsystem]
+        NativePlatformService=GDK
+        ```
+1. Cook and package your game as normal.
+1. Running the game without the `PlayFabConfigOverridePrefix` argument will use the default settings as normal but running with the argument will apply those additional settings on top of the default.
+    * `./ShooterGame.exe -PlayFabConfigOverridePrefix=GDK` will effectively set `NativePlatformService=GDK`
 
 ## Preprocessor Macros
 

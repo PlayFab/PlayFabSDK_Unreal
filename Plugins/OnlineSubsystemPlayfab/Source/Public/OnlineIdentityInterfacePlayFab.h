@@ -269,6 +269,17 @@ private:
 	void OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
 	void OnLogoutComplete(int32 LocalUserNum, bool bWasSuccessful);
 
+#if defined(OSS_PLAYFAB_WIN64)
+	void FinishRequestSteam(const FString& PlatformUserIdStr, TSharedPtr<FJsonObject> RequestBodyJson, FPFServiceConfigHandle ServiceConfigHandle);
+#endif // OSS_PLAYFAB_WIN64
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	bool ApplyPlatformHTTPRequestDataGDK(const FString& PlatformUserIdStr, const FString& URL, const FString& RequestVerb);
+	static void OnPopulatePlatformRequestDataCompletedGDK(bool bWasSuccessful, const FString& PlatformUserIdStr, TMap<FString, FString> PlatformHeaders = TMap<FString, FString>(), TSharedPtr<FJsonObject> RequestBodyJson = TSharedPtr<FJsonObject>(nullptr));
+
+	void FinishRequestGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+
 public:
 	// Platform specific, must implement for your platform!
 	bool ApplyPlatformHTTPRequestData(const FString& PlatformUserIdStr, const FString& URL, const FString& RequestVerb);

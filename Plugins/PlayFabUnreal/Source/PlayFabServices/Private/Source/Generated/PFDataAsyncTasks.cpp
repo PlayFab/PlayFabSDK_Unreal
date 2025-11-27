@@ -34,7 +34,7 @@ void FAbortFileUploadsAsyncTask::DoWork()
 
 void FAbortFileUploadsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataAbortFileUploadsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -89,7 +89,7 @@ void FDeleteFilesAsyncTask::DoWork()
 
 void FDeleteFilesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataDeleteFilesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -144,7 +144,7 @@ void FFinalizeFileUploadsAsyncTask::DoWork()
 
 void FFinalizeFileUploadsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataFinalizeFileUploadsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -196,7 +196,7 @@ void FGetFilesAsyncTask::DoWork()
 
 void FGetFilesAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataGetFilesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -249,7 +249,7 @@ void FGetObjectsAsyncTask::DoWork()
 
 void FGetObjectsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataGetObjectsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -304,7 +304,7 @@ void FInitiateFileUploadsAsyncTask::DoWork()
 
 void FInitiateFileUploadsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataInitiateFileUploadsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
@@ -346,7 +346,7 @@ void FSetObjectsAsyncTask::DoWork()
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),
 		.expectedProfileVersion = Request.expectedProfileVersion ? new int32(*Request.expectedProfileVersion) : nullptr,
-		.objects = ConvertUnrealArrayToPlayfab(Request.objects, ConvertSetObjectToPlayfab),
+		.objects = ConvertUnrealArrayToPlayfab<PFDataSetObject, FPFDataSetObject>(Request.objects, ConvertSetObjectToPlayfab),
 		.objectsCount = (uint32_t)Request.objects.Num()
 	};
 	HResult = PFDataSetObjectsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
@@ -359,7 +359,7 @@ void FSetObjectsAsyncTask::DoWork()
 
 void FSetObjectsAsyncTask::ProcessResults()
 {
-	uint64 ResultSize = 0;
+	size_t ResultSize = 0;
 	HResult = PFDataSetObjectsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{

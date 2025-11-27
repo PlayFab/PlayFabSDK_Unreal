@@ -39,7 +39,7 @@ void FPFAuthenticationLoginWithAndroidDeviceIDAsyncTask::DoWork()
 void FPFAuthenticationLoginWithAndroidDeviceIDAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithAndroidDeviceIDGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -55,8 +55,8 @@ void FPFAuthenticationLoginWithAndroidDeviceIDAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -106,7 +106,7 @@ void FPFAuthenticationLoginWithAppleAsyncTask::DoWork()
 void FPFAuthenticationLoginWithAppleAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithAppleGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -122,8 +122,8 @@ void FPFAuthenticationLoginWithAppleAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -173,7 +173,7 @@ void FPFAuthenticationLoginWithBattleNetAsyncTask::DoWork()
 void FPFAuthenticationLoginWithBattleNetAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithBattleNetGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -189,8 +189,8 @@ void FPFAuthenticationLoginWithBattleNetAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -239,7 +239,7 @@ void FPFAuthenticationLoginWithCustomIDAsyncTask::DoWork()
 void FPFAuthenticationLoginWithCustomIDAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithCustomIDGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -255,8 +255,8 @@ void FPFAuthenticationLoginWithCustomIDAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -304,7 +304,7 @@ void FPFAuthenticationLoginWithEmailAddressAsyncTask::DoWork()
 void FPFAuthenticationLoginWithEmailAddressAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithEmailAddressGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -320,8 +320,8 @@ void FPFAuthenticationLoginWithEmailAddressAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -372,7 +372,7 @@ void FPFAuthenticationLoginWithFacebookAsyncTask::DoWork()
 void FPFAuthenticationLoginWithFacebookAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithFacebookGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -388,8 +388,8 @@ void FPFAuthenticationLoginWithFacebookAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -439,7 +439,7 @@ void FPFAuthenticationLoginWithFacebookInstantGamesIdAsyncTask::DoWork()
 void FPFAuthenticationLoginWithFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithFacebookInstantGamesIdGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -455,8 +455,8 @@ void FPFAuthenticationLoginWithFacebookInstantGamesIdAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -510,7 +510,7 @@ void FPFAuthenticationLoginWithGameCenterAsyncTask::DoWork()
 void FPFAuthenticationLoginWithGameCenterAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithGameCenterGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -526,8 +526,8 @@ void FPFAuthenticationLoginWithGameCenterAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -578,7 +578,7 @@ void FPFAuthenticationLoginWithGoogleAccountAsyncTask::DoWork()
 void FPFAuthenticationLoginWithGoogleAccountAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithGoogleAccountGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -594,8 +594,8 @@ void FPFAuthenticationLoginWithGoogleAccountAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -645,7 +645,7 @@ void FPFAuthenticationLoginWithGooglePlayGamesServicesAsyncTask::DoWork()
 void FPFAuthenticationLoginWithGooglePlayGamesServicesAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithGooglePlayGamesServicesGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -661,8 +661,8 @@ void FPFAuthenticationLoginWithGooglePlayGamesServicesAsyncTask::ProcessResults(
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -714,7 +714,7 @@ void FPFAuthenticationLoginWithIOSDeviceIDAsyncTask::DoWork()
 void FPFAuthenticationLoginWithIOSDeviceIDAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithIOSDeviceIDGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -730,8 +730,8 @@ void FPFAuthenticationLoginWithIOSDeviceIDAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -782,7 +782,7 @@ void FPFAuthenticationLoginWithKongregateAsyncTask::DoWork()
 void FPFAuthenticationLoginWithKongregateAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithKongregateGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -798,8 +798,8 @@ void FPFAuthenticationLoginWithKongregateAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -849,7 +849,7 @@ void FPFAuthenticationLoginWithNintendoServiceAccountAsyncTask::DoWork()
 void FPFAuthenticationLoginWithNintendoServiceAccountAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithNintendoServiceAccountGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -865,8 +865,8 @@ void FPFAuthenticationLoginWithNintendoServiceAccountAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -916,7 +916,7 @@ void FPFAuthenticationLoginWithNintendoSwitchDeviceIdAsyncTask::DoWork()
 void FPFAuthenticationLoginWithNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithNintendoSwitchDeviceIdGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -932,8 +932,8 @@ void FPFAuthenticationLoginWithNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -983,7 +983,7 @@ void FPFAuthenticationLoginWithOpenIdConnectAsyncTask::DoWork()
 void FPFAuthenticationLoginWithOpenIdConnectAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithOpenIdConnectGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -999,8 +999,8 @@ void FPFAuthenticationLoginWithOpenIdConnectAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -1048,7 +1048,7 @@ void FPFAuthenticationLoginWithPlayFabAsyncTask::DoWork()
 void FPFAuthenticationLoginWithPlayFabAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithPlayFabGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1064,8 +1064,8 @@ void FPFAuthenticationLoginWithPlayFabAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -1117,7 +1117,7 @@ void FPFAuthenticationLoginWithPSNAsyncTask::DoWork()
 void FPFAuthenticationLoginWithPSNAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithPSNGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1133,8 +1133,8 @@ void FPFAuthenticationLoginWithPSNAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -1185,7 +1185,7 @@ void FPFAuthenticationLoginWithSteamAsyncTask::DoWork()
 void FPFAuthenticationLoginWithSteamAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithSteamGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1201,8 +1201,8 @@ void FPFAuthenticationLoginWithSteamAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -1252,7 +1252,7 @@ void FPFAuthenticationLoginWithTwitchAsyncTask::DoWork()
 void FPFAuthenticationLoginWithTwitchAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithTwitchGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1268,8 +1268,8 @@ void FPFAuthenticationLoginWithTwitchAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -1319,7 +1319,7 @@ void FPFAuthenticationLoginWithXboxAsyncTask::DoWork()
 void FPFAuthenticationLoginWithXboxAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationLoginWithXboxGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1335,8 +1335,8 @@ void FPFAuthenticationLoginWithXboxAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
 		}
 		else
 		{
@@ -1391,7 +1391,7 @@ void FPFAuthenticationRegisterPlayFabUserAsyncTask::DoWork()
 void FPFAuthenticationRegisterPlayFabUserAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationRegisterPlayFabUserGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1399,7 +1399,7 @@ void FPFAuthenticationRegisterPlayFabUserAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFAuthenticationRegisterPlayFabUserResult* result;
 		hr = PFAuthenticationRegisterPlayFabUserGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 
@@ -1461,7 +1461,7 @@ void FPFAuthenticationServerLoginWithAndroidDeviceIDAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithAndroidDeviceIDAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithAndroidDeviceIDGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1528,7 +1528,7 @@ void FPFAuthenticationServerLoginWithBattleNetAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithBattleNetAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithBattleNetGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1595,7 +1595,7 @@ void FPFAuthenticationServerLoginWithCustomIDAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithCustomIDAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithCustomIDGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1664,7 +1664,7 @@ void FPFAuthenticationServerLoginWithIOSDeviceIDAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithIOSDeviceIDAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithIOSDeviceIDGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1733,7 +1733,7 @@ void FPFAuthenticationServerLoginWithPSNAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithPSNAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithPSNGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1801,7 +1801,7 @@ void FPFAuthenticationServerLoginWithServerCustomIdAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithServerCustomIdAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithServerCustomIdGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1868,7 +1868,7 @@ void FPFAuthenticationServerLoginWithSteamIdAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithSteamIdAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithSteamIdGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -1935,7 +1935,7 @@ void FPFAuthenticationServerLoginWithXboxAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithXboxAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithXboxGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -2003,7 +2003,7 @@ void FPFAuthenticationServerLoginWithXboxIdAsyncTask::DoWork()
 void FPFAuthenticationServerLoginWithXboxIdAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationServerLoginWithXboxIdGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -2071,8 +2071,8 @@ void FPFAuthenticationAuthenticateGameServerWithCustomIdAsyncTask::ProcessResult
 
 	if (SUCCEEDED(hr))
 	{
-		FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-		delegate.ExecuteIfBound(entityHandlePtr, newlyCreated, true);
+		*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+		delegate.ExecuteIfBound(&m_entityHandle, newlyCreated, true);
 	}
 	else
 	{
@@ -2154,8 +2154,8 @@ void FPFAuthenticationGetEntityAsyncTask::ProcessResults()
 
 	if (SUCCEEDED(hr))
 	{
-		FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-		delegate.ExecuteIfBound(entityHandlePtr, true);
+		*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+		delegate.ExecuteIfBound(&m_entityHandle, true);
 	}
 	else
 	{
@@ -2203,8 +2203,8 @@ void FPFAuthenticationGetEntityWithSecretKeyAsyncTask::ProcessResults()
 
 	if (SUCCEEDED(hr))
 	{
-		FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-		delegate.ExecuteIfBound(entityHandlePtr, true);
+		*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
+		delegate.ExecuteIfBound(&m_entityHandle, true);
 	}
 	else
 	{
@@ -2246,7 +2246,7 @@ void FPFAuthenticationValidateEntityTokenAsyncTask::DoWork()
 void FPFAuthenticationValidateEntityTokenAsyncTask::ProcessResults()
 {
 	TArray<uint8> bufferArray;
-	uint64 resultSize = 0;
+	size_t resultSize = 0;
 
 	HRESULT hr = PFAuthenticationValidateEntityTokenGetResultSize(*mAsyncBlock, &resultSize); 
 	
@@ -2254,7 +2254,7 @@ void FPFAuthenticationValidateEntityTokenAsyncTask::ProcessResults()
 	{ 
 		bufferArray.Reserve(resultSize);
 
-		uint64 bufferUsed = 0;
+		size_t bufferUsed = 0;
 		PFAuthenticationValidateEntityTokenResponse* result;
 		hr = PFAuthenticationValidateEntityTokenGetResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, &bufferUsed);
 

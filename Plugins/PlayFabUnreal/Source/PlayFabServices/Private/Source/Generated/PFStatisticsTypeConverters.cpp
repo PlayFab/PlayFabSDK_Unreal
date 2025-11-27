@@ -126,7 +126,7 @@ TSharedPtr<const FPFStatisticsCreateStatisticDefinitionRequest> ConvertCreateSta
 	TSharedPtr<const FPFStatisticsCreateStatisticDefinitionRequest> ConvertedType = MakeShared<FPFStatisticsCreateStatisticDefinitionRequest>(FPFStatisticsCreateStatisticDefinitionRequest{
 		.aggregationSources = ConvertCharArrayToUnreal(Datatype->aggregationSources, Datatype->aggregationSourcesCount),
 		.aggregationSourcesCount = Datatype->aggregationSourcesCount,
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
@@ -148,7 +148,7 @@ const PFStatisticsCreateStatisticDefinitionRequest* ConvertCreateStatisticDefini
 	const PFStatisticsCreateStatisticDefinitionRequest* ConvertedType = new PFStatisticsCreateStatisticDefinitionRequest{
 		.aggregationSources = ConvertFStringArrayToPlayfab(Datatype->aggregationSources),
 		.aggregationSourcesCount = (uint32_t)Datatype->aggregationSources.Num(),
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertStatisticColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, ConvertStatisticColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
@@ -227,7 +227,7 @@ TSharedPtr<const FPFStatisticsDeleteStatisticsRequest> ConvertDeleteStatisticsRe
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.statistics = ConvertPlayfabArrayToUnreal(Datatype->statistics, Datatype->statisticsCount, ConvertStatisticDeleteToUnreal),
+		.statistics = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticDelete, FPFStatisticsStatisticDelete>(Datatype->statistics, Datatype->statisticsCount, ConvertStatisticDeleteToUnreal),
 		.statisticsCount = Datatype->statisticsCount
 	});
 
@@ -244,7 +244,7 @@ const PFStatisticsDeleteStatisticsRequest* ConvertDeleteStatisticsRequestToPlayf
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
-		.statistics = ConvertUnrealArrayToPlayfab(Datatype->statistics, ConvertStatisticDeleteToPlayfab),
+		.statistics = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticDelete, FPFStatisticsStatisticDelete>(Datatype->statistics, ConvertStatisticDeleteToPlayfab),
 		.statisticsCount = (uint32_t)Datatype->statistics.Num()
 	};
 
@@ -318,7 +318,7 @@ TSharedPtr<const FPFStatisticsGetStatisticDefinitionResponse> ConvertGetStatisti
 		.aggregationDestinationsCount = Datatype->aggregationDestinationsCount,
 		.aggregationSources = ConvertCharArrayToUnreal(Datatype->aggregationSources, Datatype->aggregationSourcesCount),
 		.aggregationSourcesCount = Datatype->aggregationSourcesCount,
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.created = FDateTime::FromUnixTimestamp((int64)Datatype->created),
 		.entityType = Datatype->entityType == nullptr ? FString() : FString(Datatype->entityType),
@@ -345,7 +345,7 @@ const PFStatisticsGetStatisticDefinitionResponse* ConvertGetStatisticDefinitionR
 		.aggregationDestinationsCount = (uint32_t)Datatype->aggregationDestinations.Num(),
 		.aggregationSources = ConvertFStringArrayToPlayfab(Datatype->aggregationSources),
 		.aggregationSourcesCount = (uint32_t)Datatype->aggregationSources.Num(),
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertStatisticColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, ConvertStatisticColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.created = Datatype->created.ToUnixTimestamp(),
 		.entityType = ConvertFStringToCharPtr(Datatype->entityType),
@@ -402,7 +402,7 @@ TSharedPtr<const FPFStatisticsStatisticColumnCollection> ConvertStatisticColumnC
 	}
 
 	TSharedPtr<const FPFStatisticsStatisticColumnCollection> ConvertedType = MakeShared<FPFStatisticsStatisticColumnCollection>(FPFStatisticsStatisticColumnCollection{
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
 		.columnsCount = Datatype->columnsCount
 	});
 
@@ -416,7 +416,7 @@ const PFStatisticsStatisticColumnCollection* ConvertStatisticColumnCollectionToP
 	}
 
 	const PFStatisticsStatisticColumnCollection* ConvertedType = new PFStatisticsStatisticColumnCollection{
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertStatisticColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, ConvertStatisticColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num()
 	};
 
@@ -500,7 +500,7 @@ TSharedPtr<const FPFStatisticsGetStatisticsForEntitiesRequest> ConvertGetStatist
 	TSharedPtr<const FPFStatisticsGetStatisticsForEntitiesRequest> ConvertedType = MakeShared<FPFStatisticsGetStatisticsForEntitiesRequest>(FPFStatisticsGetStatisticsForEntitiesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.entities = ConvertPlayfabArrayToUnreal(Datatype->entities, Datatype->entitiesCount, ConvertEntityKeyToUnreal),
+		.entities = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->entities, Datatype->entitiesCount, ConvertEntityKeyToUnreal),
 		.entitiesCount = Datatype->entitiesCount,
 		.statisticNames = ConvertCharArrayToUnreal(Datatype->statisticNames, Datatype->statisticNamesCount),
 		.statisticNamesCount = Datatype->statisticNamesCount
@@ -518,7 +518,7 @@ const PFStatisticsGetStatisticsForEntitiesRequest* ConvertGetStatisticsForEntiti
 	const PFStatisticsGetStatisticsForEntitiesRequest* ConvertedType = new PFStatisticsGetStatisticsForEntitiesRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.entities = ConvertUnrealArrayToPlayfab(Datatype->entities, ConvertEntityKeyToPlayfab),
+		.entities = ConvertUnrealArrayToPlayfab<PFEntityKey, FPFEntityKey>(Datatype->entities, ConvertEntityKeyToPlayfab),
 		.entitiesCount = (uint32_t)Datatype->entities.Num(),
 		.statisticNames = ConvertFStringArrayToPlayfab(Datatype->statisticNames),
 		.statisticNamesCount = (uint32_t)Datatype->statisticNames.Num()
@@ -535,7 +535,7 @@ TSharedPtr<const FPFStatisticsEntityStatistics> ConvertEntityStatisticsToUnreal(
 
 	TSharedPtr<const FPFStatisticsEntityStatistics> ConvertedType = MakeShared<FPFStatisticsEntityStatistics>(FPFStatisticsEntityStatistics{
 		.entityKey = ConvertEntityKeyToUnreal(Datatype->entityKey),
-		.statistics = ConvertPlayfabArrayToUnreal(Datatype->statistics, Datatype->statisticsCount, ConvertEntityStatisticValueToUnreal),
+		.statistics = ConvertPlayfabArrayToUnreal<PFStatisticsEntityStatisticValue, FPFStatisticsEntityStatisticValue>(Datatype->statistics, Datatype->statisticsCount, ConvertEntityStatisticValueToUnreal),
 		.statisticsCount = Datatype->statisticsCount
 	});
 
@@ -550,7 +550,7 @@ const PFStatisticsEntityStatistics* ConvertEntityStatisticsToPlayfab(TSharedPtr<
 
 	const PFStatisticsEntityStatistics* ConvertedType = new PFStatisticsEntityStatistics{
 		.entityKey = ConvertEntityKeyToPlayfab(Datatype->entityKey),
-		.statistics = ConvertUnrealArrayToPlayfab(Datatype->statistics, ConvertEntityStatisticValueToPlayfab),
+		.statistics = ConvertUnrealArrayToPlayfab<PFStatisticsEntityStatisticValue, FPFStatisticsEntityStatisticValue>(Datatype->statistics, ConvertEntityStatisticValueToPlayfab),
 		.statisticsCount = (uint32_t)Datatype->statistics.Num()
 	};
 
@@ -566,7 +566,7 @@ TSharedPtr<const FPFStatisticsGetStatisticsForEntitiesResponse> ConvertGetStatis
 	TSharedPtr<const FPFStatisticsGetStatisticsForEntitiesResponse> ConvertedType = MakeShared<FPFStatisticsGetStatisticsForEntitiesResponse>(FPFStatisticsGetStatisticsForEntitiesResponse{
 		.columnDetails = ConvertPlayfabMapToUnreal<PFStatisticsStatisticColumnCollectionDictionaryEntry, FPFStatisticsStatisticColumnCollection, PFStatisticsStatisticColumnCollection>(Datatype->columnDetails, Datatype->columnDetailsCount, ConvertStatisticColumnCollectionToUnreal),
 		.columnDetailsCount = Datatype->columnDetailsCount,
-		.entitiesStatistics = ConvertPlayfabArrayToUnreal(Datatype->entitiesStatistics, Datatype->entitiesStatisticsCount, ConvertEntityStatisticsToUnreal),
+		.entitiesStatistics = ConvertPlayfabArrayToUnreal<PFStatisticsEntityStatistics, FPFStatisticsEntityStatistics>(Datatype->entitiesStatistics, Datatype->entitiesStatisticsCount, ConvertEntityStatisticsToUnreal),
 		.entitiesStatisticsCount = Datatype->entitiesStatisticsCount
 	});
 
@@ -582,7 +582,7 @@ const PFStatisticsGetStatisticsForEntitiesResponse* ConvertGetStatisticsForEntit
 	const PFStatisticsGetStatisticsForEntitiesResponse* ConvertedType = new PFStatisticsGetStatisticsForEntitiesResponse{
 		.columnDetails = ConvertUnrealMapToPlayfab<PFStatisticsStatisticColumnCollectionDictionaryEntry, FPFStatisticsStatisticColumnCollection, PFStatisticsStatisticColumnCollection>(Datatype->columnDetails, ConvertStatisticColumnCollectionToPlayfab),
 		.columnDetailsCount = (uint32_t)Datatype->columnDetails.Num(),
-		.entitiesStatistics = ConvertUnrealArrayToPlayfab(Datatype->entitiesStatistics, ConvertEntityStatisticsToPlayfab),
+		.entitiesStatistics = ConvertUnrealArrayToPlayfab<PFStatisticsEntityStatistics, FPFStatisticsEntityStatistics>(Datatype->entitiesStatistics, ConvertEntityStatisticsToPlayfab),
 		.entitiesStatisticsCount = (uint32_t)Datatype->entitiesStatistics.Num()
 	};
 
@@ -684,7 +684,7 @@ TSharedPtr<const FPFStatisticsStatisticDefinition> ConvertStatisticDefinitionToU
 		.aggregationDestinationsCount = Datatype->aggregationDestinationsCount,
 		.aggregationSources = ConvertCharArrayToUnreal(Datatype->aggregationSources, Datatype->aggregationSourcesCount),
 		.aggregationSourcesCount = Datatype->aggregationSourcesCount,
-		.columns = ConvertPlayfabArrayToUnreal(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
+		.columns = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, Datatype->columnsCount, ConvertStatisticColumnToUnreal),
 		.columnsCount = Datatype->columnsCount,
 		.created = FDateTime::FromUnixTimestamp((int64)Datatype->created),
 		.entityType = Datatype->entityType == nullptr ? FString() : FString(Datatype->entityType),
@@ -711,7 +711,7 @@ const PFStatisticsStatisticDefinition* ConvertStatisticDefinitionToPlayfab(TShar
 		.aggregationDestinationsCount = (uint32_t)Datatype->aggregationDestinations.Num(),
 		.aggregationSources = ConvertFStringArrayToPlayfab(Datatype->aggregationSources),
 		.aggregationSourcesCount = (uint32_t)Datatype->aggregationSources.Num(),
-		.columns = ConvertUnrealArrayToPlayfab(Datatype->columns, ConvertStatisticColumnToPlayfab),
+		.columns = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticColumn, FPFStatisticsStatisticColumn>(Datatype->columns, ConvertStatisticColumnToPlayfab),
 		.columnsCount = (uint32_t)Datatype->columns.Num(),
 		.created = Datatype->created.ToUnixTimestamp(),
 		.entityType = ConvertFStringToCharPtr(Datatype->entityType),
@@ -736,7 +736,7 @@ TSharedPtr<const FPFStatisticsListStatisticDefinitionsResponse> ConvertListStati
 	TSharedPtr<const FPFStatisticsListStatisticDefinitionsResponse> ConvertedType = MakeShared<FPFStatisticsListStatisticDefinitionsResponse>(FPFStatisticsListStatisticDefinitionsResponse{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.statisticDefinitions = ConvertPlayfabArrayToUnreal(Datatype->statisticDefinitions, Datatype->statisticDefinitionsCount, ConvertStatisticDefinitionToUnreal),
+		.statisticDefinitions = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticDefinition, FPFStatisticsStatisticDefinition>(Datatype->statisticDefinitions, Datatype->statisticDefinitionsCount, ConvertStatisticDefinitionToUnreal),
 		.statisticDefinitionsCount = Datatype->statisticDefinitionsCount
 	});
 
@@ -752,8 +752,40 @@ const PFStatisticsListStatisticDefinitionsResponse* ConvertListStatisticDefiniti
 	const PFStatisticsListStatisticDefinitionsResponse* ConvertedType = new PFStatisticsListStatisticDefinitionsResponse{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.statisticDefinitions = ConvertUnrealArrayToPlayfab(Datatype->statisticDefinitions, ConvertStatisticDefinitionToPlayfab),
+		.statisticDefinitions = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticDefinition, FPFStatisticsStatisticDefinition>(Datatype->statisticDefinitions, ConvertStatisticDefinitionToPlayfab),
 		.statisticDefinitionsCount = (uint32_t)Datatype->statisticDefinitions.Num()
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFStatisticsUnlinkAggregationSourceFromStatisticRequest> ConvertUnlinkAggregationSourceFromStatisticRequestToUnreal(const PFStatisticsUnlinkAggregationSourceFromStatisticRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFStatisticsUnlinkAggregationSourceFromStatisticRequest> ConvertedType = MakeShared<FPFStatisticsUnlinkAggregationSourceFromStatisticRequest>(FPFStatisticsUnlinkAggregationSourceFromStatisticRequest{
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.name = Datatype->name == nullptr ? FString() : FString(Datatype->name),
+		.sourceStatisticName = Datatype->sourceStatisticName == nullptr ? FString() : FString(Datatype->sourceStatisticName)
+	});
+
+	return ConvertedType;
+}
+
+const PFStatisticsUnlinkAggregationSourceFromStatisticRequest* ConvertUnlinkAggregationSourceFromStatisticRequestToPlayfab(TSharedPtr<const FPFStatisticsUnlinkAggregationSourceFromStatisticRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFStatisticsUnlinkAggregationSourceFromStatisticRequest* ConvertedType = new PFStatisticsUnlinkAggregationSourceFromStatisticRequest{
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.name = ConvertFStringToCharPtr(Datatype->name),
+		.sourceStatisticName = ConvertFStringToCharPtr(Datatype->sourceStatisticName)
 	};
 
 	return ConvertedType;
@@ -837,7 +869,7 @@ TSharedPtr<const FPFStatisticsUpdateStatisticsRequest> ConvertUpdateStatisticsRe
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.statistics = ConvertPlayfabArrayToUnreal(Datatype->statistics, Datatype->statisticsCount, ConvertStatisticUpdateToUnreal),
+		.statistics = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticUpdate, FPFStatisticsStatisticUpdate>(Datatype->statistics, Datatype->statisticsCount, ConvertStatisticUpdateToUnreal),
 		.statisticsCount = Datatype->statisticsCount,
 		.transactionId = Datatype->transactionId == nullptr ? FString() : FString(Datatype->transactionId)
 	});
@@ -855,7 +887,7 @@ const PFStatisticsUpdateStatisticsRequest* ConvertUpdateStatisticsRequestToPlayf
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),
-		.statistics = ConvertUnrealArrayToPlayfab(Datatype->statistics, ConvertStatisticUpdateToPlayfab),
+		.statistics = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticUpdate, FPFStatisticsStatisticUpdate>(Datatype->statistics, ConvertStatisticUpdateToPlayfab),
 		.statisticsCount = (uint32_t)Datatype->statistics.Num(),
 		.transactionId = ConvertFStringToCharPtr(Datatype->transactionId)
 	};

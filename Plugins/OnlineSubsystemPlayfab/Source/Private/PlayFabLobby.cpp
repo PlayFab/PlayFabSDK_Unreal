@@ -68,7 +68,6 @@ static struct FSearchKeyMappingTable
 	{SEARCH_EMPTY_SERVERS_ONLY, 		10, EOnlineKeyValuePairDataType::Bool},
 	{SEARCH_NONEMPTY_SERVERS_ONLY, 		9, EOnlineKeyValuePairDataType::Bool},
 	{SEARCH_SECURE_SERVERS_ONLY, 		8, EOnlineKeyValuePairDataType::Bool},
-	{SEARCH_PRESENCE, 					7, EOnlineKeyValuePairDataType::Bool},
 	{SEARCH_LOBBIES, 					6, EOnlineKeyValuePairDataType::Bool},
 };
 
@@ -130,7 +129,7 @@ bool FPlayFabLobby::CreateLobbyWithUser(const FUniqueNetId& HostingPlayerId, FNa
 	MemberKeys.Add(SETTING_PLATFORM_ID);
 	MemberValues.Add(LocalUser->GetPlatformUserId());
 	MemberKeys.Add(SETTING_PLATFORM_MODEL);
-	MemberValues.Add(PLATFORM_MODEL);
+	MemberValues.Add(GetPlatformModel());
 
 	LobbyJoinConfig.memberPropertyCount = MemberKeys.GetCount();
 	LobbyJoinConfig.memberPropertyKeys = MemberKeys.GetData();
@@ -292,7 +291,7 @@ bool FPlayFabLobby::JoinLobbyWithUser(const FUniqueNetId& UserId, FName SessionN
 	MemberKeys.Add(SETTING_PLATFORM_ID);
 	MemberValues.Add(LocalUser->GetPlatformUserId());
 	MemberKeys.Add(SETTING_PLATFORM_MODEL);
-	MemberValues.Add(PLATFORM_MODEL);
+	MemberValues.Add(GetPlatformModel());
 
 	// TODO add the user settings based on Custom flags set by the game, similar to how GDK is doing it.
 	for (FSessionSettings::TConstIterator It(SessionSettings.Settings); It; ++It)
@@ -384,7 +383,7 @@ bool FPlayFabLobby::JoinArrangedLobby(FName SessionName, const FOnlineMatchmakin
 	MemberKeys.Add(SETTING_PLATFORM_ID);
 	MemberValues.Add(MatchTicket->SearchingPlayerNetId->ToString());
 	MemberKeys.Add(SETTING_PLATFORM_MODEL);
-	MemberValues.Add(PLATFORM_MODEL);
+	MemberValues.Add(GetPlatformModel());
 
 #if defined(USE_PFCORE_SDK)
 	FString LocalEntityId = MatchTicket->GetHostUser()->GetEntityKey().id;
@@ -748,7 +747,7 @@ bool FPlayFabLobby::AddLocalPlayer(const FUniqueNetId& PlayerId, FName SessionNa
 	MemberKeys.Add(SETTING_PLATFORM_ID);
 	MemberValues.Add(LocalUser->GetPlatformUserId());
 	MemberKeys.Add(SETTING_PLATFORM_MODEL);
-	MemberValues.Add(PLATFORM_MODEL);
+	MemberValues.Add(GetPlatformModel());
 
 	PFEntityKey JoiningEntityKey = LocalUser->GetEntityKey();
 	HRESULT Hr = PFLobbyAddMember(LobbyHandle, &JoiningEntityKey, MemberKeys.GetCount(), MemberKeys.GetData(), MemberValues.GetData(), nullptr);
@@ -885,10 +884,16 @@ bool FPlayFabLobby::FindLobbies(const FUniqueNetId& UserId, TSharedPtr<FOnlineSe
 
 bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 {
-#ifndef OSS_PLAYFAB_GDK
+#ifndef OSS_PLAYFAB_GDK_SUPPORT
 	UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::FindFriendLobbies is not supported on current platform"));
 	return false;
-#else // OSS_PLAYFAB_GDK
+#else // OSS_PLAYFAB_GDK_SUPPORT
+	if (!IsNativePlatformSubsystemGDK())
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::FindFriendLobbies is not supported on current platform"));
+		return false;
+	}
+
 	// Don't start another search while one is in progress
 	if (!CurrentSessionSearch.IsValid())
 	{
@@ -945,7 +950,7 @@ bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 	}
 
 	return true;
-#endif // !OSS_PLAYFAB_GDK
+#endif // !OSS_PLAYFAB_GDK_SUPPORT
 }
 
 
@@ -1175,9 +1180,12 @@ void FPlayFabLobby::HandleCreateAndJoinLobbyCompleted(const PFLobbyCreateAndJoin
 
 							ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
 
-#if defined(OSS_PLAYFAB_GDK)
-							ExistingNamedSession->SessionInfo = NewSessionInfo;
-							SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+							if (IsNativePlatformSubsystemGDK())
+							{
+								ExistingNamedSession->SessionInfo = NewSessionInfo;
+								SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+							}
 #endif
 						}
 						else
@@ -1274,8 +1282,11 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 		ExistingNamedSession->SessionInfo = NewSessionInfo;
 		ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
 
-#if defined(OSS_PLAYFAB_GDK)
-		SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+		if (IsNativePlatformSubsystemGDK())
+		{
+			SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+		}
 #endif
 	}
 
@@ -1361,8 +1372,11 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 	ExistingNamedSession->SessionInfo = NewSessionInfo;
 	ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
 
-#if defined(OSS_PLAYFAB_GDK)
-	SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (IsNativePlatformSubsystemGDK())
+	{
+		SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+	}
 #endif
 
 	TriggerOnJoinArrangedLobbyCompletedDelegates(*SessionName, true);
@@ -1425,26 +1439,29 @@ void FPlayFabLobby::HandleLeaveLobbyCompleted(const PFLobbyLeaveLobbyCompletedSt
 		auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
 		FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(*SessionName);
 
-#if defined(OSS_PLAYFAB_GDK)
-		//this session shouldn't have an activity to delete
-		if (ExistingNamedSession->SessionSettings.bUsesPresence)
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+		if (IsNativePlatformSubsystemGDK())
 		{
-			//If this value is null it signifies that the title requested all local members leave the specified lobby.
-			if (StateChange.localUser)
+			//this session shouldn't have an activity to delete
+			if (ExistingNamedSession->SessionSettings.bUsesPresence)
 			{
-				SessionInterface->DeleteMultiplayerActivity(StateChange.lobby, *StateChange.localUser, ExistingNamedSession->SessionSettings);
-			}
-			else
-			{
-				//Delete the activity for all local users
-				FOnlineIdentityPlayFabPtr PlayFabIdentityInt = OSSPlayFab ? OSSPlayFab->GetIdentityInterfacePlayFab() : nullptr;
-				if (PlayFabIdentityInt.IsValid())
+				//If this value is null it signifies that the title requested all local members leave the specified lobby.
+				if (StateChange.localUser)
 				{
-					SessionInterface->DeleteMultiplayerActivity(StateChange.lobby, PlayFabIdentityInt->GetLocalUserEntityKeys(), ExistingNamedSession->SessionSettings);
+					SessionInterface->DeleteMultiplayerActivity(StateChange.lobby, *StateChange.localUser, ExistingNamedSession->SessionSettings);
 				}
 				else
 				{
-					UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnLeaveLobbyCompleted: Identity Interface is invalid"));
+					//Delete the activity for all local users
+					FOnlineIdentityPlayFabPtr PlayFabIdentityInt = OSSPlayFab ? OSSPlayFab->GetIdentityInterfacePlayFab() : nullptr;
+					if (PlayFabIdentityInt.IsValid())
+					{
+						SessionInterface->DeleteMultiplayerActivity(StateChange.lobby, PlayFabIdentityInt->GetLocalUserEntityKeys(), ExistingNamedSession->SessionSettings);
+					}
+					else
+					{
+						UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnLeaveLobbyCompleted: Identity Interface is invalid"));
+					}
 				}
 			}
 		}
@@ -1637,10 +1654,8 @@ FOnlineSessionSearchResult FPlayFabLobby::CreateSearchResultFromLobby(const PFLo
 	// Store lobby owner's platform Id and user name in search results
 	bool PlatformIdKeyFound = false;
 	bool OwnerNicknameFound = false;
-#if defined(USES_NATIVE_SESSION)
 	bool NativeSessionIdFound = false;
 	bool NativePlatformFound = false;
-#endif
 	for (uint32_t i = 0; i < LobbySearchResult.searchPropertyCount; i++)
 	{
 		const FString SearchPropertyKey(UTF8_TO_TCHAR(LobbySearchResult.searchPropertyKeys[i]));
@@ -1658,20 +1673,22 @@ FOnlineSessionSearchResult FPlayFabLobby::CreateSearchResultFromLobby(const PFLo
 			OwnerNicknameFound = true;
 			continue;
 		}
-#if defined(USES_NATIVE_SESSION)
-		if (SearchPropertyKey.Equals(SEARCH_KEY_NATIVE_SESSIONID))
+
+		if (ShouldSubsystemUseNativeSession())
 		{
-			NewSessionInfo->SetNativeSessionIdString(SearchPropertyValue);
-			NativeSessionIdFound = true;
-			continue;
+			if (SearchPropertyKey.Equals(SEARCH_KEY_NATIVE_SESSIONID))
+			{
+				NewSessionInfo->SetNativeSessionIdString(SearchPropertyValue);
+				NativeSessionIdFound = true;
+				continue;
+			}
+			if (SearchPropertyKey.Equals(SEARCH_KEY_NATIVE_PLATFORM))
+			{
+				NewSessionInfo->SetNativePlatform(SearchPropertyValue);
+				NativePlatformFound = true;
+				continue;
+			}
 		}
-		if (SearchPropertyKey.Equals(SEARCH_KEY_NATIVE_PLATFORM))
-		{
-			NewSessionInfo->SetNativePlatform(SearchPropertyValue);
-			NativePlatformFound = true;
-			continue;
-		}
-#endif
 
 		// return search properties back to session settings
 		auto SettingKey = SearchKeyMappingTable.Find(SearchPropertyKey);
@@ -1706,16 +1723,17 @@ FOnlineSessionSearchResult FPlayFabLobby::CreateSearchResultFromLobby(const PFLo
 		UE_LOG_ONLINE_SESSION(Error, TEXT("Owner nickname is not found in lobby search properties, lobby Id %s"), UTF8_TO_TCHAR(LobbySearchResult.lobbyId));
 	}
 
-#if defined(USES_NATIVE_SESSION)
-	if (!NativeSessionIdFound)
+	if (ShouldSubsystemUseNativeSession())
 	{
-		UE_LOG_ONLINE_SESSION(Warning, TEXT("Native Session Id is not found in lobby search properties, lobby Id %s"), UTF8_TO_TCHAR(LobbySearchResult.lobbyId));
+		if (!NativeSessionIdFound)
+		{
+			UE_LOG_ONLINE_SESSION(Warning, TEXT("Native Session Id is not found in lobby search properties, lobby Id %s"), UTF8_TO_TCHAR(LobbySearchResult.lobbyId));
+		}
+		if (!NativePlatformFound)
+		{
+			UE_LOG_ONLINE_SESSION(Warning, TEXT("Native Platform is not found in lobby search properties, lobby Id %s"), UTF8_TO_TCHAR(LobbySearchResult.lobbyId));
+		}
 	}
-	if (!NativePlatformFound)
-	{
-		UE_LOG_ONLINE_SESSION(Warning, TEXT("Native Platform is not found in lobby search properties, lobby Id %s"), UTF8_TO_TCHAR(LobbySearchResult.lobbyId));
-	}
-#endif
 
 	NewSearchResult.Session.NumOpenPrivateConnections = 0;
 	NewSearchResult.Session.NumOpenPublicConnections = LobbySearchResult.maxMemberCount - LobbySearchResult.currentMemberCount;
@@ -1735,7 +1753,7 @@ FString FPlayFabLobby::ComposeLobbySearchQueryFilter(const FSearchParams& Search
 	{
 		const FString& SettingName = SearchParam.Key.ToString();
 		const FVariantData& SettingValue = SearchParam.Value.Data;
-		if (SettingValue.ToString().IsEmpty() || SettingName == SEARCH_PRESENCE.ToString() || SettingName == SEARCH_LOBBIES.ToString())
+		if (SettingValue.ToString().IsEmpty() || SettingName == SEARCH_LOBBIES.ToString())
 		{
 			continue;
 		}

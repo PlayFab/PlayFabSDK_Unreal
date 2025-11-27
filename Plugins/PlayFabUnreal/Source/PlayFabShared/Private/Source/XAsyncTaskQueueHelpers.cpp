@@ -7,6 +7,15 @@
 #include "Containers/Ticker.h"
 #include "Templates/UniquePtr.h"
 
+#if HC_PLATFORM_IS_PLAYSTATION
+
+#define INFINITE						0xFFFFFFFF  // Infinite timeout
+#define ERROR_INVALID_PARAMETER			87L    // dderror
+#define ERROR_INVALID_FUNCTION			1L    // dderror
+HRESULT HRESULT_FROM_WIN32(unsigned long x) { return (HRESULT)(x) <= 0 ? (HRESULT)(x) : (HRESULT)(((x) & 0x0000FFFF) | (FACILITY_WIN32 << 16) | 0x80000000); }
+
+#endif
+
 FXAsyncBlock::FXAsyncBlock(void* InUserData, FXAsyncBlockDelegate InDelegate, XTaskQueueHandle TaskQueue)
 	: UserData(InUserData)
 	, Delegate(MoveTemp(InDelegate))

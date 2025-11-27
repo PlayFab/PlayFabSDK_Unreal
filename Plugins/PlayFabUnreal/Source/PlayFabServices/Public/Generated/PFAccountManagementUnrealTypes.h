@@ -2754,7 +2754,7 @@ struct PLAYFABSERVICES_API FPFAccountManagementLinkSteamIdRequest
 	_Maybenull_ TSharedPtr<const bool> forceLink;
 
 	/// <summary>
-	/// Unique PlayFab identifier for a user, or null if no PlayFab account is linked to the Xbox Live identifier.
+	/// PlayFab unique identifier of the user to link.
 	/// </summary>
 	const FString playFabId;
 
@@ -2786,7 +2786,7 @@ struct PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxAccountRequest
 	_Maybenull_ TSharedPtr<const bool> forceLink;
 
 	/// <summary>
-	/// Unique PlayFab identifier for a user, or null if no PlayFab account is linked to the Xbox Live identifier.
+	/// PlayFab unique identifier of the user to link.
 	/// </summary>
 	const FString playFabId;
 
@@ -2795,6 +2795,43 @@ struct PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxAccountRequest
 	/// "").
 	/// </summary>
 	const FString xboxToken;
+};
+
+/// <summary>
+/// FPFAccountManagementLinkXboxIdRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementLinkXboxIdRequest
+{
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// (Optional) If another user is already linked to the account, unlink the other user and re-link.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const bool> forceLink;
+
+	/// <summary>
+	/// PlayFab unique identifier of the user to link.
+	/// </summary>
+	const FString playFabId;
+
+	/// <summary>
+	/// The id of Xbox Live sandbox.
+	/// </summary>
+	const FString sandbox;
+
+	/// <summary>
+	/// Unique Xbox identifier for a user.
+	/// </summary>
+	const FString xboxId;
 };
 
 /// <summary>
@@ -3094,7 +3131,7 @@ struct PLAYFABSERVICES_API FPFAccountManagementServerUnlinkXboxAccountRequest
 	uint32 customTagsCount;
 
 	/// <summary>
-	/// Unique PlayFab identifier for a user, or null if no PlayFab account is linked to the Xbox Live identifier.
+	/// PlayFab unique identifier of the user to unlink.
 	/// </summary>
 	const FString playFabId;
 };
@@ -3638,6 +3675,10 @@ DECLARE_DELEGATE_TwoParams(FOnServerLinkSteamIdCompleted, const FString&, bool);
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnServerLinkXboxAccountCompleted, const FString&, bool);
+#endif
+
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerLinkXboxIdCompleted, const FString&, bool);
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC

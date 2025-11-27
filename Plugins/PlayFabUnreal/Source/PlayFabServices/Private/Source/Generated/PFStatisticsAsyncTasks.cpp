@@ -369,7 +369,9 @@ void FListStatisticDefinitionsAsyncTask::DoWork()
 {
 	const PFStatisticsListStatisticDefinitionsRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
-		.customTagsCount = (uint32_t)Request.customTags.Num()
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.pageSize = Request.pageSize ? new int32(*Request.pageSize) : nullptr,
+		.skipToken = ConvertFStringToCharPtr(Request.skipToken)
 	};
 	HResult = PFStatisticsListStatisticDefinitionsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)

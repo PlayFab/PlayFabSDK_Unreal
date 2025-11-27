@@ -677,7 +677,9 @@ TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsRequest> ConvertListLe
 
 	TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsRequest> ConvertedType = MakeShared<FPFLeaderboardsListLeaderboardDefinitionsRequest>(FPFLeaderboardsListLeaderboardDefinitionsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
-		.customTagsCount = Datatype->customTagsCount
+		.customTagsCount = Datatype->customTagsCount,
+		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
+		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
 	return ConvertedType;
@@ -691,7 +693,9 @@ const PFLeaderboardsListLeaderboardDefinitionsRequest* ConvertListLeaderboardDef
 
 	const PFLeaderboardsListLeaderboardDefinitionsRequest* ConvertedType = new PFLeaderboardsListLeaderboardDefinitionsRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
-		.customTagsCount = (uint32_t)Datatype->customTags.Num()
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.pageSize = Datatype->pageSize ? new int32(*Datatype->pageSize) : nullptr,
+		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
 	};
 
 	return ConvertedType;
@@ -749,7 +753,9 @@ TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsResponse> ConvertListL
 
 	TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsResponse> ConvertedType = MakeShared<FPFLeaderboardsListLeaderboardDefinitionsResponse>(FPFLeaderboardsListLeaderboardDefinitionsResponse{
 		.leaderboardDefinitions = ConvertPlayfabArrayToUnreal<PFLeaderboardsLeaderboardDefinition, FPFLeaderboardsLeaderboardDefinition>(Datatype->leaderboardDefinitions, Datatype->leaderboardDefinitionsCount, ConvertLeaderboardDefinitionToUnreal),
-		.leaderboardDefinitionsCount = Datatype->leaderboardDefinitionsCount
+		.leaderboardDefinitionsCount = Datatype->leaderboardDefinitionsCount,
+		.pageSize = Datatype->pageSize,
+		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
 	return ConvertedType;
@@ -763,7 +769,9 @@ const PFLeaderboardsListLeaderboardDefinitionsResponse* ConvertListLeaderboardDe
 
 	const PFLeaderboardsListLeaderboardDefinitionsResponse* ConvertedType = new PFLeaderboardsListLeaderboardDefinitionsResponse{
 		.leaderboardDefinitions = ConvertUnrealArrayToPlayfab<PFLeaderboardsLeaderboardDefinition, FPFLeaderboardsLeaderboardDefinition>(Datatype->leaderboardDefinitions, ConvertLeaderboardDefinitionToPlayfab),
-		.leaderboardDefinitionsCount = (uint32_t)Datatype->leaderboardDefinitions.Num()
+		.leaderboardDefinitionsCount = (uint32_t)Datatype->leaderboardDefinitions.Num(),
+		.pageSize = Datatype->pageSize,
+		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
 	};
 
 	return ConvertedType;

@@ -612,6 +612,16 @@ struct PLAYFABSERVICES_API FPFLeaderboardsListLeaderboardDefinitionsRequest
 	/// Count of customTags
 	/// </summary>
 	uint32 customTagsCount;
+
+	/// <summary>
+	/// (Optional) The page size for the request.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const int32> pageSize;
+
+	/// <summary>
+	/// (Optional) The skip token for the paged request.
+	/// </summary>
+	_Maybenull_ const FString skipToken;
 };
 
 /// <summary>
@@ -686,6 +696,16 @@ struct PLAYFABSERVICES_API FPFLeaderboardsListLeaderboardDefinitionsResponse
 	/// Count of leaderboardDefinitions
 	/// </summary>
 	uint32 leaderboardDefinitionsCount;
+
+	/// <summary>
+	/// The page size on the response.
+	/// </summary>
+	int32 pageSize;
+
+	/// <summary>
+	/// (Optional) The skip token for the paged response.
+	/// </summary>
+	_Maybenull_ const FString skipToken;
 
 	/// <summary>
 	/// Error message, if any.

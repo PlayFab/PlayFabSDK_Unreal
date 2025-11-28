@@ -574,6 +574,16 @@ struct PLAYFABSERVICES_API FPFStatisticsListStatisticDefinitionsRequest
 	/// Count of customTags
 	/// </summary>
 	uint32 customTagsCount;
+
+	/// <summary>
+	/// (Optional) The page size for the request.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const int32> pageSize;
+
+	/// <summary>
+	/// (Optional) The skip token for the paged request.
+	/// </summary>
+	_Maybenull_ const FString skipToken;
 };
 
 /// <summary>
@@ -666,15 +676,14 @@ struct PLAYFABSERVICES_API FPFStatisticsStatisticDefinition
 struct PLAYFABSERVICES_API FPFStatisticsListStatisticDefinitionsResponse
 {
 	/// <summary>
-	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
-	/// identifiers, etc.).
+	/// The page size on the response.
 	/// </summary>
-	_Maybenull_ TMap<const FString, const FString> customTags;
+	int32 pageSize;
 
 	/// <summary>
-	/// Count of customTags
+	/// (Optional) The skip token for the paged response.
 	/// </summary>
-	uint32 customTagsCount;
+	_Maybenull_ const FString skipToken;
 
 	/// <summary>
 	/// (Optional) List of statistic definitions for the title.

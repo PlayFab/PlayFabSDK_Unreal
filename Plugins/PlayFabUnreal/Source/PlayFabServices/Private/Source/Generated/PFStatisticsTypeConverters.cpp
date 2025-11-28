@@ -653,9 +653,7 @@ TSharedPtr<const FPFStatisticsListStatisticDefinitionsRequest> ConvertListStatis
 
 	TSharedPtr<const FPFStatisticsListStatisticDefinitionsRequest> ConvertedType = MakeShared<FPFStatisticsListStatisticDefinitionsRequest>(FPFStatisticsListStatisticDefinitionsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
-		.customTagsCount = Datatype->customTagsCount,
-		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
-		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
+		.customTagsCount = Datatype->customTagsCount
 	});
 
 	return ConvertedType;
@@ -669,9 +667,7 @@ const PFStatisticsListStatisticDefinitionsRequest* ConvertListStatisticDefinitio
 
 	const PFStatisticsListStatisticDefinitionsRequest* ConvertedType = new PFStatisticsListStatisticDefinitionsRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
-		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
-		.pageSize = Datatype->pageSize ? new int32(*Datatype->pageSize) : nullptr,
-		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken)
+		.customTagsCount = (uint32_t)Datatype->customTags.Num()
 	};
 
 	return ConvertedType;
@@ -738,8 +734,8 @@ TSharedPtr<const FPFStatisticsListStatisticDefinitionsResponse> ConvertListStati
 	}
 
 	TSharedPtr<const FPFStatisticsListStatisticDefinitionsResponse> ConvertedType = MakeShared<FPFStatisticsListStatisticDefinitionsResponse>(FPFStatisticsListStatisticDefinitionsResponse{
-		.pageSize = Datatype->pageSize,
-		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken),
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
 		.statisticDefinitions = ConvertPlayfabArrayToUnreal<PFStatisticsStatisticDefinition, FPFStatisticsStatisticDefinition>(Datatype->statisticDefinitions, Datatype->statisticDefinitionsCount, ConvertStatisticDefinitionToUnreal),
 		.statisticDefinitionsCount = Datatype->statisticDefinitionsCount
 	});
@@ -754,8 +750,8 @@ const PFStatisticsListStatisticDefinitionsResponse* ConvertListStatisticDefiniti
 	}
 
 	const PFStatisticsListStatisticDefinitionsResponse* ConvertedType = new PFStatisticsListStatisticDefinitionsResponse{
-		.pageSize = Datatype->pageSize,
-		.skipToken = ConvertFStringToCharPtr(Datatype->skipToken),
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.statisticDefinitions = ConvertUnrealArrayToPlayfab<PFStatisticsStatisticDefinition, FPFStatisticsStatisticDefinition>(Datatype->statisticDefinitions, ConvertStatisticDefinitionToPlayfab),
 		.statisticDefinitionsCount = (uint32_t)Datatype->statisticDefinitions.Num()
 	};

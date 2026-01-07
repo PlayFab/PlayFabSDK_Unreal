@@ -15,14 +15,14 @@ The PlayFab Unreal Engine Plugin provides comprehensive integration with PlayFab
 Before integrating the PlayFab Unreal Plugin into your project, ensure you have the following:
 
 ### Software Requirements
-- **GDK 2510** (Gaming Development Kit) installed
+- **[Game Development Kit](https://learn.microsoft.com/en-us/gaming/gdk/)** (GDK) 2510 or later installed
 - **Unreal Engine 5.6** (either public version or built from source)
 - **PlayFab Account** with a configured title
 
 ### Platform Support
 The plugin supports the following platforms:
 - **Win64** (Windows Desktop)
-- **WinGDK** (Windows Gaming Development Kit)
+- **WinGDK** (Windows Game Development Kit)
 - **XSX** (Xbox Series X)
 - **XB1** (Xbox One)
 - **PS5** (PlayStation 5)
@@ -103,7 +103,7 @@ PrivateDependencyModuleNames.AddRange(new string[] {
     "PlayFabShared",
     "PlayFabCore",
     "PlayFabServices",          // If using PlayFab Services
-    "PlayFabGameSave",          // If using PlayFab Gamesaves
+    "PlayFabGameSave",          // If using PlayFab Game Saves
     "PlayFabUnreal",
 });
 ````
@@ -265,7 +265,7 @@ The PlayFab Unreal Plugin provides access to the following services:
 - **Friends**: Social features and friend lists
 - **Groups**: Guild and clan functionality
 - **Multiplayer**: Matchmaking and session management
-- **Game Saves**: Cloud save functionality (requires XUser authentication)
+- **Game Saves**: Cloud save functionality
 - **Cloud Script**: Execute server-side logic
 - **Catalog**: Game economy and item management
 

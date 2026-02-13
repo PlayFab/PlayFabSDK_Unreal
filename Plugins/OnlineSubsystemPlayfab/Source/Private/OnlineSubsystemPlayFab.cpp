@@ -155,13 +155,9 @@ void FOnlineSubsystemPlayFab::InitializePlayFabParty()
 		std::string titleIdStr = TCHAR_TO_UTF8(*TitleID);
 
 		// Initialize PlayFab Party
-#if defined(USE_PFCORE_SDK)
 		Party::PartyInitializationConfiguration partyInitConfig = {};
 		partyInitConfig.titleId = titleIdStr.c_str();
 		PartyError Err = Manager.Initialize(&partyInitConfig);
-#else // USE_PFCORE_SDK		
-		PartyError Err = Manager.Initialize(titleIdStr.c_str());
-#endif // USE_PFCORE_SDK
 		if (PARTY_FAILED(Err))
 		{
 			UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty: Initialize failed: %s"), *GetPartyErrorMessage(Err));
@@ -186,13 +182,9 @@ void FOnlineSubsystemPlayFab::InitializeMultiplayer()
 		GConfig->GetString(TEXT("OnlineSubsystemPlayFab"), TEXT("PlayFabTitleID"), TitleID, GEngineIni);
 
 		std::string titleIdStr = TCHAR_TO_UTF8(*TitleID);
-#if defined(USE_PFCORE_SDK)
 		MultiplayerInitializationConfiguration multiplayerInitConfig = {};
 		multiplayerInitConfig.titleId = titleIdStr.c_str();
 		HRESULT hr = PFMultiplayerInitialize(&multiplayerInitConfig, &MultiplayerHandle);
-#else // USE_PFCORE_SDK		
-		HRESULT hr = PFMultiplayerInitialize(titleIdStr.c_str(), &MultiplayerHandle);
-#endif // USE_PFCORE_SDK		
 		if (FAILED(hr))
 		{
 			UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::PFMultiplayerInitialize failed: 0x%08x"), hr);
@@ -233,6 +225,17 @@ void FOnlineSubsystemPlayFab::CleanUpPlayFab()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::CleanUpPlayFab PartyInitialized %d, LobbyInitialized %d"), bPartyInitialized, bMultiplayerInitialized);
 
+	if (bMultiplayerInitialized)
+	{
+		bMultiplayerInitialized = false;
+		HRESULT Hr = PFMultiplayerUninitialize(MultiplayerHandle);
+		if (FAILED(Hr))
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::PFMultiplayerCleanup failed:[0x%08x], %s"), Hr, *GetMultiplayerErrorMessage(Hr));
+		}
+		MultiplayerHandle = nullptr;
+	}
+
 	if (bPartyInitialized)
 	{
 		bPartyInitialized = false;
@@ -243,17 +246,6 @@ void FOnlineSubsystemPlayFab::CleanUpPlayFab()
 		// This cleans up everything allocated in PartyManager.Initialize() and
 		// should only be used when done with networking
 		PartyManager::GetSingleton().Cleanup();
-	}
-
-	if (bMultiplayerInitialized)
-	{
-		bMultiplayerInitialized = false;
-		HRESULT Hr = PFMultiplayerUninitialize(MultiplayerHandle);
-		if (FAILED(Hr))
-		{
-			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::PFMultiplayerCleanup failed:[0x%08x], %s"),Hr, *GetMultiplayerErrorMessage(Hr));
-		}
-		MultiplayerHandle = nullptr;
 	}
 }
 
@@ -379,6 +371,14 @@ bool FOnlineSubsystemPlayFab::IsEnabled() const
 		}
 #endif
 	}
+
+	// Enable the following lines if you're hitting the error "Unhandled exception thrown: read access violation.
+	// handle was nullptr." during shutdown. This will make it so that the GDKRuntimeModule is shutdown after
+	// OnlineSubsystemPlayFab.
+	// if (bEnabled)
+	// {
+	// 	IGDKRuntimeModule::Get();
+	// }
 
 	return bEnabled;
 }

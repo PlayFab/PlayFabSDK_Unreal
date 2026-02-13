@@ -41,12 +41,7 @@ bool FMatchmakingInterfacePlayFab::CreateMatchMakingTicket(const TArray< TShared
 		return false;
 	}
 
-#if defined(USE_PFCORE_SDK)
 	TArray<PFEntityHandle> LocalEntityHandles;
-#else // USE_PFCORE_SDK
-	TArray<PFEntityKey> LocalEntityKeys;
-#endif // USE_PFCORE_SDK
-
 	for (int32 i = 0; i < LocalPlayers.Num(); ++i)
 	{
 		TSharedPtr<FPlayFabUser> LocalUser = PlayFabIdentityInt->GetPartyLocalUserFromPlatformId(LocalPlayers[i].Get());
@@ -55,14 +50,9 @@ bool FMatchmakingInterfacePlayFab::CreateMatchMakingTicket(const TArray< TShared
 			UE_LOG_ONLINE(Error, TEXT("CreateMatchMakingTicket GetPartyLocalUserFromPlatformId returned empty user for %s!"), *LocalPlayers[i]->ToDebugString());
 			return false;
 		}
-#if defined(USE_PFCORE_SDK)
+
 		FPFEntityHandle EntityHandle = LocalUser->GetEntityHandle();
 		LocalEntityHandles.Add(EntityHandle.Get());
-#else // USE_PFCORE_SDK
-		PFEntityKey EntityKey = LocalUser->GetEntityKey();
-		LocalEntityKeys.Add(EntityKey);
-#endif // USE_PFCORE_SDK
-
 	}
 
 	FString QueueName;
@@ -102,17 +92,12 @@ bool FMatchmakingInterfacePlayFab::CreateMatchMakingTicket(const TArray< TShared
 
 	// Now convert the json to char** string to pass onto CreateMatchmakingTicket API
 	UTF8StringList UserAttributesStr;
-#if defined(USE_PFCORE_SDK)
 	for (auto Iterator : LocalEntityHandles)
-#else // USE_PFCORE_SDK
-	for (auto Iterator : LocalEntityKeys)
-#endif // USE_PFCORE_SDK
 	{
 		UserAttributesStr.Add(UserAttributes);
 	}
 
 	PFMatchmakingTicketHandle MatchTicket;
-#if defined(USE_PFCORE_SDK)
 	HRESULT Hr = PFMultiplayerCreateMatchmakingTicketWithEntityHandles(
 		OSSPlayFab->GetMultiplayerHandle(),
 		LocalEntityHandles.Num(),
@@ -121,16 +106,6 @@ bool FMatchmakingInterfacePlayFab::CreateMatchMakingTicket(const TArray< TShared
 		&MatchConfig,
 		nullptr,
 		&MatchTicket);
-#else // USE_PFCORE_SDK
-	HRESULT Hr = PFMultiplayerCreateMatchmakingTicket(
-		OSSPlayFab->GetMultiplayerHandle(),
-		LocalEntityKeys.Num(),
-		LocalEntityKeys.GetData(),
-		UserAttributesStr.GetData(),
-		&MatchConfig,
-		nullptr,
-		&MatchTicket);
-#endif // USE_PFCORE_SDK
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FMatchmakingInterfacePlayFab::PFMultiplayerCreateMatchmakingTicket failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));

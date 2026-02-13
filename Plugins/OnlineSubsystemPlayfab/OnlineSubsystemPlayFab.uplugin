@@ -24,7 +24,7 @@
             "Name": "OnlineSubsystemPlayFab",
             "Type": "Runtime",
             "LoadingPhase" : "Default",
-            "WhitelistPlatforms": [
+            "PlatformAllowList": [
 				"XB1",
 				"WinGDK",
 				"XSX",
@@ -54,7 +54,7 @@
 		{
 			"Name": "OnlineSubsystemGDK",
 			"Enabled": true,
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"XSX",
 				"WinGDK",
 				"XB1"
@@ -63,28 +63,28 @@
 		{
 			"Name": "OnlineSubsystemSwitch",
 			"Enabled": true,
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Switch"
 			]
 		},
 		{
 			"Name": "OnlineSubsystemPS4",
 			"Enabled": true,
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"PS4"
 			]
 		},
 		{
 			"Name": "OnlineSubsystemPS5",
 			"Enabled": true,
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"PS5"
 			]
 		},
 		{
 			"Name": "OnlineSubsystemSony",
 			"Enabled": true,
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"PS4",
 				"PS5"
 			]

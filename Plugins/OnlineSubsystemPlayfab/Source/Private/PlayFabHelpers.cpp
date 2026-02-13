@@ -469,8 +469,13 @@ void ParseDeviceMakeModel(FString& DeviceMake, FString& DeviceModel)
 
 FName GetNativePlatformSubsystemName()
 {
-	IOnlineSubsystem* NativeOSS = IOnlineSubsystem::GetByPlatform(false);
-	return NativeOSS ? NativeOSS->GetSubsystemName() : FName();
+	FString InterfaceString;
+	if (GConfig->GetString(TEXT("OnlineSubsystem"), TEXT("NativePlatformService"), InterfaceString, GEngineIni))
+	{
+		return FName(*InterfaceString);
+	}
+
+	return NAME_None;
 }
 
 bool IsNativePlatformSubsystem(FName ServiceType)

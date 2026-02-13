@@ -46,13 +46,8 @@ uint64 GetXuidForEntityKey(FOnlineSubsystemPlayFab* OSSPlayFab, const PFEntityKe
 	FOnlineIdentityPlayFabPtr PlayFabIdentityInt = OSSPlayFab ? OSSPlayFab->GetIdentityInterfacePlayFab() : nullptr;
 	if (PlayFabIdentityInt.IsValid())
 	{
-#if defined(USE_PFCORE_SDK)
         PFEntityHandle EntityHandle = PlayFabIdentityInt->GetLocalUserEntityHandleFromEntityKey(&EntityKey);
 		TSharedPtr<FPlayFabUser> PartyLocalUser = PlayFabIdentityInt->GetPartyLocalUserFromEntityHandle(EntityHandle);
-#else // USE_PFCORE_SDK
-		FString EntityId = FString(EntityKey.id);
-		TSharedPtr<FPlayFabUser> PartyLocalUser = PlayFabIdentityInt->GetPartyLocalUserFromEntityIdString(EntityId);
-#endif // USE_PFCORE_SDK
 		if (PartyLocalUser.IsValid())
 		{
 			FString XuidStr = PartyLocalUser->GetPlatformUserId();

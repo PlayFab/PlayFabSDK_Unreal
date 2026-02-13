@@ -105,11 +105,11 @@ public class OnlineSubsystemPlayFab : ModuleRules
 	{
 		public static string GetGDKPath()
 		{
-			string gdkPath = Environment.GetEnvironmentVariable("GameDKLatest");
+			string gdkPath = Environment.GetEnvironmentVariable("GameDKCoreLatest") ?? Environment.GetEnvironmentVariable("GameDKXboxLatest");
 
 			if (string.IsNullOrEmpty(gdkPath))
 			{
-				throw new InvalidOperationException("GameDKLatest environment variable is not set. Please ensure GDK is correctly installed.");
+				throw new InvalidOperationException("GameDKCoreLatest and/or GameDKXboxLatest environment variables are not set. Please ensure GDK is correctly installed.");
 			}
 
 			if (!Directory.Exists(gdkPath))
@@ -292,7 +292,7 @@ public class OnlineSubsystemPlayFab : ModuleRules
 			if (Target.Platform.IsInGroup(Group))
 			{
 				LogOnlineSubsystemPlayFab("Target Platform: " + Target.Platform.ToString() + " is in UnrealPlatformGroup " + Group.ToString());
-				ConfigureForGDKPlatform();
+				ConfigureForGDKPlatform(Target.Platform.ToString() == "WinGDK" ? "windows" : "xbox");
 				return;
 			}
 		}
@@ -382,11 +382,10 @@ public class OnlineSubsystemPlayFab : ModuleRules
 	}
 
 	//GDK
-	private void ConfigureForGDKPlatform()
+	private void ConfigureForGDKPlatform(string platform)
 	{
 		PublicDependencyModuleNames.Add("Core");
 		PublicDependencyModuleNames.Add("OnlineSubsystemGDK");
-		PublicDefinitions.Add("USE_PFCORE_SDK=1");
 
 		PublicDefinitions.Add("OSS_PLAYFAB_GDK=1");
 		PublicDefinitions.Add("OSS_PLAYFAB_GDK_SUPPORT=1");
@@ -399,9 +398,9 @@ public class OnlineSubsystemPlayFab : ModuleRules
 		PrivateDefinitions.Add("ONLINESUBSYSTEMGDK_PACKAGE=1");
 
 		string GDKLatest = GDKExports.GetCurrentGSDKDir();
-		string BinPath = Path.Combine(GDKLatest, @"windows\bin\x64");
-		string LibPath = Path.Combine(GDKLatest, @"windows\lib\x64");
-		string IncludePath = Path.Combine(GDKLatest, @"windows\include");
+		string BinPath = Path.Combine(GDKLatest, platform, @"bin\x64");
+		string LibPath = Path.Combine(GDKLatest, platform, @"lib\x64");
+		string IncludePath = Path.Combine(GDKLatest, platform, @"include");
 		string PFCoreIncludePath = Path.Combine(IncludePath, "playfab", "core");
 		string PFPartyIncludePath = Path.Combine(IncludePath, "playfab", "party");
 		string PFMLPIncludePath = Path.Combine(IncludePath, "playfab", "multiplayer");
@@ -517,7 +516,6 @@ public class OnlineSubsystemPlayFab : ModuleRules
 	private void ConfigureForWindowsPlatform()
 	{
 		PublicDefinitions.Add("OSS_PLAYFAB_IS_PC=1");
-		PublicDefinitions.Add("USE_PFCORE_SDK=1");
 
 		// If Unreal GDK Flavor is installed
 		MethodInfo IsGDKEditionValidFunction = System.Type.GetType("GRDK, UE5Rules", false)?.GetMethod("IsGDKEditionValid", BindingFlags.Public | BindingFlags.Static);

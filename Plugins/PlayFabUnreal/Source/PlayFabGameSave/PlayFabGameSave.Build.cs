@@ -98,14 +98,14 @@ public class PlayFabGameSave : ModuleRules
     {
         public static string GetGDKPath()
         {
-            string gdkPath = Environment.GetEnvironmentVariable("GameDKLatest");
+			string gdkPath = Environment.GetEnvironmentVariable("GameDKCoreLatest") ?? Environment.GetEnvironmentVariable("GameDKXboxLatest");
 
-            if (string.IsNullOrEmpty(gdkPath))
+			if (string.IsNullOrEmpty(gdkPath))
             {
-                throw new InvalidOperationException("GameDKLatest environment variable is not set. Please ensure GDK is correctly installed.");
-            }
+				throw new InvalidOperationException("GameDKCoreLatest and/or GameDKXboxLatest environment variables are not set. Please ensure GDK is correctly installed.");
+			}
 
-            if (!Directory.Exists(gdkPath))
+			if (!Directory.Exists(gdkPath))
             {
                 throw new DirectoryNotFoundException($"GDK directory does not exist: {gdkPath}. Please verify GDK installation.");
             }
@@ -315,7 +315,7 @@ public class PlayFabGameSave : ModuleRules
         if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
             LogPlayFabGameSave("Using GDK platform configuration");
-            ConfigureForGDKPlatform();
+            ConfigureForGDKPlatform(Target.Platform.ToString() == "WinGDK" ? "windows" : "xbox");
             return;
         }
 
@@ -366,7 +366,7 @@ public class PlayFabGameSave : ModuleRules
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabGameSave.lib"));
     }
 
-    private void ConfigureForGDKPlatform()
+    private void ConfigureForGDKPlatform(string platform)
     {
         // Try using real GDK first, fall back to environment variables
         string gdkPath = PlayFabGDKUtilities.GetGDKPathWithFallback("PlayFabGameSave");
@@ -376,8 +376,8 @@ public class PlayFabGameSave : ModuleRules
             throw new InvalidOperationException("GDK path is invalid. Please ensure GDK is correctly installed.");
         }
 
-        string LibPath = Path.Combine(gdkPath, @"windows\lib\x64");
-        string IncludePath = Path.Combine(gdkPath, @"windows\include");
+        string LibPath = Path.Combine(gdkPath, platform, @"lib\x64");
+        string IncludePath = Path.Combine(gdkPath, platform, @"include");
 
         PublicIncludePaths.Add(IncludePath);
 

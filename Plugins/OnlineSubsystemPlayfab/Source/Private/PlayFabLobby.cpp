@@ -245,12 +245,7 @@ bool FPlayFabLobby::CreateLobbyWithUser(const FUniqueNetId& HostingPlayerId, FNa
 	LobbyCreateConfig.searchPropertyKeys = SearchKeys.GetData();
 	LobbyCreateConfig.searchPropertyValues = SearchValues.GetData();
 
-#if defined(USE_PFCORE_SDK)
 	HRESULT Hr = PFMultiplayerCreateAndJoinLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), LocalUser->GetEntityHandle().Get(), &LobbyCreateConfig, &LobbyJoinConfig, nullptr, &LobbyHandle);
-#else // USE_PFCORE_SDK
-	PFEntityKey EntityKey = LocalUser->GetEntityKey();
-	HRESULT Hr = PFMultiplayerCreateAndJoinLobby(OSSPlayFab->GetMultiplayerHandle(), &EntityKey, &LobbyCreateConfig, &LobbyJoinConfig, nullptr, &LobbyHandle);
-#endif // USE_PFCORE_SDK
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFMultiplayerCreateAndJoinLobby failed: Error code [0x%08x] , Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
@@ -330,12 +325,7 @@ bool FPlayFabLobby::JoinLobbyWithUser(const FUniqueNetId& UserId, FName SessionN
 		return false;
 	}
 
-#if defined(USE_PFCORE_SDK)
 	HRESULT Hr = PFMultiplayerJoinLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), LocalUser->GetEntityHandle().Get(), TCHAR_TO_UTF8(*ConnectionString), &LobbyConfig, nullptr, &LobbyHandle);
-#else // USE_PFCORE_SDK
-	PFEntityKey EntityKey = LocalUser->GetEntityKey();
-	HRESULT Hr = PFMultiplayerJoinLobby(OSSPlayFab->GetMultiplayerHandle(), &EntityKey, TCHAR_TO_UTF8(*ConnectionString), &LobbyConfig, nullptr, &LobbyHandle);
-#endif // USE_PFCORE_SDK	
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFMultiplayerJoinLobby failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
@@ -385,11 +375,7 @@ bool FPlayFabLobby::JoinArrangedLobby(FName SessionName, const FOnlineMatchmakin
 	MemberKeys.Add(SETTING_PLATFORM_MODEL);
 	MemberValues.Add(GetPlatformModel());
 
-#if defined(USE_PFCORE_SDK)
 	FString LocalEntityId = MatchTicket->GetHostUser()->GetEntityKey().id;
-#else // USE_PFCORE_SDK
-	FString LocalEntityId = MatchTicket->GetHostUser()->GetEntityId();
-#endif // USE_PFCORE_SDK
 
 	bool localMemberFound = false;
 
@@ -418,12 +404,7 @@ bool FPlayFabLobby::JoinArrangedLobby(FName SessionName, const FOnlineMatchmakin
 
 	TUniquePtr<FString> LocalPlayerNickName = MakeUnique<FString>(PlayerNickName);
 	
-#if defined(USE_PFCORE_SDK)
 	HRESULT Hr = PFMultiplayerJoinArrangedLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), MatchTicket->GetHostUser()->GetEntityHandle().Get(), MatchTicket->PlayFabMatchmakingDetails->lobbyArrangementString, &LobbyConfig, static_cast<void*>(LocalPlayerNickName.Release()), &LobbyHandle);
-#else // USE_PFCORE_SDK
-	PFEntityKey EntityKey = MatchTicket->GetHostUser()->GetEntityKey();
-	HRESULT Hr = PFMultiplayerJoinArrangedLobby(OSSPlayFab->GetMultiplayerHandle(), &EntityKey, MatchTicket->PlayFabMatchmakingDetails->lobbyArrangementString, &LobbyConfig, static_cast<void*>(LocalPlayerNickName.Release()), &LobbyHandle);
-#endif // USE_PFCORE_SDK
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFMultiplayerJoinArrangedLobby failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
@@ -492,11 +473,7 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 					}
 				}
 
-#if defined(USE_PFCORE_SDK)
 				PFEntityHandle EntityHandle = User->GetEntityHandle().Get();
-#else // USE_PFCORE_SDK
-				PFEntityKey EntityKey = User->GetEntityKey();
-#endif // USE_PFCORE_SDK
 
 				PFLobbyMemberDataUpdate MemberUpdateData{};
 				MemberUpdateData.memberPropertyCount = MemberKeys.GetCount();
@@ -505,11 +482,7 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 
 				UpdateLobbyCompletionState.LobbyPostUpdateCount++;
 				TUniquePtr<TPair<int, int>> LobbyPostPair = MakeUnique<TPair<int, int>>(OperationId, UpdateLobbyCompletionState.LobbyPostUpdateCount);
-#if defined(USE_PFCORE_SDK)
 				HRESULT Hr = PFLobbyPostUpdateWithEntityHandle(LobbyHandle, EntityHandle, nullptr, &MemberUpdateData, reinterpret_cast<void*>(LobbyPostPair.Release()));
-#else // USE_PFCORE_SDK
-				HRESULT Hr = PFLobbyPostUpdate(LobbyHandle, &EntityKey, nullptr, &MemberUpdateData, reinterpret_cast<void*>(LobbyPostPair.Release()));
-#endif // USE_PFCORE_SDK
 				if (FAILED(Hr))
 				{
 					UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyPostUpdate update member properties failed. Error code [0x%08x]"), Hr);
@@ -689,7 +662,6 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 	UpdateLobbyCompletionState.LobbyPostUpdateCount++;
 	TUniquePtr<TPair<int, int>> LobbyPostPair = MakeUnique<TPair<int, int>>(OperationId, UpdateLobbyCompletionState.LobbyPostUpdateCount);
 
-#if defined(USE_PFCORE_SDK)
     PFEntityHandle EntityHandle = PlayFabIdentityInt->GetLocalUserEntityHandleFromEntityKey(OwnerPtr);
 	if (EntityHandle == nullptr)
 	{
@@ -697,9 +669,6 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 		return false;
 	}
 	Hr = PFLobbyPostUpdateWithEntityHandle(LobbyHandle, EntityHandle, &UpdateData, nullptr, reinterpret_cast<void*>(LobbyPostPair.Release()));
-#else // USE_PFCORE_SDK
-	Hr = PFLobbyPostUpdate(LobbyHandle, OwnerPtr, &UpdateData, nullptr, reinterpret_cast<void*>(LobbyPostPair.Release()));
-#endif // USE_PFCORE_SDK
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyPostUpdate update lobby and search properties failed. Error code [0x%08x]"), Hr);
@@ -865,12 +834,7 @@ bool FPlayFabLobby::FindLobbies(const FUniqueNetId& UserId, TSharedPtr<FOnlineSe
 	}
 
 	
-#if defined(USE_PFCORE_SDK)
 	HRESULT Hr = PFMultiplayerFindLobbiesWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), LocalUser->GetEntityHandle().Get(), &LobbySearchConfig, nullptr);
-#else // USE_PFCORE_SDK
-	PFEntityKey EntityKey = LocalUser->GetEntityKey();
-	HRESULT Hr = PFMultiplayerFindLobbies(OSSPlayFab->GetMultiplayerHandle(), &EntityKey, &LobbySearchConfig, nullptr);
-#endif // USE_PFCORE_SDK
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::FindLobbies failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
@@ -953,8 +917,6 @@ bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 #endif // !OSS_PLAYFAB_GDK_SUPPORT
 }
 
-
-#if defined(USE_PFCORE_SDK)
 void FPlayFabLobby::RegisterForInvites_PlayFabMultiplayer(const PFEntityHandle ListenerEntityHandle)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FPlayFabLobby::RegisterForInvites_PlayFabMultiplayer()"));
@@ -962,43 +924,20 @@ void FPlayFabLobby::RegisterForInvites_PlayFabMultiplayer(const PFEntityHandle L
 	HRESULT Hr = PFMultiplayerStartListeningForLobbyInvitesWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), ListenerEntityHandle);
 	if (FAILED(Hr))
 	{
-		LogMultiplayerErrorWithMessage("PFMultiplayerStartListeningForLobbyInvites", Hr);
+		LogMultiplayerErrorWithMessage("PFMultiplayerStartListeningForLobbyInvitesWithEntityHandle", Hr);
 	}
 }
 
 void FPlayFabLobby::UnregisterForInvites_PlayFabMultiplayer(const PFEntityHandle ListenerEntityHandle)
 {
-	//UE_LOG_ONLINE_SESSION(Verbose, TEXT("FPlayFabLobby::UnregisterForInvites_PlayFabMultiplayer()"));
-
-	//HRESULT Hr = PFMultiplayerStopListeningForLobbyInvites(OSSPlayFab->GetMultiplayerHandle(), &ListenerEntity);
-	//if (FAILED(Hr))
-	//{
-	//	LogMultiplayerErrorWithMessage("PFMultiplayerStopListeningForLobbyInvites", Hr);
-	//}
-}
-#else // USE_PFCORE_SDK
-void FPlayFabLobby::RegisterForInvites_PlayFabMultiplayer(const PFEntityKey& ListenerEntity)
-{
-	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FPlayFabLobby::RegisterForInvites_PlayFabMultiplayer()"));
-
-	HRESULT Hr = PFMultiplayerStartListeningForLobbyInvites(OSSPlayFab->GetMultiplayerHandle(), &ListenerEntity);
-	if (FAILED(Hr))
-	{
-		LogMultiplayerErrorWithMessage("PFMultiplayerStartListeningForLobbyInvites", Hr);
-	}
-}
-
-void FPlayFabLobby::UnregisterForInvites_PlayFabMultiplayer(const PFEntityKey& ListenerEntity)
-{
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FPlayFabLobby::UnregisterForInvites_PlayFabMultiplayer()"));
 
-	HRESULT Hr = PFMultiplayerStopListeningForLobbyInvites(OSSPlayFab->GetMultiplayerHandle(), &ListenerEntity);
+	HRESULT Hr = PFMultiplayerStopListeningForLobbyInvitesWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), ListenerEntityHandle);
 	if (FAILED(Hr))
 	{
-		LogMultiplayerErrorWithMessage("PFMultiplayerStopListeningForLobbyInvites", Hr);
+		LogMultiplayerErrorWithMessage("PFMultiplayerStopListeningForLobbyInvitesWithEntityHandle", Hr);
 	}
 }
-#endif // USE_PFCORE_SDK
 
 void FPlayFabLobby::DoWork()
 {

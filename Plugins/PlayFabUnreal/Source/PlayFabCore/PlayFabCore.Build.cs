@@ -100,14 +100,14 @@ public class PlayFabCore : ModuleRules
     {
         public static string GetGDKPath()
         {
-            string gdkPath = Environment.GetEnvironmentVariable("GameDKLatest");
+			string gdkPath = Environment.GetEnvironmentVariable("GameDKCoreLatest") ?? Environment.GetEnvironmentVariable("GameDKXboxLatest");
 
-            if (string.IsNullOrEmpty(gdkPath))
+			if (string.IsNullOrEmpty(gdkPath))
             {
-                throw new InvalidOperationException("GameDKLatest environment variable is not set. Please ensure GDK is correctly installed.");
-            }
+				throw new InvalidOperationException("GameDKCoreLatest and/or GameDKXboxLatest environment variables are not set. Please ensure GDK is correctly installed.");
+			}
 
-            if (!Directory.Exists(gdkPath))
+			if (!Directory.Exists(gdkPath))
             {
                 throw new DirectoryNotFoundException($"GDK directory does not exist: {gdkPath}. Please verify GDK installation.");
             }
@@ -332,7 +332,7 @@ public class PlayFabCore : ModuleRules
         if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
             LogPlayFabCore("Using GDK platform configuration");
-            ConfigureForGDKPlatform();
+            ConfigureForGDKPlatform(Target.Platform.ToString() == "WinGDK" ? "windows" : "xbox");
             return;
         }
 
@@ -458,7 +458,7 @@ public class PlayFabCore : ModuleRules
         LogPlayFabCore("Windows platform configuration completed");
     }
 
-    private void ConfigureForGDKPlatform()
+    private void ConfigureForGDKPlatform(string platform)
     {
         LogPlayFabCore("Configuring PlayFabCore for GDK Platform");
 
@@ -508,7 +508,7 @@ public class PlayFabCore : ModuleRules
 
         LogPlayFabCore($"Using GDK path: {gdkPath}");
         
-        string IncludePath = Path.Combine(gdkPath, @"windows\include");
+        string IncludePath = Path.Combine(gdkPath, platform, @"include");
         LogPlayFabCore($"GDK include path: {IncludePath}");
         
         if (Directory.Exists(IncludePath))

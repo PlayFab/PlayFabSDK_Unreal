@@ -40,6 +40,21 @@ bool PLAYFABCORE_API FPFLocalUserCreateHandleWithXboxUser(
 }
 #endif
 
+bool PLAYFABCORE_API FPFLocalUserCreateHandleWithSteamUser(
+	_In_ FPFServiceConfigHandle serviceConfigHandle,
+	_In_opt_ TSharedPtr<void> customContext,
+	_Out_ FPFLocalUserHandle& localUserHandle
+) noexcept
+{
+	RETURN_FALSE_IF_NULL(serviceConfigHandle);
+
+	PFLocalUserHandle handle;
+	RETURN_FALSE_IF_FAILED(PFLocalUserCreateHandleWithSteamUser(serviceConfigHandle.Get(), customContext.Get(), &handle));
+	*reinterpret_cast<PFLocalUserHandle*>(&localUserHandle) = handle;
+
+	return true;
+}
+
 HRESULT CALLBACK UnrealLocalUserLoginHandler(
     _In_ PFLocalUserHandle localUserHandle,
     _In_ PFServiceConfigHandle serviceConfigHandle,

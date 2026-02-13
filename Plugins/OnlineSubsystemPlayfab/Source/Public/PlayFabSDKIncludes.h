@@ -34,14 +34,12 @@ typedef long HRESULT;
 #include <PFMatchmaking.h> 
 #include <PFLobby.h>
 
-#if defined(USE_PFCORE_SDK)
 #include <PFCore.h>
 #include <PFAuthentication.h>
 #include <PFEntity.h>
 #include <PFServiceConfig.h>
 #include <PFLocalUser.h>
 #include <PFCoreUnrealTypes.h>
-#endif // USE_PFCORE_SDK
 
 using namespace Party;
 THIRD_PARTY_INCLUDES_END

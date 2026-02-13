@@ -40,7 +40,6 @@ struct UserAuthRequestData
 class ONLINESUBSYSTEMPLAYFAB_API FPlayFabUser
 {
 public:
-#if defined(USE_PFCORE_SDK)
 	FPlayFabUser
 	(
 		const FString& PlatformUserIdStrIn,
@@ -55,31 +54,6 @@ public:
 		EntityHandle(EntityHandleIn)
 	{
 	}
-#else // USE_PFCORE_SDK
-	FPlayFabUser
-	(
-		const FString& PlatformUserIdStrIn,
-		const FString& EntityTokenIn,
-		const FString& EntityIdIn,
-		const FString& EntityTypeIn,
-		const FString& SessionTicketIn,
-		PartyLocalUser* LocalUserIn,
-		const FString& PlayFabIdIn
-	):
-		PlatformUserIdStr(PlatformUserIdStrIn),
-		EntityToken(EntityTokenIn),
-		EntityId(EntityIdIn),
-		EntityType(EntityTypeIn),
-		SessionTicket(SessionTicketIn),
-		LocalUser(LocalUserIn),
-		EntityIdStr(TCHAR_TO_UTF8(*EntityIdIn)),
-		EntityTypeStr(TCHAR_TO_UTF8(*EntityTypeIn)),
-		PlayFabId(PlayFabIdIn)
-	{
-		SetNewEntityTokenUpdateTime();
-	}
-#endif // USE_PFCORE_SDK
-
 
 	const FString& GetPlatformUserId() const { return PlatformUserIdStr; }
 	const FString& GetEntityToken() const { return EntityToken; }
@@ -91,9 +65,7 @@ public:
 	PartyLocalUser* GetPartyLocalUser() const { return LocalUser; }
 	PFEntityKey GetEntityKey() const { return PFEntityKey{ EntityIdStr.c_str(), EntityTypeStr.c_str() }; }
 
-#if defined(USE_PFCORE_SDK)
 	FPFEntityHandle GetEntityHandle() const{ return EntityHandle; }
-#endif // USE_PFCORE_SDK
 
 	void UpdateEntityToken(const FString& NewEntityToken);
 
@@ -110,10 +82,7 @@ private:
 	std::string EntityTypeStr;
 	FString PlayFabId;
 	FDateTime EntityTokenUpdateTime;
-#if defined(USE_PFCORE_SDK)
 	FPFEntityHandle EntityHandle;
-	//const PFEntityKey* EntityKey = nullptr;
-#endif // USE_PFCORE_SDK
 };
 
 class ONLINESUBSYSTEMPLAYFAB_API FOnlineIdentityPlayFab:
@@ -223,24 +192,14 @@ public:
 	bool IsUserLocal(const PFEntityKey& UserEntityKey);
 	const TArray<PFEntityKey> GetLocalUserEntityKeys() const;
 	const FString& GetLocalUserXToken() const { return LocalUserXToken; }
-#if defined(USE_PFCORE_SDK)
 	PFEntityHandle GetLocalUserEntityHandleFromEntityKey(const PFEntityKey* EntityKey);
 	TSharedPtr<FPlayFabUser> GetPartyLocalUserFromEntityHandle(const PFEntityHandle EntityHandle);
-#endif // USE_PFCORE_SDK
 
 protected:
 	bool AuthenticateUser(const FString& UserPlatformIdStr);
-#if defined(USE_PFCORE_SDK)
     void Auth_PFAuthRequestComplete(bool bSucceeded, const FString& UserPlatformIdStr, FPFEntityHandle handle);
-#else // USE_PFCORE_SDK
-	void Auth_HttpRequestComplete(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded);
-#endif // USE_PFCORE_SDK
 
-#if defined(USE_PFCORE_SDK)
 	void CreateLocalUser(const FString& UserPlatformIdStr, const FPFEntityHandle EntityHandle);
-#else // USE_PFCORE_SDK
-	void CreateLocalUser(const FString& UserPlatformIdStr, const FString& EntityId, const FString& EntityType, const FString& SessionTicket, const FString& EntityToken, const FString& TokenExpiration, const FString& PlayFabId);
-#endif // USE_PFCORE_SDK
 	void RemoveLocalUser(const FString& PlatformUserIdStr);
 
 private:
@@ -252,9 +211,7 @@ private:
 	float TimeSinceLastAuth = 0.0f;
 	FString LocalUserXToken;
 
-#if defined(USE_PFCORE_SDK)
     FPFLocalUserHandle LocalUserHandle{ nullptr };
-#endif // USE_PFCORE_SDK
 
     /*PFServiceConfigHandle m_serviceConfigHandle{ nullptr };*/
 
@@ -270,23 +227,14 @@ private:
 	void OnLogoutComplete(int32 LocalUserNum, bool bWasSuccessful);
 
 #if defined(OSS_PLAYFAB_WIN64)
-	void FinishRequestSteam(const FString& PlatformUserIdStr, TSharedPtr<FJsonObject> RequestBodyJson, FPFServiceConfigHandle ServiceConfigHandle);
+	bool AuthenticateUserSteam(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
 #endif // OSS_PLAYFAB_WIN64
-
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
-	bool ApplyPlatformHTTPRequestDataGDK(const FString& PlatformUserIdStr, const FString& URL, const FString& RequestVerb);
-	static void OnPopulatePlatformRequestDataCompletedGDK(bool bWasSuccessful, const FString& PlatformUserIdStr, TMap<FString, FString> PlatformHeaders = TMap<FString, FString>(), TSharedPtr<FJsonObject> RequestBodyJson = TSharedPtr<FJsonObject>(nullptr));
-
-	void FinishRequestGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
+	bool AuthenticateUserGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
 #endif // OSS_PLAYFAB_GDK_SUPPORT
+	bool AuthenticateUserByPlatform(const FString& UserPlatformId);
 
 public:
-	// Platform specific, must implement for your platform!
-	bool ApplyPlatformHTTPRequestData(const FString& PlatformUserIdStr, const FString& URL, const FString& RequestVerb);
-	static void OnPopulatePlatformRequestDataCompleted(bool bWasSuccessful, const FString& PlatformUserIdStr, TMap<FString, FString> PlatformHeaders = TMap<FString, FString>(), TSharedPtr<FJsonObject> RequestBodyJson = TSharedPtr<FJsonObject>(nullptr));
-
-	void FinishRequest(bool bPlatformDataSuccess, const FString& UserPlatformId, TMap<FString, FString> PlatformHeaders, TSharedPtr<FJsonObject> RequestBodyJson);
-
 	//OnLoginChanged
 	virtual FDelegateHandle AddOnLoginChangedDelegate_Handle(const FOnLoginChangedDelegate& Delegate) override;
 	virtual void ClearOnLoginChangedDelegate_Handle(FDelegateHandle& Handle) override;

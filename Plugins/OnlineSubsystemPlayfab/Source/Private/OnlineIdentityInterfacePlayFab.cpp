@@ -15,13 +15,11 @@
 #include "HttpModule.h"
 #include "OnlineSubsystem.h"
 
-#if defined(USE_PFCORE_SDK)
 #include "PFCore.h"
 #include "PFAuthentication.h"
 #include "PFEntity.h"
 #include "PFServiceConfig.h"
 #include "PFLocalUser.h"
-#endif // USE_PFCORE_SDK
 
 #define OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();  IOnlineIdentityPtr NativeIdentityInterface = NativeSubsystem ? NativeSubsystem->GetIdentityInterface() : nullptr; if (NativeIdentityInterface)
 
@@ -452,38 +450,33 @@ bool FOnlineIdentityPlayFab::AuthenticateUser(const FString& PlatformUserIdStr)
 		return false;
 	}
 
-	const bool bAppliedPlatformData = ApplyPlatformHTTPRequestData(PlatformUserIdStr, API::Url, API::PostVerb);
+	bool bAuthStarted = AuthenticateUserByPlatform(PlatformUserIdStr);
 
-	if (bAppliedPlatformData && !UserAuthRequestsInFlight.Contains(PlatformUserIdStr))
+	if (bAuthStarted && !UserAuthRequestsInFlight.Contains(PlatformUserIdStr))
 	{
 		UserAuthRequestData MetaData;
 		UserAuthRequestsInFlight.Add(PlatformUserIdStr, MetaData);
 	}
 
-	return bAppliedPlatformData;
+	return bAuthStarted;
 }
 
 #if defined(OSS_PLAYFAB_WIN64)
-void FOnlineIdentityPlayFab::FinishRequestSteam(const FString& PlatformUserIdStr, TSharedPtr<FJsonObject> RequestBodyJson, FPFServiceConfigHandle ServiceConfigHandle)
+bool FOnlineIdentityPlayFab::AuthenticateUserSteam(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle)
 {
-	// TODO modify to use LocalUserHandle
-	FString SteamToken = RequestBodyJson->GetStringField(TEXT("SteamTicket"));
-	auto strSteamToken = StringCast<UTF8CHAR>(*SteamToken);
-	bool bTicketIsServiceSpecific = true;
-	TSharedPtr<const bool> ticketIsServiceSpecific = MakeShareable(new bool(bTicketIsServiceSpecific));
-	FPFAuthenticationLoginWithSteamRequest request = {
-		.createAccount = true,
-		.steamTicket = SteamToken,
-		.ticketIsServiceSpecific = ticketIsServiceSpecific,
-	};
+	if (!FPFLocalUserCreateHandleWithSteamUser(ServiceConfigHandle, nullptr, LocalUserHandle))
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab:FPFLocalUserCreateHandleWithSteamUser was unable to create PlayFab LocalUser"));
+		return false;
+	}
 
-	FPFAuthenticationLoginWithSteamAsync(
-		ServiceConfigHandle,
-		request,
+	return FPFLocalUserLoginAsync(
+		LocalUserHandle,
+		true,
 		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
 			{
-				// TODO check login results
-				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
+				const FPFEntityHandle EntityHandle = entityHandle ? *entityHandle : nullptr;
+				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, EntityHandle);
 				UE_LOG(LogTemp, Display, TEXT("LoginWithSteam Complete"));
 			})
 	);
@@ -491,7 +484,7 @@ void FOnlineIdentityPlayFab::FinishRequestSteam(const FString& PlatformUserIdStr
 #endif // OSS_PLAYFAB_WIN64
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
-void FOnlineIdentityPlayFab::FinishRequestGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle)
+bool FOnlineIdentityPlayFab::AuthenticateUserGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle)
 {
 	int64 xuid = FCString::Atoi64(*PlatformUserIdStr);
 	FGDKUserHandle XboxUser = IGDKRuntimeModule::Get().GetUserHandleByXUserId(xuid);
@@ -499,15 +492,16 @@ void FOnlineIdentityPlayFab::FinishRequestGDK(const FString& PlatformUserIdStr, 
 	if (!FPFLocalUserCreateHandleWithXboxUser(ServiceConfigHandle, XboxUser, nullptr, LocalUserHandle))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab:FPFLocalUserCreateHandleWithXboxUser was unable to create PlayFab LocalUser"));
-		return;
+		return false;
 	}
 
-	FPFLocalUserLoginAsync(
+	return FPFLocalUserLoginAsync(
 		LocalUserHandle,
 		true,
 		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
 			{
-				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
+				const FPFEntityHandle EntityHandle = entityHandle ? *entityHandle : nullptr;
+				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, EntityHandle);
 				UE_LOG(LogTemp, Display, TEXT("LoginWithXbox Complete"));
 			})
 	);
@@ -515,118 +509,60 @@ void FOnlineIdentityPlayFab::FinishRequestGDK(const FString& PlatformUserIdStr, 
 #endif // OSS_PLAYFAB_GDK_SUPPORT
 
 // Called after platform has appended its headers/body
-void FOnlineIdentityPlayFab::FinishRequest(bool bPlatformDataSuccess, const FString& PlatformUserIdStr, TMap<FString, FString> PlatformHeaders, TSharedPtr<FJsonObject> RequestBodyJson)
+bool FOnlineIdentityPlayFab::AuthenticateUserByPlatform(const FString& PlatformUserIdStr)
 {
-	if (bPlatformDataSuccess)
+	FPFInitialize();
+
+	FPFServiceConfigHandle m_serviceConfigHandle;
+
+	FString TitleIdStr = OSSPlayFab->GetAppId();
+	std::string titleId(TCHAR_TO_UTF8(*TitleIdStr));
+
+	FString PlayFabEndpoint = TEXT("https://");
+	PlayFabEndpoint.Append(TitleIdStr);
+	PlayFabEndpoint.Append(TEXT(".playfabapi.com"));
+
+	if (!FPFServiceConfigCreateHandle(PlayFabEndpoint,
+		TitleIdStr,
+		m_serviceConfigHandle))
 	{
-		if (!RequestBodyJson.IsValid())
-		{
-			UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::FinishRequest: RequestBodyJson is null"));
-			return;
-		}
-
-#if defined(USE_PFCORE_SDK)
-		
-		FPFInitialize();
-
-		FPFServiceConfigHandle m_serviceConfigHandle;
-
-		FString TitleIdStr = OSSPlayFab->GetAppId();
-		std::string titleId(TCHAR_TO_UTF8(*TitleIdStr));
-
-		FString PlayFabEndpoint = TEXT("https://");
-		PlayFabEndpoint.Append(TitleIdStr);
-		PlayFabEndpoint.Append(TEXT(".playfabapi.com"));
-
-		if (!FPFServiceConfigCreateHandle(PlayFabEndpoint,
-			TitleIdStr,
-			m_serviceConfigHandle))
-		{
-			UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::FPFServiceConfigCreateHandle] failed"));
-			return;
-		}
+		UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::FPFServiceConfigCreateHandle] failed"));
+		return false;
+	}
 
 #ifdef OSS_PLAYFAB_SWITCH
-		// TODO modify to use LocalUserHandle
-		PFAuthenticationLoginWithNintendoServiceAccountRequest request = {};
-		request.createAccount = true;		
-		FPFAuthenticationLoginWithNintendoServiceAccountAsync(
-			m_serviceConfigHandle,
-			request,
-			FOnLoginWithNintendoServiceAccountDelegate::CreateLambda([this, PlatformUserIdStr](bool bWasSuccessful, const PFAuthenticationLoginResult* lognResults, PFEntityHandle* entityHandle)
-				{
-					Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, *entityHandle);
-					UE_LOG(LogTemp, Display, TEXT("LoginWithNintendoServiceAccount Complete"));
-				})
-		);
+	// TODO modify to use LocalUserHandle
+	PFAuthenticationLoginWithNintendoServiceAccountRequest request = {};
+	request.createAccount = true;		
+	return FPFAuthenticationLoginWithNintendoServiceAccountAsync(
+		m_serviceConfigHandle,
+		request,
+		FOnLoginWithNintendoServiceAccountDelegate::CreateLambda([this, PlatformUserIdStr](bool bWasSuccessful, const PFAuthenticationLoginResult* lognResults, PFEntityHandle* entityHandle)
+			{
+				const FPFEntityHandle EntityHandle = entityHandle ? *entityHandle : nullptr;
+				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, EntityHandle);
+				UE_LOG(LogTemp, Display, TEXT("LoginWithNintendoServiceAccount Complete"));
+			})
+	);
 #elif defined(OSS_PLAYFAB_WIN64)
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
-		if (IsNativePlatformSubsystemGDK())
-		{
-			FinishRequestGDK(PlatformUserIdStr, m_serviceConfigHandle);
-		}
-		else
-		{
-			FinishRequestSteam(PlatformUserIdStr, RequestBodyJson, m_serviceConfigHandle);
-		}
+	if (IsNativePlatformSubsystemGDK())
+	{
+		return AuthenticateUserGDK(PlatformUserIdStr, m_serviceConfigHandle);
+	}
+
+	return AuthenticateUserSteam(PlatformUserIdStr, m_serviceConfigHandle);
 #else
-		FinishRequestSteam(PlatformUserIdStr, RequestBodyJson, m_serviceConfigHandle);
+	return AuthenticateUserSteam(PlatformUserIdStr, m_serviceConfigHandle);
 #endif // OSS_PLAYFAB_GDK_SUPPORT
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
-		
+	UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::AuthenticateUserByPlatform] Authentication not implemented for PlayStation platform"));
+	return false;
 #elif defined(OSS_PLAYFAB_GDK)
-		FinishRequestGDK(PlatformUserIdStr, m_serviceConfigHandle);
+	return AuthenticateUserGDK(PlatformUserIdStr, m_serviceConfigHandle);
 #endif // OSS_PLAYFAB_SWITCH
-#else // USE_PFCORE_SDK
-			// PlayFab auth request
-		FHttpRequestPtr httpRequest = FHttpModule::Get().CreateRequest();
-
-		UserAuthRequestData* RequestInFlight = GetUserAuthRequestData(PlatformUserIdStr);
-		if (RequestInFlight != nullptr)
-		{
-			RequestInFlight->m_HTTPRequest = httpRequest;
-
-			RequestInFlight->m_HTTPRequest->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityPlayFab::Auth_HttpRequestComplete);
-			FString TitleIdStr = OSSPlayFab->GetAppId();
-
-			// Add all platform headers
-			for (const auto& kvPair : PlatformHeaders)
-			{
-				RequestInFlight->m_HTTPRequest->SetHeader(kvPair.Key, kvPair.Value);
-			}
-			// Build up the rest of the request body
-			RequestBodyJson->SetBoolField(TEXT("CreateAccount"), true);
-			RequestBodyJson->SetStringField(TEXT("TitleId"), TitleIdStr);
-
-			// Serialize request body
-			FString RequestBodySerialized;
-			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RequestBodySerialized);
-			FJsonSerializer::Serialize(RequestBodyJson.ToSharedRef(), Writer);
-
-#ifdef OSS_PLAYFAB_SWITCH
-			const FString LoginApi = "LoginWithNintendoServiceAccount";
-#elif defined(OSS_PLAYFAB_PLAYSTATION)
-			const FString LoginApi = "LoginWithPSN";
-#endif // OSS_PLAYFAB_SWITCH
-
-			const FString URI = FString::Printf(TEXT("https://%s.playfabapi.com/Client/%s"), *TitleIdStr, *LoginApi);
-
-			RequestInFlight->m_HTTPRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-			RequestInFlight->m_HTTPRequest->SetURL(URI);
-			RequestInFlight->m_HTTPRequest->SetVerb(API::PostVerb);
-			RequestInFlight->m_HTTPRequest->SetContentAsString(RequestBodySerialized); // gets copied internally
-			RequestInFlight->m_HTTPRequest->ProcessRequest();
-		}
-#endif // USE_PFCORE_SDK
-	}
-	else
-	{
-		// Remove the in flight data
-		UserAuthRequestsInFlight.Remove(PlatformUserIdStr);
-	}
 }
 
-#if defined(USE_PFCORE_SDK)
 void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const FString& UserPlatformIdStr, FPFEntityHandle handle)
 {
 	UE_LOG(LogTemp, Display, TEXT("Auth_PFAuthRequestComplete In"));
@@ -654,135 +590,7 @@ void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const F
 	// Remove the in flight data
 	UserAuthRequestsInFlight.Remove(UserPlatformIdStr);
 }
-#else // USE_PFCORE_SDK
 
-void FOnlineIdentityPlayFab::Auth_HttpRequestComplete(FHttpRequestPtr HttpRequest, FHttpResponsePtr HttpResponse, bool bSucceeded)
-{
-	const FString& PlatformUserIdStr = GetUserPlatformIdStrFromRequest(HttpRequest);
-
-	FString ResponseStr;
-	FString ErrorStr;
-
-	if (bSucceeded && HttpResponse.IsValid())
-	{
-		ResponseStr = HttpResponse->GetContentAsString();
-
-		// Deserialize response
-		TSharedPtr<FJsonObject> HttpResponseJSON = nullptr;
-		TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ResponseStr);
-		if (FJsonSerializer::Deserialize(JsonReader, HttpResponseJSON))
-		{
-			const TSharedPtr<FJsonObject>* JsonData = nullptr;
-			if (HttpResponseJSON->TryGetObjectField(TEXT("data"), JsonData))
-			{
-				const TSharedPtr<FJsonObject>* JsonEntityTokenData = nullptr;
-				if ((*JsonData)->TryGetObjectField(TEXT("EntityToken"), JsonEntityTokenData))
-				{
-					FString EntityTokenStr;
-					FString TokenExpirationStr;
-
-					if ((*JsonEntityTokenData)->TryGetStringField(TEXT("EntityToken"), EntityTokenStr) && (*JsonEntityTokenData)->TryGetStringField(TEXT("TokenExpiration"), TokenExpirationStr))
-					{
-						const TSharedPtr<FJsonObject>* JsonEntity = nullptr;
-						if ((*JsonEntityTokenData)->TryGetObjectField(TEXT("Entity"), JsonEntity))
-						{
-							FString EntityIdStr, EntityTypeStr;
-							if ((*JsonEntity)->TryGetStringField(TEXT("Id"), EntityIdStr) && (*JsonEntity)->TryGetStringField(TEXT("Type"), EntityTypeStr))
-							{
-								UE_LOG_ONLINE(
-									Verbose,
-									TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Platform User %s authenticated with EntityId %s, Token %s, and Expiration %s"),
-									*PlatformUserIdStr,
-									*EntityIdStr,
-									*EntityTokenStr,
-									*TokenExpirationStr
-								);
-
-								int32 Index;
-								TSharedPtr<FPlayFabUser> LocalUser = GetPartyLocalUserFromPlatformIdString(PlatformUserIdStr, &Index);
-								if (LocalUser)
-								{
-									// Update an existing user if we already have one
-									LocalUser->UpdateEntityToken(EntityTokenStr);
-									TriggerOnAuthenticateUserCompleteDelegates(Index, true, PlatformUserIdStr, TEXT(""));
-								}
-								else
-								{
-									// Obtain the SessionTicket from the PlayFab auth response for use in any subsequent requests demanding the X-Authorization header.
-									FString SessionTicketStr = "";
-									if ((*JsonData)->TryGetStringField(TEXT("SessionTicket"), SessionTicketStr) == false)
-									{
-										ErrorStr = SessionTicketStr.IsEmpty() ? TEXT("SessionTicket data is empty") : TEXT("Failed to parse SessionTicket data");
-
-										UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] %s"), *ErrorStr);
-										TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, ErrorStr);
-									}
-
-									FString PlayFabIdStr = "";
-									if ((*JsonData)->TryGetStringField(TEXT("PlayFabId"), PlayFabIdStr) == false)
-									{
-										ErrorStr = PlayFabIdStr.IsEmpty() ? TEXT("PlayFabId data is empty") : TEXT("Failed to parse PlayFabId data");
-
-										UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] %s"), *ErrorStr);
-										TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, ErrorStr);
-									}
-
-									// Create a new user if we don't already have one
-									CreateLocalUser(PlatformUserIdStr, EntityIdStr, EntityTypeStr, SessionTicketStr, EntityTokenStr, TokenExpirationStr, PlayFabIdStr);
-								}
-
-								TimeSinceLastAuth = 0.0f;
-								UsersToAuth.Remove(PlatformUserIdStr);
-							}
-							else
-							{
-								// MS_ATG_PNF: in error cases, the user will re-auth on the next attempt
-								UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Failed to parse EntityId data"));
-								TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, TEXT("Failed to parse EntityId data"));
-							}
-						}
-						else
-						{
-							// MS_ATG_PNF: in error cases, the user will re-auth on the next attempt
-							UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Failed to parse Entity data"));
-							TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, TEXT("Failed to parse Entity data"));
-						}
-					}
-					else
-					{
-						// MS_ATG_PNF: in error cases, the user will re-auth on the next attempt
-						UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Failed to parse EntityToken data"));
-						TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, TEXT("Failed to parse EntityToken data"));
-					}
-				}
-				else
-				{
-					// MS_ATG_PNF: in error cases, the user will re-auth on the next attempt
-					UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Failed to parse EntityToken data"));
-					TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, TEXT("Failed to parse EntityToken data"));
-				}
-			}
-			else
-			{
-				// MS_ATG_PNF: in error cases, the user will re-auth on the next attempt
-				UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Failed to parse JSON data"));
-				TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, TEXT("Failed to parse JSON data"));
-			}
-		}
-		else
-		{
-			// MS_ATG_PNF: in error cases, the user will re-auth on the next attempt
-			UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::Auth_HttpRequestComplete] Failed to deserialize response"));
-			TriggerOnAuthenticateUserCompleteDelegates(0, false, PlatformUserIdStr, TEXT("Failed to deserialize response"));
-		}
-	}
-
-	// Remove the in flight data
-	UserAuthRequestsInFlight.Remove(PlatformUserIdStr);
-}
-#endif // USE_PFCORE_SDK
-
-#if defined(USE_PFCORE_SDK)
 void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, const FPFEntityHandle EntityHandle)
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::CreateLocalUser"));
@@ -833,50 +641,6 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 	// Listening to invite is best effort TODO
 	OSSPlayFab->GetPlayFabLobbyInterface()->RegisterForInvites_PlayFabMultiplayer(EntityHandle.Get());
 }
-#else // USE_PFCORE_SDK
-
-void FOnlineIdentityPlayFab::CreateLocalUser(const FString& PlatformUserIdStr, const FString& EntityId, const FString& EntityType, const FString& SessionTicket, const FString& EntityToken, const FString& TokenExpiration, const FString& PlayFabId)
-{
-	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::CreateLocalUser"));
-
-	PartyLocalUser* NewPartyLocalUser = nullptr;
-	PartyError Err;
-
-	// Create a local user object
-	Err = PartyManager::GetSingleton().CreateLocalUser(
-		TCHAR_TO_UTF8(*EntityId),		// User id
-		TCHAR_TO_UTF8(*EntityToken),	// User entity token
-		&NewPartyLocalUser				// OUT local user object
-	);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab PartyManager::CreateLocalUser failed: %s"), *GetPartyErrorMessage(Err));
-		return;
-	}
-	
-	TSharedPtr<FPlayFabUser> NewLocalUser = MakeShared<FPlayFabUser>(PlatformUserIdStr, EntityToken, EntityId, EntityType, SessionTicket, NewPartyLocalUser, PlayFabId);
-
-	PFEntityKey EntityKey = NewLocalUser->GetEntityKey();
-	HRESULT hr = PFMultiplayerSetEntityToken(
-		OSSPlayFab->GetMultiplayerHandle(), // Multiplayer Handle 
-		&EntityKey,							// EntityKey
-		TCHAR_TO_UTF8(*EntityToken)  		// User entity token
-	);
-
-	if (FAILED(hr))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab MultiplayerManager::GetSingleton().SetEntityToken failed: 0x%x"), hr);
-		PartyManager::GetSingleton().DestroyLocalUser(NewPartyLocalUser, nullptr);
-		return;
-	}
-	int32 LocalUserNum = LocalPlayFabUsers.Add(NewLocalUser);
-	TriggerOnAuthenticateUserCompleteDelegates(LocalUserNum, true, PlatformUserIdStr, TEXT(""));
-
-	// Listening to invite is best effort
-	OSSPlayFab->GetPlayFabLobbyInterface()->RegisterForInvites_PlayFabMultiplayer(EntityKey);
-}
-#endif //USE_PFCORE_SDK
 
 void FOnlineIdentityPlayFab::RemoveLocalUser(const FString& PlatformUserIdStr)
 {
@@ -903,8 +667,7 @@ void FOnlineIdentityPlayFab::RemoveLocalUser(const FString& PlatformUserIdStr)
 				}
 
 				// Stop Listening to invite is best effort
-				// TODO: Unregister from invites using EntityHandle
-				//OSSPlayFab->GetPlayFabLobbyInterface()->UnregisterForInvites_PlayFabMultiplayer(LocalUser->GetEntityKey());
+				OSSPlayFab->GetPlayFabLobbyInterface()->UnregisterForInvites_PlayFabMultiplayer(LocalUser->GetEntityHandle().Get());
 
 				break;
 			}
@@ -988,7 +751,6 @@ const TArray<PFEntityKey> FOnlineIdentityPlayFab::GetLocalUserEntityKeys() const
 	return EntityKeys;
 }
 
-#if defined(USE_PFCORE_SDK)
 PFEntityHandle FOnlineIdentityPlayFab::GetLocalUserEntityHandleFromEntityKey(const PFEntityKey* EntityKey)
 {
 	PFEntityHandle EntityHandle = nullptr;
@@ -1035,7 +797,6 @@ TSharedPtr<FPlayFabUser> FOnlineIdentityPlayFab::GetPartyLocalUserFromEntityHand
 
 	return nullptr;
 }
-#endif // USE_PFCORE_SDK
 
 FDelegateHandle FOnlineIdentityPlayFab::AddOnLoginChangedDelegate_Handle(const FOnLoginChangedDelegate& Delegate)
 {

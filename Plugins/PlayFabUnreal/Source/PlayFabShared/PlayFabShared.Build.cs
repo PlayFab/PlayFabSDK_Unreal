@@ -98,14 +98,14 @@ public class PlayFabShared : ModuleRules
     {
         public static string GetGDKPath()
         {
-            string gdkPath = Environment.GetEnvironmentVariable("GameDKLatest");
+			string gdkPath = Environment.GetEnvironmentVariable("GameDKCoreLatest") ?? Environment.GetEnvironmentVariable("GameDKXboxLatest");
 
-            if (string.IsNullOrEmpty(gdkPath))
+			if (string.IsNullOrEmpty(gdkPath))
             {
-                throw new InvalidOperationException("GameDKLatest environment variable is not set. Please ensure GDK is correctly installed.");
-            }
+				throw new InvalidOperationException("GameDKCoreLatest and/or GameDKXboxLatest environment variables are not set. Please ensure GDK is correctly installed.");
+			}
 
-            if (!Directory.Exists(gdkPath))
+			if (!Directory.Exists(gdkPath))
             {
                 throw new DirectoryNotFoundException($"GDK directory does not exist: {gdkPath}. Please verify GDK installation.");
             }
@@ -306,7 +306,7 @@ public class PlayFabShared : ModuleRules
         // GDK Platform
         if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
-            ConfigureForGDKPlatform();
+            ConfigureForGDKPlatform(Target.Platform.ToString() == "WinGDK" ? "windows" : "xbox");
             return;
         }
 
@@ -362,12 +362,12 @@ public class PlayFabShared : ModuleRules
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.lib"));
     }
 
-    private void ConfigureForGDKPlatform()
+    private void ConfigureForGDKPlatform(string platform)
     {
         // Use the shared utility helper method
         string GDKLatest = PlayFabGDKUtilities.GetGDKPathWithFallback("PlayFabShared");
 
-        string IncludePath = Path.Combine(GDKLatest, @"windows\include");
+        string IncludePath = Path.Combine(GDKLatest, platform, @"include");
         PublicIncludePaths.Add(IncludePath);
     }
 

@@ -13,4 +13,9 @@ class PLAYFABCORE_API FPlayFabCore : public FDefaultModuleImpl
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+private:
+#if defined(PF_GDK_AVAILABLE) || defined(PF_UE_GDK_SUPPORT)
+	void InitializeXGameRuntime();
+#endif // PF_GDK_AVAILABLE || PF_UE_GDK_SUPPORT
 };

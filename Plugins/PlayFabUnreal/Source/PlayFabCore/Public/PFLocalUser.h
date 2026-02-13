@@ -64,6 +64,20 @@ bool PLAYFABCORE_API FPFLocalUserCreateHandleWithXboxUser(
 #endif
 
 /// <summary>
+/// Creates a PlayFab Local User from a Steam authenticated user. This is the primary authentication method for Steam platforms and supports both online and offline gameplay modes.
+/// Fails with E_PF_CORE_MISSING_PLATFORM if the Steam runtime is not installed on the device.
+/// </summary>
+/// <param name="serviceConfigHandle">FPFServiceConfigHandle that will be used to log this user into PlayFab.</param>
+/// <param name="customContext">Custom context to be associated with the local user.</param>
+/// <param name="localUserHandle">Pointer to a FPFLocalUserHandle to write.</param>
+/// <returns>Result code for this API operation.  Possible values are S_OK, E_PF_NOT_INITIALIZED, E_PF_CORE_MISSING_PLATFORM, or E_INVALIDARG.</returns>
+bool PLAYFABCORE_API FPFLocalUserCreateHandleWithSteamUser(
+	_In_ FPFServiceConfigHandle serviceConfigHandle,
+	_In_opt_ TSharedPtr<void> customContext,
+	_Out_ FPFLocalUserHandle& localUserHandle
+) noexcept;
+
+/// <summary>
 /// Creates a PlayFab Local User to be used when a PlayFab identity is needed but PlayFab login is unavailable (ex. the device is offline).
 /// It is the title's responsibility to ensure the localId provided is:
 /// 1) Locally Unique. If multiple users play the title on the same device (simultaneously or during different play sessions) they must

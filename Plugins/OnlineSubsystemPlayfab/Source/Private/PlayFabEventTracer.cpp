@@ -114,10 +114,12 @@ FString PlayFabEventTracer::GetPlatformSDKVersion() const
 	#if defined(OSS_PLAYFAB_GDK)
 	return FString::FromInt(_GRDK_EDITION);
 	#elif defined(OSS_PLAYFAB_WIN64)
+	#if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	if (IsNativePlatformSubsystemGDK())
 	{
 		return FString::FromInt(_GRDK_EDITION);
 	}
+	#endif // OSS_PLAYFAB_GDK_SUPPORT
 
 	//TODO: use STEAM_SDK_VER
 	return "1.51";

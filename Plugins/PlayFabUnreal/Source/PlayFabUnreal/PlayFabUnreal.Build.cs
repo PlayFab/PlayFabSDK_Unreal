@@ -99,14 +99,14 @@ public class PlayFabUnreal : ModuleRules
     {
         public static string GetGDKPath()
         {
-            string gdkPath = Environment.GetEnvironmentVariable("GameDKLatest");
+			string gdkPath = Environment.GetEnvironmentVariable("GameDKCoreLatest") ?? Environment.GetEnvironmentVariable("GameDKXboxLatest");
 
-            if (string.IsNullOrEmpty(gdkPath))
+			if (string.IsNullOrEmpty(gdkPath))
             {
-                throw new InvalidOperationException("GameDKLatest environment variable is not set. Please ensure GDK is correctly installed.");
-            }
+				throw new InvalidOperationException("GameDKCoreLatest and/or GameDKXboxLatest environment variables are not set. Please ensure GDK is correctly installed.");
+			}
 
-            if (!Directory.Exists(gdkPath))
+			if (!Directory.Exists(gdkPath))
             {
                 throw new DirectoryNotFoundException($"GDK directory does not exist: {gdkPath}. Please verify GDK installation.");
             }
@@ -333,12 +333,12 @@ public class PlayFabUnreal : ModuleRules
         if (Target.Platform.ToString() == "WinGDK" || Target.Platform.ToString() == "XSX" || Target.Platform.ToString() == "XB1")
         {
             LogPlayFabUnreal("Using GDK platform configuration");
-            ConfigureForGDKPlatform();
+            ConfigureForGDKPlatform(Target.Platform.ToString() == "WinGDK" ? "windows" : "xbox");
             return;
         }
 
-        // Switch Platform
-        if (Target.Platform.ToString() == "Switch")
+		// Switch Platform
+		if (Target.Platform.ToString() == "Switch")
         {
             LogPlayFabUnreal("Using Switch platform configuration");
             ConfigureForSwitchPlatform();
@@ -410,17 +410,19 @@ public class PlayFabUnreal : ModuleRules
         PublicIncludePaths.Add(IncludePath);
 
         // Binaries
-        RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.dll", Path.Combine(BinPath, "LibHttpClient.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.pdb", Path.Combine(BinPath, "LibHttpClient.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.dll", Path.Combine(BinPath, "libHttpClient.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.pdb", Path.Combine(BinPath, "libHttpClient.pdb"), StagedFileType.DebugNonUFS);
         RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
         RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
         RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
         RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
         RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
         RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/xgameruntime.dll", Path.Combine(BinPath, "xgameruntime.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(BinaryOutputDir)/xgameruntime.pdb", Path.Combine(BinPath, "xgameruntime.pdb"), StagedFileType.DebugNonUFS);
 
         // Import libs
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "LibHttpClient.lib"));
+        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.lib"));
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "xgameruntime.lib"));
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.lib"));
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabServices.lib"));
@@ -436,7 +438,7 @@ public class PlayFabUnreal : ModuleRules
         }
     }
 
-    private void ConfigureForGDKPlatform()
+    private void ConfigureForGDKPlatform(string platform)
     {
         int GDKVersionNumber = PlayFabGDKUtilities.GetGDKVersionWithFallback("PlayFabUnreal");
 
@@ -453,16 +455,16 @@ public class PlayFabUnreal : ModuleRules
                 throw new InvalidOperationException("GDKLatest path is invalid. Please ensure GDK is correctly installed.");
             }
 
-            string BinPath = Path.Combine(GDKLatest, @"windows\bin\x64");
-            string LibPath = Path.Combine(GDKLatest, @"windows\lib\x64");
-            string IncludePath = Path.Combine(GDKLatest, @"windows\include");
+			string BinPath = Path.Combine(GDKLatest, platform, @"bin\x64");
+            string LibPath = Path.Combine(GDKLatest, platform, @"lib\x64");
+            string IncludePath = Path.Combine(GDKLatest, platform, @"include");
 
             // Includes
             PublicIncludePaths.Add(IncludePath);
 
             // Binaries
-            RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.dll", Path.Combine(BinPath, "LibHttpClient.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/LibHttpClient.pdb", Path.Combine(BinPath, "LibHttpClient.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.dll", Path.Combine(BinPath, "libHttpClient.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.pdb", Path.Combine(BinPath, "libHttpClient.pdb"), StagedFileType.DebugNonUFS);
             RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
             RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
             RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);

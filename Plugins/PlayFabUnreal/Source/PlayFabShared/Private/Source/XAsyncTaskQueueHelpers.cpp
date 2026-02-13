@@ -125,16 +125,6 @@ void FXAsyncTaskQueue::PlatformTearDown()
 	// destroy our task queues
 	GThreadPoolTaskQueue.Reset();
 	GBackgroundTaskQueue.Reset();
-
-	// close the system task queue and prevent anyone from using it
-	XTaskQueueHandle SystemTaskQueue;
-	if (XTaskQueueGetCurrentProcessTaskQueue(&SystemTaskQueue) && SystemTaskQueue != nullptr)
-	{
-		XTaskQueueTerminate(SystemTaskQueue, true, nullptr, nullptr);
-		XTaskQueueCloseHandle(SystemTaskQueue);
-	}
-	CA_SUPPRESS(6387) // first parameter is marked _In_ but documentation says nullptr is allowed to disable the proces default task queue
-		XTaskQueueSetCurrentProcessTaskQueue(nullptr);
 }
 
 XTaskQueueHandle FXAsyncTaskQueue::GetGenericQueue()

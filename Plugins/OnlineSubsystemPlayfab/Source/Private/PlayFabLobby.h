@@ -65,14 +65,8 @@ public:
 	bool FindFriendLobbies(const FUniqueNetId& UserId);
 	const TPair<FString, EOnlineKeyValuePairDataType::Type>* FindSearchKey(const FString& SearchKey) const;
 
-#if defined(USE_PFCORE_SDK)
 	void RegisterForInvites_PlayFabMultiplayer(const PFEntityHandle ListenerEntityHandle);
 	void UnregisterForInvites_PlayFabMultiplayer(const PFEntityHandle ListenerEntityHandle);
-#else // USE_PFCORE_SDK
-	void RegisterForInvites_PlayFabMultiplayer(const PFEntityKey& ListenerEntity);
-	void UnregisterForInvites_PlayFabMultiplayer(const PFEntityKey& ListenerEntity);
-#endif // USE_PFCORE_SDK
-	
 
 	void DoWork();
 

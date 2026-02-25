@@ -25,6 +25,9 @@ The plugin supports the following platforms:
 - **WinGDK** (Windows)
 - **XSX** (Xbox Series X)
 - **XB1** (Xbox One)
+- **PS5** *
+
+\* PS5 Platform support is currently in Private Preview and is available only to select partners. To request access, please follow the official process outlined in this page: [Request access for secured SDKs and samples](https://review.learn.microsoft.com/en-us/gaming/playfab/sdks/request-access-for-sdks-samples?branch=main).
 
 ## Setup
 

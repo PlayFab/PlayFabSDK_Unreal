@@ -231,6 +231,7 @@ elseif ($Platform -eq "PlayStation")
     Write-Host "    3: SDK 7.000"
     Write-Host "    4: SDK 9.000"
     Write-Host "    5: SDK 10.000"
+    Write-Host "    6: SDK 11.000"
     while($True)
     {
         Write-Host -NoNewline "> "
@@ -284,6 +285,14 @@ elseif ($Platform -eq "PlayStation")
             $partyNugetVersion = "1.10.8"
             $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-10.000"
             $mlpNugetVersion = "1.7.9"
+            break
+        }
+        elseif ($Selection -eq '6')
+        {
+            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-11.000"
+            $partyNugetVersion = "1.10.12"
+            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-11.000"
+            $mlpNugetVersion = "1.8.0"
             break
         }
         Write-Host "Unknown input"

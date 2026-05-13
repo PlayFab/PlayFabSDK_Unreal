@@ -443,59 +443,6 @@ void FGetInventoryOperationStatusAsyncTask::ProcessResults()
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-FGetMicrosoftStoreAccessTokensAsyncTask::FGetMicrosoftStoreAccessTokensAsyncTask(
-	_In_ FPFEntityHandle EntityHandle,
-	FPFInventoryGetMicrosoftStoreAccessTokensRequest InRequest,
-	const FOnGetMicrosoftStoreAccessTokensCompleted& InDelegate)
-	: FXAsyncTask(TEXT("FGetMicrosoftStoreAccessTokensAsyncTask")),
-	EntityHandle(EntityHandle),
-	Request(InRequest),
-	Delegate(InDelegate)
-{
-};
-
-void FGetMicrosoftStoreAccessTokensAsyncTask::DoWork()
-{
-	const PFInventoryGetMicrosoftStoreAccessTokensRequest RequestType = {
-		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
-		.customTagsCount = (uint32_t)Request.customTags.Num()
-	};
-	HResult = PFInventoryGetMicrosoftStoreAccessTokensAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
-	if (HResult != S_OK)
-	{
-		FString ErrorMessage = FString("DoWork failure");
-		Delegate.Execute(FPFInventoryGetMicrosoftStoreAccessTokensResponse{ .ErrorMessage = ErrorMessage }, false);
-	}
-};
-
-void FGetMicrosoftStoreAccessTokensAsyncTask::ProcessResults()
-{
-	size_t ResultSize = 0;
-	HResult = PFInventoryGetMicrosoftStoreAccessTokensGetResultSize(*mAsyncBlock, &ResultSize);
-	if (HResult != S_OK)
-	{
-		Delegate.Execute(FPFInventoryGetMicrosoftStoreAccessTokensResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
-		return;
-	}
-
-	PFInventoryGetMicrosoftStoreAccessTokensResponse *Result = {};
-	TArray<uint8> BufferArray;
-	BufferArray.Reserve(ResultSize);
-	HResult = PFInventoryGetMicrosoftStoreAccessTokensGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
-	if (HResult != S_OK)
-	{
-		FString ErrorMessage = FString("GetResult failure");
-		Delegate.Execute(FPFInventoryGetMicrosoftStoreAccessTokensResponse{ .ErrorMessage = ErrorMessage }, false);
-		return;
-	}
-
-	TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensResponse> ResultType = ConvertGetMicrosoftStoreAccessTokensResponseToUnreal(Result);
-
-	Delegate.Execute(*ResultType, true);
-}
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FGetTransactionHistoryAsyncTask::FGetTransactionHistoryAsyncTask(
 	_In_ FPFEntityHandle EntityHandle,
 	FPFInventoryGetTransactionHistoryRequest InRequest,
@@ -746,7 +693,6 @@ void FRedeemMicrosoftStoreInventoryItemsAsyncTask::DoWork()
 {
 	const PFInventoryRedeemMicrosoftStoreInventoryItemsRequest RequestType = {
 		.collectionId = ConvertFStringToCharPtr(Request.collectionId),
-		.collectionsIdKey = ConvertFStringToCharPtr(Request.collectionsIdKey),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Request.entity),

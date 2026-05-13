@@ -211,57 +211,6 @@ private:
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 
 /// <summary>
-/// Allows for paging through all players in a given segment. This API creates a snapshot of all player
-/// profiles that match the segment definition at the time of its creation and lives through the Total
-/// Seconds to Live, refreshing its life span on each subsequent use of the Continuation Token. Profiles
-/// that change during the course of paging will not be reflected in the results. AB Test segments are
-/// currently not supported by this operation. NOTE: This API is limited to being called 30 times in one
-/// minute. You will be returned an error if you exceed this threshold.
-/// </summary>
-/// <param name="titleEntityHandle">FPFEntityHandle for a title Entity obtained using PFAuthenticationGetEntityWithSecretKeyAsync.</param>
-/// <param name="request">Populated request object.</param>
-/// <returns>Result code for this API operation.</returns>
-/// <remarks>
-/// This API is available on Windows, Linux, and macOS.
-/// Initial request must contain at least a Segment ID. Subsequent requests must contain the Segment
-/// ID as well as the Continuation Token. Failure to send the Continuation Token will result in a new
-/// player segment list being generated. Each time the Continuation Token is passed in the length of the
-/// Total Seconds to Live is refreshed. If too much time passes between requests to the point that a subsequent
-/// request is past the Total Seconds to Live an error will be returned and paging will be terminated.
-/// This API is resource intensive and should not be used in scenarios which might generate high request
-/// volumes. Only one request to this API at a time should be made per title. Concurrent requests to the
-/// API may be rejected with the APIConcurrentRequestLimitExceeded error. See also ServerGetAllSegmentsAsync.
-///
-/// When the asynchronous task is complete, call <see cref="PFSegmentsServerGetPlayersInSegmentGetResultSize"/>
-/// and <see cref="PFSegmentsServerGetPlayersInSegmentGetResult"/> to get the result.
-/// </remarks>
-class PLAYFABSERVICES_API FServerGetPlayersInSegmentAsyncTask : public FXAsyncTask
-{
-public:
-	FServerGetPlayersInSegmentAsyncTask(
-	_In_ FPFEntityHandle TitleEntityHandle,
-	FPFSegmentsGetPlayersInSegmentRequest InRequest,
-	const FOnServerGetPlayersInSegmentCompleted& InDelegate);
-
-	virtual void DoWork() override;
-
-	virtual void ProcessResults() override;
-
-private:
-	FPFEntityHandle TitleEntityHandle;
-	
-	FPFSegmentsGetPlayersInSegmentRequest Request;
-	
-	FOnServerGetPlayersInSegmentCompleted Delegate;
-
-	HRESULT HResult;
-};
-
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-
-/// <summary>
 /// Get all tags with a given Namespace (optional) from a player profile.
 /// </summary>
 /// <param name="titleEntityHandle">FPFEntityHandle for a title Entity obtained using PFAuthenticationGetEntityWithSecretKeyAsync.</param>

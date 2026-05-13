@@ -1191,6 +1191,44 @@ const PFAuthenticationLoginWithSteamIdRequest* ConvertLoginWithSteamIdRequestToP
 	return ConvertedType;
 }
 
+TSharedPtr<const FPFAuthenticationServerLoginWithTwitchRequest> ConvertServerLoginWithTwitchRequestToUnreal(const PFAuthenticationServerLoginWithTwitchRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAuthenticationServerLoginWithTwitchRequest> ConvertedType = MakeShared<FPFAuthenticationServerLoginWithTwitchRequest>(FPFAuthenticationServerLoginWithTwitchRequest{
+		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
+		.createAccount = Datatype->createAccount,
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToUnreal(Datatype->infoRequestParameters),
+		.playerSecret = Datatype->playerSecret == nullptr ? FString() : FString(Datatype->playerSecret),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAuthenticationServerLoginWithTwitchRequest* ConvertServerLoginWithTwitchRequestToPlayfab(TSharedPtr<const FPFAuthenticationServerLoginWithTwitchRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAuthenticationServerLoginWithTwitchRequest* ConvertedType = new PFAuthenticationServerLoginWithTwitchRequest{
+		.accessToken = ConvertFStringToCharPtr(Datatype->accessToken),
+		.createAccount = Datatype->createAccount,
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToPlayfab(Datatype->infoRequestParameters),
+		.playerSecret = ConvertFStringToCharPtr(Datatype->playerSecret),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
+	};
+
+	return ConvertedType;
+}
+
 TSharedPtr<const FPFAuthenticationServerLoginWithXboxRequest> ConvertServerLoginWithXboxRequestToUnreal(const PFAuthenticationServerLoginWithXboxRequest* Datatype) {
 	if (Datatype == nullptr)
 	{

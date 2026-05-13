@@ -1251,6 +1251,48 @@ struct FPFAuthenticationLoginWithSteamIdRequest
 
 
 
+struct FPFAuthenticationServerLoginWithTwitchRequest
+{
+	/// <summary>
+	/// Twitch access token for authentication.
+	/// </summary>
+	const FString accessToken;
+
+	/// <summary>
+	/// If true, create a new PlayFab account if one does not exist.
+	/// </summary>
+	bool createAccount;
+
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// (Optional) Parameters for requesting additional player info.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const FPFGetPlayerCombinedInfoRequestParams> infoRequestParameters;
+
+	/// <summary>
+	/// (Optional) Player secret for additional authentication.
+	/// </summary>
+	_Maybenull_ const FString playerSecret;
+
+	/// <summary>
+	/// PlayFab unique identifier of the user.
+	/// </summary>
+	const FString playFabId;
+
+};
+
+
+
 struct FPFAuthenticationServerLoginWithXboxRequest
 {
 	/// <summary>

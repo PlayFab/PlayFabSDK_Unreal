@@ -198,28 +198,6 @@ bool PLAYFABSERVICES_API FPFInventoryGetInventoryOperationStatusAsync(
 #endif
 
 /// <summary>
-/// Gets the access tokens.
-/// </summary>
-/// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
-/// <param name="request">Populated request object.</param>
-/// <param name="async">XAsyncBlock for the async operation.</param>
-/// <returns>Result code for this API operation.</returns>
-/// <remarks>
-/// This API is available on Windows, Linux, and macOS.
-/// Gets the access tokens for Microsoft Store authentication.
-///
-/// When the asynchronous task is complete, call <see cref="PFInventoryGetMicrosoftStoreAccessTokensGetResultSize"/>
-/// and <see cref="PFInventoryGetMicrosoftStoreAccessTokensGetResult"/> to get the result.
-/// </remarks>
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-bool PLAYFABSERVICES_API FPFInventoryGetMicrosoftStoreAccessTokensAsync(
-	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFInventoryGetMicrosoftStoreAccessTokensRequest* request,
-	_Inout_ FOnGetMicrosoftStoreAccessTokensCompleted delegate
-) noexcept;
-#endif
-
-/// <summary>
 /// Get transaction history for a player. Up to 250 Events can be returned at once. You can use continuation
 /// tokens to paginate through results that return greater than the limit. Getting transaction history
 /// has a lower RPS limit than getting a Player's inventory with Player Entities having a limit of 30
@@ -310,7 +288,8 @@ bool PLAYFABSERVICES_API FPFInventoryRedeemGooglePlayInventoryItemsAsync(
 #endif
 
 /// <summary>
-/// Redeem items.
+/// Redeem items from the Microsoft Store. Supported entitlement types are Developer Manager Consumable
+/// and Durable.
 /// </summary>
 /// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
 /// <param name="request">Populated request object.</param>

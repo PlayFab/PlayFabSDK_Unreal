@@ -98,7 +98,11 @@ enum class FPFMultiplayerServerAzureVmSize : uint32
 	Standard_D4ds_v5,
 	Standard_D8ds_v5,
 	Standard_D16ds_v5,
-	Standard_D32ds_v5
+	Standard_D32ds_v5,
+	Standard_D2ds_v6,
+	Standard_D4ds_v6,
+	Standard_D8ds_v6,
+	Standard_D16ds_v6
 };
 
 /// <summary>

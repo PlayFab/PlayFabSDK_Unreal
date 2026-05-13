@@ -290,9 +290,14 @@ public class PlayFabUnreal : ModuleRules
                 "PlayFabShared",
                 "PlayFabCore",
                 "PlayFabServices",
-                "PlayFabGameSave"
             }
         );
+
+        // GameSave is not supported on PS4
+        if (Target.Platform.ToString() != "PS4")
+        {
+            PublicDependencyModuleNames.Add("PlayFabGameSave");
+        }
         
         LogPlayFabUnreal($"Added dependencies: {string.Join(", ", PublicDependencyModuleNames)}");
 

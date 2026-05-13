@@ -118,7 +118,15 @@ namespace
 		}
 		else
 		{
-			UE_LOG_ONLINE(Error, TEXT("LocalChatUser is nullptr"));
+			if (IsRunningDedicatedServer())
+			{
+				UE_LOG_ONLINE(Verbose, TEXT("LocalChatUser is nullptr on dedicated server, clearing %d pending cross-network talkers"), CrossNetworkTalkersGDK.Num());
+				CrossNetworkTalkersGDK.Empty();
+			}
+			else
+			{
+				UE_LOG_ONLINE(Verbose, TEXT("LocalChatUser is nullptr, deferring %d pending cross-network talkers until local user is created"), CrossNetworkTalkersGDK.Num());
+			}
 		}
 		return false;
 	}

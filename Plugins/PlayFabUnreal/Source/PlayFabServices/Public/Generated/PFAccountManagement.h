@@ -314,6 +314,30 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientGetPlayFabIDsFromNintendoSwit
 #endif
 
 /// <summary>
+/// Retrieves the unique PlayFab identifiers for the given set of OpenId subject identifiers. A OpenId
+/// identifier is the service name plus the service-specific ID for the player, as specified by the title
+/// when the OpenId identifier was added to the player account.
+/// </summary>
+/// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// See also ClientLinkOpenIdConnectAsync, ClientUnlinkOpenIdConnectAsync.
+///
+/// When the asynchronous task is complete, call <see cref="PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResultSize"/>
+/// and <see cref="PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResult"/> to get
+/// the result.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(
+	_In_ FPFEntityHandle EntityHandle,
+	_In_ const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest* request,
+	_Inout_ FOnClientGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
 /// Retrieves the unique PlayFab identifiers for the given set of PlayStation :tm: Network identifiers.
 /// </summary>
 /// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
@@ -863,7 +887,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientLinkSteamAccountAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientLinkTwitchAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementLinkTwitchAccountRequest* request,
+	_In_ const FPFAccountManagementClientLinkTwitchAccountRequest* request,
 	_Inout_ FOnClientLinkTwitchCompleted delegate
 ) noexcept;
 #endif
@@ -1071,7 +1095,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkCustomIDAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookAccountAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementUnlinkFacebookAccountRequest* request,
+	_In_ const FPFAccountManagementClientUnlinkFacebookAccountRequest* request,
 	_Inout_ FOnClientUnlinkFacebookAccountCompleted delegate
 ) noexcept;
 #endif
@@ -1095,7 +1119,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookAccountAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookInstantGamesIdAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementUnlinkFacebookInstantGamesIdRequest* request,
+	_In_ const FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest* request,
 	_Inout_ FOnClientUnlinkFacebookInstantGamesIdCompleted delegate
 ) noexcept;
 #endif
@@ -1350,7 +1374,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkSteamAccountAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkTwitchAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementUnlinkTwitchAccountRequest* request,
+	_In_ const FPFAccountManagementClientUnlinkTwitchAccountRequest* request,
 	_Inout_ FOnClientUnlinkTwitchCompleted delegate
 ) noexcept;
 #endif
@@ -1422,7 +1446,31 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUpdateUserTitleDisplayNameAsy
 #endif
 
 /// <summary>
-/// Bans users by PlayFab ID with optional IP address, or MAC address for the provided game.
+/// Adds or updates a contact email to the specified player's profile.
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// This API adds a contact email to the specified player's profile. If the player's profile already
+/// contains a contact email, it will update the contact email to the email address specified.
+///
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be one of global PlayFab Service errors. See doc page "Handling PlayFab Errors"
+/// for more details on error handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerAddOrUpdateContactEmailAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerAddOrUpdateContactEmailRequest* request,
+	_Inout_ FOnServerAddOrUpdateContactEmailCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
+/// Bans users by PlayFab ID with optional IP address for the provided game.
 /// </summary>
 /// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
 /// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
@@ -1431,9 +1479,9 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUpdateUserTitleDisplayNameAsy
 /// <returns>Result code for this API operation.</returns>
 /// <remarks>
 /// This API is available on Windows, Linux, and macOS.
-/// The existence of each user will not be verified. When banning by IP or MAC address, multiple players
-/// may be affected, so use this feature with caution. Returns information about the new bans. See also
-/// ServerGetUserBansAsync, ServerRevokeAllBansForUserAsync, ServerRevokeBansAsync, ServerUpdateBansAsync.
+/// The existence of each user will not be verified. When banning by IP, multiple players may be affected,
+/// so use this feature with caution. Returns information about the new bans. See also ServerGetUserBansAsync,
+/// ServerRevokeAllBansForUserAsync, ServerRevokeBansAsync, ServerUpdateBansAsync.
 ///
 /// When the asynchronous task is complete, call <see cref="PFAccountManagementServerBanUsersGetResultSize"/>
 /// and <see cref="PFAccountManagementServerBanUsersGetResult"/> to get the result.
@@ -1633,6 +1681,29 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerGetPlayFabIDsFromNintendoSwit
 	_In_ FPFEntityHandle TitleEntityHandle,
 	_In_ const FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsRequest* request,
 	_Inout_ FOnServerGetPlayFabIDsFromNintendoSwitchDeviceIdsCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
+/// Retrieves the unique PlayFab identifiers for the given set of OpenId subject identifiers. A OpenId
+/// subject identifier is the OpenId issuer plus the OpenId subject for the player, as specified by the
+/// title when the OpenId identifier was added to the player account.
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// When the asynchronous task is complete, call <see cref="PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResultSize"/>
+/// and <see cref="PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResult"/> to get
+/// the result.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest* request,
+	_Inout_ FOnServerGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted delegate
 ) noexcept;
 #endif
 
@@ -2038,6 +2109,30 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerLinkSteamIdAsync(
 #endif
 
 /// <summary>
+/// Links the Twitch account associated with the token to the user's PlayFab account.
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// See also ServerUnlinkTwitchAccountAsync.
+///
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_FEATURE_NOT_CONFIGURED_FOR_TITLE, E_PF_INVALID_TWITCH_TOKEN, E_PF_LINKED_IDENTIFIER_ALREADY_CLAIMED,
+/// E_PF_TWITCH_RESPONSE_ERROR or any of the global PlayFab Service errors. See doc page "Handling PlayFab
+/// Errors" for more details on error handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerLinkTwitchAccountAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerLinkTwitchAccountRequest* request,
+	_Inout_ FOnServerLinkTwitchAccountCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
 /// Links the Xbox Live account associated with the provided access code to the user's PlayFab account
 /// </summary>
 /// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
@@ -2218,6 +2313,49 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkBattleNetAccountAsync(
 #endif
 
 /// <summary>
+/// Unlinks the related Facebook account from the user's PlayFab account
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_ACCOUNT_NOT_LINKED or any of the global PlayFab Service errors. See
+/// doc page "Handling PlayFab Errors" for more details on error handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkFacebookAccountAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerUnlinkFacebookAccountRequest* request,
+	_Inout_ FOnServerUnlinkFacebookAccountCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
+/// Unlinks the related Facebook Instant Games identifier from the user's PlayFab account
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_ACCOUNT_NOT_LINKED, E_PF_FACEBOOK_INSTANT_GAMES_ID_NOT_LINKED or any
+/// of the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details on error
+/// handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkFacebookInstantGamesIdAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest* request,
+	_Inout_ FOnServerUnlinkFacebookInstantGamesIdCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
 /// Unlinks the related Nintendo account from the user's PlayFab account
 /// </summary>
 /// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
@@ -2336,6 +2474,30 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkSteamIdAsync(
 	_In_ FPFEntityHandle TitleEntityHandle,
 	_In_ const FPFAccountManagementUnlinkSteamIdRequest* request,
 	_Inout_ FOnServerUnlinkSteamIdCompleted delegate
+) noexcept;
+#endif
+
+/// <summary>
+/// Unlinks the related Twitch account from the user's PlayFab account.
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// See also ServerLinkTwitchAccountAsync.
+///
+/// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
+/// the async result will be E_PF_ACCOUNT_NOT_LINKED, E_PF_FEATURE_NOT_CONFIGURED_FOR_TITLE, E_PF_INVALID_TWITCH_TOKEN
+/// or any of the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details
+/// on error handling.
+/// </remarks>
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkTwitchAccountAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerUnlinkTwitchAccountRequest* request,
+	_Inout_ FOnServerUnlinkTwitchAccountCompleted delegate
 ) noexcept;
 #endif
 

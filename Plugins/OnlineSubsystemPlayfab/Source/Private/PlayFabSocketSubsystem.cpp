@@ -4,6 +4,7 @@
 
 #include "PlayFabSocketSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabPartyNetwork.h"
 #include "PlayFabSocket.h"
 #include "SocketSubsystemModule.h"
 #include "PlayFabSocketSubsystem.h"
@@ -182,10 +183,11 @@ bool FPlayFabSocketSubsystem::GetLocalAdapterAddresses(TArray<TSharedPtr<FIntern
 
 TSharedRef<FInternetAddr> FPlayFabSocketSubsystem::GetLocalBindAddr(FOutputDevice& Out)
 {
-	if (OSSPlayFab && OSSPlayFab->LocalEndpoint)
+	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab ? OSSPlayFab->PartyNetwork->LocalEndpoint : nullptr;
+	if (LocalEndpoint)
 	{
 		uint16 EndpointId = 0;
-		PartyError Err = OSSPlayFab->LocalEndpoint->GetUniqueIdentifier(&EndpointId);
+		PartyError Err = LocalEndpoint->GetUniqueIdentifier(&EndpointId);
 
 		if (PARTY_FAILED(Err))
 		{

@@ -733,6 +733,59 @@ void FClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 }
 #endif
 
+#if 0
+FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask(
+	_In_ FPFEntityHandle EntityHandle,
+	FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest InRequest,
+	const FOnClientGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask")),
+	EntityHandle(EntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::DoWork()
+{
+	const PFAccountManagementGetPlayFabIDsFromOpenIdsRequest RequestType = {
+		.openIdSubjectIdentifiers = ConvertUnrealArrayToPlayfab<PFAccountManagementOpenIdSubjectIdentifier, FPFAccountManagementOpenIdSubjectIdentifier>(Request.openIdSubjectIdentifiers, ConvertOpenIdSubjectIdentifierToPlayfab),
+		.openIdSubjectIdentifiersCount = (uint32_t)Request.openIdSubjectIdentifiers.Num()
+	};
+	HResult = PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
+	}
+};
+
+void FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::ProcessResults()
+{
+	size_t ResultSize = 0;
+	HResult = PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResultSize(*mAsyncBlock, &ResultSize);
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		return;
+	}
+
+	PFAccountManagementGetPlayFabIDsFromOpenIdsResult *Result = {};
+	TArray<uint8> BufferArray;
+	BufferArray.Reserve(ResultSize);
+	HResult = PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("GetResult failure");
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
+		return;
+	}
+
+	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult> ResultType = ConvertGetPlayFabIDsFromOpenIdsResultToUnreal(Result);
+
+	Delegate.Execute(*ResultType, true);
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_4 || HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_5 || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask::FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask(
 	_In_ FPFEntityHandle EntityHandle,
@@ -1719,7 +1772,7 @@ void FClientLinkSteamAccountAsyncTask::ProcessResults()
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FClientLinkTwitchAsyncTask::FClientLinkTwitchAsyncTask(
 	_In_ FPFEntityHandle EntityHandle,
-	FPFAccountManagementLinkTwitchAccountRequest InRequest,
+	FPFAccountManagementClientLinkTwitchAccountRequest InRequest,
 	const FOnClientLinkTwitchCompleted& InDelegate)
 	: FXAsyncTask(TEXT("FClientLinkTwitchAsyncTask")),
 	EntityHandle(EntityHandle),
@@ -1730,7 +1783,7 @@ FClientLinkTwitchAsyncTask::FClientLinkTwitchAsyncTask(
 
 void FClientLinkTwitchAsyncTask::DoWork()
 {
-	const PFAccountManagementLinkTwitchAccountRequest RequestType = {
+	const PFAccountManagementClientLinkTwitchAccountRequest RequestType = {
 		.accessToken = ConvertFStringToCharPtr(Request.accessToken),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
@@ -2085,7 +2138,7 @@ void FClientUnlinkCustomIDAsyncTask::ProcessResults()
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_MAC
 FClientUnlinkFacebookAccountAsyncTask::FClientUnlinkFacebookAccountAsyncTask(
 	_In_ FPFEntityHandle EntityHandle,
-	FPFAccountManagementUnlinkFacebookAccountRequest InRequest,
+	FPFAccountManagementClientUnlinkFacebookAccountRequest InRequest,
 	const FOnClientUnlinkFacebookAccountCompleted& InDelegate)
 	: FXAsyncTask(TEXT("FClientUnlinkFacebookAccountAsyncTask")),
 	EntityHandle(EntityHandle),
@@ -2096,7 +2149,7 @@ FClientUnlinkFacebookAccountAsyncTask::FClientUnlinkFacebookAccountAsyncTask(
 
 void FClientUnlinkFacebookAccountAsyncTask::DoWork()
 {
-	const PFAccountManagementUnlinkFacebookAccountRequest RequestType = {
+	const PFAccountManagementClientUnlinkFacebookAccountRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num()
 	};
@@ -2124,7 +2177,7 @@ void FClientUnlinkFacebookAccountAsyncTask::ProcessResults()
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FClientUnlinkFacebookInstantGamesIdAsyncTask::FClientUnlinkFacebookInstantGamesIdAsyncTask(
 	_In_ FPFEntityHandle EntityHandle,
-	FPFAccountManagementUnlinkFacebookInstantGamesIdRequest InRequest,
+	FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest InRequest,
 	const FOnClientUnlinkFacebookInstantGamesIdCompleted& InDelegate)
 	: FXAsyncTask(TEXT("FClientUnlinkFacebookInstantGamesIdAsyncTask")),
 	EntityHandle(EntityHandle),
@@ -2135,7 +2188,7 @@ FClientUnlinkFacebookInstantGamesIdAsyncTask::FClientUnlinkFacebookInstantGamesI
 
 void FClientUnlinkFacebookInstantGamesIdAsyncTask::DoWork()
 {
-	const PFAccountManagementUnlinkFacebookInstantGamesIdRequest RequestType = {
+	const PFAccountManagementClientUnlinkFacebookInstantGamesIdRequest RequestType = {
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num(),
 		.facebookInstantGamesId = ConvertFStringToCharPtr(Request.facebookInstantGamesId)
@@ -2555,7 +2608,7 @@ void FClientUnlinkSteamAccountAsyncTask::ProcessResults()
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FClientUnlinkTwitchAsyncTask::FClientUnlinkTwitchAsyncTask(
 	_In_ FPFEntityHandle EntityHandle,
-	FPFAccountManagementUnlinkTwitchAccountRequest InRequest,
+	FPFAccountManagementClientUnlinkTwitchAccountRequest InRequest,
 	const FOnClientUnlinkTwitchCompleted& InDelegate)
 	: FXAsyncTask(TEXT("FClientUnlinkTwitchAsyncTask")),
 	EntityHandle(EntityHandle),
@@ -2566,7 +2619,7 @@ FClientUnlinkTwitchAsyncTask::FClientUnlinkTwitchAsyncTask(
 
 void FClientUnlinkTwitchAsyncTask::DoWork()
 {
-	const PFAccountManagementUnlinkTwitchAccountRequest RequestType = {
+	const PFAccountManagementClientUnlinkTwitchAccountRequest RequestType = {
 		.accessToken = ConvertFStringToCharPtr(Request.accessToken),
 		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
 		.customTagsCount = (uint32_t)Request.customTags.Num()
@@ -2718,6 +2771,47 @@ void FClientUpdateUserTitleDisplayNameAsyncTask::ProcessResults()
 	TSharedPtr<const FPFAccountManagementUpdateUserTitleDisplayNameResult> ResultType = ConvertUpdateUserTitleDisplayNameResultToUnreal(Result);
 
 	Delegate.Execute(*ResultType, true);
+}
+#endif
+
+#if 0
+FServerAddOrUpdateContactEmailAsyncTask::FServerAddOrUpdateContactEmailAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementServerAddOrUpdateContactEmailRequest InRequest,
+	const FOnServerAddOrUpdateContactEmailCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerAddOrUpdateContactEmailAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerAddOrUpdateContactEmailAsyncTask::DoWork()
+{
+	const PFAccountManagementServerAddOrUpdateContactEmailRequest RequestType = {
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.emailAddress = ConvertFStringToCharPtr(Request.emailAddress),
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId)
+	};
+	HResult = PFAccountManagementServerAddOrUpdateContactEmailAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FServerAddOrUpdateContactEmailAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
 }
 #endif
 
@@ -3184,6 +3278,59 @@ void FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult> ResultType = ConvertGetPlayFabIDsFromNintendoSwitchDeviceIdsResultToUnreal(Result);
+
+	Delegate.Execute(*ResultType, true);
+}
+#endif
+
+#if 0
+FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest InRequest,
+	const FOnServerGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::DoWork()
+{
+	const PFAccountManagementGetPlayFabIDsFromOpenIdsRequest RequestType = {
+		.openIdSubjectIdentifiers = ConvertUnrealArrayToPlayfab<PFAccountManagementOpenIdSubjectIdentifier, FPFAccountManagementOpenIdSubjectIdentifier>(Request.openIdSubjectIdentifiers, ConvertOpenIdSubjectIdentifierToPlayfab),
+		.openIdSubjectIdentifiersCount = (uint32_t)Request.openIdSubjectIdentifiers.Num()
+	};
+	HResult = PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
+	}
+};
+
+void FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::ProcessResults()
+{
+	size_t ResultSize = 0;
+	HResult = PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResultSize(*mAsyncBlock, &ResultSize);
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		return;
+	}
+
+	PFAccountManagementGetPlayFabIDsFromOpenIdsResult *Result = {};
+	TArray<uint8> BufferArray;
+	BufferArray.Reserve(ResultSize);
+	HResult = PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("GetResult failure");
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
+		return;
+	}
+
+	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult> ResultType = ConvertGetPlayFabIDsFromOpenIdsResultToUnreal(Result);
 
 	Delegate.Execute(*ResultType, true);
 }
@@ -4006,6 +4153,48 @@ void FServerLinkSteamIdAsyncTask::ProcessResults()
 }
 #endif
 
+#if 0
+FServerLinkTwitchAccountAsyncTask::FServerLinkTwitchAccountAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementServerLinkTwitchAccountRequest InRequest,
+	const FOnServerLinkTwitchAccountCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerLinkTwitchAccountAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerLinkTwitchAccountAsyncTask::DoWork()
+{
+	const PFAccountManagementServerLinkTwitchAccountRequest RequestType = {
+		.accessToken = ConvertFStringToCharPtr(Request.accessToken),
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.forceLink = Request.forceLink ? new bool(*Request.forceLink) : nullptr,
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId)
+	};
+	HResult = PFAccountManagementServerLinkTwitchAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FServerLinkTwitchAccountAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FServerLinkXboxAccountAsyncTask::FServerLinkXboxAccountAsyncTask(
 	_In_ FPFEntityHandle TitleEntityHandle,
@@ -4319,6 +4508,87 @@ void FServerUnlinkBattleNetAccountAsyncTask::ProcessResults()
 }
 #endif
 
+#if 0
+FServerUnlinkFacebookAccountAsyncTask::FServerUnlinkFacebookAccountAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementServerUnlinkFacebookAccountRequest InRequest,
+	const FOnServerUnlinkFacebookAccountCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerUnlinkFacebookAccountAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerUnlinkFacebookAccountAsyncTask::DoWork()
+{
+	const PFAccountManagementServerUnlinkFacebookAccountRequest RequestType = {
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId)
+	};
+	HResult = PFAccountManagementServerUnlinkFacebookAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FServerUnlinkFacebookAccountAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
+}
+#endif
+
+#if 0
+FServerUnlinkFacebookInstantGamesIdAsyncTask::FServerUnlinkFacebookInstantGamesIdAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest InRequest,
+	const FOnServerUnlinkFacebookInstantGamesIdCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerUnlinkFacebookInstantGamesIdAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerUnlinkFacebookInstantGamesIdAsyncTask::DoWork()
+{
+	const PFAccountManagementServerUnlinkFacebookInstantGamesIdRequest RequestType = {
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.facebookInstantGamesId = ConvertFStringToCharPtr(Request.facebookInstantGamesId),
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId)
+	};
+	HResult = PFAccountManagementServerUnlinkFacebookInstantGamesIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FServerUnlinkFacebookInstantGamesIdAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FServerUnlinkNintendoServiceAccountAsyncTask::FServerUnlinkNintendoServiceAccountAsyncTask(
 	_In_ FPFEntityHandle TitleEntityHandle,
@@ -4509,6 +4779,47 @@ void FServerUnlinkSteamIdAsyncTask::DoWork()
 };
 
 void FServerUnlinkSteamIdAsyncTask::ProcessResults()
+{
+	if (HResult != S_OK)
+	{
+		Delegate.Execute(FString("Async task failure"), false);
+	}
+	else
+	{
+		Delegate.Execute(FString(), true);
+	}
+}
+#endif
+
+#if 0
+FServerUnlinkTwitchAccountAsyncTask::FServerUnlinkTwitchAccountAsyncTask(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	FPFAccountManagementServerUnlinkTwitchAccountRequest InRequest,
+	const FOnServerUnlinkTwitchAccountCompleted& InDelegate)
+	: FXAsyncTask(TEXT("FServerUnlinkTwitchAccountAsyncTask")),
+	TitleEntityHandle(TitleEntityHandle),
+	Request(InRequest),
+	Delegate(InDelegate)
+{
+};
+
+void FServerUnlinkTwitchAccountAsyncTask::DoWork()
+{
+	const PFAccountManagementServerUnlinkTwitchAccountRequest RequestType = {
+		.accessToken = ConvertFStringToCharPtr(Request.accessToken),
+		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
+		.customTagsCount = (uint32_t)Request.customTags.Num(),
+		.playFabId = ConvertFStringToCharPtr(Request.playFabId)
+	};
+	HResult = PFAccountManagementServerUnlinkTwitchAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
+	if (HResult != S_OK)
+	{
+		FString ErrorMessage = FString("DoWork failure");
+		Delegate.Execute(ErrorMessage, false);
+	}
+};
+
+void FServerUnlinkTwitchAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{

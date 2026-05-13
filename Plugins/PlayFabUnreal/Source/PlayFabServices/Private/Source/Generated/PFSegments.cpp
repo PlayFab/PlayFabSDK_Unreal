@@ -60,19 +60,6 @@ bool PLAYFABSERVICES_API FPFSegmentsServerGetPlayerSegmentsAsync(
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-bool PLAYFABSERVICES_API FPFSegmentsServerGetPlayersInSegmentAsync(
-	_In_ FPFEntityHandle TitleEntityHandle,
-	_In_ const FPFSegmentsGetPlayersInSegmentRequest* request,
-	_Inout_ FOnServerGetPlayersInSegmentCompleted delegate
-) noexcept
-{
-	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
-	taskManager->AddTask<FServerGetPlayersInSegmentAsyncTask>(TitleEntityHandle, *request, delegate);
-	return true;
-}
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFSegmentsServerGetPlayerTagsAsync(
 	_In_ FPFEntityHandle TitleEntityHandle,
 	_In_ const FPFSegmentsGetPlayerTagsRequest* request,

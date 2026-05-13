@@ -33,7 +33,7 @@ extern "C"
 /// E_PF_ENTITY_TYPE_MISMATCH_WITH_STAT_DEFINITION, E_PF_EXTERNAL_ENTITY_NOT_ALLOWED_FOR_TIER, E_PF_INVALID_BASE_TIME_FOR_INTERVAL,
 /// E_PF_LEADERBOARD_COUNT_LIMIT_EXCEEDED, E_PF_LEADERBOARD_NAME_CONFLICT, E_PF_LEADERBOARD_SIZE_LIMIT_EXCEEDED,
 /// E_PF_LINKED_STATISTIC_COLUMN_MISMATCH, E_PF_LINKED_STATISTIC_COLUMN_NOT_FOUND, E_PF_LINKED_STATISTIC_COLUMN_REQUIRED,
-/// E_PF_LINKING_STATS_NOT_ALLOWED_FOR_ENTITY_TYPE, E_PF_MAX_QUERYABLE_VERSIONS_VALUE_NOT_ALLOWED_FOR_TIER,
+/// E_PF_LINKING_STATS_NOT_ALLOWED_FOR_ENTITY_TYPE, E_PF_MAX_QUERYABLE_VERSIONS_EXCEEDED, E_PF_MAX_QUERYABLE_VERSIONS_VALUE_NOT_ALLOWED_FOR_TIER,
 /// E_PF_MULTIPLE_LINKED_STATISTICS_NOT_ALLOWED, E_PF_PLAY_FAB_ERROR_EVENT_NOT_SUPPORTED_FOR_ENTITY_TYPE,
 /// E_PF_STAT_DEFINITION_ALREADY_LINKED_TO_LEADERBOARD, E_PF_STATISTIC_NOT_FOUND, E_PF_VERSION_CONFIGURATION_IS_REQUIRED
 /// or any of the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details
@@ -272,10 +272,10 @@ bool PLAYFABSERVICES_API FPFLeaderboardsUnlinkLeaderboardFromStatisticAsync(
 /// See also LeaderboardDeleteLeaderboardDefinitionAsync.
 ///
 /// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
-/// the async result will be E_PF_LEADERBOARD_SIZE_LIMIT_EXCEEDED, E_PF_MAX_QUERYABLE_VERSIONS_VALUE_NOT_ALLOWED_FOR_TIER,
-/// E_PF_PLAY_FAB_ERROR_EVENT_NOT_SUPPORTED_FOR_ENTITY_TYPE, E_PF_RESET_INTERVAL_CANNOT_BE_MODIFIED or
-/// any of the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details
-/// on error handling.
+/// the async result will be E_PF_LEADERBOARD_SIZE_LIMIT_EXCEEDED, E_PF_MAX_QUERYABLE_VERSIONS_EXCEEDED,
+/// E_PF_MAX_QUERYABLE_VERSIONS_VALUE_NOT_ALLOWED_FOR_TIER, E_PF_PLAY_FAB_ERROR_EVENT_NOT_SUPPORTED_FOR_ENTITY_TYPE,
+/// E_PF_RESET_INTERVAL_CANNOT_BE_MODIFIED or any of the global PlayFab Service errors. See doc page "Handling
+/// PlayFab Errors" for more details on error handling.
 /// </remarks>
 #if HC_PLATFORM == HC_PLATFORM_GDK
 bool PLAYFABSERVICES_API FPFLeaderboardsUpdateLeaderboardDefinitionAsync(
@@ -298,8 +298,9 @@ bool PLAYFABSERVICES_API FPFLeaderboardsUpdateLeaderboardDefinitionAsync(
 ///
 /// Call <see cref="XAsyncGetStatus"/> to get the status of the operation. If the service call is unsuccessful,
 /// the async result will be E_PF_API_NOT_ENABLED_FOR_GAME_CLIENT_ACCESS, E_PF_LEADERBOARD_COLUMN_LENGTH_MISMATCH,
-/// E_PF_LEADERBOARD_NOT_FOUND, E_PF_LEADERBOARD_UPDATE_NOT_ALLOWED_WHILE_LINKED or any of the global
-/// PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details on error handling.
+/// E_PF_LEADERBOARD_NOT_FOUND, E_PF_LEADERBOARD_UPDATE_NOT_ALLOWED_WHILE_LINKED, E_PF_METADATA_LENGTH_EXCEEDED
+/// or any of the global PlayFab Service errors. See doc page "Handling PlayFab Errors" for more details
+/// on error handling.
 /// </remarks>
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFLeaderboardsUpdateLeaderboardEntriesAsync(

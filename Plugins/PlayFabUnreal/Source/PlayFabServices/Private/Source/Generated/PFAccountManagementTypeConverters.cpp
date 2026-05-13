@@ -1057,6 +1057,118 @@ const PFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult* Convert
 	return ConvertedType;
 }
 
+TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifier> ConvertOpenIdSubjectIdentifierToUnreal(const PFAccountManagementOpenIdSubjectIdentifier* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifier> ConvertedType = MakeShared<FPFAccountManagementOpenIdSubjectIdentifier>(FPFAccountManagementOpenIdSubjectIdentifier{
+		.issuer = Datatype->issuer == nullptr ? FString() : FString(Datatype->issuer),
+		.subject = Datatype->subject == nullptr ? FString() : FString(Datatype->subject)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementOpenIdSubjectIdentifier* ConvertOpenIdSubjectIdentifierToPlayfab(TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifier> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementOpenIdSubjectIdentifier* ConvertedType = new PFAccountManagementOpenIdSubjectIdentifier{
+		.issuer = ConvertFStringToCharPtr(Datatype->issuer),
+		.subject = ConvertFStringToCharPtr(Datatype->subject)
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest> ConvertGetPlayFabIDsFromOpenIdsRequestToUnreal(const PFAccountManagementGetPlayFabIDsFromOpenIdsRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest>(FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest{
+		.openIdSubjectIdentifiers = ConvertPlayfabArrayToUnreal<PFAccountManagementOpenIdSubjectIdentifier, FPFAccountManagementOpenIdSubjectIdentifier>(Datatype->openIdSubjectIdentifiers, Datatype->openIdSubjectIdentifiersCount, ConvertOpenIdSubjectIdentifierToUnreal),
+		.openIdSubjectIdentifiersCount = Datatype->openIdSubjectIdentifiersCount
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementGetPlayFabIDsFromOpenIdsRequest* ConvertGetPlayFabIDsFromOpenIdsRequestToPlayfab(TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementGetPlayFabIDsFromOpenIdsRequest* ConvertedType = new PFAccountManagementGetPlayFabIDsFromOpenIdsRequest{
+		.openIdSubjectIdentifiers = ConvertUnrealArrayToPlayfab<PFAccountManagementOpenIdSubjectIdentifier, FPFAccountManagementOpenIdSubjectIdentifier>(Datatype->openIdSubjectIdentifiers, ConvertOpenIdSubjectIdentifierToPlayfab),
+		.openIdSubjectIdentifiersCount = (uint32_t)Datatype->openIdSubjectIdentifiers.Num()
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair> ConvertOpenIdSubjectIdentifierPlayFabIdPairToUnreal(const PFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair> ConvertedType = MakeShared<FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair>(FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair{
+		.openIdSubjectIdentifier = ConvertOpenIdSubjectIdentifierToUnreal(Datatype->openIdSubjectIdentifier),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair* ConvertOpenIdSubjectIdentifierPlayFabIdPairToPlayfab(TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair* ConvertedType = new PFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair{
+		.openIdSubjectIdentifier = ConvertOpenIdSubjectIdentifierToPlayfab(Datatype->openIdSubjectIdentifier),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult> ConvertGetPlayFabIDsFromOpenIdsResultToUnreal(const PFAccountManagementGetPlayFabIDsFromOpenIdsResult* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromOpenIdsResult>(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{
+		.data = ConvertPlayfabArrayToUnreal<PFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair, FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair>(Datatype->data, Datatype->dataCount, ConvertOpenIdSubjectIdentifierPlayFabIdPairToUnreal),
+		.dataCount = Datatype->dataCount
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementGetPlayFabIDsFromOpenIdsResult* ConvertGetPlayFabIDsFromOpenIdsResultToPlayfab(TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementGetPlayFabIDsFromOpenIdsResult* ConvertedType = new PFAccountManagementGetPlayFabIDsFromOpenIdsResult{
+		.data = ConvertUnrealArrayToPlayfab<PFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair, FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair>(Datatype->data, ConvertOpenIdSubjectIdentifierPlayFabIdPairToPlayfab),
+		.dataCount = (uint32_t)Datatype->data.Num()
+	};
+
+	return ConvertedType;
+}
+
 TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest> ConvertGetPlayFabIDsFromPSNAccountIDsRequestToUnreal(const PFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
@@ -2107,13 +2219,13 @@ const PFAccountManagementLinkSteamAccountRequest* ConvertLinkSteamAccountRequest
 	return ConvertedType;
 }
 
-TSharedPtr<const FPFAccountManagementLinkTwitchAccountRequest> ConvertLinkTwitchAccountRequestToUnreal(const PFAccountManagementLinkTwitchAccountRequest* Datatype) {
+TSharedPtr<const FPFAccountManagementClientLinkTwitchAccountRequest> ConvertClientLinkTwitchAccountRequestToUnreal(const PFAccountManagementClientLinkTwitchAccountRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
 		return nullptr;
 	}
 
-	TSharedPtr<const FPFAccountManagementLinkTwitchAccountRequest> ConvertedType = MakeShared<FPFAccountManagementLinkTwitchAccountRequest>(FPFAccountManagementLinkTwitchAccountRequest{
+	TSharedPtr<const FPFAccountManagementClientLinkTwitchAccountRequest> ConvertedType = MakeShared<FPFAccountManagementClientLinkTwitchAccountRequest>(FPFAccountManagementClientLinkTwitchAccountRequest{
 		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
@@ -2123,13 +2235,13 @@ TSharedPtr<const FPFAccountManagementLinkTwitchAccountRequest> ConvertLinkTwitch
 	return ConvertedType;
 }
 
-const PFAccountManagementLinkTwitchAccountRequest* ConvertLinkTwitchAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementLinkTwitchAccountRequest> Datatype) {
+const PFAccountManagementClientLinkTwitchAccountRequest* ConvertClientLinkTwitchAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementClientLinkTwitchAccountRequest> Datatype) {
 	if (!Datatype.IsValid())
 	{
 		return nullptr;
 	}
 
-	const PFAccountManagementLinkTwitchAccountRequest* ConvertedType = new PFAccountManagementLinkTwitchAccountRequest{
+	const PFAccountManagementClientLinkTwitchAccountRequest* ConvertedType = new PFAccountManagementClientLinkTwitchAccountRequest{
 		.accessToken = ConvertFStringToCharPtr(Datatype->accessToken),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
@@ -2417,13 +2529,13 @@ const PFAccountManagementUnlinkCustomIDRequest* ConvertUnlinkCustomIDRequestToPl
 	return ConvertedType;
 }
 
-TSharedPtr<const FPFAccountManagementUnlinkFacebookAccountRequest> ConvertUnlinkFacebookAccountRequestToUnreal(const PFAccountManagementUnlinkFacebookAccountRequest* Datatype) {
+TSharedPtr<const FPFAccountManagementClientUnlinkFacebookAccountRequest> ConvertClientUnlinkFacebookAccountRequestToUnreal(const PFAccountManagementClientUnlinkFacebookAccountRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
 		return nullptr;
 	}
 
-	TSharedPtr<const FPFAccountManagementUnlinkFacebookAccountRequest> ConvertedType = MakeShared<FPFAccountManagementUnlinkFacebookAccountRequest>(FPFAccountManagementUnlinkFacebookAccountRequest{
+	TSharedPtr<const FPFAccountManagementClientUnlinkFacebookAccountRequest> ConvertedType = MakeShared<FPFAccountManagementClientUnlinkFacebookAccountRequest>(FPFAccountManagementClientUnlinkFacebookAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount
 	});
@@ -2431,13 +2543,13 @@ TSharedPtr<const FPFAccountManagementUnlinkFacebookAccountRequest> ConvertUnlink
 	return ConvertedType;
 }
 
-const PFAccountManagementUnlinkFacebookAccountRequest* ConvertUnlinkFacebookAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementUnlinkFacebookAccountRequest> Datatype) {
+const PFAccountManagementClientUnlinkFacebookAccountRequest* ConvertClientUnlinkFacebookAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementClientUnlinkFacebookAccountRequest> Datatype) {
 	if (!Datatype.IsValid())
 	{
 		return nullptr;
 	}
 
-	const PFAccountManagementUnlinkFacebookAccountRequest* ConvertedType = new PFAccountManagementUnlinkFacebookAccountRequest{
+	const PFAccountManagementClientUnlinkFacebookAccountRequest* ConvertedType = new PFAccountManagementClientUnlinkFacebookAccountRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num()
 	};
@@ -2445,13 +2557,13 @@ const PFAccountManagementUnlinkFacebookAccountRequest* ConvertUnlinkFacebookAcco
 	return ConvertedType;
 }
 
-TSharedPtr<const FPFAccountManagementUnlinkFacebookInstantGamesIdRequest> ConvertUnlinkFacebookInstantGamesIdRequestToUnreal(const PFAccountManagementUnlinkFacebookInstantGamesIdRequest* Datatype) {
+TSharedPtr<const FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest> ConvertClientUnlinkFacebookInstantGamesIdRequestToUnreal(const PFAccountManagementClientUnlinkFacebookInstantGamesIdRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
 		return nullptr;
 	}
 
-	TSharedPtr<const FPFAccountManagementUnlinkFacebookInstantGamesIdRequest> ConvertedType = MakeShared<FPFAccountManagementUnlinkFacebookInstantGamesIdRequest>(FPFAccountManagementUnlinkFacebookInstantGamesIdRequest{
+	TSharedPtr<const FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest> ConvertedType = MakeShared<FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest>(FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.facebookInstantGamesId = Datatype->facebookInstantGamesId == nullptr ? FString() : FString(Datatype->facebookInstantGamesId)
@@ -2460,13 +2572,13 @@ TSharedPtr<const FPFAccountManagementUnlinkFacebookInstantGamesIdRequest> Conver
 	return ConvertedType;
 }
 
-const PFAccountManagementUnlinkFacebookInstantGamesIdRequest* ConvertUnlinkFacebookInstantGamesIdRequestToPlayfab(TSharedPtr<const FPFAccountManagementUnlinkFacebookInstantGamesIdRequest> Datatype) {
+const PFAccountManagementClientUnlinkFacebookInstantGamesIdRequest* ConvertClientUnlinkFacebookInstantGamesIdRequestToPlayfab(TSharedPtr<const FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest> Datatype) {
 	if (!Datatype.IsValid())
 	{
 		return nullptr;
 	}
 
-	const PFAccountManagementUnlinkFacebookInstantGamesIdRequest* ConvertedType = new PFAccountManagementUnlinkFacebookInstantGamesIdRequest{
+	const PFAccountManagementClientUnlinkFacebookInstantGamesIdRequest* ConvertedType = new PFAccountManagementClientUnlinkFacebookInstantGamesIdRequest{
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.facebookInstantGamesId = ConvertFStringToCharPtr(Datatype->facebookInstantGamesId)
@@ -2761,13 +2873,13 @@ const PFAccountManagementUnlinkSteamAccountRequest* ConvertUnlinkSteamAccountReq
 	return ConvertedType;
 }
 
-TSharedPtr<const FPFAccountManagementUnlinkTwitchAccountRequest> ConvertUnlinkTwitchAccountRequestToUnreal(const PFAccountManagementUnlinkTwitchAccountRequest* Datatype) {
+TSharedPtr<const FPFAccountManagementClientUnlinkTwitchAccountRequest> ConvertClientUnlinkTwitchAccountRequestToUnreal(const PFAccountManagementClientUnlinkTwitchAccountRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
 		return nullptr;
 	}
 
-	TSharedPtr<const FPFAccountManagementUnlinkTwitchAccountRequest> ConvertedType = MakeShared<FPFAccountManagementUnlinkTwitchAccountRequest>(FPFAccountManagementUnlinkTwitchAccountRequest{
+	TSharedPtr<const FPFAccountManagementClientUnlinkTwitchAccountRequest> ConvertedType = MakeShared<FPFAccountManagementClientUnlinkTwitchAccountRequest>(FPFAccountManagementClientUnlinkTwitchAccountRequest{
 		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount
@@ -2776,13 +2888,13 @@ TSharedPtr<const FPFAccountManagementUnlinkTwitchAccountRequest> ConvertUnlinkTw
 	return ConvertedType;
 }
 
-const PFAccountManagementUnlinkTwitchAccountRequest* ConvertUnlinkTwitchAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementUnlinkTwitchAccountRequest> Datatype) {
+const PFAccountManagementClientUnlinkTwitchAccountRequest* ConvertClientUnlinkTwitchAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementClientUnlinkTwitchAccountRequest> Datatype) {
 	if (!Datatype.IsValid())
 	{
 		return nullptr;
 	}
 
-	const PFAccountManagementUnlinkTwitchAccountRequest* ConvertedType = new PFAccountManagementUnlinkTwitchAccountRequest{
+	const PFAccountManagementClientUnlinkTwitchAccountRequest* ConvertedType = new PFAccountManagementClientUnlinkTwitchAccountRequest{
 		.accessToken = ConvertFStringToCharPtr(Datatype->accessToken),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num()
@@ -2896,6 +3008,38 @@ const PFAccountManagementUpdateUserTitleDisplayNameResult* ConvertUpdateUserTitl
 
 	const PFAccountManagementUpdateUserTitleDisplayNameResult* ConvertedType = new PFAccountManagementUpdateUserTitleDisplayNameResult{
 		.displayName = ConvertFStringToCharPtr(Datatype->displayName)
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFAccountManagementServerAddOrUpdateContactEmailRequest> ConvertServerAddOrUpdateContactEmailRequestToUnreal(const PFAccountManagementServerAddOrUpdateContactEmailRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementServerAddOrUpdateContactEmailRequest> ConvertedType = MakeShared<FPFAccountManagementServerAddOrUpdateContactEmailRequest>(FPFAccountManagementServerAddOrUpdateContactEmailRequest{
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.emailAddress = Datatype->emailAddress == nullptr ? FString() : FString(Datatype->emailAddress),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementServerAddOrUpdateContactEmailRequest* ConvertServerAddOrUpdateContactEmailRequestToPlayfab(TSharedPtr<const FPFAccountManagementServerAddOrUpdateContactEmailRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementServerAddOrUpdateContactEmailRequest* ConvertedType = new PFAccountManagementServerAddOrUpdateContactEmailRequest{
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.emailAddress = ConvertFStringToCharPtr(Datatype->emailAddress),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
 	};
 
 	return ConvertedType;
@@ -3529,6 +3673,40 @@ const PFAccountManagementLinkSteamIdRequest* ConvertLinkSteamIdRequestToPlayfab(
 	return ConvertedType;
 }
 
+TSharedPtr<const FPFAccountManagementServerLinkTwitchAccountRequest> ConvertServerLinkTwitchAccountRequestToUnreal(const PFAccountManagementServerLinkTwitchAccountRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementServerLinkTwitchAccountRequest> ConvertedType = MakeShared<FPFAccountManagementServerLinkTwitchAccountRequest>(FPFAccountManagementServerLinkTwitchAccountRequest{
+		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementServerLinkTwitchAccountRequest* ConvertServerLinkTwitchAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementServerLinkTwitchAccountRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementServerLinkTwitchAccountRequest* ConvertedType = new PFAccountManagementServerLinkTwitchAccountRequest{
+		.accessToken = ConvertFStringToCharPtr(Datatype->accessToken),
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.forceLink = Datatype->forceLink ? new bool(*Datatype->forceLink) : nullptr,
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
+	};
+
+	return ConvertedType;
+}
+
 TSharedPtr<const FPFAccountManagementServerLinkXboxAccountRequest> ConvertServerLinkXboxAccountRequestToUnreal(const PFAccountManagementServerLinkXboxAccountRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
@@ -3805,6 +3983,68 @@ const PFAccountManagementServerUnlinkBattleNetAccountRequest* ConvertServerUnlin
 	return ConvertedType;
 }
 
+TSharedPtr<const FPFAccountManagementServerUnlinkFacebookAccountRequest> ConvertServerUnlinkFacebookAccountRequestToUnreal(const PFAccountManagementServerUnlinkFacebookAccountRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementServerUnlinkFacebookAccountRequest> ConvertedType = MakeShared<FPFAccountManagementServerUnlinkFacebookAccountRequest>(FPFAccountManagementServerUnlinkFacebookAccountRequest{
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementServerUnlinkFacebookAccountRequest* ConvertServerUnlinkFacebookAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementServerUnlinkFacebookAccountRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementServerUnlinkFacebookAccountRequest* ConvertedType = new PFAccountManagementServerUnlinkFacebookAccountRequest{
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest> ConvertServerUnlinkFacebookInstantGamesIdRequestToUnreal(const PFAccountManagementServerUnlinkFacebookInstantGamesIdRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest> ConvertedType = MakeShared<FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest>(FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest{
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.facebookInstantGamesId = Datatype->facebookInstantGamesId == nullptr ? FString() : FString(Datatype->facebookInstantGamesId),
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementServerUnlinkFacebookInstantGamesIdRequest* ConvertServerUnlinkFacebookInstantGamesIdRequestToPlayfab(TSharedPtr<const FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementServerUnlinkFacebookInstantGamesIdRequest* ConvertedType = new PFAccountManagementServerUnlinkFacebookInstantGamesIdRequest{
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.facebookInstantGamesId = ConvertFStringToCharPtr(Datatype->facebookInstantGamesId),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
+	};
+
+	return ConvertedType;
+}
+
 TSharedPtr<const FPFAccountManagementServerUnlinkNintendoServiceAccountRequest> ConvertServerUnlinkNintendoServiceAccountRequestToUnreal(const PFAccountManagementServerUnlinkNintendoServiceAccountRequest* Datatype) {
 	if (Datatype == nullptr)
 	{
@@ -3951,6 +4191,38 @@ const PFAccountManagementUnlinkSteamIdRequest* ConvertUnlinkSteamIdRequestToPlay
 	}
 
 	const PFAccountManagementUnlinkSteamIdRequest* ConvertedType = new PFAccountManagementUnlinkSteamIdRequest{
+		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
+		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
+		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)
+	};
+
+	return ConvertedType;
+}
+
+TSharedPtr<const FPFAccountManagementServerUnlinkTwitchAccountRequest> ConvertServerUnlinkTwitchAccountRequestToUnreal(const PFAccountManagementServerUnlinkTwitchAccountRequest* Datatype) {
+	if (Datatype == nullptr)
+	{
+		return nullptr;
+	}
+
+	TSharedPtr<const FPFAccountManagementServerUnlinkTwitchAccountRequest> ConvertedType = MakeShared<FPFAccountManagementServerUnlinkTwitchAccountRequest>(FPFAccountManagementServerUnlinkTwitchAccountRequest{
+		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
+		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
+		.customTagsCount = Datatype->customTagsCount,
+		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
+	});
+
+	return ConvertedType;
+}
+
+const PFAccountManagementServerUnlinkTwitchAccountRequest* ConvertServerUnlinkTwitchAccountRequestToPlayfab(TSharedPtr<const FPFAccountManagementServerUnlinkTwitchAccountRequest> Datatype) {
+	if (!Datatype.IsValid())
+	{
+		return nullptr;
+	}
+
+	const PFAccountManagementServerUnlinkTwitchAccountRequest* ConvertedType = new PFAccountManagementServerUnlinkTwitchAccountRequest{
+		.accessToken = ConvertFStringToCharPtr(Datatype->accessToken),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.playFabId = ConvertFStringToCharPtr(Datatype->playFabId)

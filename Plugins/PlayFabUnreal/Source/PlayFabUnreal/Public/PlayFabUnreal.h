@@ -112,9 +112,11 @@
 #include "PlayStation/PFLocalUser_PS.h"
 #endif
 
-// PlayFab GameSave includes
+// PlayFab GameSave includes (GameSave not supported on PS4)
+#if !defined(HC_PLATFORM) || HC_PLATFORM != HC_PLATFORM_SONY_PLAYSTATION_4
 #include "PFGameSaveFiles.h"
 #include "PFGameSaveFilesUi.h"
+#endif
 
 class PLAYFABUNREAL_API FPlayFabUnrealModule : public IModuleInterface
 {

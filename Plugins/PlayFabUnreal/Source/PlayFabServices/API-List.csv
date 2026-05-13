@@ -55,7 +55,6 @@ PF Services,Segments,PFSegmentsAdminDeleteSegmentAsync,SecretKey,Segments,AdminD
 PF Services,Segments,PFSegmentsAdminExportPlayersInSegmentAsync,SecretKey,PlayStream,AdminExportPlayersInSegment,false,No,No,No,No,No,No,No
 PF Services,Segments,PFSegmentsAdminGetAllSegmentsAsync,SecretKey,PlayStream,AdminGetAllSegments,false,No,No,No,No,No,No,No
 PF Services,Segments,PFSegmentsAdminGetPlayerSegmentsAsync,SecretKey,PlayStream,AdminGetPlayerSegments,false,No,No,No,No,No,No,No
-PF Services,Segments,PFSegmentsAdminGetPlayersInSegmentAsync,SecretKey,PlayStream,AdminGetPlayersInSegment,false,No,No,No,No,No,No,No
 PF Services,Segments,PFSegmentsAdminGetPlayerTagsAsync,SecretKey,PlayStream,AdminGetPlayerTags,false,No,No,No,No,No,No,No
 PF Services,Segments,PFSegmentsAdminGetSegmentExportAsync,SecretKey,PlayStream,AdminGetSegmentExport,false,No,No,No,No,No,No,No
 PF Services,Segments,PFSegmentsAdminGetSegmentsAsync,SecretKey,Segments,AdminGetSegments,false,No,No,No,No,No,No,No
@@ -66,7 +65,6 @@ PF Services,Segments,PFSegmentsClientGetPlayerTagsAsync,SessionTicket,PlayStream
 PF Services,Segments,PFSegmentsServerAddPlayerTagAsync,SecretKey,PlayStream,ServerAddPlayerTag,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Segments,PFSegmentsServerGetAllSegmentsAsync,SecretKey,PlayStream,ServerGetAllSegments,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Segments,PFSegmentsServerGetPlayerSegmentsAsync,SecretKey,PlayStream,ServerGetPlayerSegments,false,Yes,No,No,Yes,No,No,Yes
-PF Services,Segments,PFSegmentsServerGetPlayersInSegmentAsync,SecretKey,PlayStream,ServerGetPlayersInSegment,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Segments,PFSegmentsServerGetPlayerTagsAsync,SecretKey,PlayStream,ServerGetPlayerTags,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Segments,PFSegmentsServerRemovePlayerTagAsync,SecretKey,PlayStream,ServerRemovePlayerTag,false,Yes,No,No,Yes,No,No,Yes
 PF Services,PlayerItemManagement,PFPlayerItemManagementAdminAddUserVirtualCurrencyAsync,SecretKey,Player Item Management,AdminAddUserVirtualCurrency,false,No,No,No,No,No,No,No
@@ -149,6 +147,7 @@ PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromGooglePl
 PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromKongregateIDsAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromKongregateIDs,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromNintendoServiceAccountIdsAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromNintendoServiceAccountIds,false,Yes,Yes,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromNintendoSwitchDeviceIds,false,Yes,No,No,Yes,No,No,Yes
+PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromOpenIdSubjectIdentifiers,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromPSNAccountIDsAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromPSNAccountIDs,false,Yes,No,Yes,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromPSNOnlineIDsAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromPSNOnlineIDs,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,AccountManagement,PFAccountManagementClientGetPlayFabIDsFromSteamIDsAsync,SessionTicket,Account Management,ClientGetPlayFabIDsFromSteamIDs,false,Yes,No,No,Yes,No,No,Yes
@@ -198,6 +197,7 @@ PF Services,AccountManagement,PFAccountManagementClientUnlinkXboxAccountAsync,Se
 PF Services,AccountManagement,PFAccountManagementClientUpdateAvatarUrlAsync,SessionTicket,Account Management,ClientUpdateAvatarUrl,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,AccountManagement,PFAccountManagementClientUpdateUserTitleDisplayNameAsync,SessionTicket,Account Management,ClientUpdateUserTitleDisplayName,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerAddGenericIDAsync,SecretKey,Account Management,ServerAddGenericID,false,No,No,No,No,No,No,No
+PF Services,AccountManagement,PFAccountManagementServerAddOrUpdateContactEmailAsync,SecretKey,Account Management,ServerAddOrUpdateContactEmail,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerBanUsersAsync,SecretKey,Account Management,ServerBanUsers,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerDeletePlayerAsync,SecretKey,Account Management,ServerDeletePlayer,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerGetPlayerCombinedInfoAsync,SecretKey,Player Data Management,ServerGetPlayerCombinedInfo,false,Yes,No,No,Yes,No,No,Yes
@@ -208,6 +208,7 @@ PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromFacebook
 PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromGenericIDsAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromGenericIDs,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromNintendoServiceAccountIdsAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromNintendoServiceAccountIds,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromNintendoSwitchDeviceIds,false,Yes,No,No,Yes,No,No,Yes
+PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromOpenIdSubjectIdentifiers,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromPSNAccountIDsAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromPSNAccountIDs,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromPSNOnlineIDsAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromPSNOnlineIDs,false,Yes,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerGetPlayFabIDsFromSteamIDsAsync,SecretKey,Account Management,ServerGetPlayFabIDsFromSteamIDs,false,Yes,No,No,Yes,No,No,Yes
@@ -225,6 +226,7 @@ PF Services,AccountManagement,PFAccountManagementServerLinkPSNAccountAsync,Secre
 PF Services,AccountManagement,PFAccountManagementServerLinkPSNIdAsync,SecretKey,Account Management,ServerLinkPSNId,false,Yes,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerLinkServerCustomIdAsync,SecretKey,Account Management,ServerLinkServerCustomId,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerLinkSteamIdAsync,SecretKey,Account Management,ServerLinkSteamId,false,Yes,No,No,Yes,No,No,Yes
+PF Services,AccountManagement,PFAccountManagementServerLinkTwitchAccountAsync,SecretKey,Account Management,ServerLinkTwitchAccount,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerLinkXboxAccountAsync,SecretKey,Account Management,ServerLinkXboxAccount,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerLinkXboxIdAsync,SecretKey,Account Management,ServerLinkXboxId,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerRemoveGenericIDAsync,SecretKey,Account Management,ServerRemoveGenericID,false,No,No,No,No,No,No,No
@@ -233,11 +235,14 @@ PF Services,AccountManagement,PFAccountManagementServerRevokeBansAsync,SecretKey
 PF Services,AccountManagement,PFAccountManagementServerSendCustomAccountRecoveryEmailAsync,SecretKey,Account Management,ServerSendCustomAccountRecoveryEmail,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerSendEmailFromTemplateAsync,SecretKey,Account Management,ServerSendEmailFromTemplate,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUnlinkBattleNetAccountAsync,SecretKey,Account Management,ServerUnlinkBattleNetAccount,false,Yes,No,No,No,No,No,No
+PF Services,AccountManagement,PFAccountManagementServerUnlinkFacebookAccountAsync,SecretKey,Account Management,ServerUnlinkFacebookAccount,false,No,No,No,No,No,No,No
+PF Services,AccountManagement,PFAccountManagementServerUnlinkFacebookInstantGamesIdAsync,SecretKey,Account Management,ServerUnlinkFacebookInstantGamesId,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerUnlinkNintendoServiceAccountAsync,SecretKey,Account Management,ServerUnlinkNintendoServiceAccount,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUnlinkNintendoSwitchDeviceIdAsync,SecretKey,Account Management,ServerUnlinkNintendoSwitchDeviceId,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUnlinkPSNAccountAsync,SecretKey,Account Management,ServerUnlinkPSNAccount,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUnlinkServerCustomIdAsync,SecretKey,Account Management,ServerUnlinkServerCustomId,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUnlinkSteamIdAsync,SecretKey,Account Management,ServerUnlinkSteamId,false,Yes,No,No,Yes,No,No,Yes
+PF Services,AccountManagement,PFAccountManagementServerUnlinkTwitchAccountAsync,SecretKey,Account Management,ServerUnlinkTwitchAccount,false,No,No,No,No,No,No,No
 PF Services,AccountManagement,PFAccountManagementServerUnlinkXboxAccountAsync,SecretKey,Account Management,ServerUnlinkXboxAccount,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUpdateAvatarUrlAsync,SecretKey,Account Management,ServerUpdateAvatarUrl,false,Yes,No,No,Yes,No,No,Yes
 PF Services,AccountManagement,PFAccountManagementServerUpdateBansAsync,SecretKey,Account Management,ServerUpdateBans,false,Yes,No,No,Yes,No,No,Yes
@@ -437,7 +442,6 @@ PF Services,Inventory,PFInventoryExecuteTransferOperationsAsync,EntityToken,Inve
 PF Services,Inventory,PFInventoryGetInventoryCollectionIdsAsync,EntityToken,Inventory,GetInventoryCollectionIds,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,Inventory,PFInventoryGetInventoryItemsAsync,EntityToken,Inventory,GetInventoryItems,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,Inventory,PFInventoryGetInventoryOperationStatusAsync,EntityToken,Inventory,GetInventoryOperationStatus,false,Yes,No,No,No,No,No,No
-PF Services,Inventory,PFInventoryGetMicrosoftStoreAccessTokensAsync,EntityToken,Inventory,GetMicrosoftStoreAccessTokens,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Inventory,PFInventoryGetTransactionHistoryAsync,EntityToken,Inventory,GetTransactionHistory,false,Yes,No,No,Yes,No,No,Yes
 PF Services,Inventory,PFInventoryPurchaseInventoryItemsAsync,EntityToken,Inventory,PurchaseInventoryItems,false,Yes,Yes,Yes,Yes,Yes,Yes,Yes
 PF Services,Inventory,PFInventoryRedeemAppleAppStoreInventoryItemsAsync,EntityToken,Inventory,RedeemAppleAppStoreInventoryItems,false,Yes,No,No,No,No,Yes,No

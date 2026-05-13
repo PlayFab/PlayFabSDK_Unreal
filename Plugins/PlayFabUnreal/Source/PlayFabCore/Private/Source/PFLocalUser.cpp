@@ -40,6 +40,7 @@ bool PLAYFABCORE_API FPFLocalUserCreateHandleWithXboxUser(
 }
 #endif
 
+#if !defined(HC_PLATFORM_IS_PLAYSTATION) || !HC_PLATFORM_IS_PLAYSTATION
 bool PLAYFABCORE_API FPFLocalUserCreateHandleWithSteamUser(
 	_In_ FPFServiceConfigHandle serviceConfigHandle,
 	_In_opt_ TSharedPtr<void> customContext,
@@ -54,6 +55,7 @@ bool PLAYFABCORE_API FPFLocalUserCreateHandleWithSteamUser(
 
 	return true;
 }
+#endif // !HC_PLATFORM_IS_PLAYSTATION
 
 HRESULT CALLBACK UnrealLocalUserLoginHandler(
     _In_ PFLocalUserHandle localUserHandle,

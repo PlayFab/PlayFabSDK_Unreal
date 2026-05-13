@@ -5,6 +5,7 @@
 #include "PlayFabSocket.h"
 #include "PlayFabSocketSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabPartyNetwork.h"
 
 const uint32 FPlayFabSocket::SendTimeout = 500;
 
@@ -12,7 +13,6 @@ FPlayFabSocket::FPlayFabSocket(FOnlineSubsystemPlayFab* InOSSPlayFab, const FStr
 	FSocket(SOCKTYPE_Datagram, InSocketDescription, InSocketProtocol),
 	OSSPlayFab(InOSSPlayFab),
 	SocketSubsystem(static_cast<FPlayFabSocketSubsystem*>(ISocketSubsystem::Get(PLAYFAB_SOCKET_SUBSYSTEM))),
-	LocalEndpoint(OSSPlayFab->LocalEndpoint),
 	PendingPackets(2048)
 {
 	PartyQueueConfiguration.priority = Party::c_maxSendMessageQueuingPriority;
@@ -47,16 +47,18 @@ bool FPlayFabSocket::SendTo(const uint8* Data, int32 Count, int32& BytesSent, co
 		return false;
 	}
 
+	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab->PartyNetwork->LocalEndpoint;
+
 	if (LocalEndpoint == nullptr)
 	{
-		UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocket::SendTo failed, LocalEnpoint was null"));
+		UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocket::SendTo failed, LocalEndpoint was null"));
 		SocketSubsystem->LastSocketError = SE_ENOTCONN;
 		return false;
 	}
 
 	uint32 EndpointId;
 	Destination.GetIp(EndpointId);
-	PartyEndpoint* RemoteEndpoint = OSSPlayFab->GetPartyEndpoint(EndpointId);
+	PartyEndpoint* RemoteEndpoint = OSSPlayFab->PartyNetwork->GetEndpoint(EndpointId);
 	if (RemoteEndpoint == nullptr)
 	{
 		// Might be disconnected peer
@@ -165,6 +167,7 @@ bool FPlayFabSocket::HasPendingData(uint32& PendingDataSize)
 
 ESocketConnectionState FPlayFabSocket::GetConnectionState()
 {
+	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab ? OSSPlayFab->PartyNetwork->LocalEndpoint : nullptr;
 	return LocalEndpoint ? SCS_Connected : SCS_NotConnected;
 }
 
@@ -172,6 +175,7 @@ int32 FPlayFabSocket::GetPortNo()
 {
 	uint16 EndpointId = 0;
 
+	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab ? OSSPlayFab->PartyNetwork->LocalEndpoint : nullptr;
 	if (LocalEndpoint)
 	{
 		LocalEndpoint->GetUniqueIdentifier(&EndpointId);

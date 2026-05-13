@@ -381,6 +381,48 @@ public class OnlineSubsystemPlayFab : ModuleRules
 		}
 	}
 
+	private class UnifiedSDKPackageLoader
+	{
+		public string PackagePath = string.Empty;
+
+		public void ParsingNuGetPackage(ref string PlatformDir)
+		{
+			string[] Lines = System.IO.File.ReadAllLines(Path.Combine(PlatformDir, "packages.config"));
+			foreach (string Line in Lines)
+			{
+				Int32 BeginOfString = Line.IndexOf("Microsoft.PlayFab", 0);
+				if (BeginOfString > -1)
+				{
+					Int32 EndOfString = Line.IndexOf("\"", BeginOfString);
+					string Id = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+					const string versionString = "version=\"";
+					BeginOfString = Line.IndexOf(versionString, 0);
+					if (BeginOfString > -1)
+					{
+						BeginOfString += versionString.Length;
+						EndOfString = Line.IndexOf("\"", BeginOfString);
+						string Version = Line.Substring(BeginOfString, EndOfString - BeginOfString);
+
+						if (Id.IndexOf("UnifiedSDK", 0) > -1)
+						{
+							PackagePath = Id + "." + Version;
+						}
+						else
+						{
+							throw new BuildException("Unknown package id in packages.config file. Expected UnifiedSDK package.");
+						}
+					}
+				}
+			}
+			if (PackagePath.Length == 0)
+			{
+				throw new BuildException("Can't find UnifiedSDK package information in packages.config file.");
+			}
+			LogOnlineSubsystemPlayFab("OnlineSubsystemPlayFab: UnifiedSDK={0}", PackagePath);
+		}
+	}
+
 	//GDK
 	private void ConfigureForGDKPlatform(string platform)
 	{
@@ -583,10 +625,9 @@ public class OnlineSubsystemPlayFab : ModuleRules
 	//PS4
 	private void ConfigureForPlayStation4Platform()
 	{
-		NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
-		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
+		UnifiedSDKPackageLoader SDKLoader = new UnifiedSDKPackageLoader();
 		string PlatformDir = Path.Combine(PluginDirectory, "Platforms", "PS4");
-		NuGetLoader.ParsingNuGetPackage(ref PlatformDir, ref NugetPackageInfo);
+		SDKLoader.ParsingNuGetPackage(ref PlatformDir);
 
 		PublicDependencyModuleNames.Add("OnlineSubsystemPS4");
 
@@ -597,10 +638,9 @@ public class OnlineSubsystemPlayFab : ModuleRules
 	//PS5
 	private void ConfigureForPlayStation5Platform()
 	{
-		NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
-		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
+		UnifiedSDKPackageLoader SDKLoader = new UnifiedSDKPackageLoader();
 		string PlatformDir = Path.Combine(PluginDirectory, "Platforms", "PS5");
-		NuGetLoader.ParsingNuGetPackage(ref PlatformDir, ref NugetPackageInfo);
+		SDKLoader.ParsingNuGetPackage(ref PlatformDir);
 
 		PublicDependencyModuleNames.Add("OnlineSubsystemPS5");
 

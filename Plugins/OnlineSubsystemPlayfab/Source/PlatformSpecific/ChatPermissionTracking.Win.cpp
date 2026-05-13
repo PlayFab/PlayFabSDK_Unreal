@@ -28,6 +28,7 @@ namespace
 	TMap<FString /*Entity ID*/, FString /*User ID*/> TalkerIdMappingWin;
 
 	FString LocalTalkerUserId;
+	bool bLoggedLocalUserIdNotSet = false;
 
 	TArray<FCrossNetworkTalkerPlayFab> CrossNetworkTalkersWin;
 	
@@ -40,7 +41,11 @@ namespace
 
 		if (LocalTalkerUserId.IsEmpty())
 		{
-			UE_LOG_ONLINE(Verbose, TEXT("Local user id isn't set yet"));
+			if (!bLoggedLocalUserIdNotSet)
+			{
+				UE_LOG_ONLINE(Verbose, TEXT("Local user id isn't set yet"));
+				bLoggedLocalUserIdNotSet = true;
+			}
 			return false;
 		}
 

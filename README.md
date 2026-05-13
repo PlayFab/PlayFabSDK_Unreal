@@ -15,7 +15,7 @@ The PlayFab Unreal Engine Plugin provides comprehensive integration with PlayFab
 Before integrating the PlayFab Unreal Plugin into your project, ensure you have the following:
 
 ### Software Requirements
-- **[Game Development Kit](https://learn.microsoft.com/en-us/gaming/gdk/) 2510 Update 1 or later**  installed with legacy layouts
+- **[Game Development Kit](https://learn.microsoft.com/en-us/gaming/gdk/) 2604 or later**  installed with legacy layouts
 - **Unreal Engine 5.7** (either public version or built from source)
 - **PlayFab Account** with a configured title
 
@@ -25,18 +25,59 @@ The plugin supports the following platforms:
 - **WinGDK** (Windows)
 - **XSX** (Xbox Series X)
 - **XB1** (Xbox One)
-- **PS5** *
+- **PS5** (PlayStation 5)
+- **PS4** (PlayStation 4)
 
-\* PS5 Platform support is currently in Private Preview and is available only to select partners. To request access, please follow the official process outlined in this page: [Request access for secured SDKs and samples](https://review.learn.microsoft.com/en-us/gaming/playfab/sdks/request-access-for-sdks-samples?branch=main).
+To access PlayStation support, please follow the official process outlined in this page: [Request access for secured SDKs and samples](https://review.learn.microsoft.com/en-us/gaming/playfab/sdks/request-access-for-sdks-samples?branch=main).
 
 ## Setup
 
-### (GDK Platforms) Add 2510 GDK Support to UE 5.7
+### GDK Setup
 
-The PlayFab plugins require the 2510 GDK but Unreal Engine 5.7 does not support it out of the box so you'll need to make the following changes to `Engine\Platforms\GDK\Config\GDK_SDK.json`:
-* Set `MaxVersion` to `251001` or above
-* Set `MinVersion` to `251001` or below
-* Set `MainVersion` somewhere in between like `251001`
+The PlayFab plugins require the 2604 GDK but Unreal Engine 5.7 does not support it out of the box so you'll need to make the following changes to `Engine\Platforms\GDK\Config\GDK_SDK.json`:
+* Set `MaxVersion` to `260400` or above
+* Set `MinVersion` to `260400` or below
+* Set `MainVersion` somewhere in between like `260400`
+
+### PlayStation Setup
+
+PlayStation platform support requires additional private components that are distributed as git submodules and NuGet packages.
+
+#### Prerequisites
+
+- Access to the PlayFab private Azure DevOps repositories (granted through the request access process above)
+- [NuGet.exe](https://www.nuget.org/downloads) installed and available on your `PATH`
+- Git installed
+
+#### Setup for Both Plugins
+
+From the root of this repository, run the setup script with the `PlayStation` platform parameter:
+
+```powershell
+.\SetUpPrivatePlatforms.ps1 -Platform PlayStation
+```
+
+This wrapper script runs both plugin setup scripts in sequence:
+1. `Plugins\PlayFabUnreal\SetUpPrivate.ps1` — Downloads NuGet packages and initializes submodules for the PlayFabUnreal plugin
+2. `Plugins\OnlineSubsystemPlayfab\SetUpPrivateOSS.ps1` — Downloads NuGet packages and initializes submodules for the OnlineSubsystemPlayFab plugin
+
+Each script will prompt you to select PS5 and PS4 SDK versions for the NuGet packages.
+
+#### Setup for Individual Plugins
+
+If you only need one of the plugins, you can run the setup scripts individually from their respective directories:
+
+For **PlayFabUnreal** only:
+```powershell
+cd Plugins\PlayFabUnreal
+.\SetUpPrivate.ps1 -Platform PlayStation
+```
+
+For **OnlineSubsystemPlayFab** only:
+```powershell
+cd Plugins\OnlineSubsystemPlayfab
+.\SetUpPrivateOSS.ps1 -Platform PlayStation
+```
 
 ### PlayFabUnreal Plugin Only
 
@@ -104,13 +145,17 @@ Add the following element to the `Plugins` key in your `.uproject` file and remo
         "XB1",
         "WinGDK",
         "XSX",
-        "Win64"
+        "Win64",
+        "PS4",
+        "PS5"
     ],
     "PlatformAllowList": [
         "XB1",
         "WinGDK",
         "XSX",
-        "Win64"
+        "Win64",
+        "PS4",
+        "PS5"
     ]
 }
 ````
@@ -165,6 +210,10 @@ NativePlatformService=GDK
 
 To learn more about using the GDK with the Win64 platform, refer to [this page](https://dev.epicgames.com/documentation/en-us/unreal-engine/microsoft-gdk-plugins-for-unreal-engine) for details about the MSGamingRuntime plugin. 
 
+#### PlayStation
+
+For PlayStation-specific engine and game project configuration, refer to [`Plugins/OnlineSubsystemPlayfab/Source/PlatformSpecific/PlayStation/README.md`](Plugins/OnlineSubsystemPlayfab/Source/PlatformSpecific/PlayStation/README.md) for detailed setup instructions.
+
 #### Steam
 
 If you're developing games for Win64 with Steam then update your platform services in the `WindowsEngine.ini` with:
@@ -184,6 +233,8 @@ If your game uses PlayFab's cross-platform networking support, define which plat
 !CompatibleUniqueNetIdTypes=ClearArray
 +CompatibleUniqueNetIdTypes=STEAM
 +CompatibleUniqueNetIdTypes=GDK
++CompatibleUniqueNetIdTypes=PS4
++CompatibleUniqueNetIdTypes=PS5
 ````
 
 All platforms allow VoIP by default. To disable VoIP for a specific platform, add the platform model name to your Unreal Engine configuration file as shown in the following example.
@@ -349,7 +400,7 @@ For additional support, refer to the PlayFab community forums and documentation.
 When using the PlayFab Online Subsystem, you may encounter the following runtime error: 
 
 ````
-Runtime dependency 'Party.dll' is configured to be staged from 'C:\Program Files (x86)\Microsoft GDK\251001\GRDK\ExtensionLibraries\PlayFab.Party.Cpp\Redist\x64\Party.dll' and 'C:\Program Files (x86)\Microsoft GDK\251001\windows\bin\x64\Party.dll'
+Runtime dependency 'Party.dll' is configured to be staged from 'C:\Program Files (x86)\Microsoft GDK\260400\GRDK\ExtensionLibraries\PlayFab.Party.Cpp\Redist\x64\Party.dll' and 'C:\Program Files (x86)\Microsoft GDK\260400\windows\bin\x64\Party.dll'
 ````
 
 Some of these steps will be unnecessary once UE 5.7 officially supports the new GDK layout but until then you can make the following modifications if applicable to work around the issue.
@@ -396,13 +447,11 @@ public class YourGameTarget_XSX : YourGame
 ````
 
 #### Plugin 'OnlineSubsystemPlayFab' failed to load
-You may encounter the following error when launching the editor:
+You may encounter the following error when launching the editor. This is fixed in the latest release but if you're using an older version you can make the following modifications to work around the issue.
 
 `Plugin 'OnlineSubsystemPlayFab' failed to load because module 'OnlineSubsystemPlayFab' could not be loaded. There may be an operating system error or the module may not be properly set up.`
 
-The code will be updated in the future once the OnlineSubsystemGDK plugin has been made publicly available but until then you will need to make the following change.
-
-Update the `OnlineSubsystemGDK` plugin’s `PlatformAllowList` field with `Win64` in `OnlineSubsystemPlayFab/OnlineSubsystemPlayFab.uplugin`:
+Make sure `OnlineSubsystemGDK` plugin’s `PlatformAllowList` field with `Win64` in `OnlineSubsystemPlayFab/OnlineSubsystemPlayFab.uplugin`:
 
 ````json
 {

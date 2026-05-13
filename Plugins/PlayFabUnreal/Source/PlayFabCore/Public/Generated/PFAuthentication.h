@@ -839,6 +839,37 @@ bool PLAYFABCORE_API FPFAuthenticationServerLoginWithSteamIdAsync(
 
 
 /// <summary>
+/// Sign in the user with a Twitch access token
+/// </summary>
+/// <param name="serviceConfigHandle">PFServiceConfigHandle returned from PFServiceConfigCreateHandle call.</param>
+/// <param name="secretKey">Title Secret Key used to authenticate the service request.</param>
+/// <param name="request">Populated request object.</param>
+/// <param name="async">XAsyncBlock for the async operation.</param>
+/// <returns>Result code for this API operation.</returns>
+/// <remarks>
+/// More details regarding Twitch and their authentication system can be found at https://github.com/justintv/Twitch-API/blob/master/authentication.md.
+/// Developers must provide the Twitch access token that is generated using one of the Twitch authentication
+/// flows. PlayFab will use the title's unique Twitch Client ID to authenticate the token and log in to
+/// the PlayFab system. If CreateAccount is set to true and there is not already a user matched to the
+/// Twitch username that generated the token, then PlayFab will create a new account for this user and
+/// link the ID. In this case, no email or username will be associated with the PlayFab account. If there
+/// is already a different PlayFab user linked with this account, then an error will be returned. See
+/// also ServerLinkTwitchAccountAsync, ServerUnlinkTwitchAccountAsync.
+///
+/// When the asynchronous task is complete, call <see cref="PFAuthenticationServerLoginWithTwitchGetResult"/>
+/// to get the result.
+/// </remarks>
+#if 0
+bool PLAYFABCORE_API FPFAuthenticationServerLoginWithTwitchAsync(
+	_In_ FPFServiceConfigHandle serviceConfigHandle,
+	_In_z_ const FString secretKey,
+	_In_ const FPFAuthenticationServerLoginWithTwitchRequest request,
+	_Inout_ FOnPFAuthenticationServerLoginCompleteDelegate delegate
+) noexcept;
+#endif
+
+
+/// <summary>
 /// Signs the user in using a Xbox Live Token from an external server backend, returning a session identifier
 /// that can subsequently be used for API calls which require an authenticated user
 /// </summary>

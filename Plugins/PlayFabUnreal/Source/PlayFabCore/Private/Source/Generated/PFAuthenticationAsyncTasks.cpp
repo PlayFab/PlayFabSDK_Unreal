@@ -1900,6 +1900,75 @@ void FPFAuthenticationServerLoginWithSteamIdAsyncTask::ProcessResults()
 #endif
 
 
+#if 0
+
+FPFAuthenticationServerLoginWithTwitchAsyncTask::FPFAuthenticationServerLoginWithTwitchAsyncTask(
+	FPFServiceConfigHandle serviceConfigHandle,
+	const FString secretKey,
+	const FPFAuthenticationServerLoginWithTwitchRequest request,
+	FOnPFAuthenticationServerLoginCompleteDelegate delegate)
+	: FXAsyncTask(TEXT("FPFServerLoginWithTwitchAsyncTask")),
+	serviceConfigHandle(serviceConfigHandle),
+	secretKey(secretKey),
+	request(request),
+	delegate(delegate)
+{
+}
+
+void FPFAuthenticationServerLoginWithTwitchAsyncTask::DoWork()
+{
+	const PFAuthenticationServerLoginWithTwitchRequest RequestType = {
+		.accessToken = ConvertFStringToCharPtr(request.accessToken),
+		.createAccount = request.createAccount,
+		.customTags = ConvertFStringMapToPlayfab(request.customTags),
+		.customTagsCount = (uint32_t)request.customTags.Num(),
+		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToPlayfab(request.infoRequestParameters),
+		.playerSecret = ConvertFStringToCharPtr(request.playerSecret),
+		.playFabId = ConvertFStringToCharPtr(request.playFabId)
+	};
+	HRESULT hr = PFAuthenticationServerLoginWithTwitchAsync(serviceConfigHandle.Get(), ConvertFStringToCharPtr(secretKey), &RequestType, *mAsyncBlock);
+
+	if (FAILED(hr))
+	{
+		delegate.ExecuteIfBound(nullptr, nullptr, false);
+	}
+}
+
+void FPFAuthenticationServerLoginWithTwitchAsyncTask::ProcessResults()
+{
+	TArray<uint8> bufferArray;
+	size_t resultSize = 0;
+
+	HRESULT hr = PFAuthenticationServerLoginWithTwitchGetResultSize(*mAsyncBlock, &resultSize); 
+	
+	if (SUCCEEDED(hr))
+	{ 
+		bufferArray.Reserve(resultSize);
+
+		PFAuthenticationLoginResult const* result;
+		PFAuthenticationEntityTokenResponse const* entityTokenResponse { nullptr };
+		hr = PFAuthenticationServerLoginWithTwitchGetResult(*mAsyncBlock, &entityTokenResponse, resultSize, bufferArray.GetData(), &result, nullptr);
+
+		if (SUCCEEDED(hr))
+		{
+			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
+
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+		}
+		else
+		{
+			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+		}
+	}
+	else
+	{
+		delegate.ExecuteIfBound(nullptr, nullptr, false);
+	}
+}
+
+#endif
+
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 
 FPFAuthenticationServerLoginWithXboxAsyncTask::FPFAuthenticationServerLoginWithXboxAsyncTask(

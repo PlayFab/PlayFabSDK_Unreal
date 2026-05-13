@@ -10,11 +10,48 @@
 #include "PlayFabHelpers.h"
 
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabPartyNetwork.h"
 #include "OnlineSubsystemPlayFabPrivate.h"
 
 #include "GenericPlatform/GenericPlatformHttp.h"
 
 #define OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();  IOnlineSessionPtr NativeSessionInterface = NativeSubsystem ? NativeSubsystem->GetSessionInterface() : nullptr; if (NativeSessionInterface)
+
+FPlayFabSessionState::~FPlayFabSessionState()
+{
+	OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
+	{
+		if (OnNativeCreateSessionCompleteDelegateHandle.IsValid())
+		{
+			NativeSessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(OnNativeCreateSessionCompleteDelegateHandle);
+		}
+		if (OnNativeUpdateSessionCompleteDelegateHandle.IsValid())
+		{
+			NativeSessionInterface->ClearOnUpdateSessionCompleteDelegate_Handle(OnNativeUpdateSessionCompleteDelegateHandle);
+		}
+		if (OnNativeJoinSessionCompleteDelegateHandle.IsValid())
+		{
+			NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnNativeJoinSessionCompleteDelegateHandle);
+		}
+	}
+
+	FOnlineSubsystemPlayFab* OSSPlayFab = static_cast<FOnlineSubsystemPlayFab*>(IOnlineSubsystem::Get(PLAYFAB_SUBSYSTEM));
+	if (OSSPlayFab)
+	{
+		FPlayFabLobbyPtr LobbyInterface = OSSPlayFab->GetPlayFabLobbyInterface();
+		if (LobbyInterface.IsValid())
+		{
+			if (OnUpdateLobbyCompleteDelegate.IsValid())
+			{
+				LobbyInterface->ClearOnUpdateLobbyCompletedDelegate_Handle(OnUpdateLobbyCompleteDelegate);
+			}
+			if (OnUpdateSession_MatchmakingDelegateHandle.IsValid())
+			{
+				LobbyInterface->ClearOnUpdateLobbyCompletedDelegate_Handle(OnUpdateSession_MatchmakingDelegateHandle);
+			}
+		}
+	}
+}
 
 FOnlineSessionPlayFab::FOnlineSessionPlayFab(class FOnlineSubsystemPlayFab* InSubsystem) :
 	OSSPlayFab(InSubsystem)
@@ -36,6 +73,9 @@ FOnlineSessionPlayFab::FOnlineSessionPlayFab(class FOnlineSubsystemPlayFab* InSu
 #endif
 	RegisterForUpdates();
 	GenerateCrossNetworkVoiceChatPlatformPermissions();
+
+	OSSPlayFab->AddOnPartyEndpointCreatedDelegate_Handle(
+		FOnPartyEndpointCreatedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnPartyEndpointCreated));
 }
 
 FOnlineSessionPlayFab::~FOnlineSessionPlayFab()
@@ -48,8 +88,8 @@ FOnlineSessionPlayFab::~FOnlineSessionPlayFab()
 #endif
 
 	// Clean up delegates
+	OSSPlayFab->ClearOnPartyEndpointCreatedDelegates(this);
 	OSSPlayFab->ClearOnConnectToPlayFabPartyNetworkCompletedDelegates(this);
-	ClearOnMatchmakingCompleteDelegate_Handle(OnMatchmakingCompleteDelegateHandle);
 	UnregisterForUpdates();
 }
 
@@ -139,27 +179,56 @@ bool FOnlineSessionPlayFab::CreateSession(int32 HostingPlayerControllerIndex, FN
 		return false;
 	}
 
-	PendingCreateSessionInfo.PlayerControllerIndex = HostingPlayerControllerIndex;
-	auto allUsers = OSSPlayFab->GetIdentityInterface()->GetAllUserAccounts();
-	if (allUsers.Num() > HostingPlayerControllerIndex)
+	PlayFabSessionState.PendingCreateSessionInfo.PlayerControllerIndex = HostingPlayerControllerIndex;
+
+	// Dedicated servers always use the PlayFab server entity (secret key auth),
+	// even if native GDK users are logged in on the same machine
+	if (IsRunningDedicatedServer())
 	{
-		PendingCreateSessionInfo.PlayerId = allUsers[HostingPlayerControllerIndex]->GetUserId()->AsShared();
+		FOnlineIdentityPlayFabPtr PlayFabIdentity = OSSPlayFab->GetIdentityInterfacePlayFab();
+		if (PlayFabIdentity)
+		{
+			TSharedPtr<FPlayFabUser> Server = PlayFabIdentity->GetServerEntity();
+			if (Server.IsValid())
+			{
+				PlayFabSessionState.PendingCreateSessionInfo.PlayerId = FUniqueNetIdPlayFab::Create(Server->GetPlatformUserId());
+				UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::CreateSession: Using server entity '%s' as hosting player"), *Server->GetPlatformUserId());
+			}
+			else
+			{
+				PlayFabSessionState.PendingCreateSessionInfo.PlayerId = nullptr;
+			}
+		}
+		else
+		{
+			PlayFabSessionState.PendingCreateSessionInfo.PlayerId = nullptr;
+		}
 	}
 	else
 	{
-		PendingCreateSessionInfo.PlayerId = nullptr;
+		auto allUsers = OSSPlayFab->GetIdentityInterface()->GetAllUserAccounts();
+		if (allUsers.Num() > HostingPlayerControllerIndex)
+		{
+			PlayFabSessionState.PendingCreateSessionInfo.PlayerId = allUsers[HostingPlayerControllerIndex]->GetUserId()->AsShared();
+		}
+		else
+		{
+			PlayFabSessionState.PendingCreateSessionInfo.PlayerId = nullptr;
+		}
 	}
-	PendingCreateSessionInfo.SessionName = SessionName;
+	PlayFabSessionState.PendingCreateSessionInfo.SessionName = SessionName;
 #if !defined(OSS_PLAYFAB_PLAYSTATION)
 	NativeSessionName = SessionName;
 #endif
-	PendingCreateSessionInfo.SessionSettings = NewSessionSettings;
+	PlayFabSessionState.PendingCreateSessionInfo.SessionSettings = NewSessionSettings;
 
-	OSSPlayFab->AddOnPartyEndpointCreatedDelegate_Handle(FOnPartyEndpointCreatedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCreatePartyEndpoint));
+	bSuccess = OSSPlayFab->PartyNetwork->CreateAndConnectToNetwork();
 
-	bSuccess = OSSPlayFab->CreateAndConnectToPlayFabPartyNetwork();
-
-	if (bSuccess == false)
+	if (bSuccess)
+	{
+		PlayFabSessionState.PendingCreateSessionInfo.NetworkId = OSSPlayFab->PartyNetwork->NetworkId;
+	}
+	else
 	{
 		OnCreateSessionCompleted(SessionName, false);
 	}
@@ -188,18 +257,21 @@ bool FOnlineSessionPlayFab::CreateSession(const FUniqueNetId& HostingPlayerId, F
 		return false;
 	}
 
-	PendingCreateSessionInfo.PlayerControllerIndex = INDEX_NONE;
-	PendingCreateSessionInfo.PlayerId = HostingPlayerId.AsShared();
-	PendingCreateSessionInfo.SessionName = SessionName;
+	PlayFabSessionState.PendingCreateSessionInfo.PlayerControllerIndex = INDEX_NONE;
+	PlayFabSessionState.PendingCreateSessionInfo.PlayerId = HostingPlayerId.AsShared();
+	PlayFabSessionState.PendingCreateSessionInfo.SessionName = SessionName;
 #if !defined(OSS_PLAYFAB_PLAYSTATION)
 	NativeSessionName = SessionName;
 #endif
-	PendingCreateSessionInfo.SessionSettings = NewSessionSettings;
+	PlayFabSessionState.PendingCreateSessionInfo.SessionSettings = NewSessionSettings;
 
-	OSSPlayFab->AddOnPartyEndpointCreatedDelegate_Handle(FOnPartyEndpointCreatedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCreatePartyEndpoint));
-	bSuccess = OSSPlayFab->CreateAndConnectToPlayFabPartyNetwork();
+	bSuccess = OSSPlayFab->PartyNetwork->CreateAndConnectToNetwork();
 
-	if (bSuccess == false)
+	if (bSuccess)
+	{
+		PlayFabSessionState.PendingCreateSessionInfo.NetworkId = OSSPlayFab->PartyNetwork->NetworkId;
+	}
+	else
 	{
 		OnCreateSessionCompleted(SessionName, false);
 	}
@@ -207,11 +279,34 @@ bool FOnlineSessionPlayFab::CreateSession(const FUniqueNetId& HostingPlayerId, F
 	return bSuccess;
 }
 
-void FOnlineSessionPlayFab::OnCreatePartyEndpoint(bool bSuccess, uint16 EndpointID, bool bIsHosting)
+void FOnlineSessionPlayFab::OnPartyEndpointCreated(bool bSuccess, const FString& NetworkId, uint16 EndpointID, bool bIsHosting)
+{
+	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnPartyEndpointCreated()"));
+
+	if (NetworkId == PlayFabSessionState.PendingCreateSessionInfo.NetworkId)
+	{
+		PlayFabSessionState.PendingCreateSessionInfo.NetworkId.Empty();
+		OnCreatePartyEndpoint(bSuccess, bIsHosting, &PlayFabSessionState);
+	}
+	else if (NetworkId == PlayFabSessionState.MatchmakingNetworkId)
+	{
+		PlayFabSessionState.MatchmakingNetworkId.Empty();
+		OnCreatePartyEndpoint_Matchmaking(bSuccess, bIsHosting, PlayFabSessionState.MatchmakingCompleteSessionName, &PlayFabSessionState);
+	}
+	else if (NetworkId == PlayFabSessionState.JoinSessionNetworkId)
+	{
+		PlayFabSessionState.JoinSessionNetworkId.Empty();
+		OnCreatePartyEndpoint_JoinSession(bSuccess, PlayFabSessionState.JoinSessionCompleteSessionName);
+	}
+	else
+	{
+		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnPartyEndpointCreated: No matching flow for NetworkId '%s'"), *NetworkId);
+	}
+}
+
+void FOnlineSessionPlayFab::OnCreatePartyEndpoint(bool bSuccess, bool bIsHosting, FPlayFabSessionState* SessionState)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint()"));
-
-	OSSPlayFab->ClearOnPartyEndpointCreatedDelegates(this);
 
 	if (bIsHosting)
 	{
@@ -222,32 +317,37 @@ void FOnlineSessionPlayFab::OnCreatePartyEndpoint(bool bSuccess, uint16 Endpoint
 			TSharedRef<FInternetAddr> LocalIp = PlayFabSocketSubsystem->GetLocalHostAddr(*GLog, BindAll);
 			if (LocalIp->IsValid())
 			{
-				FString NetworkIdStr = OSSPlayFab->NetworkId;
-				FString NetworkDescriptorStr = OSSPlayFab->SerializeNetworkDescriptor(OSSPlayFab->NetworkDescriptor);
+				FString NetworkIdStr = OSSPlayFab->PartyNetwork->NetworkId;
+				FString NetworkDescriptorStr = OSSPlayFab->PartyNetwork->SerializeNetworkDescriptor(OSSPlayFab->PartyNetwork->NetworkDescriptor);
 				FString HostConnectInfo = LocalIp->ToString(false);
 
-				PendingCreateSessionInfo.SessionSettings.Set(SETTING_NETWORK_ID, NetworkIdStr, EOnlineDataAdvertisementType::ViaOnlineService);
-				PendingCreateSessionInfo.SessionSettings.Set(SETTING_NETWORK_DESCRIPTOR, NetworkDescriptorStr, EOnlineDataAdvertisementType::ViaOnlineService);
-				PendingCreateSessionInfo.SessionSettings.Set(SETTING_HOST_CONNECT_INFO, HostConnectInfo, EOnlineDataAdvertisementType::ViaOnlineService);
+				SessionState->PendingCreateSessionInfo.SessionSettings.Set(SETTING_NETWORK_ID, NetworkIdStr, EOnlineDataAdvertisementType::ViaOnlineService);
+				SessionState->PendingCreateSessionInfo.SessionSettings.Set(SETTING_NETWORK_DESCRIPTOR, NetworkDescriptorStr, EOnlineDataAdvertisementType::ViaOnlineService);
+				SessionState->PendingCreateSessionInfo.SessionSettings.Set(SETTING_HOST_CONNECT_INFO, HostConnectInfo, EOnlineDataAdvertisementType::ViaOnlineService);
 			}
 			else
 			{
 				UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint: LocalHostAddr was invalid"));
 			}
 
-			if (!(InternalCreateSession(*PendingCreateSessionInfo.PlayerId, PendingCreateSessionInfo.SessionName, PendingCreateSessionInfo.SessionSettings)))
+			if (!SessionState->PendingCreateSessionInfo.PlayerId.IsValid())
 			{
-				OnCreateSessionCompleted(PendingCreateSessionInfo.SessionName, false);
+				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint: PlayerId is null, cannot create session"));
+				OnCreateSessionCompleted(SessionState->PendingCreateSessionInfo.SessionName, false);
+			}
+			else if (!(InternalCreateSession(*SessionState->PendingCreateSessionInfo.PlayerId, SessionState->PendingCreateSessionInfo.SessionName, SessionState->PendingCreateSessionInfo.SessionSettings, SessionState)))
+			{
+				OnCreateSessionCompleted(SessionState->PendingCreateSessionInfo.SessionName, false);
 			}
 		}
 		else
 		{
-			OnCreateSessionCompleted(PendingCreateSessionInfo.SessionName, false);
+			OnCreateSessionCompleted(SessionState->PendingCreateSessionInfo.SessionName, false);
 		}
 	}
 }
 
-bool FOnlineSessionPlayFab::InternalCreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings)
+bool FOnlineSessionPlayFab::InternalCreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings, FPlayFabSessionState* SessionState)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::InternalCreateSession()"));
 
@@ -258,7 +358,7 @@ bool FOnlineSessionPlayFab::InternalCreateSession(const FUniqueNetId& HostingPla
 	FNamedOnlineSessionRef Session = AddNamedSessionRef(SessionName, NewSessionSettings);
 	Session->SessionState = EOnlineSessionState::Creating;
 	Session->bHosting = true;
-	Session->OwningUserId = FUniqueNetIdPlayFab::Create(HostingPlayerId);
+	Session->OwningUserId = HostingPlayerId.AsShared();
 	Session->LocalOwnerId = HostingPlayerId.AsShared();
 	Session->SessionInfo = NewSessionInfo;
 
@@ -269,9 +369,6 @@ bool FOnlineSessionPlayFab::InternalCreateSession(const FUniqueNetId& HostingPla
 	{
 		return false;
 	}
-
-	OnLobbyCreatedAndJoinCompletedDelegateHandle = FOnLobbyCreatedAndJoinCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLobbyCreatedAndJoinCompleted);
-	OnLobbyCreatedAndJoinCompletedHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLobbyCreatedAndJoinCompletedDelegate_Handle(OnLobbyCreatedAndJoinCompletedDelegateHandle);
 
 	if (!OSSPlayFab->GetPlayFabLobbyInterface()->CreatePlayFabLobby(HostingPlayerId, SessionName, NewSessionSettings))
 	{
@@ -286,8 +383,6 @@ bool FOnlineSessionPlayFab::InternalCreateSession(const FUniqueNetId& HostingPla
 void FOnlineSessionPlayFab::OnLobbyCreatedAndJoinCompleted(bool fSuccess, FName SessionName)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnLobbyCreatedAndJoinCompleted()"));
-
-	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLobbyCreatedAndJoinCompletedDelegate_Handle(OnLobbyCreatedAndJoinCompletedHandle);
 	OnCreateSessionCompleted(SessionName, fSuccess);
 }
 
@@ -366,17 +461,17 @@ bool FOnlineSessionPlayFab::UpdateSession(FName SessionName, FOnlineSessionSetti
 		return false;
 	}
 
-	if (OnUpdateLobbyCompleteDelegate.IsValid())
+	if (PlayFabSessionState.OnUpdateLobbyCompleteDelegate.IsValid())
 	{
 		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::UpdateSession: UpdateSession is already in progress. Call UpdateSession again after the current operation is completed."));
 		return false;
 	}
 
-	OnUpdateLobbyCompleteDelegate = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnUpdateLobbyCompletedDelegate_Handle(FOnUpdateLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnUpdateLobbyCompleted));
+	PlayFabSessionState.OnUpdateLobbyCompleteDelegate = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnUpdateLobbyCompletedDelegate_Handle(FOnUpdateLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnUpdateLobbyCompleted));
 	if (!OSSPlayFab->GetPlayFabLobbyInterface()->UpdateLobby(SessionName, UpdatedSessionSettings))
 	{
 		UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::UpdateSession: Failed to update session %s"), *SessionName.ToString());
-		OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(OnUpdateLobbyCompleteDelegate);
+		OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(PlayFabSessionState.OnUpdateLobbyCompleteDelegate);
 		return false;
 	}
 
@@ -385,8 +480,8 @@ bool FOnlineSessionPlayFab::UpdateSession(FName SessionName, FOnlineSessionSetti
 		OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
 		{
 			FOnlineSessionSettings SessionSettings = UpdatedSessionSettings;
-			SessionSettings.Set(SETTING_CONNECTION_STRING, ConnectionString, EOnlineDataAdvertisementType::ViaOnlineService);
-			OnNativeUpdateSessionCompleteDelegateHandle = NativeSessionInterface->AddOnUpdateSessionCompleteDelegate_Handle(
+			SessionSettings.Set(SETTING_CONNECTION_STRING, PlayFabSessionState.ConnectionString, EOnlineDataAdvertisementType::ViaOnlineService);
+			PlayFabSessionState.OnNativeUpdateSessionCompleteDelegateHandle = NativeSessionInterface->AddOnUpdateSessionCompleteDelegate_Handle(
 				FOnUpdateSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, bool bNativeSessionUpdated)
 					{
 						if (bNativeSessionUpdated == false)
@@ -394,7 +489,7 @@ bool FOnlineSessionPlayFab::UpdateSession(FName SessionName, FOnlineSessionSetti
 							UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeUpdateSessionComplete: Failed to update native session"));
 						}
 
-						NativeSessionInterface->ClearOnUpdateSessionCompleteDelegate_Handle(OnNativeUpdateSessionCompleteDelegateHandle);
+						NativeSessionInterface->ClearOnUpdateSessionCompleteDelegate_Handle(PlayFabSessionState.OnNativeUpdateSessionCompleteDelegateHandle);
 					}));
 			return NativeSessionInterface->UpdateSession(NativeSessionName, SessionSettings, bShouldRefreshOnlineData);
 		}
@@ -416,7 +511,7 @@ bool FOnlineSessionPlayFab::EndSession(FName SessionName)
 	{
 		OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
 		{
-			ConnectionString = TEXT("");
+			PlayFabSessionState.ConnectionString = TEXT("");
 			NativeSessionInterface->EndSession(NativeSessionName);
 		}
 	}
@@ -454,13 +549,18 @@ bool FOnlineSessionPlayFab::DestroySession(FName SessionName, const FOnDestroySe
 	{
 		OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
 		{
-			ConnectionString = TEXT("");
+			PlayFabSessionState.ConnectionString = TEXT("");
 			NativeSessionInterface->DestroySession(NativeSessionName);
 		}
 	}
 
+	// Clear any pending endpoint flow NetworkIds before tearing down the network
+	PlayFabSessionState.PendingCreateSessionInfo.NetworkId.Empty();
+	PlayFabSessionState.MatchmakingNetworkId.Empty();
+	PlayFabSessionState.JoinSessionNetworkId.Empty();
+
 	// Leave the PlayFab Party network
-	OSSPlayFab->LeavePlayFabPartyNetwork();
+	OSSPlayFab->PartyNetwork->LeaveNetwork();
 
 	FNamedOnlineSessionPtr Session = GetNamedSessionPtr(SessionName);
 	if (!Session.IsValid())
@@ -487,13 +587,10 @@ bool FOnlineSessionPlayFab::DestroySession(FName SessionName, const FOnDestroySe
 
 	Session->SessionState = EOnlineSessionState::Destroying;
 
-	OnLeaveLobbyCompletedHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLeaveLobbyCompletedDelegate_Handle(FOnLeaveLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLeaveLobbyCompleted));
-
 	// TODO GDK OSS will leave the session in next tick? should PF OSS also use ExecuteNextTick?
 	if (!OSSPlayFab->GetPlayFabLobbyInterface()->LeaveLobby(*FUniqueNetIdPlayFab::EmptyId(), SessionName, CompletionDelegate, FOnUnregisterLocalPlayerCompleteDelegate(), true))
 	{
 		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::DestroySession: Failed to destroy the session %s"), *SessionName.ToString());
-		OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLeaveLobbyCompletedDelegate_Handle(OnLeaveLobbyCompletedHandle);
 
 		OSSPlayFab->ExecuteNextTick([this, SessionName, CompletionDelegate]()
 			{
@@ -509,8 +606,6 @@ bool FOnlineSessionPlayFab::DestroySession(FName SessionName, const FOnDestroySe
 void FOnlineSessionPlayFab::OnLeaveLobbyCompleted(FName SessionName, bool bSuccess)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnLeaveLobbyCompleted()"));
-
-	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLeaveLobbyCompletedDelegate_Handle(OnLeaveLobbyCompletedHandle);
 	TriggerOnDestroySessionCompleteDelegates(SessionName, bSuccess);
 }
 
@@ -538,9 +633,6 @@ bool FOnlineSessionPlayFab::StartMatchmaking(const TArray< TSharedRef<const FUni
 		return false;
 	}
 
-	OnMatchmakingTicketCompletedDelegateHandle = FOnMatchmakingTicketCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnMatchmakingTicketCompleted);
-	OnMatchmakingTicketCompletedHandle = OSSPlayFab->GetMatchmakingInterface()->AddOnMatchmakingTicketCompletedDelegate_Handle(OnMatchmakingTicketCompletedDelegateHandle);
-
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::StartMatchmaking:CreateMatchMakingTicket()"));
 	if (!OSSPlayFab->GetMatchmakingInterface()->CreateMatchMakingTicket(LocalPlayers, SessionName, NewSessionSettings, SearchSettings))
 	{
@@ -555,7 +647,6 @@ bool FOnlineSessionPlayFab::StartMatchmaking(const TArray< TSharedRef<const FUni
 void FOnlineSessionPlayFab::OnMatchmakingTicketCompleted(bool fSuccess, FName SessionName)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnMatchmakingTicketCompleted()"));
-	OSSPlayFab->GetMatchmakingInterface()->ClearOnMatchmakingTicketCompletedDelegate_Handle(OnMatchmakingTicketCompletedHandle);
 	OnMatchmakingComplete(SessionName, fSuccess);
 }
 
@@ -563,13 +654,12 @@ void FOnlineSessionPlayFab::OnCancelMatchmakingComplete(FName SessionName, bool 
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnCancelMatchmakingComplete()"));
 	TriggerOnCancelMatchmakingCompleteDelegates(SessionName, fSuccess);
-	OSSPlayFab->GetMatchmakingInterface()->ClearOnCancelMatchmakingCompleteDelegate_Handle(OnCancelMatchmakingCompleteHandle);
 }
 
 void FOnlineSessionPlayFab::OnMatchmakingComplete(FName SessionName, bool bWasSuccessful)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnMatchmakingComplete()"));
-	MatchmakingCompleteSessionName = SessionName;
+	PlayFabSessionState.MatchmakingCompleteSessionName = SessionName;
 
 	if (OSSPlayFab == nullptr)
 	{
@@ -589,10 +679,13 @@ void FOnlineSessionPlayFab::OnMatchmakingComplete(FName SessionName, bool bWasSu
 	{
 		if (Session->bHosting)
 		{
-			OSSPlayFab->AddOnPartyEndpointCreatedDelegate_Handle(FOnPartyEndpointCreatedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking));
-			bool bSuccess = OSSPlayFab->CreateAndConnectToPlayFabPartyNetwork();
+			bool bSuccess = OSSPlayFab->PartyNetwork->CreateAndConnectToNetwork();
 
-			if (bSuccess == false)
+			if (bSuccess)
+			{
+				PlayFabSessionState.MatchmakingNetworkId = OSSPlayFab->PartyNetwork->NetworkId;
+			}
+			else
 			{
 				UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnMatchmakingComplete: CreateAndConnectToPlayFabPartyNetwork failed"));
 				TriggerOnMatchmakingCompleteDelegates(SessionName, false);
@@ -601,7 +694,7 @@ void FOnlineSessionPlayFab::OnMatchmakingComplete(FName SessionName, bool bWasSu
 		else
 		{
 			//kick off the join logic and give time for the session update
-			RetryJoinMatchmakingSession_Count = RetryJoinMatchmakingSession_MaxCount;
+			PlayFabSessionState.RetryJoinMatchmakingSession_Count = PlayFabSessionState.RetryJoinMatchmakingSession_MaxCount;
 		}
 
 		// Matchmaking does not use native interface
@@ -614,11 +707,11 @@ void FOnlineSessionPlayFab::OnMatchmakingComplete(FName SessionName, bool bWasSu
 	}
 }
 
-void FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork(bool bJoinLobbyOperation, int32& RetryOperationSession_Count)
+void FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork(FName SessionName, FPlayFabSessionState* SessionState, bool bJoinLobbyOperation)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork()"));
 
-	FName SessionName = bJoinLobbyOperation ? JoinSessionCompleteSessionName : MatchmakingCompleteSessionName;
+	int32& RetryOperationSession_Count = bJoinLobbyOperation ? SessionState->RetryJoinLobbySession_Count : SessionState->RetryJoinMatchmakingSession_Count;
 
 	if (OSSPlayFab == nullptr)
 	{
@@ -628,11 +721,11 @@ void FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork(bool bJoinLobbyOp
 		UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork: OSSPlayFab was null"));
 		if (bJoinLobbyOperation)
 		{
-			TriggerOnJoinSessionCompleteDelegates(JoinSessionCompleteSessionName, EOnJoinSessionCompleteResult::UnknownError);
+			TriggerOnJoinSessionCompleteDelegates(SessionName, EOnJoinSessionCompleteResult::UnknownError);
 		}
 		else
 		{
-			TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+			TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 		}
 
 		return;
@@ -647,25 +740,27 @@ void FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork(bool bJoinLobbyOp
 			SessionSettings->Get(SETTING_NETWORK_DESCRIPTOR, NetworkDescriptorStr) &&
 			SessionSettings->Get(SETTING_HOST_CONNECT_INFO, HostConnectInfo))
 		{
-			if (bJoinLobbyOperation)
-			{
-				OSSPlayFab->AddOnPartyEndpointCreatedDelegate_Handle(FOnPartyEndpointCreatedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCreatePartyEndpoint_JoinSession));
-			}
-			else
-			{
-				OSSPlayFab->AddOnPartyEndpointCreatedDelegate_Handle(FOnPartyEndpointCreatedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking));
-			}
-
-			if (!OSSPlayFab->ConnectToPlayFabPartyNetwork(NetworkIdStr, NetworkDescriptorStr))
+			if (!OSSPlayFab->PartyNetwork->ConnectToNetwork(NetworkIdStr, NetworkDescriptorStr))
 			{
 				UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork: ConnectToPlayFabPartyNetwork failed"));
 				if (bJoinLobbyOperation)
 				{
-					TriggerOnJoinSessionCompleteDelegates(JoinSessionCompleteSessionName, EOnJoinSessionCompleteResult::UnknownError);
+					TriggerOnJoinSessionCompleteDelegates(SessionName, EOnJoinSessionCompleteResult::UnknownError);
 				}
 				else
 				{
-					TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+					TriggerOnMatchmakingCompleteDelegates(SessionName, false);
+				}
+			}
+			else
+			{
+				if (bJoinLobbyOperation)
+				{
+					SessionState->JoinSessionNetworkId = OSSPlayFab->PartyNetwork->NetworkId;
+				}
+				else
+				{
+					SessionState->MatchmakingNetworkId = OSSPlayFab->PartyNetwork->NetworkId;
 				}
 			}
 
@@ -680,11 +775,11 @@ void FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork(bool bJoinLobbyOp
 				UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork: Missing required session settings"));
 				if (bJoinLobbyOperation)
 				{
-					TriggerOnJoinSessionCompleteDelegates(JoinSessionCompleteSessionName, EOnJoinSessionCompleteResult::UnknownError);
+					TriggerOnJoinSessionCompleteDelegates(SessionName, EOnJoinSessionCompleteResult::UnknownError);
 				}
 				else
 				{
-					TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+					TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 				}
 			}
 		}
@@ -697,24 +792,22 @@ void FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork(bool bJoinLobbyOp
 		UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnOperationComplete_TryJoinNetwork: SessionSettings was null"));
 		if (bJoinLobbyOperation)
 		{
-			TriggerOnJoinSessionCompleteDelegates(JoinSessionCompleteSessionName, EOnJoinSessionCompleteResult::UnknownError);
+			TriggerOnJoinSessionCompleteDelegates(SessionName, EOnJoinSessionCompleteResult::UnknownError);
 		}
 		else
 		{
-			TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+			TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 		}
 	}
 }
 
-void FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking(bool bSuccess, uint16 EndpointID, bool bIsHosting)
+void FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking(bool bSuccess, bool bIsHosting, FName SessionName, FPlayFabSessionState* SessionState)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking()"));
 
-	OSSPlayFab->ClearOnPartyEndpointCreatedDelegates(this);
-
 	if (bIsHosting)
 	{
-		if (FOnlineSessionSettings* SessionSettings = GetSessionSettings(MatchmakingCompleteSessionName))
+		if (FOnlineSessionSettings* SessionSettings = GetSessionSettings(SessionName))
 		{
 			if (ISocketSubsystem* PlayFabSocketSubsystem = ISocketSubsystem::Get(PLAYFAB_SOCKET_SUBSYSTEM))
 			{
@@ -722,64 +815,63 @@ void FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking(bool bSuccess, uin
 				TSharedRef<FInternetAddr> LocalIp = PlayFabSocketSubsystem->GetLocalHostAddr(*GLog, BindAll);
 				if (LocalIp->IsValid())
 				{
-					FString NetworkIdStr = OSSPlayFab->NetworkId;
-					FString NetworkDescriptorStr = OSSPlayFab->SerializeNetworkDescriptor(OSSPlayFab->NetworkDescriptor);
+					FString NetworkIdStr = OSSPlayFab->PartyNetwork->NetworkId;
+					FString NetworkDescriptorStr = OSSPlayFab->PartyNetwork->SerializeNetworkDescriptor(OSSPlayFab->PartyNetwork->NetworkDescriptor);
 					FString HostConnectInfo = LocalIp->ToString(false);
 
 					SessionSettings->Set(SETTING_NETWORK_ID, NetworkIdStr, EOnlineDataAdvertisementType::ViaOnlineService);
 					SessionSettings->Set(SETTING_NETWORK_DESCRIPTOR, NetworkDescriptorStr, EOnlineDataAdvertisementType::ViaOnlineService);
 					SessionSettings->Set(SETTING_HOST_CONNECT_INFO, HostConnectInfo, EOnlineDataAdvertisementType::ViaOnlineService);
 
-					OnUpdateSession_MatchmakingDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnUpdateLobbyCompletedDelegate_Handle(FOnUpdateLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnUpdateSession_Matchmaking));
-					if (!OSSPlayFab->GetPlayFabLobbyInterface()->UpdateLobby(MatchmakingCompleteSessionName, *SessionSettings))
+					SessionState->OnUpdateSession_MatchmakingDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnUpdateLobbyCompletedDelegate_Handle(FOnUpdateLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnUpdateSession_Matchmaking));
+					if (!OSSPlayFab->GetPlayFabLobbyInterface()->UpdateLobby(SessionName, *SessionSettings))
 					{
-						UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking: Failed to update Lobby with network descriptor %s"), *MatchmakingCompleteSessionName.ToString());
-						OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(OnUpdateSession_MatchmakingDelegateHandle);
-						TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+						UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking: Failed to update Lobby with network descriptor %s"), *SessionName.ToString());
+						OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(SessionState->OnUpdateSession_MatchmakingDelegateHandle);
+						TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 					}
 				}
 				else
 				{
 					UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking: LocalIp was invalid"));
-					TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+					TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 				}
 			}
 			else
 			{
 				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking: PlayFabSocketSubsystem was null"));
-				TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+				TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 			}
 		}
 		else
 		{
 			UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_Matchmaking: SessionSettings was null"));
-			TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, false);
+			TriggerOnMatchmakingCompleteDelegates(SessionName, false);
 		}
 	}
 	else
 	{
-		TriggerOnMatchmakingCompleteDelegates(MatchmakingCompleteSessionName, bSuccess);
+		TriggerOnMatchmakingCompleteDelegates(SessionName, bSuccess);
 	}
 }
 
-void FOnlineSessionPlayFab::OnCreatePartyEndpoint_JoinSession(bool bSuccess, uint16 EndpointID, bool bIsHosting)
+void FOnlineSessionPlayFab::OnCreatePartyEndpoint_JoinSession(bool bSuccess, FName SessionName)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnCreatePartyEndpoint_JoinSession()"));
-	OSSPlayFab->ClearOnPartyEndpointCreatedDelegates(this);
-	TriggerOnJoinSessionCompleteDelegates(JoinSessionCompleteSessionName, bSuccess ? EOnJoinSessionCompleteResult::Success : EOnJoinSessionCompleteResult::UnknownError);
+	TriggerOnJoinSessionCompleteDelegates(SessionName, bSuccess ? EOnJoinSessionCompleteResult::Success : EOnJoinSessionCompleteResult::UnknownError);
 }
 
 void FOnlineSessionPlayFab::OnUpdateLobbyCompleted(FName SessionName, bool bWasSuccessful)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnUpdateLobbyCompleted()"));
-	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(OnUpdateLobbyCompleteDelegate);
+	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(PlayFabSessionState.OnUpdateLobbyCompleteDelegate);
 	TriggerOnUpdateSessionCompleteDelegates(SessionName, bWasSuccessful);
 }
 
 void FOnlineSessionPlayFab::OnUpdateSession_Matchmaking(FName SessionName, bool bWasSuccessful)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnUpdateSession_Matchmaking()"));
-	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(OnUpdateSession_MatchmakingDelegateHandle);
+	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnUpdateLobbyCompletedDelegate_Handle(PlayFabSessionState.OnUpdateSession_MatchmakingDelegateHandle);
 	TriggerOnMatchmakingCompleteDelegates(SessionName, bWasSuccessful);
 }
 
@@ -802,9 +894,6 @@ bool FOnlineSessionPlayFab::CancelMatchmaking(const FUniqueNetId& SearchingPlaye
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::CancelMatchmaking()"));
 
-	OnCancelMatchmakingCompleteDelegateHandle = FOnCancelMatchmakingCompleteDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCancelMatchmakingComplete);
-	OnCancelMatchmakingCompleteHandle = OSSPlayFab->GetMatchmakingInterface()->AddOnCancelMatchmakingCompleteDelegate_Handle(OnCancelMatchmakingCompleteDelegateHandle);
-
 	return OSSPlayFab->GetMatchmakingInterface()->CancelMatchmakingTicket(SessionName);
 }
 
@@ -820,6 +909,7 @@ bool FOnlineSessionPlayFab::FindSessions(int32 SearchingPlayerNum, const TShared
 	}
 
 	PlayerId = IdentityIntPtr->GetUniquePlayerId(SearchingPlayerNum);
+
 	if (!PlayerId.IsValid())
 	{
 		return false;
@@ -904,6 +994,11 @@ void FOnlineSessionPlayFab::RegisterForUpdates()
 	OnLobbyMemberAddedDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLobbyMemberAddedDelegate_Handle(FOnLobbyMemberAddedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLobbyMemberAdded));
 	OnLobbyMemberRemovedDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLobbyMemberRemovedDelegate_Handle(FOnLobbyMemberRemovedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLobbyMemberRemoved));
 	OnLobbyDisconnectedDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLobbyDisconnectedDelegate_Handle(FOnLobbyDisconnectedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLobbyDisconnected));
+	OnLobbyCreatedAndJoinCompletedHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLobbyCreatedAndJoinCompletedDelegate_Handle(FOnLobbyCreatedAndJoinCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLobbyCreatedAndJoinCompleted));
+	OnJoinLobbyCompleteDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnJoinLobbyCompletedDelegate_Handle(FOnJoinLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnJoinLobbyCompleted));
+	OnLeaveLobbyCompletedHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnLeaveLobbyCompletedDelegate_Handle(FOnLeaveLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnLeaveLobbyCompleted));
+	OnMatchmakingTicketCompletedHandle = OSSPlayFab->GetMatchmakingInterface()->AddOnMatchmakingTicketCompletedDelegate_Handle(FOnMatchmakingTicketCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnMatchmakingTicketCompleted));
+	OnCancelMatchmakingCompleteHandle = OSSPlayFab->GetMatchmakingInterface()->AddOnCancelMatchmakingCompleteDelegate_Handle(FOnCancelMatchmakingCompleteDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnCancelMatchmakingComplete));
 	
 	if (bUsesNativeSession)
 	{
@@ -920,6 +1015,11 @@ void FOnlineSessionPlayFab::UnregisterForUpdates()
 	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLobbyMemberAddedDelegate_Handle(OnLobbyMemberAddedDelegateHandle);
 	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLobbyMemberRemovedDelegate_Handle(OnLobbyMemberRemovedDelegateHandle);
 	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLobbyDisconnectedDelegate_Handle(OnLobbyDisconnectedDelegateHandle);
+	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLobbyCreatedAndJoinCompletedDelegate_Handle(OnLobbyCreatedAndJoinCompletedHandle);
+	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnJoinLobbyCompletedDelegate_Handle(OnJoinLobbyCompleteDelegateHandle);
+	OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnLeaveLobbyCompletedDelegate_Handle(OnLeaveLobbyCompletedHandle);
+	OSSPlayFab->GetMatchmakingInterface()->ClearOnMatchmakingTicketCompletedDelegate_Handle(OnMatchmakingTicketCompletedHandle);
+	OSSPlayFab->GetMatchmakingInterface()->ClearOnCancelMatchmakingCompleteDelegate_Handle(OnCancelMatchmakingCompleteHandle);
 	
 	if (bUsesNativeSession)
 	{
@@ -1267,7 +1367,7 @@ void FOnlineSessionPlayFab::OnLobbyDisconnected(FName SessionName)
 	if (Session.IsValid())
 	{
 		// Leave the PlayFab Party network
-		OSSPlayFab->LeavePlayFabPartyNetwork();
+		OSSPlayFab->PartyNetwork->LeaveNetwork();
 
 		RemoveNamedSession(SessionName);
 		TriggerOnSessionFailureDelegates(*FUniqueNetIdPlayFab::EmptyId(), ESessionFailure::ServiceConnectionLost);
@@ -1323,7 +1423,27 @@ bool FOnlineSessionPlayFab::SetHostOnSession(FName SessionName, const PFEntityKe
 		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::SetHostOnSession: session owner nickname is %s"), *PlayerNickname);
 	}
 
-	ExistingNamedSession->OwningUserId = FUniqueNetIdPlayFab::Create(*HostPlatformId);
+	FUniqueNetIdPtr NativePlatformId;
+	for (int32 i = 0; i < MAX_LOCAL_PLAYERS; ++i)
+	{
+		TSharedPtr<const FUniqueNetId> NativeId = IdentityIntPtr->GetUniquePlayerId(i);
+		if (NativeId.IsValid() && NativeId->ToString() == *HostPlatformId)
+		{
+			NativePlatformId = NativeId;
+			break;
+		}
+	}
+
+	if (NativePlatformId.IsValid())
+	{
+		ExistingNamedSession->OwningUserId = NativePlatformId;
+		ExistingNamedSession->LocalOwnerId = NativePlatformId;
+	}
+	else
+	{
+		ExistingNamedSession->OwningUserId = FUniqueNetIdPlayFab::Create(*HostPlatformId);
+		ExistingNamedSession->LocalOwnerId = ExistingNamedSession->OwningUserId->AsShared();
+	}
 	ExistingNamedSession->OwningUserName = PlayerNickname;
 
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::SetHostOnSession set host updated:%s"), *ExistingNamedSession->OwningUserId->ToString());
@@ -1338,7 +1458,6 @@ bool FOnlineSessionPlayFab::SetHostOnSession(FName SessionName, const PFEntityKe
 	else
 	{
 		ExistingNamedSession->bHosting = true;
-		ExistingNamedSession->LocalOwnerId = ExistingNamedSession->OwningUserId->AsShared();
 	}
 
 	return true;
@@ -1347,8 +1466,6 @@ bool FOnlineSessionPlayFab::SetHostOnSession(FName SessionName, const PFEntityKe
 bool FOnlineSessionPlayFab::JoinSession_PlayFabInternal(int32 ControllerIndex, TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::JoinSession_PlayFabInternal()"));
-
-	OnJoinLobbyCompleteDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnJoinLobbyCompletedDelegate_Handle(FOnJoinLobbyCompletedDelegate::CreateRaw(this, &FOnlineSessionPlayFab::OnJoinLobbyCompleted));
 
 	TSharedPtr<const FUniqueNetId> PlayerId;
 	if (ControllerIndex != INDEX_NONE)
@@ -1428,17 +1545,49 @@ bool FOnlineSessionPlayFab::JoinSession(int32 ControllerIndex, FName SessionName
 	{
 		OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
 		{
-			OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
-				FOnJoinSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, EOnJoinSessionCompleteResult::Type NativeSessionJoinedResult)
-					{
-						if (NativeSessionJoinedResult != EOnJoinSessionCompleteResult::Success)
-						{
-							UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeJoinSessionComplete: Failed to join native session due to %s"), LexToString(NativeSessionJoinedResult));
-						}
+			// Check if the session has native session info before trying to join the native session.
+			// Server lobbies (e.g., created via PFMultiplayerCreateAndClaimServerLobby) won't have
+			// native session properties, so we skip the native join for dedicated servers.
+			// For clients, a missing native session ID is unexpected and treated as an error.
+			bool bHasNativeSession = false;
+			if (DesiredSession.Session.SessionInfo.IsValid() &&
+				DesiredSession.Session.SessionInfo->GetSessionId().GetType() == PLAYFAB_SUBSYSTEM)
+			{
+				FOnlineSessionInfoPlayFabPtr PlayFabSessionInfo = StaticCastSharedPtr<FOnlineSessionInfoPlayFab>(DesiredSession.Session.SessionInfo);
+				if (PlayFabSessionInfo.IsValid())
+				{
+					const FString NativeSessionIdStr = PlayFabSessionInfo->GetNativeSessionIdString();
+					bHasNativeSession = !NativeSessionIdStr.IsEmpty();
+				}
+			}
 
-						NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnNativeJoinSessionCompleteDelegateHandle);
-					}));
-			return NativeSessionInterface->JoinSession(ControllerIndex, NativeSessionName, DesiredSession);
+			if (!bHasNativeSession)
+			{
+				if (IsRunningDedicatedServer())
+				{
+					UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::JoinSession: No native session ID in lobby properties, skipping native session join (dedicated server)"));
+				}
+				else
+				{
+					UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::JoinSession: No native session ID found but client expects one — session may have been created by a server lobby"));
+					return false;
+				}
+			}
+
+			if (bHasNativeSession)
+			{
+				PlayFabSessionState.OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
+					FOnJoinSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, EOnJoinSessionCompleteResult::Type NativeSessionJoinedResult)
+						{
+							if (NativeSessionJoinedResult != EOnJoinSessionCompleteResult::Success)
+							{
+								UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeJoinSessionComplete: Failed to join native session due to %s"), LexToString(NativeSessionJoinedResult));
+							}
+
+							NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(PlayFabSessionState.OnNativeJoinSessionCompleteDelegateHandle);
+						}));
+				return NativeSessionInterface->JoinSession(ControllerIndex, NativeSessionName, DesiredSession);
+			}
 		}
 		else
 		{
@@ -1544,14 +1693,14 @@ bool FOnlineSessionPlayFab::JoinSession(const FUniqueNetId& UserId, FName Sessio
 							}
 							else
 							{
-								OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
+								PlayFabSessionState.OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
 									FOnJoinSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, EOnJoinSessionCompleteResult::Type NativeSessionJoinedResult)
 										{
 											if (NativeSessionJoinedResult != EOnJoinSessionCompleteResult::Success)
 											{
 												UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeJoinSessionComplete: Failed to join native session due to %s"), LexToString(NativeSessionJoinedResult));
 											}
-											NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnNativeJoinSessionCompleteDelegateHandle);
+											NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(PlayFabSessionState.OnNativeJoinSessionCompleteDelegateHandle);
 										}));
 								bSuccess = NativeSessionInterface->JoinSession(UserId, NativeSessionName, *NativeDesiredSession);
 							}
@@ -1574,7 +1723,7 @@ bool FOnlineSessionPlayFab::JoinSession(const FUniqueNetId& UserId, FName Sessio
 			else
 			{
 				// This call is triggered by invitation from native layer.
-				OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
+				PlayFabSessionState.OnNativeJoinSessionCompleteDelegateHandle = NativeSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
 					FOnJoinSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface](FName SessionName, EOnJoinSessionCompleteResult::Type NativeSessionJoinedResult)
 						{
 							if (NativeSessionJoinedResult != EOnJoinSessionCompleteResult::Success)
@@ -1582,7 +1731,7 @@ bool FOnlineSessionPlayFab::JoinSession(const FUniqueNetId& UserId, FName Sessio
 								UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeJoinSessionComplete: Failed to join native session due to %s"), LexToString(NativeSessionJoinedResult));
 							}
 
-							NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnNativeJoinSessionCompleteDelegateHandle);
+							NativeSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(PlayFabSessionState.OnNativeJoinSessionCompleteDelegateHandle);
 						}));
 				return NativeSessionInterface->JoinSession(UserId, NativeSessionName, DesiredSession);
 			}
@@ -1602,20 +1751,15 @@ void FOnlineSessionPlayFab::OnJoinLobbyCompleted(FName InSessionName, EOnJoinSes
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnJoinLobbyCompleted()"));
 
-	if (OSSPlayFab)
-	{
-		OSSPlayFab->GetPlayFabLobbyInterface()->ClearOnJoinLobbyCompletedDelegate_Handle(OnJoinLobbyCompleteDelegateHandle);
-	}
-
-	JoinSessionCompleteSessionName = InSessionName;
+	PlayFabSessionState.JoinSessionCompleteSessionName = InSessionName;
 
 	//kick off the join logic and give time for the session update
-	RetryJoinLobbySession_Count = RetryJoinLobbySession_MaxCount;
+	PlayFabSessionState.RetryJoinLobbySession_Count = PlayFabSessionState.RetryJoinLobbySession_MaxCount;
 
 	if (Result != EOnJoinSessionCompleteResult::Success && Result != EOnJoinSessionCompleteResult::AlreadyInSession)
 	{
 		// Leave the PlayFab Party network
-		OSSPlayFab->LeavePlayFabPartyNetwork();
+		OSSPlayFab->PartyNetwork->LeaveNetwork();
 		
 		TriggerOnJoinSessionCompleteDelegates(InSessionName, Result);
 	}
@@ -1794,7 +1938,10 @@ bool FOnlineSessionPlayFab::RegisterPlayers(FName SessionName, const TArray< TSh
 							}
 						}
 					}
-					RegisterVoice(*PlayerId);
+					if (!IsRunningDedicatedServer())
+					{
+						RegisterVoice(*PlayerId);
+					}
 				}
 				else
 				{
@@ -2035,29 +2182,29 @@ const FName FOnlineSessionPlayFab::GetNativeSessionName() const
 
 void FOnlineSessionPlayFab::Tick(float DeltaTime)
 {
-	RetryJoinMatchmakingSession_TimeSinceLastRetry += DeltaTime;
+	PlayFabSessionState.RetryJoinMatchmakingSession_TimeSinceLastRetry += DeltaTime;
 
-	if (RetryJoinMatchmakingSession_Count > 0)
+	if (PlayFabSessionState.RetryJoinMatchmakingSession_Count > 0)
 	{
-		if (RetryJoinMatchmakingSession_TimeSinceLastRetry > RetryJoinMatchmakingSession_RetryTime)
+		if (PlayFabSessionState.RetryJoinMatchmakingSession_TimeSinceLastRetry > PlayFabSessionState.RetryJoinMatchmakingSession_RetryTime)
 		{
-			RetryJoinMatchmakingSession_TimeSinceLastRetry = 0.0f;
-			RetryJoinMatchmakingSession_Count -= 1;
+			PlayFabSessionState.RetryJoinMatchmakingSession_TimeSinceLastRetry = 0.0f;
+			PlayFabSessionState.RetryJoinMatchmakingSession_Count -= 1;
 
-			OnOperationComplete_TryJoinNetwork(false, RetryJoinMatchmakingSession_Count);
+			OnOperationComplete_TryJoinNetwork(PlayFabSessionState.MatchmakingCompleteSessionName, &PlayFabSessionState, false);
 		}
 	}
 
-	RetryJoinLobbySession_TimeSinceLastRetry += DeltaTime;
+	PlayFabSessionState.RetryJoinLobbySession_TimeSinceLastRetry += DeltaTime;
 
-	if (RetryJoinLobbySession_Count > 0)
+	if (PlayFabSessionState.RetryJoinLobbySession_Count > 0)
 	{
-		if (RetryJoinLobbySession_TimeSinceLastRetry > RetryJoinLobbySession_RetryTime)
+		if (PlayFabSessionState.RetryJoinLobbySession_TimeSinceLastRetry > PlayFabSessionState.RetryJoinLobbySession_RetryTime)
 		{
-			RetryJoinLobbySession_TimeSinceLastRetry = 0.0f;
-			RetryJoinLobbySession_Count -= 1;
+			PlayFabSessionState.RetryJoinLobbySession_TimeSinceLastRetry = 0.0f;
+			PlayFabSessionState.RetryJoinLobbySession_Count -= 1;
 
-			OnOperationComplete_TryJoinNetwork(true, RetryJoinLobbySession_Count);
+			OnOperationComplete_TryJoinNetwork(PlayFabSessionState.JoinSessionCompleteSessionName, &PlayFabSessionState, true);
 		}
 	}
 
@@ -2126,10 +2273,14 @@ void FOnlineSessionPlayFab::OnCreateSessionCompleted(FName SessionName, bool bPl
 
 	if (bPlayFabSessionCreated)
 	{
-		if (PendingCreateSessionInfo.PlayerId.IsValid())
+		if (PlayFabSessionState.PendingCreateSessionInfo.PlayerId.IsValid())
 		{
-			FUniqueNetIdPtr NativeNetId = OSSPlayFab->GetNativeNetId(PendingCreateSessionInfo.PlayerId->AsShared());
-			if (NativeNetId.IsValid())
+			FUniqueNetIdPtr NativeNetId;
+			if (bUsesNativeSession && !IsRunningDedicatedServer())
+			{
+				NativeNetId = OSSPlayFab->GetNativeNetId(PlayFabSessionState.PendingCreateSessionInfo.PlayerId->AsShared());
+			}
+			if (NativeNetId.IsValid() || PlayFabSessionState.PendingCreateSessionInfo.PlayerId->GetType() == PLAYFAB_SUBSYSTEM)
 			{
 				FNamedOnlineSessionPtr ExistingNamedSession = GetNamedSessionPtr(SessionName);
 				if (ExistingNamedSession.IsValid())
@@ -2137,19 +2288,19 @@ void FOnlineSessionPlayFab::OnCreateSessionCompleted(FName SessionName, bool bPl
 					FOnlineSessionInfoPlayFabPtr PlayFabSessionInfo = StaticCastSharedPtr<FOnlineSessionInfoPlayFab>(ExistingNamedSession->SessionInfo);
 					if (PlayFabSessionInfo.IsValid())
 					{
-						ConnectionString = PlayFabSessionInfo->ConnectionString;
-						if (ConnectionString.IsEmpty() == false)
+						PlayFabSessionState.ConnectionString = PlayFabSessionInfo->ConnectionString;
+						if (PlayFabSessionState.ConnectionString.IsEmpty() == false)
 						{
-							if (bUsesNativeSession)
+							if (bUsesNativeSession && NativeNetId.IsValid())
 							{
 								OSS_PLAYFAB_GET_NATIVE_SESSION_INTERFACE
 								{
-									OnNativeCreateSessionCompleteDelegateHandle = NativeSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(
+									PlayFabSessionState.OnNativeCreateSessionCompleteDelegateHandle = NativeSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(
 										FOnCreateSessionCompleteDelegate::CreateLambda([this, NativeSessionInterface, ExistingNamedSession, SessionName](FName CallbackNativeSessionName, bool bNativeSessionCreated)
 										{
 											if (bNativeSessionCreated == false)
 											{
-												OSSPlayFab->LeavePlayFabPartyNetwork();
+												OSSPlayFab->PartyNetwork->LeaveNetwork();
 												OSSPlayFab->GetPlayFabLobbyInterface()->LeaveLobby(*FUniqueNetIdPlayFab::EmptyId(), SessionName, FOnDestroySessionCompleteDelegate(), FOnUnregisterLocalPlayerCompleteDelegate(), true);
 
 												UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnNativeCreateSessionComplete: Failed to create native session, leaving Playfab Party network"));
@@ -2188,11 +2339,11 @@ void FOnlineSessionPlayFab::OnCreateSessionCompleted(FName SessionName, bool bPl
 												}
 											}
 											TriggerOnCreateSessionCompleteDelegates(SessionName, bNativeSessionCreated);
-											NativeSessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(OnNativeCreateSessionCompleteDelegateHandle);
+											NativeSessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(PlayFabSessionState.OnNativeCreateSessionCompleteDelegateHandle);
 										}));
 
-									FOnlineSessionSettings SessionSettings = PendingCreateSessionInfo.SessionSettings;
-									SessionSettings.Set(SETTING_CONNECTION_STRING, ConnectionString, EOnlineDataAdvertisementType::ViaOnlineService);
+									FOnlineSessionSettings SessionSettings = PlayFabSessionState.PendingCreateSessionInfo.SessionSettings;
+									SessionSettings.Set(SETTING_CONNECTION_STRING, PlayFabSessionState.ConnectionString, EOnlineDataAdvertisementType::ViaOnlineService);
 									bSuccess = NativeSessionInterface->CreateSession(*NativeNetId, NativeSessionName, SessionSettings);
 								}
 							}
@@ -2232,7 +2383,7 @@ void FOnlineSessionPlayFab::OnCreateSessionCompleted(FName SessionName, bool bPl
 	if (bSuccess == false)
 	{
 		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreateSessionCompleted: failed to create session, leaving Playfab Party network"));
-		OSSPlayFab->LeavePlayFabPartyNetwork();
+		OSSPlayFab->PartyNetwork->LeaveNetwork();
 		TriggerOnCreateSessionCompleteDelegates(SessionName, false);
 	}
 }
@@ -2268,7 +2419,7 @@ void FOnlineSessionPlayFab::OnNativeSessionUserInviteAccepted(const bool bWasSuc
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::OnNativeSessionUserInviteAccepted()"));
 
-	ConnectionString = InviteResult.GetSessionIdStr();
+	PlayFabSessionState.ConnectionString = InviteResult.GetSessionIdStr();
 	TriggerOnSessionUserInviteAcceptedDelegates(bWasSuccessful, ControllerId, UserId, InviteResult);
 }
 

@@ -5,12 +5,18 @@
 #include "OnlineSubsystemPlayFab.h"
 #include "OnlineIdentityInterfacePlayFab.h"
 #include "PlayFabSocketSubsystem.h"
+#include "PlayFabPartyNetwork.h"
 #include "Interfaces/IPluginManager.h"
 #include "SocketSubsystem.h"
 #include "IpConnection.h"
 #include "PlayFabNetDriver.h"
 #include "OnlineExternalUIInterfacePlayFab.h"
 #include "PlayFabHelpers.h"
+
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+#include <playfab/core/PFCorePS.h>
+#include "PlayStation/PlayFabCoreModule.PS.h"
+#endif
 
 #include "EngineLogs.h"
 #include "CoreGlobals.h"
@@ -62,6 +68,25 @@ namespace FNetworkProtocolTypes
 	const FLazyName PlayFab(TEXT("PlayFab"));
 }
 
+FOnlineSubsystemPlayFab::FOnlineSubsystemPlayFab(FName InInstanceName) :
+	FOnlineSubsystemImpl(PLAYFAB_SUBSYSTEM, InInstanceName)
+{
+	// Fix subsystem name to the base one
+	FString NativePlatformServiceName;
+	if (!GConfig->GetString(TEXT("OnlineSubsystem"), TEXT("NativePlatformService"), NativePlatformServiceName, GEngineIni))
+	{
+		UE_LOG_ONLINE(Error, TEXT("Engine INI OnlineSubsystem section does not contain a value for key NativePlatformService"));
+	}
+	else
+	{
+		SubsystemName = FName(*NativePlatformServiceName);
+	}
+}
+
+FOnlineSubsystemPlayFab::~FOnlineSubsystemPlayFab()
+{
+}
+
 bool FOnlineSubsystemPlayFab::Init()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::Init"));
@@ -97,17 +122,34 @@ bool FOnlineSubsystemPlayFab::Init()
 	
 	RegisterNetworkInitCallbacks();
 
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+	if (!PlayFabCorePS::InitializePlatform())
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::Init: PlayFabCorePS::InitializePlatform failed"));
+		return false;
+	}
+
+	HRESULT hr = PFInitialize(nullptr);
+	if (FAILED(hr))
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::Init: PFInitialize failed: 0x%08x"), hr);
+	}
+#endif
+
 	// Try to initialize PlayFab Party if the platform is ready
 	TryInitializePlayFabParty();
 
-	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxDeviceCount"), MaxDeviceCount, GEngineIni);
-	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxDevicesPerUserCount"), MaxDevicesPerUserCount, GEngineIni);
-	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxEndpointsPerDeviceCount"), MaxEndpointsPerDeviceCount, GEngineIni);
-	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxUserCount"), MaxUserCount, GEngineIni);
-	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxUsersPerDeviceCount"), MaxUsersPerDeviceCount, GEngineIni);
+	// Construct PartyNetwork early so config reads can write to it
+	PartyNetwork = MakeUnique<FPlayFabPartyNetwork>(this);
+
+	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxDeviceCount"), PartyNetwork->MaxDeviceCount, GEngineIni);
+	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxDevicesPerUserCount"), PartyNetwork->MaxDevicesPerUserCount, GEngineIni);
+	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxEndpointsPerDeviceCount"), PartyNetwork->MaxEndpointsPerDeviceCount, GEngineIni);
+	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxUserCount"), PartyNetwork->MaxUserCount, GEngineIni);
+	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxUsersPerDeviceCount"), PartyNetwork->MaxUsersPerDeviceCount, GEngineIni);
 	GConfig->GetBool(TEXT("OnlineSubsystemPlayFab"), TEXT("bForceAutoLogin"), bForceAutoLogin, GEngineIni);
 
-	ParseDirectPeerConnectivityOptions();
+	PartyNetwork->ParseDirectPeerConnectivityOptions();
 
 	TSharedPtr<IPlugin> SocketsPlugin = IPluginManager::Get().FindPlugin(TEXT("PlayFabParty"));
 	if (!SocketsPlugin.IsValid() || (SocketsPlugin.IsValid() && !SocketsPlugin->IsEnabled()))
@@ -157,6 +199,25 @@ void FOnlineSubsystemPlayFab::InitializePlayFabParty()
 		// Initialize PlayFab Party
 		Party::PartyInitializationConfiguration partyInitConfig = {};
 		partyInitConfig.titleId = titleIdStr.c_str();
+
+		// For dedicated servers, use a dynamic UDP port instead of the GDK preferred port (3074)
+		// to avoid conflicts when server and client run on the same machine
+		if (IsRunningDedicatedServer())
+		{
+			PartyLocalUdpSocketBindAddressConfiguration bindConfig{};
+			bindConfig.options = PartyLocalUdpSocketBindAddressOptions::ExcludeGameCorePreferredUdpMultiplayerPort;
+			bindConfig.port = 0; // Let the system pick an available port
+			PartyError SetOptErr = Manager.SetOption(nullptr, PartyOption::LocalUdpSocketBindAddress, &bindConfig);
+			if (PARTY_FAILED(SetOptErr))
+			{
+				UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty: SetOption(LocalUdpSocketBindAddress) failed: %s"), *GetPartyErrorMessage(SetOptErr));
+			}
+			else
+			{
+				UE_LOG_ONLINE(Display, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty: Dedicated server using dynamic UDP port (excluded GDK preferred port 3074)"));
+			}
+		}
+
 		PartyError Err = Manager.Initialize(&partyInitConfig);
 		if (PARTY_FAILED(Err))
 		{
@@ -240,50 +301,13 @@ void FOnlineSubsystemPlayFab::CleanUpPlayFab()
 	{
 		bPartyInitialized = false;
 
-		NetworkState = EPlayFabPartyNetworkState::NoNetwork;
-		Network = nullptr;
+		PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NoNetwork;
+		PartyNetwork->Network = nullptr;
 
 		// This cleans up everything allocated in PartyManager.Initialize() and
 		// should only be used when done with networking
 		PartyManager::GetSingleton().Cleanup();
 	}
-}
-
-const static TMap<FString, PartyDirectPeerConnectivityOptions> ConnectivityOptionsMap  = {
-	{"None", PartyDirectPeerConnectivityOptions::None},
-	{"SamePlatformType", PartyDirectPeerConnectivityOptions::SamePlatformType},
-	{"DifferentPlatformType", PartyDirectPeerConnectivityOptions::DifferentPlatformType},
-	{"AnyPlatformType", PartyDirectPeerConnectivityOptions::SamePlatformType |
-		PartyDirectPeerConnectivityOptions::DifferentPlatformType},
-	{"SameEntityLoginProvider", PartyDirectPeerConnectivityOptions::SameEntityLoginProvider},
-	{"DifferentEntityLoginProvider", PartyDirectPeerConnectivityOptions::DifferentEntityLoginProvider},
-	{"AnyEntityLoginProvider", PartyDirectPeerConnectivityOptions::SameEntityLoginProvider |
-		PartyDirectPeerConnectivityOptions::DifferentEntityLoginProvider},
-};
-
-void FOnlineSubsystemPlayFab::ParseDirectPeerConnectivityOptions()
-{
-	TArray<FString> ConnectivityOptionsArr;
-	GConfig->GetArray(TEXT("OnlineSubsystemPlayFab"), TEXT("DirectPeerConnectivityOptions"), ConnectivityOptionsArr, GEngineIni);
-	if (!ConnectivityOptionsArr.Num())
-	{
-		UE_LOG_ONLINE(Warning, TEXT("DirectPeerConnectivityOptions not provided - using default."));
-		return; // use default value for DirectPeerConnectivity Options
-	}
-	
-	PartyDirectPeerConnectivityOptions ConnectivityOptions = PartyDirectPeerConnectivityOptions::None;
-	for (const FString& ConnType : ConnectivityOptionsArr)
-	{
-		const PartyDirectPeerConnectivityOptions* ConnectivityOption = ConnectivityOptionsMap.Find(ConnType);
-		if (!ConnectivityOption)
-		{ // LOG error and exit, default value will be used
-			UE_LOG_ONLINE(Error, TEXT("Engine INI OnlineSubsystemPlayFab section contains erroneous value for key DirectPeerConnectivityOptions"));
-			return;
-		}
-		ConnectivityOptions |= *ConnectivityOption;
-	}
-	// On success, set class variable
-	DirectPeerConnectivityOptions = ConnectivityOptions;
 }
 
 bool FOnlineSubsystemPlayFab::Shutdown()
@@ -292,7 +316,11 @@ bool FOnlineSubsystemPlayFab::Shutdown()
 
 	FOnlineSubsystemImpl::Shutdown();
 
-	NetworkState = EPlayFabPartyNetworkState::NoNetwork;
+	if (PartyNetwork)
+	{
+		PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NoNetwork;
+		PartyNetwork->Network = nullptr;
+	}
 
 #ifdef OSS_PLAYFAB_PLAYSTATION
 	if (OnlineAsyncTaskThread)
@@ -443,8 +471,8 @@ void FOnlineSubsystemPlayFab::OnAppSuspend()
 	{
 		bPartyInitialized = false;
 
-		NetworkState = EPlayFabPartyNetworkState::NoNetwork;
-		Network = nullptr;
+		PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NoNetwork;
+		PartyNetwork->Network = nullptr;
 
 		// This cleans up everything allocated in PartyManager.Initialize() and
 		// should only be used when done with networking
@@ -621,7 +649,7 @@ void FOnlineSubsystemPlayFab::DoWork()
 	{
 		return;
 	}
-	
+
 	uint32_t Count;
 	PartyStateChangeArray Changes;
 	PartyManager& Manager = PartyManager::GetSingleton();
@@ -702,7 +730,7 @@ void FOnlineSubsystemPlayFab::DoWork()
 			}
 		}
 	}
-	
+
 	// Return the processed changes back to the PartyManager
 	Err = Manager.FinishProcessingStateChanges(Count, Changes);
 	if (PARTY_FAILED(Err))
@@ -711,245 +739,6 @@ void FOnlineSubsystemPlayFab::DoWork()
 	}
 }
 
-bool FOnlineSubsystemPlayFab::CreateAndConnectToPlayFabPartyNetwork()
-{
-	UE_LOG_ONLINE(Log, TEXT("FOnlineSubsystemPlayFab::CreateAndConnectToPlayFabPartyNetwork()"));
-
-	if (!bPartyInitialized)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CreateAndConnectToPlayFabPartyNetwork: Cannot create to playfab network, PartyManager is not initialized."));
-		return false;
-	}
-
-	if (NetworkState != EPlayFabPartyNetworkState::NoNetwork || Network != nullptr)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CreateAndConnectToPlayFabPartyNetwork: Cannot create to playfab network while already connected to a network."));
-		return false;
-	}
-
-	PartyLocalUser* FirstPartyLocalUser = IdentityInterface ? IdentityInterface->GetFirstPartyLocalUser() : nullptr;
-	if (FirstPartyLocalUser == nullptr)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CreateAndConnectToPlayFabPartyNetwork: Could not create new network PlayFabPartyLocalUser was null"));
-		return false;
-	}
-
-	const FString NewNetworkId = FGuid::NewGuid().ToString();
-	const std::string NetworkIdStr = TCHAR_TO_UTF8(*NewNetworkId);
-
-	PartyNetworkConfiguration PlayFabPartyNetworkConfig = {};
-
-	// Setup the network using values from config
-	PlayFabPartyNetworkConfig.maxDeviceCount = MaxDeviceCount;				
-	PlayFabPartyNetworkConfig.maxDevicesPerUserCount = MaxDevicesPerUserCount;		
-	PlayFabPartyNetworkConfig.maxEndpointsPerDeviceCount = MaxEndpointsPerDeviceCount;	
-	PlayFabPartyNetworkConfig.maxUserCount = MaxUserCount;					
-	PlayFabPartyNetworkConfig.maxUsersPerDeviceCount = MaxUsersPerDeviceCount;
-	PlayFabPartyNetworkConfig.directPeerConnectivityOptions = DirectPeerConnectivityOptions;
-
-	// Setup the network invitation configuration to use the network id as an invitation id and allow anyone to join.
-	PartyInvitationConfiguration PartyInviteConfig{
-		NetworkIdStr.c_str(),					// Invitation identifier
-		PartyInvitationRevocability::Anyone,	// Revocability
-		0,										// Authorized user count
-		nullptr									// Authorized user list
-	};
-
-	PartyNetworkDescriptor NewNetworkDescriptor = {};
-
-	// Create a new network descriptor
-	PartyError Err = PartyManager::GetSingleton().CreateNewNetwork(
-		FirstPartyLocalUser,		// Local User
-		&PlayFabPartyNetworkConfig,	// Network Config
-		0,							// Region List Count
-		nullptr,					// Region List
-		&PartyInviteConfig,			// Invitation configuration
-		nullptr,					// Async Identifier
-		&NewNetworkDescriptor,		// OUT network descriptor
-		nullptr						// Applied initial invitation identifier
-	);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CreateAndConnectToPlayFabPartyNetwork: CreateNewNetwork failed: %s"), *GetPartyErrorMessage(Err));
-		return false;
-	}
-
-	// Connect to the new network
-	if (InternalConnectToNetwork(FirstPartyLocalUser, NewNetworkId, NewNetworkDescriptor))
-	{
-		NetworkState = EPlayFabPartyNetworkState::JoiningNetwork_Host;
-		NetworkId = NewNetworkId;
-
-		return true;
-	}
-
-	return false;
-}
-
-bool FOnlineSubsystemPlayFab::ConnectToPlayFabPartyNetwork(const FString& NewNetworkId, const FString& NewNetworkDescriptorStr)
-{
-	UE_LOG_ONLINE(Log, TEXT("FOnlineSubsystemPlayFab::ConnectToPlayFabPartyNetwork()"));
-
-	if (bPartyInitialized == false)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::ConnectToPlayFabPartyNetwork: Cannot connect to playfab network, PartyManager is not initialized."));
-		return false;
-	}
-
-	if (NetworkState != EPlayFabPartyNetworkState::NoNetwork || Network != nullptr)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::ConnectToPlayFabPartyNetwork: Cannot connect to playfab network while already connected to a network."));
-		return false;
-	}
-
-	PartyLocalUser* FirstPartyLocalUser = IdentityInterface ? IdentityInterface->GetFirstPartyLocalUser() : nullptr;
-	if (FirstPartyLocalUser == nullptr)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::ConnectToPlayFabPartyNetwork: Could not create new network FirstPartyLocalUser was null"));
-		return false;
-	}
-
-	PartyNetworkDescriptor NewNetworkDescriptor = {};
-
-	// Deserialize the remote network's descriptor
-	PartyError Err = PartyManager::DeserializeNetworkDescriptor(TCHAR_TO_UTF8(*NewNetworkDescriptorStr), &NewNetworkDescriptor);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::ConnectToPlayFabPartyNetwork: failed to deserialize descriptor: %s"), *GetPartyErrorMessage(Err));
-		return false;
-	}
-
-	// Connect to the remote network
-	if (InternalConnectToNetwork(FirstPartyLocalUser, NewNetworkId, NewNetworkDescriptor))
-	{
-		NetworkState = EPlayFabPartyNetworkState::JoiningNetwork_Client;
-		NetworkId = NewNetworkId;
-
-		return true;
-	}
-
-	return false;
-}
-
-bool FOnlineSubsystemPlayFab::AddChatControlToNetwork(PartyLocalChatControl* LocalChatControl)
-{
-	if (Network && NetworkState == EPlayFabPartyNetworkState::NetworkReady)
-	{
-		PartyError Err = Network->ConnectChatControl(LocalChatControl, nullptr);
-
-		if (PARTY_FAILED(Err))
-		{
-			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::AddChatControlToNetwork failed: %s\n"), *GetPartyErrorMessage(Err));
-			return false;
-		}
-
-		return true;
-	}
-	else
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::AddChatControlToNetwork failed: Network is null or state is invalid!\n"))
-	}
-
-	return false;
-}
-
-bool FOnlineSubsystemPlayFab::InternalConnectToNetwork(PartyLocalUser* PlayFabPartyLocalUser, const FString& InNetworkId, Party::PartyNetworkDescriptor& InNetworkDescriptor)
-{
-	// This portion of connecting to the network is the same for
-	// both creating a new and joining an existing network.
-
-	if (PlayFabPartyLocalUser == nullptr)
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::InternalConnectToNetwork: Could not create new network PlayFabPartyLocalUser was null"));
-		return false;
-	}
-
-	PartyError Err = PartyManager::GetSingleton().ConnectToNetwork(
-		&InNetworkDescriptor,	// Network descriptor
-		nullptr,				// Async identifier
-		&Network				// OUT network
-	);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::InternalConnectToNetwork: ConnectToNetwork failed: %s"), *GetPartyErrorMessage(Err));
-		return false;
-	}
-
-	// Authenticate the local user on the network so we can participate in it
-	Err = Network->AuthenticateLocalUser(
-		PlayFabPartyLocalUser,			// Local user
-		TCHAR_TO_UTF8(*InNetworkId),	// Invite value
-		nullptr							// Async identifier
-	);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::InternalConnectToNetwork: AuthenticateLocalUser failed: %s"), *GetPartyErrorMessage(Err));
-		return false;
-	}
-
-	// Establish a network endpoint for game message traffic
-	Err = Network->CreateEndpoint(
-		PlayFabPartyLocalUser,	// Local user
-		0,						// Property Count
-		nullptr,				// Property name keys
-		nullptr,				// Property Values
-		nullptr,				// Async identifier
-		&LocalEndpoint			// OUT local endpoint
-	);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::InternalConnectToNetwork: CreateEndpoint failed: %s"), *GetPartyErrorMessage(Err));
-		return false;
-	}
-
-	return true;
-}
-
-void FOnlineSubsystemPlayFab::LeavePlayFabPartyNetwork()
-{
-	UE_LOG_ONLINE(Log, TEXT("FOnlineSubsystemPlayFab::LeaveNetwork()"));
-
-	if (NetworkState != EPlayFabPartyNetworkState::LeavingNetwork && Network)
-	{
-		NetworkState = EPlayFabPartyNetworkState::LeavingNetwork;
-		Network->LeaveNetwork(nullptr);
-
-		if (VoiceInterface)
-		{
-			VoiceInterface->OnLeavePlayFabPartyNetwork();
-		}
-	}
-}
-
-FString FOnlineSubsystemPlayFab::SerializeNetworkDescriptor(const PartyNetworkDescriptor& InNetworkDescriptor)
-{
-	FString NetworkDescriptorStr;
-	
-	char Descriptor[c_maxSerializedNetworkDescriptorStringLength + 1] = {};
-
-	PartyError Err = PartyManager::SerializeNetworkDescriptor(
-		&InNetworkDescriptor,
-		Descriptor
-	);
-
-	if (PARTY_FAILED(Err))
-	{
-		UE_LOG_ONLINE(Warning, TEXT("Failed to serialize network descriptor: %s\n"), *GetPartyErrorMessage(Err));
-	}
-	else
-	{
-		NetworkDescriptorStr = UTF8_TO_TCHAR(Descriptor);
-	}
-
-	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::SerializeNetworkDescriptor: NetworkDescriptor: %s"), *NetworkDescriptorStr);
-
-	return NetworkDescriptorStr;
-}
 
 FString GetPartyErrorMessage(PartyError InError)
 {
@@ -1054,20 +843,6 @@ FString GetPartyStateChangeTypeString(PartyStateChangeType Type)
 	return TEXT("Unknown PartyStateChangeType");
 }
 
-FString GetNetworkStateStateString(EPlayFabPartyNetworkState State)
-{
-	switch (State)
-	{
-	case EPlayFabPartyNetworkState::NoNetwork: return TEXT("NoNetwork");
-	case EPlayFabPartyNetworkState::JoiningNetwork_Host: return TEXT("JoiningNetwork_Host");
-	case EPlayFabPartyNetworkState::JoiningNetwork_Host_PendingEndpointCreation: return TEXT("JoiningNetwork_Host_PendingEndpointCreation");
-	case EPlayFabPartyNetworkState::JoiningNetwork_Client: return TEXT("JoiningNetwork_Client");
-	case EPlayFabPartyNetworkState::NetworkReady: return TEXT("NetworkReady");
-	case EPlayFabPartyNetworkState::LeavingNetwork: return TEXT("LeavingNetwork");
-	}
-	return TEXT("Unknown");
-}
-
 void FOnlineSubsystemPlayFab::OnCreateNewNetworkCompleted(const PartyStateChange* Change)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnCreateNewNetworkCompleted"));
@@ -1106,15 +881,15 @@ void FOnlineSubsystemPlayFab::OnConnectToNetworkCompleted(const PartyStateChange
 			UE_LOG_ONLINE(Verbose, TEXT("ConnectToNetworkCompleted: SUCCESS"));
 
 			// We branch here if we are the host, since we need to wait for the local endpoint to be created to store the info in the session / have a valid 'PlayFab IP addr' class instance
-			if (NetworkState == EPlayFabPartyNetworkState::JoiningNetwork_Host)
+			if (PartyNetwork->NetworkState == EPlayFabPartyNetworkState::JoiningNetwork_Host)
 			{
-				NetworkState = EPlayFabPartyNetworkState::JoiningNetwork_Host_PendingEndpointCreation;
+				PartyNetwork->NetworkState = EPlayFabPartyNetworkState::JoiningNetwork_Host_PendingEndpointCreation;
 			}
 			else
 			{
-				NetworkState = EPlayFabPartyNetworkState::NetworkReady;
+				PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NetworkReady;
 			}
-			NetworkDescriptor = Result->networkDescriptor;
+			PartyNetwork->NetworkDescriptor = Result->networkDescriptor;
 
 			TriggerOnConnectToPlayFabPartyNetworkCompletedDelegates(true);
 		}
@@ -1137,12 +912,12 @@ void FOnlineSubsystemPlayFab::OnLeaveNetworkCompleted(const PartyStateChange* Ch
 	{
 		if (Result->result == PartyStateChangeResult::Succeeded)
 		{
-			if (ensure(NetworkState != EPlayFabPartyNetworkState::NoNetwork || Network != nullptr))
+			if (ensure(PartyNetwork->NetworkState != EPlayFabPartyNetworkState::NoNetwork || PartyNetwork->Network != nullptr))
 			{
 				UE_LOG_ONLINE(Verbose, TEXT("OnLeaveNetworkCompleted: SUCCESS"));
 
-				NetworkState = EPlayFabPartyNetworkState::NoNetwork;
-				Network = nullptr;
+				PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NoNetwork;
+				PartyNetwork->Network = nullptr;
 			}
 		}
 		else
@@ -1162,8 +937,8 @@ void FOnlineSubsystemPlayFab::OnNetworkDestroyed(const PartyStateChange* Change)
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnNetworkDestroyed: PlayFab Party network was destroyed with reason code %d"), Result->reason);
 
-		NetworkState = EPlayFabPartyNetworkState::NoNetwork;
-		Network = nullptr;
+		PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NoNetwork;
+		PartyNetwork->Network = nullptr;
 
 		FPlayFabSocketSubsystem* SocketSubsystem = static_cast<FPlayFabSocketSubsystem*>(ISocketSubsystem::Get(PLAYFAB_SOCKET_SUBSYSTEM));
 		if (SocketSubsystem == nullptr)
@@ -1213,7 +988,6 @@ void FOnlineSubsystemPlayFab::OnNetworkDestroyed(const PartyStateChange* Change)
 				GEngine->BroadcastNetworkFailure(PlayFabNetDriver->GetWorld(), PlayFabNetDriver, ENetworkFailure::PendingConnectionFailure, ErrorString);
 			}
 		}
-	
 	}
 }
 
@@ -1235,12 +1009,12 @@ void FOnlineSubsystemPlayFab::OnNetworkConfigurationMadeAvailable(const PartySta
 	{
 		if (Result->networkConfiguration)
 		{
-			MaxDeviceCount = Result->networkConfiguration->maxDeviceCount;
-			MaxDevicesPerUserCount = Result->networkConfiguration->maxDevicesPerUserCount;
-			MaxEndpointsPerDeviceCount = Result->networkConfiguration->maxEndpointsPerDeviceCount;
-			MaxUserCount = Result->networkConfiguration->maxUserCount;
-			MaxUsersPerDeviceCount = Result->networkConfiguration->maxUsersPerDeviceCount;
-			DirectPeerConnectivityOptions = Result->networkConfiguration->directPeerConnectivityOptions;
+			PartyNetwork->MaxDeviceCount = Result->networkConfiguration->maxDeviceCount;
+			PartyNetwork->MaxDevicesPerUserCount = Result->networkConfiguration->maxDevicesPerUserCount;
+			PartyNetwork->MaxEndpointsPerDeviceCount = Result->networkConfiguration->maxEndpointsPerDeviceCount;
+			PartyNetwork->MaxUserCount = Result->networkConfiguration->maxUserCount;
+			PartyNetwork->MaxUsersPerDeviceCount = Result->networkConfiguration->maxUsersPerDeviceCount;
+			PartyNetwork->DirectPeerConnectivityOptions = Result->networkConfiguration->directPeerConnectivityOptions;
 		}
 		else
 		{
@@ -1297,7 +1071,7 @@ void FOnlineSubsystemPlayFab::OnEndpointCreated(const PartyStateChange* Change)
 	const PartyEndpointCreatedStateChange* Result = static_cast<const PartyEndpointCreatedStateChange*>(Change);
 	if (Result)
 	{
-		bool bIsHosting = NetworkState == EPlayFabPartyNetworkState::JoiningNetwork_Host_PendingEndpointCreation;
+		bool bIsHosting = PartyNetwork->NetworkState == EPlayFabPartyNetworkState::JoiningNetwork_Host_PendingEndpointCreation;
 
 		PartyEndpoint* NewEndpoint = Result->endpoint;
 		if (NewEndpoint)
@@ -1308,23 +1082,21 @@ void FOnlineSubsystemPlayFab::OnEndpointCreated(const PartyStateChange* Change)
 			{
 				UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointCreated: Unable to retrieve UniqueIdentifier from endpoint: %s"), *GetPartyErrorMessage(Err));
 
-				
-
-				TriggerOnPartyEndpointCreatedDelegates(false, 0, bIsHosting);
+				TriggerOnPartyEndpointCreatedDelegates(false, PartyNetwork->NetworkId, 0, bIsHosting);
 			}
 			else
 			{
-				Endpoints.Add(EndpointId, NewEndpoint);
-				NetworkState = EPlayFabPartyNetworkState::NetworkReady;
-				TriggerOnPartyEndpointCreatedDelegates(true, EndpointId, bIsHosting);
+				PartyNetwork->Endpoints.Add(EndpointId, NewEndpoint);
+				PartyNetwork->NetworkState = EPlayFabPartyNetworkState::NetworkReady;
+				TriggerOnPartyEndpointCreatedDelegates(true, PartyNetwork->NetworkId, EndpointId, bIsHosting);
 
-				UE_LOG(LogNet, Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointCreate: Created Party Endpoint: %d"), EndpointId);
+				UE_LOG(LogNet, Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointCreated: Created Party Endpoint: %d"), EndpointId);
 			}
 		}
 		else
 		{
-			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointCreated: returned enpoint was invalid"));
-			TriggerOnPartyEndpointCreatedDelegates(false, 0, bIsHosting);
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointCreated: returned endpoint was invalid"));
+			TriggerOnPartyEndpointCreatedDelegates(false, PartyNetwork->NetworkId, 0, bIsHosting);
 		}
 	}
 }
@@ -1347,7 +1119,7 @@ void FOnlineSubsystemPlayFab::OnEndpointDestroyed(const PartyStateChange* Change
 			}
 			else
 			{
-				Endpoints.Remove(EndpointId);
+				PartyNetwork->Endpoints.Remove(EndpointId);
 			}
 
 			UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnEndpointDestroyed: Destroying endpoint %d with reason code %d"), EndpointId, Result->reason);
@@ -1391,7 +1163,7 @@ void FOnlineSubsystemPlayFab::OnEndpointDestroyed(const PartyStateChange* Change
 		}
 		else
 		{
-			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointDestroyed: returned enpoint was invalid"));
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnEndpointDestroyed: returned endpoint was invalid"));
 		}
 	}
 }
@@ -1534,29 +1306,6 @@ void FOnlineSubsystemPlayFab::OnConfigureAudioManipulationCaptureStreamCompleted
 void FOnlineSubsystemPlayFab::OnConfigureAudioManipulationRenderStreamCompleted(const PartyStateChange* Change)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnConfigureAudioManipulationRenderStreamCompleted"));
-}
-
-PartyEndpoint* FOnlineSubsystemPlayFab::GetPartyEndpoint(uint32 EndpointId)
-{
-	if (EndpointId != 0)
-	{
-		PartyEndpoint** PlayFabPartyEndpoint = Endpoints.Find(EndpointId);
-
-		if (PlayFabPartyEndpoint == nullptr || *PlayFabPartyEndpoint == nullptr)
-		{
-			UE_LOG(LogSockets, Warning, TEXT("FOnlineSubsystemPlayFab::GetPartyEndpoint: Could not find Enpoint for UniqueId %d"), EndpointId);
-		}
-		else
-		{
-			return *PlayFabPartyEndpoint;
-		}
-	}
-	else
-	{
-		UE_LOG(LogSockets, Warning, TEXT("FOnlineSubsystemPlayFab::GetPartyEndpoint: UniqueId was invalid"));
-	}
-
-	return nullptr;
 }
 
 FUniqueNetIdPtr FOnlineSubsystemPlayFab::GetNativeNetId(const FUniqueNetIdRef& NetId)

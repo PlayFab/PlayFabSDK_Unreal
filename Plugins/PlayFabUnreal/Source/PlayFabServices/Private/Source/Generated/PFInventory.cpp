@@ -93,19 +93,6 @@ bool PLAYFABSERVICES_API FPFInventoryGetInventoryOperationStatusAsync(
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-bool PLAYFABSERVICES_API FPFInventoryGetMicrosoftStoreAccessTokensAsync(
-	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFInventoryGetMicrosoftStoreAccessTokensRequest* request,
-	_Inout_ FOnGetMicrosoftStoreAccessTokensCompleted delegate
-) noexcept
-{
-	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
-	taskManager->AddTask<FGetMicrosoftStoreAccessTokensAsyncTask>(EntityHandle, *request, delegate);
-	return true;
-}
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFInventoryGetTransactionHistoryAsync(
 	_In_ FPFEntityHandle EntityHandle,
 	_In_ const FPFInventoryGetTransactionHistoryRequest* request,

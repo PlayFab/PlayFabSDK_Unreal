@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 THIRD_PARTY_INCLUDES_START
 #include "httpClient/pal.h"
 #include <httpClient/httpClient.h>

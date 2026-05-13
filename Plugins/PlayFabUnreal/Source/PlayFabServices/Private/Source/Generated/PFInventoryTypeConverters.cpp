@@ -473,6 +473,7 @@ TSharedPtr<const FPFInventoryInventoryItem> ConvertInventoryItemToUnreal(const P
 		.expirationDate = ConvertTimeToUnreal(Datatype->expirationDate),
 		.id = Datatype->id == nullptr ? FString() : FString(Datatype->id),
 		.stackId = Datatype->stackId == nullptr ? FString() : FString(Datatype->stackId),
+		.startDate = ConvertTimeToUnreal(Datatype->startDate),
 		.type = Datatype->type == nullptr ? FString() : FString(Datatype->type)
 	});
 
@@ -491,6 +492,7 @@ const PFInventoryInventoryItem* ConvertInventoryItemToPlayfab(TSharedPtr<const F
 		.expirationDate = ConvertFDateTimeToPlayfab(Datatype->expirationDate),
 		.id = ConvertFStringToCharPtr(Datatype->id),
 		.stackId = ConvertFStringToCharPtr(Datatype->stackId),
+		.startDate = ConvertFDateTimeToPlayfab(Datatype->startDate),
 		.type = ConvertFStringToCharPtr(Datatype->type)
 	};
 
@@ -906,62 +908,6 @@ const PFInventoryGetInventoryOperationStatusResponse* ConvertGetInventoryOperati
 
 	const PFInventoryGetInventoryOperationStatusResponse* ConvertedType = new PFInventoryGetInventoryOperationStatusResponse{
 		.operationStatus = ConvertFStringToCharPtr(Datatype->operationStatus)
-	};
-
-	return ConvertedType;
-}
-
-TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensRequest> ConvertGetMicrosoftStoreAccessTokensRequestToUnreal(const PFInventoryGetMicrosoftStoreAccessTokensRequest* Datatype) {
-	if (Datatype == nullptr)
-	{
-		return nullptr;
-	}
-
-	TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensRequest> ConvertedType = MakeShared<FPFInventoryGetMicrosoftStoreAccessTokensRequest>(FPFInventoryGetMicrosoftStoreAccessTokensRequest{
-		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
-		.customTagsCount = Datatype->customTagsCount
-	});
-
-	return ConvertedType;
-}
-
-const PFInventoryGetMicrosoftStoreAccessTokensRequest* ConvertGetMicrosoftStoreAccessTokensRequestToPlayfab(TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensRequest> Datatype) {
-	if (!Datatype.IsValid())
-	{
-		return nullptr;
-	}
-
-	const PFInventoryGetMicrosoftStoreAccessTokensRequest* ConvertedType = new PFInventoryGetMicrosoftStoreAccessTokensRequest{
-		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
-		.customTagsCount = (uint32_t)Datatype->customTags.Num()
-	};
-
-	return ConvertedType;
-}
-
-TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensResponse> ConvertGetMicrosoftStoreAccessTokensResponseToUnreal(const PFInventoryGetMicrosoftStoreAccessTokensResponse* Datatype) {
-	if (Datatype == nullptr)
-	{
-		return nullptr;
-	}
-
-	TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensResponse> ConvertedType = MakeShared<FPFInventoryGetMicrosoftStoreAccessTokensResponse>(FPFInventoryGetMicrosoftStoreAccessTokensResponse{
-		.collectionsAccessToken = Datatype->collectionsAccessToken == nullptr ? FString() : FString(Datatype->collectionsAccessToken),
-		.collectionsAccessTokenExpirationDate = FDateTime::FromUnixTimestamp((int64)Datatype->collectionsAccessTokenExpirationDate)
-	});
-
-	return ConvertedType;
-}
-
-const PFInventoryGetMicrosoftStoreAccessTokensResponse* ConvertGetMicrosoftStoreAccessTokensResponseToPlayfab(TSharedPtr<const FPFInventoryGetMicrosoftStoreAccessTokensResponse> Datatype) {
-	if (!Datatype.IsValid())
-	{
-		return nullptr;
-	}
-
-	const PFInventoryGetMicrosoftStoreAccessTokensResponse* ConvertedType = new PFInventoryGetMicrosoftStoreAccessTokensResponse{
-		.collectionsAccessToken = ConvertFStringToCharPtr(Datatype->collectionsAccessToken),
-		.collectionsAccessTokenExpirationDate = Datatype->collectionsAccessTokenExpirationDate.ToUnixTimestamp()
 	};
 
 	return ConvertedType;
@@ -1404,6 +1350,7 @@ TSharedPtr<const FPFInventoryRedemptionSuccess> ConvertRedemptionSuccessToUnreal
 	}
 
 	TSharedPtr<const FPFInventoryRedemptionSuccess> ConvertedType = MakeShared<FPFInventoryRedemptionSuccess>(FPFInventoryRedemptionSuccess{
+		.expirationTimestamp = ConvertTimeToUnreal(Datatype->expirationTimestamp),
 		.marketplaceAlternateId = Datatype->marketplaceAlternateId == nullptr ? FString() : FString(Datatype->marketplaceAlternateId),
 		.marketplaceTransactionId = Datatype->marketplaceTransactionId == nullptr ? FString() : FString(Datatype->marketplaceTransactionId),
 		.successTimestamp = FDateTime::FromUnixTimestamp((int64)Datatype->successTimestamp)
@@ -1419,6 +1366,7 @@ const PFInventoryRedemptionSuccess* ConvertRedemptionSuccessToPlayfab(TSharedPtr
 	}
 
 	const PFInventoryRedemptionSuccess* ConvertedType = new PFInventoryRedemptionSuccess{
+		.expirationTimestamp = ConvertFDateTimeToPlayfab(Datatype->expirationTimestamp),
 		.marketplaceAlternateId = ConvertFStringToCharPtr(Datatype->marketplaceAlternateId),
 		.marketplaceTransactionId = ConvertFStringToCharPtr(Datatype->marketplaceTransactionId),
 		.successTimestamp = Datatype->successTimestamp.ToUnixTimestamp()
@@ -1571,7 +1519,6 @@ TSharedPtr<const FPFInventoryRedeemMicrosoftStoreInventoryItemsRequest> ConvertR
 
 	TSharedPtr<const FPFInventoryRedeemMicrosoftStoreInventoryItemsRequest> ConvertedType = MakeShared<FPFInventoryRedeemMicrosoftStoreInventoryItemsRequest>(FPFInventoryRedeemMicrosoftStoreInventoryItemsRequest{
 		.collectionId = Datatype->collectionId == nullptr ? FString() : FString(Datatype->collectionId),
-		.collectionsIdKey = Datatype->collectionsIdKey == nullptr ? FString() : FString(Datatype->collectionsIdKey),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
@@ -1595,7 +1542,6 @@ const PFInventoryRedeemMicrosoftStoreInventoryItemsRequest* ConvertRedeemMicroso
 
 	const PFInventoryRedeemMicrosoftStoreInventoryItemsRequest* ConvertedType = new PFInventoryRedeemMicrosoftStoreInventoryItemsRequest{
 		.collectionId = ConvertFStringToCharPtr(Datatype->collectionId),
-		.collectionsIdKey = ConvertFStringToCharPtr(Datatype->collectionsIdKey),
 		.customTags = ConvertFStringMapToPlayfab(Datatype->customTags),
 		.customTagsCount = (uint32_t)Datatype->customTags.Num(),
 		.entity = ConvertEntityKeyToPlayfab(Datatype->entity),

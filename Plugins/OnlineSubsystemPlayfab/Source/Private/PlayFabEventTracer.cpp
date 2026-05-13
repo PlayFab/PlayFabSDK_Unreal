@@ -87,12 +87,25 @@ void PlayFabEventTracer::DoWork()
 	// error checking is done already for validity of GetIdentityInterface
 	IOnlineIdentityPtr IdentityIntPtr = OSSPlayFab->GetIdentityInterface();
 	FOnlineIdentityPlayFab* PlayFabIdentityInt = static_cast<FOnlineIdentityPlayFab*>(IdentityIntPtr.Get());
-	if (PlayFabIdentityInt->GetFirstPartyLocalUser() == nullptr)
+
+	TSharedPtr<FPlayFabUser> LocalUser;
+	if (IsRunningDedicatedServer())
+	{
+		LocalUser = PlayFabIdentityInt->GetServerEntity();
+	}
+	else
+	{
+		if (PlayFabIdentityInt->GetFirstPartyLocalUser() == nullptr)
+		{
+			return;
+		}
+		LocalUser = PlayFabIdentityInt->GetAllPartyLocalUsers()[0];
+	}
+	if (!LocalUser.IsValid())
 	{
 		return;
 	}
 	LoggedEntity = true; // so that DoWork() is not called again
-	TSharedPtr<FPlayFabUser> LocalUser = PlayFabIdentityInt->GetAllPartyLocalUsers()[0];
 	EventsRequest.Events[0].Entity = LocalUser->GetEntityKey();
 
 	TArray<TPair<FString, FString>> ExtraHeaders;

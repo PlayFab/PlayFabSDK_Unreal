@@ -465,6 +465,11 @@ struct PLAYFABSERVICES_API FPFInventoryInventoryItem
 	_Maybenull_ const FString stackId;
 
 	/// <summary>
+	/// (Optional) Only used for subscriptions. The date of when the item started in UTC.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const FDateTime> startDate;
+
+	/// <summary>
 	/// (Optional) The type of the item. This should correspond to the item type in the catalog.
 	/// </summary>
 	_Maybenull_ const FString type;
@@ -901,46 +906,6 @@ struct PLAYFABSERVICES_API FPFInventoryGetInventoryOperationStatusResponse
 	/// (Optional) The inventory operation status.
 	/// </summary>
 	_Maybenull_ const FString operationStatus;
-
-	/// <summary>
-	/// Error message, if any.
-	/// </summary>
-	FString ErrorMessage;
-};
-
-/// <summary>
-/// FPFInventoryGetMicrosoftStoreAccessTokensRequest data model. Gets the access tokens for Microsoft
-/// Store authentication.
-/// </summary>
-struct PLAYFABSERVICES_API FPFInventoryGetMicrosoftStoreAccessTokensRequest
-{
-	/// <summary>
-	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
-	/// identifiers, etc.).
-	/// </summary>
-	_Maybenull_ TMap<const FString, const FString> customTags;
-
-	/// <summary>
-	/// Count of customTags
-	/// </summary>
-	uint32 customTagsCount;
-};
-
-/// <summary>
-/// FPFInventoryGetMicrosoftStoreAccessTokensResponse data model.
-/// </summary>
-struct PLAYFABSERVICES_API FPFInventoryGetMicrosoftStoreAccessTokensResponse
-{
-	/// <summary>
-	/// (Optional) The collections access token for calling https://onestore.microsoft.com/b2b/keys/create/collections
-	/// to obtain a CollectionsIdKey for the user.
-	/// </summary>
-	_Maybenull_ const FString collectionsAccessToken;
-
-	/// <summary>
-	/// The date the collections access token expires.
-	/// </summary>
-	FDateTime collectionsAccessTokenExpirationDate;
 
 	/// <summary>
 	/// Error message, if any.
@@ -1411,6 +1376,11 @@ struct PLAYFABSERVICES_API FPFInventoryRedemptionFailure
 struct PLAYFABSERVICES_API FPFInventoryRedemptionSuccess
 {
 	/// <summary>
+	/// (Optional) The timestamp for when the redeem expired.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const FDateTime> expirationTimestamp;
+
+	/// <summary>
 	/// (Optional) The Marketplace Alternate ID being redeemed.
 	/// </summary>
 	_Maybenull_ const FString marketplaceAlternateId;
@@ -1571,11 +1541,6 @@ struct PLAYFABSERVICES_API FPFInventoryRedeemMicrosoftStoreInventoryItemsRequest
 	/// (Optional) The id of the entity's collection to perform this action on. (Default="default").
 	/// </summary>
 	_Maybenull_ const FString collectionId;
-
-	/// <summary>
-	/// (Optional) The OneStore Collections Id Key used for AAD authentication.
-	/// </summary>
-	_Maybenull_ const FString collectionsIdKey;
 
 	/// <summary>
 	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
@@ -2199,10 +2164,6 @@ DECLARE_DELEGATE_TwoParams(FOnGetInventoryItemsCompleted, const FPFInventoryGetI
 
 #if HC_PLATFORM == HC_PLATFORM_GDK
 DECLARE_DELEGATE_TwoParams(FOnGetInventoryOperationStatusCompleted, const FPFInventoryGetInventoryOperationStatusResponse&, bool);
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-DECLARE_DELEGATE_TwoParams(FOnGetMicrosoftStoreAccessTokensCompleted, const FPFInventoryGetMicrosoftStoreAccessTokensResponse&, bool);
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC

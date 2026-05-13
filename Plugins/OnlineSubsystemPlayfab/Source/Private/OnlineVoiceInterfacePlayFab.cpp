@@ -6,6 +6,7 @@
 #include "OnlineSessionInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
 #include "PlayFabHelpers.h"
+#include "PlayFabPartyNetwork.h"
 
 FOnlineVoicePlayFab::FOnlineVoicePlayFab(class FOnlineSubsystemPlayFab* InSubsystem) :
 	OSSPlayFab(InSubsystem)
@@ -241,7 +242,7 @@ bool FOnlineVoicePlayFab::RegisterLocalTalker(TSharedPtr<FPlayFabUser> LocalPlay
 #endif
 	
 	// Add the chat control into the network mesh
-	if (!OSSPlayFab->AddChatControlToNetwork(NewChatControl))
+	if (!OSSPlayFab->PartyNetwork->AddChatControlToNetwork(NewChatControl))
 	{
 		return false;
 	}

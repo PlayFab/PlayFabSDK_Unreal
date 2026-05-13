@@ -65,7 +65,16 @@ public:
 	PartyLocalUser* GetPartyLocalUser() const { return LocalUser; }
 	PFEntityKey GetEntityKey() const { return PFEntityKey{ EntityIdStr.c_str(), EntityTypeStr.c_str() }; }
 
+	/**
+	 * Returns the user's current PlayFab entity handle.
+	 * Important: Entity handles may be refreshed during re-authentication (e.g., Steam
+	 * AutoLogin triggering a second auth). Do not cache this value — always call
+	 * GetEntityHandle() when you need it. Subscribe to OnLoginStatusChanged if you
+	 * need to be notified when re-authentication occurs.
+	 */
 	FPFEntityHandle GetEntityHandle() const{ return EntityHandle; }
+
+	void SetEntityHandle(const FPFEntityHandle& NewHandle) { EntityHandle = NewHandle; }
 
 	void UpdateEntityToken(const FString& NewEntityToken);
 
@@ -189,6 +198,12 @@ public:
 		return LocalPlayFabUsers;
 	}
 
+	/** Returns the server entity if this is a dedicated server and auth has completed, nullptr otherwise. */
+	TSharedPtr<FPlayFabUser> GetServerEntity() const
+	{
+		return ServerEntity;
+	}
+
 	bool IsUserLocal(const PFEntityKey& UserEntityKey);
 	const TArray<PFEntityKey> GetLocalUserEntityKeys() const;
 	const FString& GetLocalUserXToken() const { return LocalUserXToken; }
@@ -204,6 +219,7 @@ protected:
 
 private:
 	TArray<TSharedPtr<FPlayFabUser>> LocalPlayFabUsers;
+	TSharedPtr<FPlayFabUser> ServerEntity;
 	TSet<FString> UsersToAuth;
 	TMap<FString, UserAuthRequestData> UserAuthRequestsInFlight;
 	bool bRegisterAuthDelegates = true;
@@ -219,6 +235,10 @@ private:
 	TArray<FDelegateHandle> LoginCompleteDelegateHandles;
 	TArray<FDelegateHandle> LogoutCompleteDelegateHandles;
 
+	// Guard to prevent OnLoginStatusChanged from re-queuing a user for auth
+	// when we fire the delegate ourselves during re-auth completion.
+	bool bFiringReAuthLoginStatusChanged = false;
+
 	void RegisterAuthDelegates();
 	void CleanUpAuthDelegates();
 
@@ -232,6 +252,13 @@ private:
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	bool AuthenticateUserGDK(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
 #endif // OSS_PLAYFAB_GDK_SUPPORT
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+	bool AuthenticateUserPlayStation(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
+#endif // OSS_PLAYFAB_PLAYSTATION
+	bool AuthenticateServerWithSecretKey();
+	bool bServerAuthInFlight = false;
+	bool bServerAuthenticated = false;
+	bool bServerAuthFailed = false;
 	bool AuthenticateUserByPlatform(const FString& UserPlatformId);
 
 public:

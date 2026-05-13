@@ -36,24 +36,16 @@ typedef TSharedPtr<class FOnlineCognitiveServicesPlayFab, ESPMode::ThreadSafe> F
 typedef TSharedPtr<class FPlayFabLobby, ESPMode::ThreadSafe> FPlayFabLobbyPtr;
 typedef TSharedPtr<class FMatchmakingInterfacePlayFab, ESPMode::ThreadSafe> FMatchmakingInterfacePtr;
 
+class FPlayFabPartyNetwork;
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEndpointMessageReceived, const PartyEndpointMessageReceivedStateChange* /*Change*/);
 typedef FOnEndpointMessageReceived::FDelegate FOnEndpointMessageReceivedDelegate;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnConnectToPlayFabPartyNetworkCompleted, bool /*bSuccess*/);
 typedef FOnConnectToPlayFabPartyNetworkCompleted::FDelegate FOnConnectToPlayFabPartyNetworkCompletedDelegate;
 
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnPartyEndpointCreated, bool /*bSuccess*/, uint16 /*EndpointID*/, bool /*bIsHosting*/);
+DECLARE_MULTICAST_DELEGATE_FourParams(FOnPartyEndpointCreated, bool /*bSuccess*/, const FString& /*NetworkId*/, uint16 /*EndpointID*/, bool /*bIsHosting*/);
 typedef FOnPartyEndpointCreated::FDelegate FOnPartyEndpointCreatedDelegate;
-
-enum class EPlayFabPartyNetworkState
-{
-	NoNetwork,
-	JoiningNetwork_Host,
-	JoiningNetwork_Host_PendingEndpointCreation,
-	JoiningNetwork_Client,
-	NetworkReady,
-	LeavingNetwork
-};
 
 struct FNetIdPair
 {
@@ -68,20 +60,7 @@ PACKAGE_SCOPE:
 
 	// Only the factory makes instances
 	FOnlineSubsystemPlayFab() = delete;
-	FOnlineSubsystemPlayFab(FName InInstanceName) :
-		FOnlineSubsystemImpl(PLAYFAB_SUBSYSTEM, InInstanceName)
-	{
-		// Fix subsystem name to the base one
-		FString NativePlatformServiceName;
-		if (!GConfig->GetString(TEXT("OnlineSubsystem"), TEXT("NativePlatformService"), NativePlatformServiceName, GEngineIni))
-		{
-			UE_LOG_ONLINE(Error, TEXT("Engine INI OnlineSubsystem section does not contain a value for key NativePlatformService"));
-		}
-		else
-		{
-			SubsystemName = FName(*NativePlatformServiceName);
-		}
-	}
+	FOnlineSubsystemPlayFab(FName InInstanceName);
 
 #ifdef OSS_PLAYFAB_PLAYSTATION
 	FOnlineAsyncTaskManagerPlayFab* GetAsyncTaskManager() { return OnlineAsyncTaskThreadRunnable; }
@@ -90,9 +69,7 @@ PACKAGE_SCOPE:
 
 public:
 
-	virtual ~FOnlineSubsystemPlayFab()
-	{
-	}
+	virtual ~FOnlineSubsystemPlayFab();
 
 	// IOnlineSubsystem
 
@@ -151,13 +128,6 @@ public:
 	// FTickerObjectBase
 	virtual bool Tick(float DeltaTime) override;
 
-	// Chat <-> Network bridge
-	bool AddChatControlToNetwork(PartyLocalChatControl* LocalChatControl);
-	
-	bool CreateAndConnectToPlayFabPartyNetwork();
-	bool ConnectToPlayFabPartyNetwork(const FString& NetworkId, const FString& NetworkDescriptorStr);
-	void LeavePlayFabPartyNetwork();
-
 	IOnlineSubsystem* NativeOSS = nullptr;
 
 	bool bNetworkInitialized = false;
@@ -166,23 +136,7 @@ public:
 	bool bMemoryCallbacksSet = false;
 	bool bForceAutoLogin = true;
 
-	int32 MaxDeviceCount = 8;
-	int32 MaxDevicesPerUserCount = 1;
-	int32 MaxEndpointsPerDeviceCount = 1;
-	int32 MaxUserCount = 8;
-	int32 MaxUsersPerDeviceCount = 1;
-	PartyDirectPeerConnectivityOptions DirectPeerConnectivityOptions 
-		= PartyDirectPeerConnectivityOptions::AnyPlatformType | PartyDirectPeerConnectivityOptions::AnyEntityLoginProvider;
-
-	EPlayFabPartyNetworkState NetworkState = EPlayFabPartyNetworkState::NoNetwork;
-	PartyNetwork* Network = nullptr;
-	PartyLocalEndpoint* LocalEndpoint = nullptr;
-	TMap<uint32, PartyEndpoint*> Endpoints;
-	
-	FString NetworkId;
-	PartyNetworkDescriptor NetworkDescriptor;
-
-	FString SerializeNetworkDescriptor(const PartyNetworkDescriptor& InNetworkDescriptor);
+	TUniquePtr<FPlayFabPartyNetwork> PartyNetwork;
 
 	FPlayFabLobbyPtr GetPlayFabLobbyInterface() const;
 	FMatchmakingInterfacePtr GetMatchmakingInterface() const;
@@ -214,11 +168,7 @@ private:
 	void CleanUpSwitch();
 #endif // OSS_PLAYFAB_SWITCH
 
-	void ParseDirectPeerConnectivityOptions();
-	
 	void DoWork();
-
-	bool InternalConnectToNetwork(PartyLocalUser* PlayFabPartyLocalUser, const FString& InNetworkId, Party::PartyNetworkDescriptor& NetworkDescriptor);
 
 	FOnlineIdentityPlayFabPtr IdentityInterface;
 	FOnlineSessionPlayFabPtr SessionInterface;
@@ -292,9 +242,7 @@ public:
 
 	DEFINE_ONLINE_DELEGATE_ONE_PARAM(OnEndpointMessageReceived, const PartyEndpointMessageReceivedStateChange* /*Change*/);
 	DEFINE_ONLINE_DELEGATE_ONE_PARAM(OnConnectToPlayFabPartyNetworkCompleted, bool /*bSuccess*/);
-	DEFINE_ONLINE_DELEGATE_THREE_PARAM(OnPartyEndpointCreated, bool /*bSuccess*/, uint16 /*EndpointID*/, bool /*bIsHosting*/);
-	
-	PartyEndpoint* GetPartyEndpoint(uint32 EndpointId);
+	DEFINE_ONLINE_DELEGATE_FOUR_PARAM(OnPartyEndpointCreated, bool /*bSuccess*/, const FString& /*NetworkId*/, uint16 /*EndpointID*/, bool /*bIsHosting*/);
 
 	FUniqueNetIdPtr GetNativeNetId(const FUniqueNetIdRef& NetId);
 	FUniqueNetIdPtr GetPlayFabNetId(const FUniqueNetIdRef& NetId);
@@ -313,4 +261,3 @@ void LogMultiplayerErrorWithMessage(const FString& FuncName, HRESULT Hr);
 FString GetMultiplayerErrorMessage(HRESULT hr);
 FString PartyStateChangeResultToReasonString(PartyStateChangeResult result);
 FString GetPartyStateChangeTypeString(PartyStateChangeType Type);
-FString GetNetworkStateStateString(EPlayFabPartyNetworkState State);

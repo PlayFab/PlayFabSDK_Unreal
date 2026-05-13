@@ -395,6 +395,21 @@ bool PLAYFABCORE_API FPFAuthenticationServerLoginWithSteamIdAsync(
 #endif
 
 
+#if 0
+bool PLAYFABCORE_API FPFAuthenticationServerLoginWithTwitchAsync(
+	_In_ FPFServiceConfigHandle contextHandle,
+	_In_z_ const FString secretKey,
+	_In_ const FPFAuthenticationServerLoginWithTwitchRequest request,
+	_Inout_ FOnPFAuthenticationServerLoginCompleteDelegate delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FPFAuthenticationServerLoginWithTwitchAsyncTask>(contextHandle, secretKey, request, delegate);
+	return true;
+}
+#endif
+
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABCORE_API FPFAuthenticationServerLoginWithXboxAsync(
 	_In_ FPFServiceConfigHandle contextHandle,

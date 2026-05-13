@@ -817,6 +817,37 @@ private:
 
 #endif
 
+#if 0
+
+class PLAYFABCORE_API FPFAuthenticationServerLoginWithTwitchAsyncTask : public FXAsyncTask
+{
+public:
+	FPFAuthenticationServerLoginWithTwitchAsyncTask(
+		FPFServiceConfigHandle serviceConfigHandle,
+		const FString secretKey,
+		const FPFAuthenticationServerLoginWithTwitchRequest request,
+		FOnPFAuthenticationServerLoginCompleteDelegate delegate
+	);
+
+	void DoWork() override;
+
+	void ProcessResults() override;
+
+private:
+
+	FPFServiceConfigHandle serviceConfigHandle;
+
+	const FString secretKey;
+
+	const FPFAuthenticationServerLoginWithTwitchRequest request;
+
+	FOnPFAuthenticationServerLoginCompleteDelegate delegate;
+
+	FPFEntityHandle m_entityHandle;
+};
+
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 
 class PLAYFABCORE_API FPFAuthenticationServerLoginWithXboxAsyncTask : public FXAsyncTask

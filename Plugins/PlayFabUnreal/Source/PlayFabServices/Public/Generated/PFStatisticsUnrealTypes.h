@@ -769,7 +769,7 @@ struct PLAYFABSERVICES_API FPFStatisticsStatisticUpdate
 {
 	/// <summary>
 	/// (Optional) Arbitrary metadata to store along side the statistic, will be returned by all Leaderboard
-	/// APIs. Must be less than 50 UTF8 encoded characters.
+	/// APIs.
 	/// </summary>
 	_Maybenull_ const FString metadata;
 

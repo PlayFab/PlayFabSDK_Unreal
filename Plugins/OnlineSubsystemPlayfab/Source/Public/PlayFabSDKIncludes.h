@@ -32,6 +32,7 @@ typedef long HRESULT;
 #include <PFEntityKey.h>
 #include <PFMultiplayer.h>
 #include <PFMatchmaking.h> 
+#define PFMULTIPLAYER_INCLUDE_SERVER_APIS
 #include <PFLobby.h>
 
 #include <PFCore.h>

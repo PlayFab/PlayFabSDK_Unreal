@@ -760,6 +760,78 @@ struct PLAYFABSERVICES_API FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDe
 };
 
 /// <summary>
+/// FPFAccountManagementOpenIdSubjectIdentifier data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementOpenIdSubjectIdentifier
+{
+	/// <summary>
+	/// The issuer URL for the OpenId Connect provider, or the override URL if an override exists.
+	/// </summary>
+	const FString issuer;
+
+	/// <summary>
+	/// The unique subject identifier within the context of the issuer.
+	/// </summary>
+	const FString subject;
+};
+
+/// <summary>
+/// FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest
+{
+	/// <summary>
+	/// Array of unique OpenId Connect identifiers for which the title needs to get PlayFab identifiers.
+	/// The array cannot exceed 10 in length.
+	/// </summary>
+	TArray<TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifier>> openIdSubjectIdentifiers;
+
+	/// <summary>
+	/// Count of openIdSubjectIdentifiers
+	/// </summary>
+	uint32 openIdSubjectIdentifiersCount;
+};
+
+/// <summary>
+/// FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair
+{
+	/// <summary>
+	/// (Optional) Unique OpenId Connect identifier for a user.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifier> openIdSubjectIdentifier;
+
+	/// <summary>
+	/// (Optional) Unique PlayFab identifier for a user, or null if no PlayFab account is linked to the
+	/// OpenId Connect identifier.
+	/// </summary>
+	_Maybenull_ const FString playFabId;
+};
+
+/// <summary>
+/// FPFAccountManagementGetPlayFabIDsFromOpenIdsResult data model. For OpenId identifiers which have
+/// not been linked to PlayFab accounts, null will be returned.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementGetPlayFabIDsFromOpenIdsResult
+{
+	/// <summary>
+	/// (Optional) Mapping of OpenId Connect identifiers to PlayFab identifiers.
+	/// </summary>
+	_Maybenull_ TArray<TSharedPtr<const FPFAccountManagementOpenIdSubjectIdentifierPlayFabIdPair>> data;
+
+	/// <summary>
+	/// Count of data
+	/// </summary>
+	uint32 dataCount;
+
+	/// <summary>
+	/// Error message, if any.
+	/// </summary>
+	FString ErrorMessage;
+};
+
+/// <summary>
 /// FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest data model.
 /// </summary>
 struct PLAYFABSERVICES_API FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest
@@ -1653,9 +1725,9 @@ struct PLAYFABSERVICES_API FPFAccountManagementLinkSteamAccountRequest
 };
 
 /// <summary>
-/// FPFAccountManagementLinkTwitchAccountRequest data model.
+/// FPFAccountManagementClientLinkTwitchAccountRequest data model.
 /// </summary>
-struct PLAYFABSERVICES_API FPFAccountManagementLinkTwitchAccountRequest
+struct PLAYFABSERVICES_API FPFAccountManagementClientLinkTwitchAccountRequest
 {
 	/// <summary>
 	/// Valid token issued by Twitch.
@@ -1899,9 +1971,9 @@ struct PLAYFABSERVICES_API FPFAccountManagementUnlinkCustomIDRequest
 };
 
 /// <summary>
-/// FPFAccountManagementUnlinkFacebookAccountRequest data model.
+/// FPFAccountManagementClientUnlinkFacebookAccountRequest data model.
 /// </summary>
-struct PLAYFABSERVICES_API FPFAccountManagementUnlinkFacebookAccountRequest
+struct PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookAccountRequest
 {
 	/// <summary>
 	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
@@ -1916,9 +1988,9 @@ struct PLAYFABSERVICES_API FPFAccountManagementUnlinkFacebookAccountRequest
 };
 
 /// <summary>
-/// FPFAccountManagementUnlinkFacebookInstantGamesIdRequest data model.
+/// FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest data model.
 /// </summary>
-struct PLAYFABSERVICES_API FPFAccountManagementUnlinkFacebookInstantGamesIdRequest
+struct PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest
 {
 	/// <summary>
 	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
@@ -2127,9 +2199,9 @@ struct PLAYFABSERVICES_API FPFAccountManagementUnlinkSteamAccountRequest
 };
 
 /// <summary>
-/// FPFAccountManagementUnlinkTwitchAccountRequest data model.
+/// FPFAccountManagementClientUnlinkTwitchAccountRequest data model.
 /// </summary>
-struct PLAYFABSERVICES_API FPFAccountManagementUnlinkTwitchAccountRequest
+struct PLAYFABSERVICES_API FPFAccountManagementClientUnlinkTwitchAccountRequest
 {
 	/// <summary>
 	/// (Optional) Valid token issued by Twitch. Used to specify which twitch account to unlink from the
@@ -2219,6 +2291,35 @@ struct PLAYFABSERVICES_API FPFAccountManagementUpdateUserTitleDisplayNameResult
 };
 
 /// <summary>
+/// FPFAccountManagementServerAddOrUpdateContactEmailRequest data model. This API adds a contact email
+/// to the specified player's profile. If the player's profile already contains a contact email, it will
+/// update the contact email to the email address specified.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementServerAddOrUpdateContactEmailRequest
+{
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// The new contact email to associate with the player.
+	/// </summary>
+	const FString emailAddress;
+
+	/// <summary>
+	/// Unique PlayFab assigned ID of the user on whom the operation will be performed.
+	/// </summary>
+	const FString playFabId;
+};
+
+/// <summary>
 /// FPFAccountManagementBanRequest data model. Represents a single ban request.
 /// </summary>
 struct PLAYFABSERVICES_API FPFAccountManagementBanRequest
@@ -2252,8 +2353,8 @@ struct PLAYFABSERVICES_API FPFAccountManagementBanRequest
 
 /// <summary>
 /// FPFAccountManagementBanUsersRequest data model. The existence of each user will not be verified.
-/// When banning by IP or MAC address, multiple players may be affected, so use this feature with caution.
-/// Returns information about the new bans.
+/// When banning by IP, multiple players may be affected, so use this feature with caution. Returns information
+/// about the new bans.
 /// </summary>
 struct PLAYFABSERVICES_API FPFAccountManagementBanUsersRequest
 {
@@ -2765,6 +2866,38 @@ struct PLAYFABSERVICES_API FPFAccountManagementLinkSteamIdRequest
 };
 
 /// <summary>
+/// FPFAccountManagementServerLinkTwitchAccountRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementServerLinkTwitchAccountRequest
+{
+	/// <summary>
+	/// Twitch access token for authentication.
+	/// </summary>
+	const FString accessToken;
+
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// (Optional) If another user is already linked to the account, unlink the other user and re-link.
+	/// </summary>
+	_Maybenull_ TSharedPtr<const bool> forceLink;
+
+	/// <summary>
+	/// PlayFab unique identifier of the user to link.
+	/// </summary>
+	const FString playFabId;
+};
+
+/// <summary>
 /// FPFAccountManagementServerLinkXboxAccountRequest data model.
 /// </summary>
 struct PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxAccountRequest
@@ -2994,6 +3127,56 @@ struct PLAYFABSERVICES_API FPFAccountManagementServerUnlinkBattleNetAccountReque
 };
 
 /// <summary>
+/// FPFAccountManagementServerUnlinkFacebookAccountRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementServerUnlinkFacebookAccountRequest
+{
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// PlayFab unique identifier of the user to unlink.
+	/// </summary>
+	const FString playFabId;
+};
+
+/// <summary>
+/// FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest
+{
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// (Optional) Facebook Instant Games identifier for the user. If not specified, the most recently linked
+	/// identifier will be used.
+	/// </summary>
+	_Maybenull_ const FString facebookInstantGamesId;
+
+	/// <summary>
+	/// PlayFab unique identifier of the user to unlink.
+	/// </summary>
+	const FString playFabId;
+};
+
+/// <summary>
 /// FPFAccountManagementServerUnlinkNintendoServiceAccountRequest data model.
 /// </summary>
 struct PLAYFABSERVICES_API FPFAccountManagementServerUnlinkNintendoServiceAccountRequest
@@ -3110,6 +3293,34 @@ struct PLAYFABSERVICES_API FPFAccountManagementUnlinkSteamIdRequest
 
 	/// <summary>
 	/// Unique PlayFab identifier for a user, or null if no PlayFab account is linked to the Steam account.
+	/// </summary>
+	const FString playFabId;
+};
+
+/// <summary>
+/// FPFAccountManagementServerUnlinkTwitchAccountRequest data model.
+/// </summary>
+struct PLAYFABSERVICES_API FPFAccountManagementServerUnlinkTwitchAccountRequest
+{
+	/// <summary>
+	/// (Optional) Valid token issued by Twitch. Used to specify which twitch account to unlink from the
+	/// profile. By default it uses the one that is present on the profile.
+	/// </summary>
+	_Maybenull_ const FString accessToken;
+
+	/// <summary>
+	/// (Optional) The optional custom tags associated with the request (e.g. build number, external trace
+	/// identifiers, etc.).
+	/// </summary>
+	_Maybenull_ TMap<const FString, const FString> customTags;
+
+	/// <summary>
+	/// Count of customTags
+	/// </summary>
+	uint32 customTagsCount;
+
+	/// <summary>
+	/// PlayFab unique identifier of the user to unlink.
 	/// </summary>
 	const FString playFabId;
 };
@@ -3397,6 +3608,10 @@ DECLARE_DELEGATE_TwoParams(FOnClientGetPlayFabIDsFromNintendoServiceAccountIdsCo
 DECLARE_DELEGATE_TwoParams(FOnClientGetPlayFabIDsFromNintendoSwitchDeviceIdsCompleted, const FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult&, bool);
 #endif
 
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnClientGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted, const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult&, bool);
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_4 || HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_5 || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnClientGetPlayFabIDsFromPSNAccountIDsCompleted, const FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult&, bool);
 #endif
@@ -3569,6 +3784,10 @@ DECLARE_DELEGATE_TwoParams(FOnClientUpdateAvatarUrlCompleted, const FString&, bo
 DECLARE_DELEGATE_TwoParams(FOnClientUpdateUserTitleDisplayNameCompleted, const FPFAccountManagementUpdateUserTitleDisplayNameResult&, bool);
 #endif
 
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerAddOrUpdateContactEmailCompleted, const FString&, bool);
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnServerBanUsersCompleted, const FPFAccountManagementBanUsersResult&, bool);
 #endif
@@ -3603,6 +3822,10 @@ DECLARE_DELEGATE_TwoParams(FOnServerGetPlayFabIDsFromNintendoServiceAccountIdsCo
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnServerGetPlayFabIDsFromNintendoSwitchDeviceIdsCompleted, const FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult&, bool);
+#endif
+
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted, const FPFAccountManagementGetPlayFabIDsFromOpenIdsResult&, bool);
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
@@ -3673,6 +3896,10 @@ DECLARE_DELEGATE_TwoParams(FOnServerLinkServerCustomIdCompleted, const FString&,
 DECLARE_DELEGATE_TwoParams(FOnServerLinkSteamIdCompleted, const FString&, bool);
 #endif
 
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerLinkTwitchAccountCompleted, const FString&, bool);
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnServerLinkXboxAccountCompleted, const FString&, bool);
 #endif
@@ -3701,6 +3928,14 @@ DECLARE_DELEGATE_TwoParams(FOnServerSendEmailFromTemplateCompleted, const FStrin
 DECLARE_DELEGATE_TwoParams(FOnServerUnlinkBattleNetAccountCompleted, const FString&, bool);
 #endif
 
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerUnlinkFacebookAccountCompleted, const FString&, bool);
+#endif
+
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerUnlinkFacebookInstantGamesIdCompleted, const FString&, bool);
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnServerUnlinkNintendoServiceAccountCompleted, const FString&, bool);
 #endif
@@ -3719,6 +3954,10 @@ DECLARE_DELEGATE_TwoParams(FOnServerUnlinkServerCustomIdCompleted, const FString
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 DECLARE_DELEGATE_TwoParams(FOnServerUnlinkSteamIdCompleted, const FString&, bool);
+#endif
+
+#if 0
+DECLARE_DELEGATE_TwoParams(FOnServerUnlinkTwitchAccountCompleted, const FString&, bool);
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC

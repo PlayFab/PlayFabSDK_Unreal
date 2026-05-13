@@ -55,6 +55,7 @@ public:
 
 	bool CreatePlayFabLobby(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings);
 	bool CreateLobbyWithUser(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings);
+	bool CreateServerLobby(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings);
 	bool JoinLobby(const FUniqueNetId& UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession);
 	bool JoinLobbyWithUser(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& SessionSettings);
 	bool JoinArrangedLobby(FName SessionName, const FOnlineMatchmakingTicketInfoPtr MatchTicket);
@@ -71,6 +72,7 @@ public:
 	void DoWork();
 
 	void HandleCreateAndJoinLobbyCompleted(const PFLobbyCreateAndJoinLobbyCompletedStateChange& StateChange);
+	void HandleCreateAndClaimServerLobbyCompleted(const PFLobbyCreateAndClaimServerLobbyCompletedStateChange& StateChange);
 	void HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStateChange& StateChange);
 	void HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLobbyCompletedStateChange& StateChange);
 	void HandleLobbyUpdate(const PFLobbyUpdatedStateChange& StateChange);

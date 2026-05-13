@@ -246,64 +246,6 @@ void FServerGetPlayerSegmentsAsyncTask::ProcessResults()
 #endif
 
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-FServerGetPlayersInSegmentAsyncTask::FServerGetPlayersInSegmentAsyncTask(
-	_In_ FPFEntityHandle TitleEntityHandle,
-	FPFSegmentsGetPlayersInSegmentRequest InRequest,
-	const FOnServerGetPlayersInSegmentCompleted& InDelegate)
-	: FXAsyncTask(TEXT("FServerGetPlayersInSegmentAsyncTask")),
-	TitleEntityHandle(TitleEntityHandle),
-	Request(InRequest),
-	Delegate(InDelegate)
-{
-};
-
-void FServerGetPlayersInSegmentAsyncTask::DoWork()
-{
-	const PFSegmentsGetPlayersInSegmentRequest RequestType = {
-		.continuationToken = ConvertFStringToCharPtr(Request.continuationToken),
-		.customTags = ConvertFStringMapToPlayfab(Request.customTags),
-		.customTagsCount = (uint32_t)Request.customTags.Num(),
-		.getProfilesAsync = Request.getProfilesAsync ? new bool(*Request.getProfilesAsync) : nullptr,
-		.maxBatchSize = Request.maxBatchSize ? new uint32(*Request.maxBatchSize) : nullptr,
-		.secondsToLive = Request.secondsToLive ? new uint32(*Request.secondsToLive) : nullptr,
-		.segmentId = ConvertFStringToCharPtr(Request.segmentId)
-	};
-	HResult = PFSegmentsServerGetPlayersInSegmentAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
-	if (HResult != S_OK)
-	{
-		FString ErrorMessage = FString("DoWork failure");
-		Delegate.Execute(FPFSegmentsGetPlayersInSegmentResult{ .ErrorMessage = ErrorMessage }, false);
-	}
-};
-
-void FServerGetPlayersInSegmentAsyncTask::ProcessResults()
-{
-	size_t ResultSize = 0;
-	HResult = PFSegmentsServerGetPlayersInSegmentGetResultSize(*mAsyncBlock, &ResultSize);
-	if (HResult != S_OK)
-	{
-		Delegate.Execute(FPFSegmentsGetPlayersInSegmentResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
-		return;
-	}
-
-	PFSegmentsGetPlayersInSegmentResult *Result = {};
-	TArray<uint8> BufferArray;
-	BufferArray.Reserve(ResultSize);
-	HResult = PFSegmentsServerGetPlayersInSegmentGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
-	if (HResult != S_OK)
-	{
-		FString ErrorMessage = FString("GetResult failure");
-		Delegate.Execute(FPFSegmentsGetPlayersInSegmentResult{ .ErrorMessage = ErrorMessage }, false);
-		return;
-	}
-
-	TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> ResultType = ConvertGetPlayersInSegmentResultToUnreal(Result);
-
-	Delegate.Execute(*ResultType, true);
-}
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 FServerGetPlayerTagsAsyncTask::FServerGetPlayerTagsAsyncTask(
 	_In_ FPFEntityHandle TitleEntityHandle,
 	FPFSegmentsGetPlayerTagsRequest InRequest,

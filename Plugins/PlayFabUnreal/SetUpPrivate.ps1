@@ -28,52 +28,70 @@ if ($Platform -eq "Switch")
 }
 elseif ($Platform -eq "PlayStation")
 {
-    $Selection = ''
-    if (-not $Version -eq '')
-    {
-        $Selection = $Version
-    }
 	Write-Host "Select PlayStation 5 Unified SDK version..."
-	Write-Host "    1: SDK 2.0.9-prerelease"
-    Write-Host "    2: SDK 2.0.10-prerelease"
-    while($True)
-    {
-        Write-Host -NoNewline "> "
-        $inputString = ""
-        while ($true)
-        {
-            $key = $Host.UI.RawUI.ReadKey()
-            if ($key.VirtualKeyCode -eq 13) # Enter key
-            {
-                break
-            }
-            $inputString += $key.Character
-        }
-        $Selection = $inputString
-        Write-Host ""
-        if ($Selection -eq '1')
-        {
-            $unifiedSdkNugetFileName = "Microsoft.PlayFab.UnifiedSDK.Cpp.PS5-11.000"
-            $unifiedSdkNugetVersion = "2.0.9-prerelease"
-            break
-        }
-        if ($Selection -eq '2')
-        {
-            $unifiedSdkNugetFileName = "Microsoft.PlayFab.UnifiedSDK.Cpp.PS5-11.000"
-            $unifiedSdkNugetVersion = "2.0.10-prerelease"
-            break
-        }
-        Write-Host "Unknown input"
-    }
-	Write-Host "Downloading PlayStation 5 Unified SDK NuGet packages..."
-    Write-Host $unifiedSdkNugetFileName". Downloaded Unified SDK version="$unifiedSdkNugetVersion
-    Write-Host "If you want to use a higher version of the Unified SDK, please checkout to our private repositories and follow https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/networking/party-unreal-engine-oss-obtaining-playfab-party-libraries"
-    $localPath = ".\Platforms\PS5"
-    Set-NuGetPackageInfo $localPath $unifiedSdkNugetFileName $unifiedSdkNugetVersion
+	Write-Host "    1: SDK 2.3.0"
+	while($True)
+	{
+		Write-Host -NoNewline "> "
+		$inputString = ""
+		while ($true)
+		{
+			$key = $Host.UI.RawUI.ReadKey()
+			if ($key.VirtualKeyCode -eq 13) # Enter key
+			{
+				break
+			}
+			$inputString += $key.Character
+		}
+		$Selection = $inputString
+		Write-Host ""
+		if ($Selection -eq '1')
+		{
+			$unifiedSdkNugetFileName = "Microsoft.PlayFab.UnifiedSDK.Cpp.PS5-12.000"
+			$unifiedSdkNugetVersion = "2.3.0"
+			break
+		}
+		Write-Host "Unknown input"
+	}
+	Write-Host "Downloading PlayStation 5 Unified SDK NuGet package..."
+	Write-Host $unifiedSdkNugetFileName". Downloaded Unified SDK version="$unifiedSdkNugetVersion
+	$localPath = ".\Platforms\PS5"
+	Set-NuGetPackageInfo $localPath $unifiedSdkNugetFileName $unifiedSdkNugetVersion
 	nuget.exe restore $localPath -ConfigFile $localPath\nuget.config -PackagesDirectory $localPath
 
-	# Write-Host "Updating git submodules for private platforms..."
-	# git submodule update --recursive --init Source/PlatformSpecific/PlayStation
+	Write-Host "Select PlayStation 4 Unified SDK version..."
+	Write-Host "    1: SDK 2.3.0"
+	while($True)
+	{
+		Write-Host -NoNewline "> "
+		$inputString = ""
+		while ($true)
+		{
+			$key = $Host.UI.RawUI.ReadKey()
+			if ($key.VirtualKeyCode -eq 13) # Enter key
+			{
+				break
+			}
+			$inputString += $key.Character
+		}
+		$Selection = $inputString
+		Write-Host ""
+		if ($Selection -eq '1')
+		{
+			$unifiedSdkNugetFileName = "Microsoft.PlayFab.UnifiedSDK.Cpp.PS4-12.500"
+			$unifiedSdkNugetVersion = "2.3.0"
+			break
+		}
+		Write-Host "Unknown input"
+	}
+	Write-Host "Downloading PlayStation 4 Unified SDK NuGet package..."
+	Write-Host $unifiedSdkNugetFileName". Downloaded Unified SDK version="$unifiedSdkNugetVersion
+	$localPath = ".\Platforms\PS4"
+	Set-NuGetPackageInfo $localPath $unifiedSdkNugetFileName $unifiedSdkNugetVersion
+	nuget.exe restore $localPath -ConfigFile $localPath\nuget.config -PackagesDirectory $localPath
+
+	Write-Host "Updating git submodules for private platforms..."
+	git submodule update --recursive --init Source/PlayFabCore/PlatformSpecific/PlayStation
 
 	Write-Host "Patching PlayStation platforms patch..."
 	git apply --reject --whitespace=fix Source/PlayFabCore/PlatformSpecific/PlayStation/playstation.patch

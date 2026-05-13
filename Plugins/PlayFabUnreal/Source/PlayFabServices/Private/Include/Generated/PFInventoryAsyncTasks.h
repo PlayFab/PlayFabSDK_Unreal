@@ -337,45 +337,6 @@ private:
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 
 /// <summary>
-/// Gets the access tokens.
-/// </summary>
-/// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
-/// <param name="request">Populated request object.</param>
-/// <returns>Result code for this API operation.</returns>
-/// <remarks>
-/// This API is available on Windows, Linux, and macOS.
-/// Gets the access tokens for Microsoft Store authentication.
-///
-/// When the asynchronous task is complete, call <see cref="PFInventoryGetMicrosoftStoreAccessTokensGetResultSize"/>
-/// and <see cref="PFInventoryGetMicrosoftStoreAccessTokensGetResult"/> to get the result.
-/// </remarks>
-class PLAYFABSERVICES_API FGetMicrosoftStoreAccessTokensAsyncTask : public FXAsyncTask
-{
-public:
-	FGetMicrosoftStoreAccessTokensAsyncTask(
-	_In_ FPFEntityHandle EntityHandle,
-	FPFInventoryGetMicrosoftStoreAccessTokensRequest InRequest,
-	const FOnGetMicrosoftStoreAccessTokensCompleted& InDelegate);
-
-	virtual void DoWork() override;
-
-	virtual void ProcessResults() override;
-
-private:
-	FPFEntityHandle EntityHandle;
-	
-	FPFInventoryGetMicrosoftStoreAccessTokensRequest Request;
-	
-	FOnGetMicrosoftStoreAccessTokensCompleted Delegate;
-
-	HRESULT HResult;
-};
-
-#endif
-
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
-
-/// <summary>
 /// Get transaction history for a player. Up to 250 Events can be returned at once. You can use continuation
 /// tokens to paginate through results that return greater than the limit. Getting transaction history
 /// has a lower RPS limit than getting a Player's inventory with Player Entities having a limit of 30
@@ -534,7 +495,8 @@ private:
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 
 /// <summary>
-/// Redeem items.
+/// Redeem items from the Microsoft Store. Supported entitlement types are Developer Manager Consumable
+/// and Durable.
 /// </summary>
 /// <param name="entityHandle">FPFEntityHandle to use for authentication.</param>
 /// <param name="request">Populated request object.</param>

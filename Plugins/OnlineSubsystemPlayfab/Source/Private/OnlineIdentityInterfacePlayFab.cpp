@@ -14,12 +14,20 @@
 
 #include "HttpModule.h"
 #include "OnlineSubsystem.h"
+#include "SocketSubsystem.h"
 
 #include "PFCore.h"
 #include "PFAuthentication.h"
+
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+THIRD_PARTY_INCLUDES_START
+#include <playfab/core/PFCorePS.h>
+THIRD_PARTY_INCLUDES_END
+#endif
 #include "PFEntity.h"
 #include "PFServiceConfig.h"
 #include "PFLocalUser.h"
+#include "Generated/PFAuthentication.h"
 
 #define OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();  IOnlineIdentityPtr NativeIdentityInterface = NativeSubsystem ? NativeSubsystem->GetIdentityInterface() : nullptr; if (NativeIdentityInterface)
 
@@ -145,9 +153,20 @@ ELoginStatus::Type FOnlineIdentityPlayFab::GetLoginStatus(int32 LocalUserNum) co
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::GetLoginStatus"));
 
-	OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
+	// Only report LoggedIn once the PlayFab user has been fully authenticated
+	// (i.e., present in LocalPlayFabUsers or ServerEntity). This ensures titles
+	// can rely on GetLoginStatus to know when session APIs are safe to call,
+	// rather than seeing the native platform's early "logged in" status.
+	if (IsRunningDedicatedServer())
 	{
-		return NativeIdentityInterface->GetLoginStatus(LocalUserNum);
+		if (ServerEntity.IsValid())
+		{
+			return ELoginStatus::LoggedIn;
+		}
+	}
+	else if (LocalUserNum < LocalPlayFabUsers.Num() && LocalPlayFabUsers[LocalUserNum].IsValid())
+	{
+		return ELoginStatus::LoggedIn;
 	}
 
 	return ELoginStatus::NotLoggedIn;
@@ -157,9 +176,12 @@ ELoginStatus::Type FOnlineIdentityPlayFab::GetLoginStatus(const FUniqueNetId& Us
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::GetLoginStatus"));
 
-	OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
+	// Only report LoggedIn once the PlayFab user has been fully authenticated.
+	// Check PlayFab local users by platform ID string lookup.
+	TSharedPtr<FPlayFabUser> LocalUser = const_cast<FOnlineIdentityPlayFab*>(this)->GetPartyLocalUserFromPlatformIdString(UserId.ToString());
+	if (LocalUser.IsValid())
 	{
-		return NativeIdentityInterface->GetLoginStatus(UserId);
+		return ELoginStatus::LoggedIn;
 	}
 
 	return ELoginStatus::NotLoggedIn;
@@ -183,7 +205,11 @@ FString FOnlineIdentityPlayFab::GetPlayerNickname(const FUniqueNetId& UserId) co
 
 	OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
 	{
-		return NativeIdentityInterface->GetPlayerNickname(UserId);
+		// Don't forward PlayFab-type IDs to native interface (causes GDK type assertion)
+		if (UserId.GetType() != PLAYFAB_SUBSYSTEM)
+		{
+			return NativeIdentityInterface->GetPlayerNickname(UserId);
+		}
 	}
 
 	return TEXT("");
@@ -262,19 +288,24 @@ void FOnlineIdentityPlayFab::Tick(float DeltaTime)
 				RegisterAuthDelegates();
 			}
 
-			for (const auto& User : NativeIdentityInterface->GetAllUserAccounts())
+			// Dedicated servers authenticate separately via TryAuthenticateUsers()
+			if (!IsRunningDedicatedServer())
 			{
-				FString PlatformUserIdStr;
-				User->GetUserAttribute(USER_ATTR_ID, PlatformUserIdStr);
-				UsersToAuth.Add(PlatformUserIdStr);
-			}
+				for (const auto& User : NativeIdentityInterface->GetAllUserAccounts())
+				{
+					FString PlatformUserIdStr;
+					User->GetUserAttribute(USER_ATTR_ID, PlatformUserIdStr);
+					UsersToAuth.Add(PlatformUserIdStr);
+				}
 #if defined(OSS_PLAYFAB_WIN64) || defined(OSS_PLAYFAB_PLAYSTATION)
-			if (OSSPlayFab->bForceAutoLogin && !IsNativePlatformSubsystemGDK())
-			{
-				UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("AutoLogin"));
-				AutoLogin(0);
-			}
+				if (OSSPlayFab->bForceAutoLogin && !IsNativePlatformSubsystemGDK())
+				{
+					UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("AutoLogin"));
+					AutoLogin(0);
+				}
 #endif
+			}
+
 			bAuthAllUsers = false;
 		}
 	}
@@ -361,6 +392,12 @@ void FOnlineIdentityPlayFab::OnLoginStatusChanged(int32 LocalUserNum, ELoginStat
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::OnLoginStatusChanged"));
 
+	// Skip if this was triggered by our own re-auth notification to avoid re-queuing
+	if (bFiringReAuthLoginStatusChanged)
+	{
+		return;
+	}
+
 	OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
 	{
 		if (NewId.IsValid())
@@ -413,6 +450,19 @@ void FOnlineIdentityPlayFab::OnLogoutComplete(int32 LocalUserNum, bool bWasSucce
 
 void FOnlineIdentityPlayFab::TryAuthenticateUsers()
 {
+	// Dedicated server auth is handled separately from player auth
+	if (IsRunningDedicatedServer())
+	{
+		if (!bServerAuthInFlight && !bServerAuthenticated && !bServerAuthFailed)
+		{
+			if (!AuthenticateServerWithSecretKey())
+			{
+				bServerAuthFailed = true;
+			}
+		}
+		return;
+	}
+
 	// Update any users that need to update their tokens
 	for (TSharedPtr<FPlayFabUser> LocalUser : LocalPlayFabUsers)
 	{
@@ -437,9 +487,11 @@ void FOnlineIdentityPlayFab::CleanUpLocalUsers()
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::CleanUpLocalUsers"));
 
 	LocalPlayFabUsers.Empty();
+	ServerEntity.Reset();
 
 	UsersToAuth.Empty();
 	UserAuthRequestsInFlight.Empty();
+	bServerAuthFailed = false;
 }
 
 bool FOnlineIdentityPlayFab::AuthenticateUser(const FString& PlatformUserIdStr)
@@ -508,10 +560,229 @@ bool FOnlineIdentityPlayFab::AuthenticateUserGDK(const FString& PlatformUserIdSt
 }
 #endif // OSS_PLAYFAB_GDK_SUPPORT
 
+bool FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey()
+{
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+	// Server auth with secret key not supported on PlayStation.
+	UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey: Not supported on PlayStation"));
+	return false;
+#else // OSS_PLAYFAB_PLAYSTATION
+	FPFInitialize();
+
+	FPFServiceConfigHandle ServiceConfigHandle;
+
+	FString TitleIdStr = OSSPlayFab->GetAppId();
+	FString PlayFabEndpoint = TEXT("https://");
+	PlayFabEndpoint.Append(TitleIdStr);
+	PlayFabEndpoint.Append(TEXT(".playfabapi.com"));
+
+	if (!FPFServiceConfigCreateHandle(PlayFabEndpoint, TitleIdStr, ServiceConfigHandle))
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey: FPFServiceConfigCreateHandle failed"));
+		return false;
+	}
+
+	// TODO: Replace config/env-var secret key retrieval with a secure key store (e.g. Azure Key Vault, MPS) to avoid embedding secrets in config files or environment variables.
+	FString TitleSecretKey;
+	if (!GConfig->GetString(TEXT("OnlineSubsystemPlayFab"), TEXT("TitleSecretKey"), TitleSecretKey, GEngineIni) || TitleSecretKey.IsEmpty())
+	{
+		// Fallback to environment variable for cases where embedding the key in config is undesirable
+		TitleSecretKey = FPlatformMisc::GetEnvironmentVariable(TEXT("PF_TITLE_SECRET_KEY"));
+	}
+	if (TitleSecretKey.IsEmpty())
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey: TitleSecretKey not found in [OnlineSubsystemPlayFab] config or PF_TITLE_SECRET_KEY environment variable"));
+		return false;
+	}
+
+	// Build a unique server address hash as a postfix for the custom ID
+	FString AddressPostfix;
+	{
+		FString HostAddr = TEXT("unknown");
+		bool bCanBindAll = false;
+		if (ISocketSubsystem* SocketSub = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM))
+		{
+			TSharedRef<FInternetAddr> LocalAddr = SocketSub->GetLocalHostAddr(*GLog, bCanBindAll);
+			HostAddr = LocalAddr->ToString(false);
+		}
+		int32 ServerPort = 7777; // UE default
+		FParse::Value(FCommandLine::Get(), TEXT("Port="), ServerPort);
+		FString RawAddress = FString::Printf(TEXT("%s:%d"), *HostAddr, ServerPort);
+		uint32 AddrHash = GetTypeHash(RawAddress);
+		AddressPostfix = FString::Printf(TEXT("%08X"), AddrHash);
+	}
+
+	FString ServerCustomIdPrefix;
+	FString ServerCustomId;
+	if (GConfig->GetString(TEXT("OnlineSubsystemPlayFab"), TEXT("ServerCustomId"), ServerCustomIdPrefix, GEngineIni) && !ServerCustomIdPrefix.IsEmpty())
+	{
+		ServerCustomId = FString::Printf(TEXT("%s_%s"), *ServerCustomIdPrefix, *AddressPostfix);
+	}
+	else
+	{
+		ServerCustomId = FString::Printf(TEXT("PlayFabServer_%s_%s"), *OSSPlayFab->GetAppId(), *AddressPostfix);
+	}
+	// customId must be 32-100 characters; pad if needed
+	while (ServerCustomId.Len() < 32)
+	{
+		ServerCustomId.Append(TEXT("_pad"));
+	}
+	if (ServerCustomId.Len() > 100)
+	{
+		ServerCustomId.LeftInline(100);
+	}
+
+	bServerAuthInFlight = true;
+
+    FPFAuthenticationGetEntityRequest Request{};
+    Request.customTagsCount = 0;
+	
+	UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: Step 1 - Getting title entity with secret key..."));
+
+	return FPFAuthenticationGetEntityWithSecretKeyAsync(
+		ServiceConfigHandle,
+		TitleSecretKey,
+		Request,
+		FOnGetEntityWithSecretKeyDelegate::CreateLambda([this, ServerCustomId](FPFEntityHandle* EntityHandle, bool bWasSuccessful)
+			{
+				if (!bWasSuccessful || !EntityHandle)
+				{
+					bServerAuthInFlight = false;
+					UE_LOG(LogTemp, Error, TEXT("FOnlineIdentityPlayFab: Step 1 FAILED - GetEntityWithSecretKey returned failure"));
+					return;
+				}
+
+				// Diagnostic: log the entity type returned
+				SIZE_T* KeySizePtr = static_cast<SIZE_T*>(FMemory::Malloc(sizeof(SIZE_T)));
+				*KeySizePtr = 0;
+				TSharedPtr<SIZE_T> KeySize = MakeShareable(KeySizePtr, [](SIZE_T* P) { FMemory::Free(P); });
+				HRESULT hr = FPFEntityGetEntityKeySize(*EntityHandle, KeySize);
+				if (SUCCEEDED(hr))
+				{
+					TSharedPtr<void> KeyBuffer = MakeShareable(FMemory::Malloc(*KeySize.Get()), [](void* P) { FMemory::Free(P); });
+					TSharedPtr<const FPFEntityKey> EntityKey = MakeShareable(new FPFEntityKey);
+					hr = FPFEntityGetEntityKey(*EntityHandle, *KeySize.Get(), KeyBuffer, EntityKey, nullptr);
+					if (SUCCEEDED(hr))
+					{
+						UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: Step 1 SUCCESS - Entity type='%s', id='%s'"),
+							*EntityKey->type, *EntityKey->id);
+					}
+				}
+
+				// Step 2: Use the title entity to create a game_server entity
+				UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: Step 2 - AuthenticateGameServerWithCustomId (customId='%s')..."), *ServerCustomId);
+
+				FPFAuthenticationAuthenticateCustomIdRequest GameServerRequest;
+				// Use const_cast + placement to set the const FString member
+				const_cast<FString&>(GameServerRequest.customId) = ServerCustomId;
+				GameServerRequest.customTagsCount = 0;
+
+				bool bStarted = FPFAuthenticationAuthenticateGameServerWithCustomIdAsync(
+					*EntityHandle,
+					GameServerRequest,
+					FOnAuthenticateGameServerWithCustomIdDelegate::CreateLambda([this](FPFEntityHandle* GameServerEntityHandle, bool* bNewlyCreated, bool bGameServerSuccess)
+						{
+							bServerAuthInFlight = false;
+							if (bGameServerSuccess && GameServerEntityHandle)
+							{
+								bServerAuthenticated = true;
+								UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: Step 2 SUCCESS - game_server entity created (newlyCreated=%s)"),
+									bNewlyCreated ? (*bNewlyCreated ? TEXT("true") : TEXT("false")) : TEXT("null"));
+
+								// Diagnostic: log game_server entity type
+								SIZE_T* GsKeySizePtr = static_cast<SIZE_T*>(FMemory::Malloc(sizeof(SIZE_T)));
+								*GsKeySizePtr = 0;
+								TSharedPtr<SIZE_T> GsKeySize = MakeShareable(GsKeySizePtr, [](SIZE_T* P) { FMemory::Free(P); });
+								HRESULT gsHr = FPFEntityGetEntityKeySize(*GameServerEntityHandle, GsKeySize);
+								if (SUCCEEDED(gsHr))
+								{
+									TSharedPtr<void> GsKeyBuffer = MakeShareable(FMemory::Malloc(*GsKeySize.Get()), [](void* P) { FMemory::Free(P); });
+									TSharedPtr<const FPFEntityKey> GsEntityKey = MakeShareable(new FPFEntityKey);
+									gsHr = FPFEntityGetEntityKey(*GameServerEntityHandle, *GsKeySize.Get(), GsKeyBuffer, GsEntityKey, nullptr);
+									if (SUCCEEDED(gsHr))
+									{
+										UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: game_server entity type='%s', id='%s'"),
+											*GsEntityKey->type, *GsEntityKey->id);
+									}
+								}
+
+								// Step 3: Get entity token and register with Multiplayer subsystem for lobby APIs
+								FPFEntityHandle CapturedHandle = *GameServerEntityHandle;
+								FPFEntityGetEntityTokenAsync(
+									*GameServerEntityHandle,
+									FOnEntityGetEntityTokenDelegate::CreateLambda([this, CapturedHandle](bool bTokenSuccess, FPFEntityToken const* EntityToken)
+										{
+											if (bTokenSuccess && EntityToken && !EntityToken->token.IsEmpty())
+											{
+												// Extract entity key for PFMultiplayerSetEntityToken
+												SIZE_T* KeySizePtr = static_cast<SIZE_T*>(FMemory::Malloc(sizeof(SIZE_T)));
+												*KeySizePtr = 0;
+												TSharedPtr<SIZE_T> KeySize = MakeShareable(KeySizePtr, [](SIZE_T* P) { FMemory::Free(P); });
+												HRESULT hr = FPFEntityGetEntityKeySize(CapturedHandle, KeySize);
+												if (SUCCEEDED(hr))
+												{
+													TSharedPtr<void> KeyBuffer = MakeShareable(FMemory::Malloc(*KeySize.Get()), [](void* P) { FMemory::Free(P); });
+													TSharedPtr<const FPFEntityKey> EntityKey = MakeShareable(new FPFEntityKey);
+													hr = FPFEntityGetEntityKey(CapturedHandle, *KeySize.Get(), KeyBuffer, EntityKey, nullptr);
+													if (SUCCEEDED(hr))
+													{
+														std::string entityIdStr = TCHAR_TO_UTF8(*EntityKey->id);
+														std::string entityTypeStr = TCHAR_TO_UTF8(*EntityKey->type);
+														PFEntityKey RawEntityKey{ entityIdStr.c_str(), entityTypeStr.c_str() };
+														std::string tokenStr = TCHAR_TO_UTF8(*EntityToken->token);
+														HRESULT setHr = PFMultiplayerSetEntityToken(
+															OSSPlayFab->GetMultiplayerHandle(),
+															&RawEntityKey,
+															tokenStr.c_str()
+														);
+														if (SUCCEEDED(setHr))
+														{
+															UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: Step 3 SUCCESS - Entity token registered with Multiplayer subsystem"));
+														}
+														else
+														{
+															UE_LOG(LogTemp, Error, TEXT("FOnlineIdentityPlayFab: Step 3 FAILED - PFMultiplayerSetEntityToken error: 0x%08x"), setHr);
+														}
+													}
+												}
+											}
+											else
+											{
+												UE_LOG(LogTemp, Warning, TEXT("FOnlineIdentityPlayFab: Step 3 - Could not get entity token (success=%s, token=%s)"),
+													bTokenSuccess ? TEXT("true") : TEXT("false"),
+													(EntityToken && !EntityToken->token.IsEmpty()) ? TEXT("present") : TEXT("empty"));
+											}
+
+											Auth_PFAuthRequestComplete(true, TEXT("DedicatedServer"), CapturedHandle);
+											UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab: Server authentication complete"));
+										})
+								);
+							}
+							else
+							{
+								UE_LOG(LogTemp, Error, TEXT("FOnlineIdentityPlayFab: Step 2 FAILED - AuthenticateGameServerWithCustomId returned failure"));
+							}
+						})
+				);
+
+				if (!bStarted)
+				{
+					bServerAuthInFlight = false;
+					UE_LOG(LogTemp, Error, TEXT("FOnlineIdentityPlayFab: Step 2 FAILED - Could not start AuthenticateGameServerWithCustomId"));
+				}
+			})
+	);
+#endif // !OSS_PLAYFAB_PLAYSTATION
+}
+
 // Called after platform has appended its headers/body
 bool FOnlineIdentityPlayFab::AuthenticateUserByPlatform(const FString& PlatformUserIdStr)
 {
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+	PFInitialize(nullptr);
+#else // OSS_PLAYFAB_PLAYSTATION
 	FPFInitialize();
+#endif // !OSS_PLAYFAB_PLAYSTATION
 
 	FPFServiceConfigHandle m_serviceConfigHandle;
 
@@ -556,8 +827,7 @@ bool FOnlineIdentityPlayFab::AuthenticateUserByPlatform(const FString& PlatformU
 	return AuthenticateUserSteam(PlatformUserIdStr, m_serviceConfigHandle);
 #endif // OSS_PLAYFAB_GDK_SUPPORT
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
-	UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::AuthenticateUserByPlatform] Authentication not implemented for PlayStation platform"));
-	return false;
+	return AuthenticateUserPlayStation(PlatformUserIdStr, m_serviceConfigHandle);
 #elif defined(OSS_PLAYFAB_GDK)
 	return AuthenticateUserGDK(PlatformUserIdStr, m_serviceConfigHandle);
 #endif // OSS_PLAYFAB_SWITCH
@@ -572,8 +842,22 @@ void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const F
 		TSharedPtr<FPlayFabUser> LocalUser = GetPartyLocalUserFromPlatformIdString(UserPlatformIdStr, &Index);
 		if (LocalUser)
 		{
+			// Re-auth completed - update entity handle in case it changed (e.g., Steam AutoLogin
+			// triggering a second auth that creates a new entity handle via the SDK)
+			LocalUser->SetEntityHandle(handle);
 			LocalUser->SetNewEntityTokenUpdateTime();
 			TriggerOnAuthenticateUserCompleteDelegates(Index, true, UserPlatformIdStr, TEXT(""));
+
+			// Notify titles that a re-auth occurred so they can react (e.g., re-fetch entity handles).
+			// Use a guard flag to prevent our own OnLoginStatusChanged handler from re-queuing
+			// this user for another auth cycle.
+			TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(Index);
+			if (UserId.IsValid())
+			{
+				bFiringReAuthLoginStatusChanged = true;
+				TriggerOnLoginStatusChangedDelegates(Index, ELoginStatus::LoggedIn, ELoginStatus::LoggedIn, *UserId);
+				bFiringReAuthLoginStatusChanged = false;
+			}
 			UE_LOG(LogTemp, Display, TEXT("TriggerOnAuthenticateUserCompleteDelegates true"));
 		}
 		else
@@ -613,8 +897,9 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 	}
 
 	// To make FPlayFabUser we need EntityKey for future mapping
-	// TODO use TArray instead
-	TSharedPtr<SIZE_T> bufferSize = MakeShareable(new SIZE_T(0));
+	SIZE_T* bufferSizePtr = static_cast<SIZE_T*>(FMemory::Malloc(sizeof(SIZE_T)));
+	*bufferSizePtr = 0;
+	TSharedPtr<SIZE_T> bufferSize = MakeShareable(bufferSizePtr, [](SIZE_T* P) { FMemory::Free(P); });
 	HRESULT hr = FPFEntityGetEntityKeySize(EntityHandle, bufferSize);
 	if (FAILED(hr))
 	{
@@ -622,7 +907,7 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 		return;
 	}
 
-	TSharedPtr<void> entityKeyBuffer = MakeShareable(new char[*bufferSize.Get()]);
+	TSharedPtr<void> entityKeyBuffer = MakeShareable(FMemory::Malloc(*bufferSize.Get()), [](void* P) { FMemory::Free(P); });
 	TSharedPtr<const FPFEntityKey> EntityKeyptr = MakeShareable(new FPFEntityKey);
 
 	hr = FPFEntityGetEntityKey(EntityHandle, *bufferSize.Get(), entityKeyBuffer, EntityKeyptr, nullptr);
@@ -634,7 +919,18 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 
 	TSharedPtr<FPlayFabUser> NewLocalUser = MakeShared<FPlayFabUser>(UserPlatformIdStr, EntityHandle, EntityKeyptr, NewPartyLocalUser);
 
-	int32 LocalUserNum = LocalPlayFabUsers.Add(NewLocalUser);
+	// Store server entity separately from player entities
+	if (IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer"))
+	{
+		ServerEntity = NewLocalUser;
+		UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::CreateLocalUser: Stored server entity (type=%s, id=%s)"), *EntityKeyptr->type, *EntityKeyptr->id);
+	}
+	else
+	{
+		LocalPlayFabUsers.Add(NewLocalUser);
+	}
+
+	int32 LocalUserNum = IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer") ? 0 : LocalPlayFabUsers.Num() - 1;
 	TriggerOnAuthenticateUserCompleteDelegates(LocalUserNum, true, UserPlatformIdStr, TEXT(""));
 	UE_LOG(LogTemp, Display, TEXT("TriggerOnAuthenticateUserCompleteDelegates:true"));
 
@@ -650,6 +946,20 @@ void FOnlineIdentityPlayFab::RemoveLocalUser(const FString& PlatformUserIdStr)
 	{
 		UserAuthRequestsInFlight.Remove(PlatformUserIdStr);
 		UsersToAuth.Remove(PlatformUserIdStr);
+
+		// Check if this is the server entity
+		if (ServerEntity.IsValid() && ServerEntity->GetPlatformUserId().Compare(PlatformUserIdStr, ESearchCase::IgnoreCase) == 0)
+		{
+			PartyError Err = PartyManager::GetSingleton().DestroyLocalUser(ServerEntity->GetPartyLocalUser(), nullptr);
+			if (PARTY_FAILED(Err))
+			{
+				UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::DestroyLocalUser (server) failed: %s"), *GetPartyErrorMessage(Err));
+			}
+			OSSPlayFab->GetPlayFabLobbyInterface()->UnregisterForInvites_PlayFabMultiplayer(ServerEntity->GetEntityHandle().Get());
+			ServerEntity.Reset();
+			bServerAuthenticated = false;
+			return;
+		}
 
 		for (int32 i = 0; i < LocalPlayFabUsers.Num(); ++i)
 		{
@@ -685,6 +995,16 @@ TSharedPtr<FPlayFabUser> FOnlineIdentityPlayFab::GetPartyLocalUserFromPlatformId
 	int32 UserIndex = 0;
 	if (!PlatformNetIdStr.IsEmpty())
 	{
+		// Check server entity
+		if (ServerEntity.IsValid() && ServerEntity->GetPlatformUserId().Compare(PlatformNetIdStr, ESearchCase::IgnoreCase) == 0)
+		{
+			if (Index)
+			{
+				*Index = 0;
+			}
+			return ServerEntity;
+		}
+
 		for (TSharedPtr<FPlayFabUser> LocalUser : LocalPlayFabUsers)
 		{
 			if (LocalUser->GetPlatformUserId().Compare(PlatformNetIdStr, ESearchCase::IgnoreCase) == 0)
@@ -711,6 +1031,12 @@ TSharedPtr<FPlayFabUser> FOnlineIdentityPlayFab::GetPartyLocalUserFromEntityIdSt
 {
 	if (EntityIdString.IsEmpty() == false)
 	{
+		// Check server entity
+		if (ServerEntity.IsValid() && ServerEntity->GetEntityId().Compare(EntityIdString, ESearchCase::IgnoreCase) == 0)
+		{
+			return ServerEntity;
+		}
+
 		for (TSharedPtr<FPlayFabUser> LocalUser : LocalPlayFabUsers)
 		{
 			if (LocalUser->GetEntityId().Compare(EntityIdString, ESearchCase::IgnoreCase) == 0)
@@ -725,6 +1051,17 @@ TSharedPtr<FPlayFabUser> FOnlineIdentityPlayFab::GetPartyLocalUserFromEntityIdSt
 
 bool FOnlineIdentityPlayFab::IsUserLocal(const PFEntityKey& UserEntityKey)
 {
+	// Check server entity first
+	if (ServerEntity.IsValid())
+	{
+		const PFEntityKey ServerKey = ServerEntity->GetEntityKey();
+		if (FCString::Strcmp(UTF8_TO_TCHAR(ServerKey.id), UTF8_TO_TCHAR(UserEntityKey.id)) == 0 &&
+			FCString::Strcmp(UTF8_TO_TCHAR(ServerKey.type), UTF8_TO_TCHAR(UserEntityKey.type)) == 0)
+		{
+			return true;
+		}
+	}
+
 	for (TSharedPtr<FPlayFabUser> LocalUser : LocalPlayFabUsers)
 	{
 		if ((FCString::Strcmp(UTF8_TO_TCHAR(LocalUser->GetEntityKey().id), UTF8_TO_TCHAR(UserEntityKey.id)) == 0) && 
@@ -757,6 +1094,17 @@ PFEntityHandle FOnlineIdentityPlayFab::GetLocalUserEntityHandleFromEntityKey(con
 
 	if (EntityKey != nullptr)
 	{
+		// Check server entity first
+		if (ServerEntity.IsValid())
+		{
+			const PFEntityKey ServerKey = ServerEntity->GetEntityKey();
+			if (FCStringAnsi::Strcmp(ServerKey.id, EntityKey->id) == 0 &&
+				FCStringAnsi::Strcmp(ServerKey.type, EntityKey->type) == 0)
+			{
+				return ServerEntity->GetEntityHandle().Get();
+			}
+		}
+
 		for (const TSharedPtr<FPlayFabUser>& LocalUser : LocalPlayFabUsers)
 		{
 			if (!LocalUser.IsValid())
@@ -780,6 +1128,12 @@ TSharedPtr<FPlayFabUser> FOnlineIdentityPlayFab::GetPartyLocalUserFromEntityHand
 {
 	if (EntityHandle != nullptr)
 	{
+		// Check server entity
+		if (ServerEntity.IsValid() && ServerEntity->GetEntityHandle().Get() == EntityHandle)
+		{
+			return ServerEntity;
+		}
+
 		for (const TSharedPtr<FPlayFabUser>& LocalUser : LocalPlayFabUsers)
 		{
 			if (!LocalUser.IsValid())

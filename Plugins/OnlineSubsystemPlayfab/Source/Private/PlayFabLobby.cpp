@@ -79,6 +79,10 @@ FPlayFabLobby::FPlayFabLobby(FOnlineSubsystemPlayFab* InOSSPlayFab) :
 
 bool FPlayFabLobby::CreatePlayFabLobby(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings)
 {
+	if (IsRunningDedicatedServer())
+	{
+		return CreateServerLobby(HostingPlayerId, SessionName, NewSessionSettings);
+	}
 	return CreateLobbyWithUser(HostingPlayerId, SessionName, NewSessionSettings);
 }
 
@@ -256,6 +260,164 @@ bool FPlayFabLobby::CreateLobbyWithUser(const FUniqueNetId& HostingPlayerId, FNa
 	return true;
 }
 
+bool FPlayFabLobby::CreateServerLobby(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings)
+{
+	PFLobbyHandle LobbyHandle;
+	PFLobbyCreateConfiguration LobbyCreateConfig{};
+
+	auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
+	FOnlineSessionSettings UpdateSessionSettings(NewSessionSettings);
+
+	IOnlineIdentityPtr IdentityIntPtr = OSSPlayFab->GetIdentityInterface();
+
+	FOnlineIdentityPlayFab* PlayFabIdentityInt = static_cast<FOnlineIdentityPlayFab*>(IdentityIntPtr.Get());
+	if (!PlayFabIdentityInt)
+	{
+		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::CreateServerLobby: Identity Interface is invalid"));
+		return false;
+	}
+
+	TSharedPtr<FPlayFabUser> LocalUser = PlayFabIdentityInt->GetServerEntity();
+	if (LocalUser == nullptr)
+	{
+		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::CreateServerLobby: GetServerEntity returned nullptr — server not authenticated?"));
+		return false;
+	}
+
+	// Server lobby uses Server owner migration policy
+	LobbyCreateConfig.maxMemberCount = UpdateSessionSettings.NumPublicConnections;
+	LobbyCreateConfig.ownerMigrationPolicy = PFLobbyOwnerMigrationPolicy::Server;
+	LobbyCreateConfig.accessPolicy = PFLobbyAccessPolicy::Private;
+	if (UpdateSessionSettings.bShouldAdvertise)
+	{
+		if (UpdateSessionSettings.bAllowJoinViaPresenceFriendsOnly)
+		{
+			LobbyCreateConfig.accessPolicy = PFLobbyAccessPolicy::Friends;
+		}
+		else
+		{
+			LobbyCreateConfig.accessPolicy = PFLobbyAccessPolicy::Public;
+		}
+	}
+
+	UTF8StringList LobbyKeys, LobbyValues;
+	UTF8StringList SearchKeys, SearchValues;
+
+	// Set session custom settings
+	for (FSessionSettings::TConstIterator It(UpdateSessionSettings.Settings); It; ++It)
+	{
+		const FName& SettingName = It.Key();
+		const FOnlineSessionSetting& SettingValue = It.Value();
+		const FString SettingNameString = SettingName.ToString();
+		const FString SettingValueString = SettingValue.Data.ToString();
+
+		if (SettingValue.AdvertisementType >= EOnlineDataAdvertisementType::ViaOnlineService)
+		{
+			if (SettingValueString.IsEmpty())
+			{
+				UE_LOG_ONLINE(Warning, TEXT("CreateServerLobby: %s: <Empty>."), *SettingNameString);
+				LobbyKeys.Add(SettingNameString);
+				LobbyValues.AddNull();
+			}
+			else
+			{
+				UE_LOG_ONLINE(Verbose, TEXT("CreateServerLobby: %s: %s."), *SettingNameString, *SettingValueString);
+				LobbyKeys.Add(SettingNameString);
+				LobbyValues.Add(SettingValueString);
+			}
+		}
+
+		if (IsSearchKey(SettingNameString))
+		{
+			if (SettingValueString.IsEmpty())
+			{
+				SearchKeys.Add(SettingNameString);
+				SearchValues.AddNull();
+			}
+			else
+			{
+				UE_LOG_ONLINE(Verbose, TEXT("CreateServerLobby: %s: %s."), *SettingNameString, *SettingValueString);
+				SearchKeys.Add(SettingNameString);
+				SearchValues.Add(SettingValueString);
+			}
+		}
+		else
+		{
+			FString SearchKey;
+			EOnlineKeyValuePairDataType::Type Type;
+			if (GetSearchKeyFromSettingMappingTable(SettingNameString, SearchKey, Type))
+			{
+				UE_LOG_ONLINE(Verbose, TEXT("CreateServerLobby: predefined item %s(%s): %s Type: %d."), *SettingNameString, *SearchKey, *SettingValueString, Type);
+				switch (Type)
+				{
+				case EOnlineKeyValuePairDataType::Bool:
+				{
+					const FVariantData& VariantData = SettingValue.Data;
+					bool BoolVal;
+					VariantData.GetValue(BoolVal);
+					SearchKeys.Add(TCHAR_TO_UTF8(*SearchKey));
+					SearchValues.Add(BoolVal == true ? "1" : "0");
+					break;
+				}
+				case EOnlineKeyValuePairDataType::Int32:
+				case EOnlineKeyValuePairDataType::String:
+					SearchKeys.Add(TCHAR_TO_UTF8(*SearchKey));
+					SearchValues.Add(SettingValueString);
+					break;
+				}
+			}
+		}
+	}
+
+	// Set session setting bools
+	{
+		int32 BitShift = 0;
+		int32 SessionSettingsFlags = 0;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bShouldAdvertise) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinInProgress) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bIsLANMatch) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bIsDedicated) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bUsesStats) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowInvites) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bUsesPresence) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinViaPresence) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinViaPresenceFriendsOnly) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAntiCheatProtected) << BitShift++;
+
+		FString SessionSettingsFlagsName(TEXT("_flags"));
+		const FString SessionSettingsFlagsValue(FString::FromInt(SessionSettingsFlags));
+
+		LobbyKeys.Add(SessionSettingsFlagsName);
+		LobbyValues.Add(SessionSettingsFlagsValue);
+	}
+
+	LobbyCreateConfig.lobbyPropertyCount = LobbyKeys.GetCount();
+	LobbyCreateConfig.lobbyPropertyKeys = LobbyKeys.GetData();
+	LobbyCreateConfig.lobbyPropertyValues = LobbyValues.GetData();
+
+	// Add search properties
+	SearchKeys.Add(SEARCH_KEY_PLATFORM_ID);
+	SearchValues.Add(LocalUser->GetPlatformUserId());
+
+	LobbyCreateConfig.searchPropertyCount = SearchKeys.GetCount();
+	LobbyCreateConfig.searchPropertyKeys = SearchKeys.GetData();
+	LobbyCreateConfig.searchPropertyValues = SearchValues.GetData();
+
+	// Get the entity handle for the game_server entity
+	UE_LOG_ONLINE(Display, TEXT("FPlayFabLobby::CreateServerLobby: Creating server lobby with entity type='%s', id='%s'"),
+		UTF8_TO_TCHAR(LocalUser->GetEntityKey().type), UTF8_TO_TCHAR(LocalUser->GetEntityKey().id));
+
+	HRESULT Hr = PFMultiplayerCreateAndClaimServerLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), LocalUser->GetEntityHandle().Get(), &LobbyCreateConfig, nullptr, &LobbyHandle);
+	if (FAILED(Hr))
+	{
+		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::CreateServerLobby: PFMultiplayerCreateAndClaimServerLobby failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
+		return false;
+	}
+	LobbySessionMap.Add(LobbyHandle, SessionName);
+
+	return true;
+}
+
 bool FPlayFabLobby::JoinLobby(const FUniqueNetId& UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession)
 {
 	return JoinLobbyWithUser(UserId, SessionName, DesiredSession.Session.SessionSettings);
@@ -325,7 +487,20 @@ bool FPlayFabLobby::JoinLobbyWithUser(const FUniqueNetId& UserId, FName SessionN
 		return false;
 	}
 
-	HRESULT Hr = PFMultiplayerJoinLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), LocalUser->GetEntityHandle().Get(), TCHAR_TO_UTF8(*ConnectionString), &LobbyConfig, nullptr, &LobbyHandle);
+	PFMultiplayerHandle MpHandle = OSSPlayFab->GetMultiplayerHandle();
+	FPFEntityHandle EntityHandle = LocalUser->GetEntityHandle();
+	PFEntityHandle RawEntityHandle = EntityHandle.Get();
+
+	UE_LOG_ONLINE(Log, TEXT("FPlayFabLobby::JoinLobbyWithUser: MultiplayerHandle=%p, EntityHandle valid=%d, RawEntityHandle=%p, ConnectionString=%s"),
+		MpHandle, EntityHandle.IsValid(), RawEntityHandle, *ConnectionString);
+
+	if (!RawEntityHandle)
+	{
+		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::JoinLobbyWithUser: Entity handle is null! Cannot join lobby."));
+		return false;
+	}
+
+	HRESULT Hr = PFMultiplayerJoinLobbyWithEntityHandle(MpHandle, RawEntityHandle, TCHAR_TO_UTF8(*ConnectionString), &LobbyConfig, nullptr, &LobbyHandle);
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFMultiplayerJoinLobby failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
@@ -440,64 +615,67 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 	UpdateLobbyCompletionState.LobbyPostUpdateCount = 0;
 	UpdateLobbyCompletionState.MergedCompletionResult = true;
 
-	// Update member properties for all party local users
-	const TArray<TSharedPtr<FPlayFabUser>>& PartyLocalUsers = PlayFabIdentityInt->GetAllPartyLocalUsers();
-	for (TSharedPtr<FPlayFabUser> User : PartyLocalUsers)
+	// Update member properties for all party local users (skip on dedicated server — server is not a lobby member)
+	if (!IsRunningDedicatedServer())
 	{
-		if (User.IsValid())
+		const TArray<TSharedPtr<FPlayFabUser>>& PartyLocalUsers = PlayFabIdentityInt->GetAllPartyLocalUsers();
+		for (TSharedPtr<FPlayFabUser> User : PartyLocalUsers)
 		{
-			if (FSessionSettings* UpdatedMemberSettings = (FSessionSettings*)SessionSettings.MemberSettings.Find(FUniqueNetIdPlayFab::Create(User->GetPlatformUserId())))
+			if (User.IsValid())
 			{
-				UTF8StringList MemberKeys, MemberValues;
-
-				for (FSessionSettings::TIterator It = UpdatedMemberSettings->CreateIterator(); It; ++It)
+				if (FSessionSettings* UpdatedMemberSettings = (FSessionSettings*)SessionSettings.MemberSettings.Find(FUniqueNetIdPlayFab::Create(User->GetPlatformUserId())))
 				{
-					const FOnlineSessionSetting& SettingValue = It.Value();
-					const FString SettingNameString = It.Key().ToString();
-					const FString SettingValueString = SettingValue.Data.ToString();
-					// Only upload values that are marked for service use
-					if (SettingValue.AdvertisementType >= EOnlineDataAdvertisementType::ViaOnlineService)
+					UTF8StringList MemberKeys, MemberValues;
+
+					for (FSessionSettings::TIterator It = UpdatedMemberSettings->CreateIterator(); It; ++It)
 					{
-						if (SettingValueString.IsEmpty())
+						const FOnlineSessionSetting& SettingValue = It.Value();
+						const FString SettingNameString = It.Key().ToString();
+						const FString SettingValueString = SettingValue.Data.ToString();
+						// Only upload values that are marked for service use
+						if (SettingValue.AdvertisementType >= EOnlineDataAdvertisementType::ViaOnlineService)
 						{
-							UE_LOG_ONLINE(Warning, TEXT("UpdateLobby Member Property: %s: <Empty>."), *SettingNameString);
-							MemberKeys.Add(SettingNameString);
-							MemberValues.AddNull();
-						}
-						else
-						{
-							UE_LOG_ONLINE(Verbose, TEXT("UpdateLobby Member Property: %s: %s."), *SettingNameString, *SettingValueString);
-							MemberKeys.Add(SettingNameString);
-							MemberValues.Add(SettingValueString);
+							if (SettingValueString.IsEmpty())
+							{
+								UE_LOG_ONLINE(Warning, TEXT("UpdateLobby Member Property: %s: <Empty>."), *SettingNameString);
+								MemberKeys.Add(SettingNameString);
+								MemberValues.AddNull();
+							}
+							else
+							{
+								UE_LOG_ONLINE(Verbose, TEXT("UpdateLobby Member Property: %s: %s."), *SettingNameString, *SettingValueString);
+								MemberKeys.Add(SettingNameString);
+								MemberValues.Add(SettingValueString);
+							}
 						}
 					}
+
+					PFEntityHandle EntityHandle = User->GetEntityHandle().Get();
+
+					PFLobbyMemberDataUpdate MemberUpdateData{};
+					MemberUpdateData.memberPropertyCount = MemberKeys.GetCount();
+					MemberUpdateData.memberPropertyKeys = MemberKeys.GetData();
+					MemberUpdateData.memberPropertyValues = MemberValues.GetData();
+
+					UpdateLobbyCompletionState.LobbyPostUpdateCount++;
+					TUniquePtr<TPair<int, int>> LobbyPostPair = MakeUnique<TPair<int, int>>(OperationId, UpdateLobbyCompletionState.LobbyPostUpdateCount);
+					HRESULT Hr = PFLobbyPostUpdateWithEntityHandle(LobbyHandle, EntityHandle, nullptr, &MemberUpdateData, reinterpret_cast<void*>(LobbyPostPair.Release()));
+					if (FAILED(Hr))
+					{
+						UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyPostUpdate update member properties failed. Error code [0x%08x]"), Hr);
+						return false;
+					}
 				}
-
-				PFEntityHandle EntityHandle = User->GetEntityHandle().Get();
-
-				PFLobbyMemberDataUpdate MemberUpdateData{};
-				MemberUpdateData.memberPropertyCount = MemberKeys.GetCount();
-				MemberUpdateData.memberPropertyKeys = MemberKeys.GetData();
-				MemberUpdateData.memberPropertyValues = MemberValues.GetData();
-
-				UpdateLobbyCompletionState.LobbyPostUpdateCount++;
-				TUniquePtr<TPair<int, int>> LobbyPostPair = MakeUnique<TPair<int, int>>(OperationId, UpdateLobbyCompletionState.LobbyPostUpdateCount);
-				HRESULT Hr = PFLobbyPostUpdateWithEntityHandle(LobbyHandle, EntityHandle, nullptr, &MemberUpdateData, reinterpret_cast<void*>(LobbyPostPair.Release()));
-				if (FAILED(Hr))
+				else
 				{
-					UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyPostUpdate update member properties failed. Error code [0x%08x]"), Hr);
-					return false;
+					UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::UpdateLobbyMemberProperties: Failed to access member property for user %s"), *(User->GetPlatformUserId()));
 				}
 			}
 			else
 			{
-				UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::UpdateLobbyMemberProperties: Failed to access member property for user %s"), *(User->GetPlatformUserId()));
+				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::UpdateLobby: User is invalid"));
+				return false;
 			}
-		}
-		else
-		{
-			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::UpdateLobby: User is invalid"));
-			return false;
 		}
 	}
 
@@ -662,17 +840,29 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 	UpdateLobbyCompletionState.LobbyPostUpdateCount++;
 	TUniquePtr<TPair<int, int>> LobbyPostPair = MakeUnique<TPair<int, int>>(OperationId, UpdateLobbyCompletionState.LobbyPostUpdateCount);
 
-    PFEntityHandle EntityHandle = PlayFabIdentityInt->GetLocalUserEntityHandleFromEntityKey(OwnerPtr);
-	if (EntityHandle == nullptr)
+	if (IsRunningDedicatedServer())
 	{
-		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::UpdateLobby: Failed to get the entity handle of the lobby owner"));
-		return false;
+		Hr = PFLobbyServerPostUpdate(LobbyHandle, &UpdateData, reinterpret_cast<void*>(LobbyPostPair.Release()));
+		if (FAILED(Hr))
+		{
+			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyServerPostUpdate update lobby and search properties failed. Error code [0x%08x]"), Hr);
+			return false;
+		}
 	}
-	Hr = PFLobbyPostUpdateWithEntityHandle(LobbyHandle, EntityHandle, &UpdateData, nullptr, reinterpret_cast<void*>(LobbyPostPair.Release()));
-	if (FAILED(Hr))
+	else
 	{
-		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyPostUpdate update lobby and search properties failed. Error code [0x%08x]"), Hr);
-		return false;
+		PFEntityHandle EntityHandle = PlayFabIdentityInt->GetLocalUserEntityHandleFromEntityKey(OwnerPtr);
+		if (EntityHandle == nullptr)
+		{
+			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::UpdateLobby: Failed to get the entity handle of the lobby owner"));
+			return false;
+		}
+		Hr = PFLobbyPostUpdateWithEntityHandle(LobbyHandle, EntityHandle, &UpdateData, nullptr, reinterpret_cast<void*>(LobbyPostPair.Release()));
+		if (FAILED(Hr))
+		{
+			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyPostUpdate update lobby and search properties failed. Error code [0x%08x]"), Hr);
+			return false;
+		}
 	}
 
 	UpdateLobbyOperations.Add(OperationId, UpdateLobbyCompletionState);
@@ -745,12 +935,25 @@ bool FPlayFabLobby::LeaveLobby(const FUniqueNetId& PlayerId, FName SessionName, 
 	if (bDestroyingSession)
 	{
 		UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby destroying session!"));
-		Hr = PFLobbyLeave(LobbyHandle, nullptr, nullptr);
-		if (FAILED(Hr))
+		if (IsRunningDedicatedServer())
 		{
-			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyLeave failed: 0x%08x"), Hr);
-			CompletionDelegate.ExecuteIfBound(SessionName, false);
-			return false;
+			Hr = PFLobbyServerDeleteLobby(LobbyHandle, nullptr);
+			if (FAILED(Hr))
+			{
+				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyServerDeleteLobby failed: 0x%08x"), Hr);
+				CompletionDelegate.ExecuteIfBound(SessionName, false);
+				return false;
+			}
+		}
+		else
+		{
+			Hr = PFLobbyLeave(LobbyHandle, nullptr, nullptr);
+			if (FAILED(Hr))
+			{
+				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyLeave failed: 0x%08x"), Hr);
+				CompletionDelegate.ExecuteIfBound(SessionName, false);
+				return false;
+			}
 		}
 	}
 	else
@@ -962,6 +1165,11 @@ void FPlayFabLobby::DoWork()
 				HandleCreateAndJoinLobbyCompleted(static_cast<const PFLobbyCreateAndJoinLobbyCompletedStateChange&>(StateChange));
 				break;
 			}
+			case PFLobbyStateChangeType::CreateAndClaimServerLobbyCompleted:
+			{
+				HandleCreateAndClaimServerLobbyCompleted(static_cast<const PFLobbyCreateAndClaimServerLobbyCompletedStateChange&>(StateChange));
+				break;
+			}
 			case PFLobbyStateChangeType::JoinLobbyCompleted:
 			{
 				HandleJoinLobbyCompleted(static_cast<const PFLobbyJoinLobbyCompletedStateChange&>(StateChange));
@@ -1041,6 +1249,75 @@ void FPlayFabLobby::DoWork()
 			case PFLobbyStateChangeType::Disconnected:
 			{
 				HandleLobbyDisconnected(static_cast<const PFLobbyDisconnectedStateChange&>(StateChange));
+				break;
+			}
+			case PFLobbyStateChangeType::ServerPostUpdateCompleted:
+			{
+				const auto& UpdateCompleted = static_cast<const PFLobbyServerPostUpdateCompletedStateChange&>(StateChange);
+				UE_LOG_ONLINE(Verbose, TEXT("Received ServerPostUpdateCompleted: result=0x%08x"), UpdateCompleted.result);
+				TUniquePtr<TPair<int, int>> LobbyPostPair(reinterpret_cast<TPair<int, int>*>(UpdateCompleted.asyncContext));
+				if (LobbyPostPair != nullptr)
+				{
+					int UpdateLobbyOperationId = LobbyPostPair->Key;
+					FUpdateLobbyCompletionState* UpdateLobbyCompletionState = UpdateLobbyOperations.Find(UpdateLobbyOperationId);
+					if (UpdateLobbyCompletionState == nullptr)
+					{
+						UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::DoWork received ServerPostUpdateCompleted, but UpdateLobbyOperations does not have valid key %d"), LobbyPostPair->Key);
+					}
+					else
+					{
+						UpdateLobbyOperations[UpdateLobbyOperationId].MergedCompletionResult = UpdateLobbyCompletionState->MergedCompletionResult && SUCCEEDED(UpdateCompleted.result);
+						if (UpdateLobbyCompletionState->LobbyPostUpdateCount == LobbyPostPair->Value)
+						{
+							FName* SessionName = LobbySessionMap.Find(UpdateCompleted.lobby);
+							if (SessionName != nullptr)
+							{
+								TriggerOnUpdateLobbyCompletedDelegates(*SessionName, UpdateLobbyOperations[UpdateLobbyOperationId].MergedCompletionResult);
+							}
+							else
+							{
+								UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::DoWork: No session name found for lobby handle during ServerPostUpdateCompleted"));
+							}
+							UpdateLobbyOperations.Remove(UpdateLobbyOperationId);
+
+							if (UpdateLobbyOperations.Num() == 0)
+							{
+								NextUpdateLobbyOperationId.store(0);
+							}
+						}
+					}
+				}
+				else
+				{
+					UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::DoWork received ServerPostUpdateCompleted, and asyncContext is nullptr"));
+				}
+				break;
+			}
+			case PFLobbyStateChangeType::ServerDeleteLobbyCompleted:
+			{
+				const auto& DeleteCompleted = static_cast<const PFLobbyServerDeleteLobbyCompletedStateChange&>(StateChange);
+				UE_LOG_ONLINE(Verbose, TEXT("Received ServerDeleteLobbyCompleted: lobby=0x%p"), DeleteCompleted.lobby);
+
+				if (DeleteCompleted.lobby != nullptr)
+				{
+					FName* SessionName = LobbySessionMap.Find(DeleteCompleted.lobby);
+					if (SessionName != nullptr)
+					{
+						auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
+						FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(*SessionName);
+
+						if (ExistingNamedSession.IsValid() && ExistingNamedSession->SessionState == EOnlineSessionState::Destroying)
+						{
+							SessionInterface->RemoveNamedSession(*SessionName);
+							LobbySessionMap.Remove(DeleteCompleted.lobby);
+							TriggerOnLeaveLobbyCompletedDelegates(*SessionName, true);
+						}
+					}
+				}
+				else
+				{
+					TriggerOnLeaveLobbyCompletedDelegates(FName(), false);
+				}
 				break;
 			}
 			case PFLobbyStateChangeType::JoinArrangedLobbyCompleted:
@@ -1160,6 +1437,86 @@ void FPlayFabLobby::HandleCreateAndJoinLobbyCompleted(const PFLobbyCreateAndJoin
 	TriggerOnLobbyCreatedAndJoinCompletedDelegates(bSuccess, SessionName);
 }
 
+void FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted(const PFLobbyCreateAndClaimServerLobbyCompletedStateChange& StateChange)
+{
+	UE_LOG_ONLINE(Display, TEXT("Received PFLobbyCreateAndClaimServerLobbyCompletedStateChange(%u) event"), StateChange.stateChangeType);
+
+	bool bSuccess = false;
+	FName SessionName = NAME_None;
+
+	if (FAILED(StateChange.result))
+	{
+		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: Failed with error 0x%08x: %s"),
+			StateChange.result, *GetMultiplayerErrorMessage(StateChange.result));
+
+		TriggerOnLobbyCreatedAndJoinCompletedDelegates(false, SessionName);
+		return;
+	}
+
+	if (FName* FoundSessionName = LobbySessionMap.Find(StateChange.lobby))
+	{
+		SessionName = *FoundSessionName;
+
+		FOnlineSessionPlayFabPtr SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
+		if (SessionInterface.IsValid())
+		{
+			FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(SessionName);
+			if (ExistingNamedSession.IsValid())
+			{
+				const char* LobbyId;
+				HRESULT Hr = PFLobbyGetLobbyId(StateChange.lobby, &LobbyId);
+				if (SUCCEEDED(Hr))
+				{
+					const char* ConnectionString;
+					Hr = PFLobbyGetConnectionString(StateChange.lobby, &ConnectionString);
+					if (SUCCEEDED(Hr))
+					{
+						FOnlineSessionInfoPlayFabPtr NewSessionInfo = StaticCastSharedPtr<FOnlineSessionInfoPlayFab>(ExistingNamedSession->SessionInfo);
+						if (NewSessionInfo.IsValid())
+						{
+							bSuccess = SUCCEEDED(StateChange.result);
+
+							NewSessionInfo->LobbyHandle = StateChange.lobby;
+							NewSessionInfo->SetSessionId(UTF8_TO_TCHAR(LobbyId));
+							NewSessionInfo->ConnectionString = UTF8_TO_TCHAR(ConnectionString);
+
+							ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
+
+							UE_LOG_ONLINE(Display, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: Server lobby created. LobbyId='%s'"), UTF8_TO_TCHAR(LobbyId));
+						}
+						else
+						{
+							UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: SessionInfo was null"));
+						}
+					}
+					else
+					{
+						UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: failed to GetConnectionString: 0x%08x"), Hr);
+					}
+				}
+				else
+				{
+					UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: failed to GetLobbyId: 0x%08x"), Hr);
+				}
+			}
+			else
+			{
+				UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: ExistingNamedSession was null"));
+			}
+		}
+		else
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: SessionInterface was null"));
+		}
+	}
+	else
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted: could not find session name from lobby handle"));
+	}
+
+	TriggerOnLobbyCreatedAndJoinCompletedDelegates(bSuccess, SessionName);
+}
+
 void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStateChange& StateChange)
 {
 	EOnJoinSessionCompleteResult::Type JoinResult = EOnJoinSessionCompleteResult::UnknownError;
@@ -1220,6 +1577,33 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 
 		ExistingNamedSession->SessionInfo = NewSessionInfo;
 		ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
+
+		// Read lobby properties directly after join to populate session settings
+		// Server-owned lobbies may not deliver lobby properties via LobbyUpdated events
+		{
+			uint32_t LobbyPropertyCount = 0;
+			const char* const* LobbyPropertyKeys = nullptr;
+			HRESULT PropHr = PFLobbyGetLobbyPropertyKeys(StateChange.lobby, &LobbyPropertyCount, &LobbyPropertyKeys);
+			if (SUCCEEDED(PropHr) && LobbyPropertyCount > 0)
+			{
+				for (uint32_t i = 0; i < LobbyPropertyCount; ++i)
+				{
+					const char* PropValue = nullptr;
+					PropHr = PFLobbyGetLobbyProperty(StateChange.lobby, LobbyPropertyKeys[i], &PropValue);
+					if (SUCCEEDED(PropHr) && PropValue != nullptr)
+					{
+						FString Key = UTF8_TO_TCHAR(LobbyPropertyKeys[i]);
+						FString Value = UTF8_TO_TCHAR(PropValue);
+						UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby::HandleJoinLobbyCompleted: Lobby property %s=%s"), *Key, *Value);
+						ExistingNamedSession->SessionSettings.Set(FName(*Key), Value, EOnlineDataAdvertisementType::ViaOnlineService);
+					}
+				}
+			}
+			else if (FAILED(PropHr))
+			{
+				UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleJoinLobbyCompleted: PFLobbyGetLobbyPropertyKeys failed: 0x%08x"), PropHr);
+			}
+		}
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
 		if (IsNativePlatformSubsystemGDK())

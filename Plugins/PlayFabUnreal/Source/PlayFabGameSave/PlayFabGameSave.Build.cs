@@ -268,6 +268,12 @@ public class PlayFabGameSave : ModuleRules
     {
         LogPlayFabGameSave($"Loading module for target: {Target.Name}, Platform: {Target.Platform}, Configuration: {Target.Configuration}");
         LogPlayFabGameSave($"Module directory: {ModuleDirectory}");
+
+        // GameSave is not supported on PS4
+        if (Target.Platform.ToString() == "PS4")
+        {
+            throw new PlatformNotSupportedException("PlayFabGameSave is not supported on PlayStation 4.");
+        }
         
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -328,14 +334,6 @@ public class PlayFabGameSave : ModuleRules
         }
 
         // PS5 Platform
-        if (Target.Platform.ToString() == "PS4")
-        {
-            LogPlayFabGameSave("Using PlayStation 4 platform configuration");
-            ConfigureForPlayStation4Platform();
-            return;
-        }
-
-        // PS5 Platform
         if (Target.Platform.ToString() == "PS5")
         {
             LogPlayFabGameSave("Using PlayStation 5 platform configuration");
@@ -384,15 +382,6 @@ public class PlayFabGameSave : ModuleRules
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "LibHttpClient.lib"));
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabCore.lib"));
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "PlayFabGameSave.lib"));
-    }
-
-    private void ConfigureForPlayStation4Platform()
-    {
-        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
-		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
-        string PluginPath = Path.Combine(ModuleDirectory, "../../");
-        string PlatformsPath = Path.Combine(PluginPath, "Platforms", "PS4");
-        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
     }
 
     private void ConfigureForPlayStation5Platform()

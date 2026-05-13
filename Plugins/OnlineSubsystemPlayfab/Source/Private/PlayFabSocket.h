@@ -32,8 +32,6 @@ PACKAGE_SCOPE:
 	class FPlayFabSocketSubsystem* SocketSubsystem = nullptr;
 	TWeakObjectPtr<UPlayFabNetDriver> NetDriver;
 	
-	PartyLocalEndpoint* LocalEndpoint = nullptr;
-
 	TCircularQueue<PartyPacket> PendingPackets;
 
 public:

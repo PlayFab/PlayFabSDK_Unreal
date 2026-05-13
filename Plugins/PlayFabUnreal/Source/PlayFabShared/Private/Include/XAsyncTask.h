@@ -1,8 +1,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/ObjectMacros.h"
 #include "Templates/SharedPointer.h"
+#include "Async/AsyncWork.h"
+#include "Containers/Ticker.h"
 #include "XAsyncTaskQueueHelpers.h"
+
+#ifndef PACKAGE_SCOPE
+#define PACKAGE_SCOPE public
+#endif
 
 typedef TSharedPtr<FXAsyncBlock> FXAsyncBlockPtr;
 

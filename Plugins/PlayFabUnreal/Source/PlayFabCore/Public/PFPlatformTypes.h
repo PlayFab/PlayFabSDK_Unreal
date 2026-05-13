@@ -1,4 +1,9 @@
 #pragma once
+#include "CoreMinimal.h"
+
+#ifndef _Maybenull_
+#define _Maybenull_
+#endif
 
 //-----------------------------------------------------------------------------
 // Hooks for platform specific behavior

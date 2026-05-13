@@ -29,14 +29,47 @@ struct FPendingCreateSessionInfo
 	TSharedPtr<const FUniqueNetId> PlayerId;
 	FName SessionName;
 	FOnlineSessionSettings SessionSettings;
+	FString NetworkId;
 };
 
-struct FPendingJoinSessionInfo
+// Encapsulates all per-session state for a PlayFab session. This bundles PlayFab-specific async
+// operation state (retry counters, pending info).
+struct FPlayFabSessionState
 {
-	int32 PlayerControllerIndex = INDEX_NONE;
-	TSharedPtr<const FUniqueNetId> PlayerId;
-	FName SessionName;
-	FOnlineSessionSearchResult SessionSearchResult;
+	~FPlayFabSessionState();
+
+	// Create-in-progress state
+	FPendingCreateSessionInfo PendingCreateSessionInfo;
+
+	// Per-session connection info
+	FString ConnectionString;
+
+	// Retry state for joining Party network after matchmaking
+	float RetryJoinMatchmakingSession_RetryTime = 2.0f;
+	float RetryJoinMatchmakingSession_TimeSinceLastRetry = 0.0f;
+	int32 RetryJoinMatchmakingSession_Count = 0;
+	int32 RetryJoinMatchmakingSession_MaxCount = 15;
+
+	// Retry state for joining Party network after lobby join
+	float RetryJoinLobbySession_RetryTime = 2.0f;
+	float RetryJoinLobbySession_TimeSinceLastRetry = 0.0f;
+	int32 RetryJoinLobbySession_Count = 0;
+	int32 RetryJoinLobbySession_MaxCount = 15;
+
+	// Per-session operation state
+	FString JoinSessionNetworkId;
+	FName JoinSessionCompleteSessionName;
+	FString MatchmakingNetworkId;
+	FName MatchmakingCompleteSessionName;
+
+	// Lobby operation delegate handles
+	FDelegateHandle OnUpdateLobbyCompleteDelegate;
+	FDelegateHandle OnUpdateSession_MatchmakingDelegateHandle;
+
+	// Native platform operation delegate handles
+	FDelegateHandle OnNativeCreateSessionCompleteDelegateHandle;
+	FDelegateHandle OnNativeUpdateSessionCompleteDelegateHandle;
+	FDelegateHandle OnNativeJoinSessionCompleteDelegateHandle;
 };
 
 struct FPendingInviteData
@@ -143,33 +176,18 @@ PACKAGE_SCOPE:
 protected:
 	bool JoinSession_PlayFabInternal(int32 ControllerIndex, TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession);
 
-	void OnCreatePartyEndpoint(bool bSuccess, uint16 EndpointID, bool bIsHosting);
+	void OnPartyEndpointCreated(bool bSuccess, const FString& NetworkId, uint16 EndpointID, bool bIsHosting);
+	void OnCreatePartyEndpoint(bool bSuccess, bool bIsHosting, FPlayFabSessionState* SessionState);
 
 	class FOnlineSubsystemPlayFab* OSSPlayFab = nullptr;
 
-	FPendingCreateSessionInfo PendingCreateSessionInfo;
+	FPlayFabSessionState PlayFabSessionState;
 
-	FName JoinSessionCompleteSessionName;
-	FDelegateHandle OnJoinLobbyCompleteDelegateHandle;
 	void OnJoinLobbyCompleted(FName InSessionName, EOnJoinSessionCompleteResult::Type Result);
-
-	FName MatchmakingCompleteSessionName;
-	FDelegateHandle OnMatchmakingCompleteDelegateHandle;
+	FDelegateHandle OnJoinLobbyCompleteDelegateHandle;
 	void OnMatchmakingComplete(FName SessionName, bool bWasSuccessful);
-
-	FDelegateHandle OnUpdateSession_MatchmakingDelegateHandle, OnUpdateLobbyCompleteDelegate;
 	void OnUpdateSession_Matchmaking(FName SessionName, bool bWasSuccessful);
 	void OnUpdateLobbyCompleted(FName SessionName, bool bWasSuccessful);
-
-	float RetryJoinMatchmakingSession_RetryTime = 2.0f;
-	float RetryJoinMatchmakingSession_TimeSinceLastRetry = 0.0f;
-	int32 RetryJoinMatchmakingSession_Count = 0;
-	int32 RetryJoinMatchmakingSession_MaxCount = 15;
-
-	float RetryJoinLobbySession_RetryTime = 2.0f;
-	float RetryJoinLobbySession_TimeSinceLastRetry = 0.0f;
-	int32 RetryJoinLobbySession_Count = 0;
-	int32 RetryJoinLobbySession_MaxCount = 15;
 
 	FName NativeSessionName = NAME_GameSession;
 #if defined(OSS_PLAYFAB_PLAYSTATION)
@@ -177,10 +195,10 @@ protected:
 	const FUniqueNetIdPtr CreateNativeNetIdPtr();
 #endif
 
-	void OnOperationComplete_TryJoinNetwork(bool bJoinLobbyOperation, int32& RetryOperationSession_Count);
+	void OnOperationComplete_TryJoinNetwork(FName SessionName, FPlayFabSessionState* SessionState, bool bJoinLobbyOperation);
 
-	void OnCreatePartyEndpoint_Matchmaking(bool bSuccess, uint16 EndpointID, bool bIsHosting);
-	void OnCreatePartyEndpoint_JoinSession(bool bSuccess, uint16 EndpointID, bool bIsHosting);
+	void OnCreatePartyEndpoint_Matchmaking(bool bSuccess, bool bIsHosting, FName SessionName, FPlayFabSessionState* SessionState);
+	void OnCreatePartyEndpoint_JoinSession(bool bSuccess, FName SessionName);
 
 public:
 	void Tick(float DeltaTime);
@@ -188,15 +206,12 @@ public:
 	void OnCreateSessionCompleted(FName SessionName, bool bWasSuccessful);
 
 	void OnLobbyCreatedAndJoinCompleted(bool bSuccess, FName SessionName);
-	FOnLobbyCreatedAndJoinCompletedDelegate OnLobbyCreatedAndJoinCompletedDelegateHandle;
 	FDelegateHandle OnLobbyCreatedAndJoinCompletedHandle;
 
 	void OnMatchmakingTicketCompleted(bool bSuccess, FName SessionName);
-	FOnMatchmakingTicketCompletedDelegate OnMatchmakingTicketCompletedDelegateHandle;
 	FDelegateHandle OnMatchmakingTicketCompletedHandle;
 
 	void OnCancelMatchmakingComplete(FName SessionName, bool bSuccess);
-	FOnCancelMatchmakingCompleteDelegate OnCancelMatchmakingCompleteDelegateHandle;
 	FDelegateHandle OnCancelMatchmakingCompleteHandle;
 
 	void OnLeaveLobbyCompleted(FName SessionName, bool bSuccess);
@@ -212,7 +227,7 @@ public:
 	const FName GetNativeSessionName() const;
 
 private:
-	bool InternalCreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings);
+	bool InternalCreateSession(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& NewSessionSettings, FPlayFabSessionState* SessionState);
 	void RegisterVoice(const FUniqueNetId& PlayerId);
 	void UnregisterVoice(const FUniqueNetId& PlayerId);
 	FString GetPlatformIdFromEntityId(const FString& EntityId);
@@ -234,11 +249,7 @@ private:
 	bool IsHostSetting(const FName& Name);
 
 	bool bUsesNativeSession = false;
-	FString ConnectionString;
 
-	FDelegateHandle OnNativeCreateSessionCompleteDelegateHandle;
-	FDelegateHandle OnNativeUpdateSessionCompleteDelegateHandle;
-	FDelegateHandle OnNativeJoinSessionCompleteDelegateHandle;
 	FDelegateHandle OnNativeFindSessionsCompleteDelegateHandle;
 
 	FDelegateHandle OnNativeSessionUserInviteAcceptedDelegateHandle;

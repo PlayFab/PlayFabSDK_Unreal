@@ -174,6 +174,19 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientGetPlayFabIDsFromNintendoSwit
 }
 #endif
 
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(
+	_In_ FPFEntityHandle EntityHandle,
+	_In_ const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest* request,
+	_Inout_ FOnClientGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask>(EntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_4 || HC_PLATFORM == HC_PLATFORM_SONY_PLAYSTATION_5 || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientGetPlayFabIDsFromPSNAccountIDsAsync(
 	_In_ FPFEntityHandle EntityHandle,
@@ -455,7 +468,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientLinkSteamAccountAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientLinkTwitchAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementLinkTwitchAccountRequest* request,
+	_In_ const FPFAccountManagementClientLinkTwitchAccountRequest* request,
 	_Inout_ FOnClientLinkTwitchCompleted delegate
 ) noexcept
 {
@@ -568,7 +581,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkCustomIDAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_ANDROID || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookAccountAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementUnlinkFacebookAccountRequest* request,
+	_In_ const FPFAccountManagementClientUnlinkFacebookAccountRequest* request,
 	_Inout_ FOnClientUnlinkFacebookAccountCompleted delegate
 ) noexcept
 {
@@ -581,7 +594,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookAccountAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkFacebookInstantGamesIdAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementUnlinkFacebookInstantGamesIdRequest* request,
+	_In_ const FPFAccountManagementClientUnlinkFacebookInstantGamesIdRequest* request,
 	_Inout_ FOnClientUnlinkFacebookInstantGamesIdCompleted delegate
 ) noexcept
 {
@@ -722,7 +735,7 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkSteamAccountAsync(
 #if HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementClientUnlinkTwitchAsync(
 	_In_ FPFEntityHandle EntityHandle,
-	_In_ const FPFAccountManagementUnlinkTwitchAccountRequest* request,
+	_In_ const FPFAccountManagementClientUnlinkTwitchAccountRequest* request,
 	_Inout_ FOnClientUnlinkTwitchCompleted delegate
 ) noexcept
 {
@@ -765,6 +778,19 @@ bool PLAYFABSERVICES_API FPFAccountManagementClientUpdateUserTitleDisplayNameAsy
 {
 	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
 	taskManager->AddTask<FClientUpdateUserTitleDisplayNameAsyncTask>(EntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerAddOrUpdateContactEmailAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerAddOrUpdateContactEmailRequest* request,
+	_Inout_ FOnServerAddOrUpdateContactEmailCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerAddOrUpdateContactEmailAsyncTask>(TitleEntityHandle, *request, delegate);
 	return true;
 }
 #endif
@@ -882,6 +908,19 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerGetPlayFabIDsFromNintendoSwit
 {
 	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
 	taskManager->AddTask<FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask>(TitleEntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementGetPlayFabIDsFromOpenIdsRequest* request,
+	_Inout_ FOnServerGetPlayFabIDsFromOpenIdSubjectIdentifiersCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask>(TitleEntityHandle, *request, delegate);
 	return true;
 }
 #endif
@@ -1107,6 +1146,19 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerLinkSteamIdAsync(
 }
 #endif
 
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerLinkTwitchAccountAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerLinkTwitchAccountRequest* request,
+	_Inout_ FOnServerLinkTwitchAccountCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerLinkTwitchAccountAsyncTask>(TitleEntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementServerLinkXboxAccountAsync(
 	_In_ FPFEntityHandle TitleEntityHandle,
@@ -1198,6 +1250,32 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkBattleNetAccountAsync(
 }
 #endif
 
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkFacebookAccountAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerUnlinkFacebookAccountRequest* request,
+	_Inout_ FOnServerUnlinkFacebookAccountCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerUnlinkFacebookAccountAsyncTask>(TitleEntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkFacebookInstantGamesIdAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerUnlinkFacebookInstantGamesIdRequest* request,
+	_Inout_ FOnServerUnlinkFacebookInstantGamesIdCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerUnlinkFacebookInstantGamesIdAsyncTask>(TitleEntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
 #if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_MAC
 bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkNintendoServiceAccountAsync(
 	_In_ FPFEntityHandle TitleEntityHandle,
@@ -1259,6 +1337,19 @@ bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkSteamIdAsync(
 {
 	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
 	taskManager->AddTask<FServerUnlinkSteamIdAsyncTask>(TitleEntityHandle, *request, delegate);
+	return true;
+}
+#endif
+
+#if 0
+bool PLAYFABSERVICES_API FPFAccountManagementServerUnlinkTwitchAccountAsync(
+	_In_ FPFEntityHandle TitleEntityHandle,
+	_In_ const FPFAccountManagementServerUnlinkTwitchAccountRequest* request,
+	_Inout_ FOnServerUnlinkTwitchAccountCompleted delegate
+) noexcept
+{
+	FXAsyncTaskManager* taskManager = FXAsyncTaskManagerSingleton::Get().GetTaskManagerRunnable();
+	taskManager->AddTask<FServerUnlinkTwitchAccountAsyncTask>(TitleEntityHandle, *request, delegate);
 	return true;
 }
 #endif

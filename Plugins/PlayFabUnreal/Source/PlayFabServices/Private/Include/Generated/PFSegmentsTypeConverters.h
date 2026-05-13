@@ -13,9 +13,6 @@
 
 #pragma push_macro("IN")
 #undef IN
-
-const FPFSegmentsChurnRiskLevel ConvertChurnRiskLevelToUnreal(const PFSegmentsChurnRiskLevel* enumVal);
-const PFSegmentsChurnRiskLevel ConvertChurnRiskLevelToPlayfab(TSharedPtr<const FPFSegmentsChurnRiskLevel> enumVal);
 	
 TSharedPtr<const FPFSegmentsGetSegmentResult> ConvertGetSegmentResultToUnreal(const PFSegmentsGetSegmentResult* Datatype);
 const PFSegmentsGetSegmentResult* ConvertGetSegmentResultToPlayfab(TSharedPtr<const FPFSegmentsGetSegmentResult> Datatype);
@@ -37,33 +34,6 @@ const PFSegmentsGetAllSegmentsResult* ConvertGetAllSegmentsResultToPlayfab(TShar
 	
 TSharedPtr<const FPFSegmentsGetPlayersSegmentsRequest> ConvertGetPlayersSegmentsRequestToUnreal(const PFSegmentsGetPlayersSegmentsRequest* Datatype);
 const PFSegmentsGetPlayersSegmentsRequest* ConvertGetPlayersSegmentsRequestToPlayfab(TSharedPtr<const FPFSegmentsGetPlayersSegmentsRequest> Datatype);
-	
-TSharedPtr<const FPFSegmentsGetPlayersInSegmentRequest> ConvertGetPlayersInSegmentRequestToUnreal(const PFSegmentsGetPlayersInSegmentRequest* Datatype);
-const PFSegmentsGetPlayersInSegmentRequest* ConvertGetPlayersInSegmentRequestToPlayfab(TSharedPtr<const FPFSegmentsGetPlayersInSegmentRequest> Datatype);
-	
-TSharedPtr<const FPFSegmentsAdCampaignAttribution> ConvertAdCampaignAttributionToUnreal(const PFSegmentsAdCampaignAttribution* Datatype);
-const PFSegmentsAdCampaignAttribution* ConvertAdCampaignAttributionToPlayfab(TSharedPtr<const FPFSegmentsAdCampaignAttribution> Datatype);
-	
-TSharedPtr<const FPFSegmentsContactEmailInfo> ConvertContactEmailInfoToUnreal(const PFSegmentsContactEmailInfo* Datatype);
-const PFSegmentsContactEmailInfo* ConvertContactEmailInfoToPlayfab(TSharedPtr<const FPFSegmentsContactEmailInfo> Datatype);
-	
-TSharedPtr<const FPFSegmentsPlayerLinkedAccount> ConvertPlayerLinkedAccountToUnreal(const PFSegmentsPlayerLinkedAccount* Datatype);
-const PFSegmentsPlayerLinkedAccount* ConvertPlayerLinkedAccountToPlayfab(TSharedPtr<const FPFSegmentsPlayerLinkedAccount> Datatype);
-	
-TSharedPtr<const FPFSegmentsPlayerLocation> ConvertPlayerLocationToUnreal(const PFSegmentsPlayerLocation* Datatype);
-const PFSegmentsPlayerLocation* ConvertPlayerLocationToPlayfab(TSharedPtr<const FPFSegmentsPlayerLocation> Datatype);
-	
-TSharedPtr<const FPFSegmentsPlayerStatistic> ConvertPlayerStatisticToUnreal(const PFSegmentsPlayerStatistic* Datatype);
-const PFSegmentsPlayerStatistic* ConvertPlayerStatisticToPlayfab(TSharedPtr<const FPFSegmentsPlayerStatistic> Datatype);
-	
-TSharedPtr<const FPFSegmentsPushNotificationRegistration> ConvertPushNotificationRegistrationToUnreal(const PFSegmentsPushNotificationRegistration* Datatype);
-const PFSegmentsPushNotificationRegistration* ConvertPushNotificationRegistrationToPlayfab(TSharedPtr<const FPFSegmentsPushNotificationRegistration> Datatype);
-	
-TSharedPtr<const FPFSegmentsPlayerProfile> ConvertPlayerProfileToUnreal(const PFSegmentsPlayerProfile* Datatype);
-const PFSegmentsPlayerProfile* ConvertPlayerProfileToPlayfab(TSharedPtr<const FPFSegmentsPlayerProfile> Datatype);
-	
-TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> ConvertGetPlayersInSegmentResultToUnreal(const PFSegmentsGetPlayersInSegmentResult* Datatype);
-const PFSegmentsGetPlayersInSegmentResult* ConvertGetPlayersInSegmentResultToPlayfab(TSharedPtr<const FPFSegmentsGetPlayersInSegmentResult> Datatype);
 	
 TSharedPtr<const FPFSegmentsRemovePlayerTagRequest> ConvertRemovePlayerTagRequestToUnreal(const PFSegmentsRemovePlayerTagRequest* Datatype);
 const PFSegmentsRemovePlayerTagRequest* ConvertRemovePlayerTagRequestToPlayfab(TSharedPtr<const FPFSegmentsRemovePlayerTagRequest> Datatype);

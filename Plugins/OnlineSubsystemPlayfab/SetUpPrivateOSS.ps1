@@ -26,6 +26,17 @@ function Set-NuGetPackageInfo($localPath, $partyFileName, $partyVersion, $mlpFil
     Set-Content -Path $localPath\packages.config -Value $packagesXml
 }
 
+$unifiedSdkNugetFileName = ""
+$unifiedSdkNugetVersion = ""
+
+function Set-UnifiedSDKPackageInfo($localPath, $sdkFileName, $sdkVersion)
+{
+    $packagesXml = Get-Content $localPath\packages.config".xml"
+    $packagesXml = $packagesXml -replace "##UNIFIED_SDK##", $sdkFileName
+    $packagesXml = $packagesXml -replace "##UNIFIED_SDK_VERSION##", $sdkVersion
+    Set-Content -Path $localPath\packages.config -Value $packagesXml
+}
+
 if ($Platform -eq "Switch")
 {
     Write-Host "Select Switch SDK version..."
@@ -149,160 +160,66 @@ if ($Platform -eq "Switch")
 }
 elseif ($Platform -eq "PlayStation")
 {
-	Write-Host "Select PlayStation4 SDK version..."
-	Write-Host "    1: SDK 9.500"
-	Write-Host "    2: SDK 10.000"
-    Write-Host "    3: SDK 10.500"
-    Write-Host "    4: SDK 11.500"
-    Write-Host "    5: SDK 12.000"
-    while($True)
-    {
-        Write-Host -NoNewline "> "
-        $inputString = ""
-        while ($true)
-        {
-            $key = $Host.UI.RawUI.ReadKey()
-            if ($key.VirtualKeyCode -eq 13) # Enter key
-            {
-                break
-            }
-            $inputString += $key.Character
-        }
-        $Selection = $inputString
-        Write-Host ""
-        if ($Selection -eq '1')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS4-9.500"
-            $partyNugetVersion = "1.7.15"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS4-9.500"
-            $mlpNugetVersion = "1.4.3"
-            break
-        }
-        elseif ($Selection -eq '2')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS4-10.000"
-            $partyNugetVersion = "1.8.5"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS4-10.000"
-            $mlpNugetVersion = "1.6.1"
-            break
-        }
-        elseif ($Selection -eq '3')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS4-10.500"
-            $partyNugetVersion = "1.8.5"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS4-10.500"
-            $mlpNugetVersion = "1.6.2"
-            break
-        }
-        elseif ($Selection -eq '4')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS4-11.500"
-            $partyNugetVersion = "1.9.5"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS4-11.500"
-            $mlpNugetVersion = "1.7.2"
-            break
-        }
-        elseif ($Selection -eq '5')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS4-12.000"
-            $partyNugetVersion = "1.10.8"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS4-12.000"
-            $mlpNugetVersion = "1.7.9"
-            break
-        }
-        Write-Host "Unknown input"
-    }
-	Write-Host "Downloading PlayStation4 Party and Multiplayer NuGet packages..."
-    Write-Host $partyNugetFileName". Downloaded Party SDK version="$partyNugetVersion
-    Write-Host $mlpNugetFileName". Downloaded Multiplayer SDK version="$mlpNugetVersion
-    Write-Host "If you want to use a higher version of Party and Multiplayer SDK, please checkout to our private repositories and follow https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/networking/party-unreal-engine-oss-obtaining-playfab-party-libraries"
-	$localPath = ".\Platforms\PS4"
-    Set-NuGetPackageInfo $localPath $partyNugetFileName $partyNugetVersion $mlpNugetFileName $mlpNugetVersion
+	Write-Host "Select PlayStation 5 Unified SDK version..."
+	Write-Host "    1: SDK 2.3.0"
+	while($True)
+	{
+		Write-Host -NoNewline "> "
+		$inputString = ""
+		while ($true)
+		{
+			$key = $Host.UI.RawUI.ReadKey()
+			if ($key.VirtualKeyCode -eq 13) # Enter key
+			{
+				break
+			}
+			$inputString += $key.Character
+		}
+		$Selection = $inputString
+		Write-Host ""
+		if ($Selection -eq '1')
+		{
+			$unifiedSdkNugetFileName = "Microsoft.PlayFab.UnifiedSDK.Cpp.PS5-12.000"
+			$unifiedSdkNugetVersion = "2.3.0"
+			break
+		}
+		Write-Host "Unknown input"
+	}
+	Write-Host "Downloading PlayStation 5 UnifiedSDK NuGet package..."
+	Write-Host $unifiedSdkNugetFileName". Downloaded UnifiedSDK version="$unifiedSdkNugetVersion
+	$localPath = ".\Platforms\PS5"
+	Set-UnifiedSDKPackageInfo $localPath $unifiedSdkNugetFileName $unifiedSdkNugetVersion
 	nuget.exe restore $localPath -ConfigFile $localPath\nuget.config -PackagesDirectory $localPath
-	
-    $Selection = ''
-    if (-not $Version -eq '')
-    {
-        $Selection = $Version
-    }
-	Write-Host "Select PlayStation5 SDK version..."
-	Write-Host "    1: SDK 5.000"
-	Write-Host "    2: SDK 6.000"
-    Write-Host "    3: SDK 7.000"
-    Write-Host "    4: SDK 9.000"
-    Write-Host "    5: SDK 10.000"
-    Write-Host "    6: SDK 11.000"
-    while($True)
-    {
-        Write-Host -NoNewline "> "
-        $inputString = ""
-        while ($true)
-        {
-            $key = $Host.UI.RawUI.ReadKey()
-            if ($key.VirtualKeyCode -eq 13) # Enter key
-            {
-                break
-            }
-            $inputString += $key.Character
-        }
-        $Selection = $inputString
-        Write-Host ""
-        if ($Selection -eq '1')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-5.000"
-            $partyNugetVersion = "1.7.15"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-5.000"
-            $mlpNugetVersion = "1.4.3"
-            break
-        }
-        elseif ($Selection -eq '2')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-6.000"
-            $partyNugetVersion = "1.8.5"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-6.000"
-            $mlpNugetVersion = "1.6.1"
-            break
-        }
-        elseif ($Selection -eq '3')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-7.000"
-            $partyNugetVersion = "1.8.5"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-7.000"
-            $mlpNugetVersion = "1.6.2"
-            break
-        }
-        elseif ($Selection -eq '4')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-9.000"
-            $partyNugetVersion = "1.9.5"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-9.000"
-            $mlpNugetVersion = "1.7.2"
-            break
-        }
-        elseif ($Selection -eq '5')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-10.000"
-            $partyNugetVersion = "1.10.8"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-10.000"
-            $mlpNugetVersion = "1.7.9"
-            break
-        }
-        elseif ($Selection -eq '6')
-        {
-            $partyNugetFileName = "Microsoft.PlayFab.PlayFabParty.Cpp.PS5-11.000"
-            $partyNugetVersion = "1.10.12"
-            $mlpNugetFileName = "Microsoft.PlayFab.Multiplayer.Cpp.PS5-11.000"
-            $mlpNugetVersion = "1.8.0"
-            break
-        }
-        Write-Host "Unknown input"
-    }
-	Write-Host "Downloading PlayStation5 Party and Multiplayer NuGet packages..."
-    Write-Host $partyNugetFileName". Downloaded Party SDK version="$partyNugetVersion
-    Write-Host $mlpNugetFileName". Downloaded Multiplayer SDK version="$mlpNugetVersion
-    Write-Host "If you want to use a higher version of Party and Multiplayer SDK, please checkout to our private repositories and follow https://learn.microsoft.com/en-us/gaming/playfab/features/multiplayer/networking/party-unreal-engine-oss-obtaining-playfab-party-libraries"
-    $localPath = ".\Platforms\PS5"
-    Set-NuGetPackageInfo $localPath $partyNugetFileName $partyNugetVersion $mlpNugetFileName $mlpNugetVersion
+
+	Write-Host "Select PlayStation 4 Unified SDK version..."
+	Write-Host "    1: SDK 2.3.0"
+	while($True)
+	{
+		Write-Host -NoNewline "> "
+		$inputString = ""
+		while ($true)
+		{
+			$key = $Host.UI.RawUI.ReadKey()
+			if ($key.VirtualKeyCode -eq 13) # Enter key
+			{
+				break
+			}
+			$inputString += $key.Character
+		}
+		$Selection = $inputString
+		Write-Host ""
+		if ($Selection -eq '1')
+		{
+			$unifiedSdkNugetFileName = "Microsoft.PlayFab.UnifiedSDK.Cpp.PS4-12.500"
+			$unifiedSdkNugetVersion = "2.3.0"
+			break
+		}
+		Write-Host "Unknown input"
+	}
+	Write-Host "Downloading PlayStation 4 UnifiedSDK NuGet package..."
+	Write-Host $unifiedSdkNugetFileName". Downloaded UnifiedSDK version="$unifiedSdkNugetVersion
+	$localPath = ".\Platforms\PS4"
+	Set-UnifiedSDKPackageInfo $localPath $unifiedSdkNugetFileName $unifiedSdkNugetVersion
 	nuget.exe restore $localPath -ConfigFile $localPath\nuget.config -PackagesDirectory $localPath
 
 	Write-Host "Updating git submodules for private platforms..."

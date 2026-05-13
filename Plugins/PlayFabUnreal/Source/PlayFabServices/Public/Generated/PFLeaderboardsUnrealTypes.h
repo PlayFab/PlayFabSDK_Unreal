@@ -790,7 +790,7 @@ struct PLAYFABSERVICES_API FPFLeaderboardsLeaderboardEntryUpdate
 
 	/// <summary>
 	/// (Optional) Arbitrary metadata to store along side the leaderboard entry, will be returned by all
-	/// Leaderboard APIs. Must be less than 50 UTF8 encoded characters.
+	/// Leaderboard APIs.
 	/// </summary>
 	_Maybenull_ const FString metadata;
 

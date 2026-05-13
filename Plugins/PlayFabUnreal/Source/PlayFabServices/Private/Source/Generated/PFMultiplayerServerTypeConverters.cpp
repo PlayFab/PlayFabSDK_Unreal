@@ -94,6 +94,10 @@ const FPFMultiplayerServerAzureVmSize ConvertAzureVmSizeToUnreal(const PFMultipl
 	case PFMultiplayerServerAzureVmSize::Standard_D8ds_v5: return FPFMultiplayerServerAzureVmSize::Standard_D8ds_v5;
 	case PFMultiplayerServerAzureVmSize::Standard_D16ds_v5: return FPFMultiplayerServerAzureVmSize::Standard_D16ds_v5;
 	case PFMultiplayerServerAzureVmSize::Standard_D32ds_v5: return FPFMultiplayerServerAzureVmSize::Standard_D32ds_v5;
+	case PFMultiplayerServerAzureVmSize::Standard_D2ds_v6: return FPFMultiplayerServerAzureVmSize::Standard_D2ds_v6;
+	case PFMultiplayerServerAzureVmSize::Standard_D4ds_v6: return FPFMultiplayerServerAzureVmSize::Standard_D4ds_v6;
+	case PFMultiplayerServerAzureVmSize::Standard_D8ds_v6: return FPFMultiplayerServerAzureVmSize::Standard_D8ds_v6;
+	case PFMultiplayerServerAzureVmSize::Standard_D16ds_v6: return FPFMultiplayerServerAzureVmSize::Standard_D16ds_v6;
 	default:
 	return FPFMultiplayerServerAzureVmSize::Standard_A1;
 	}
@@ -190,6 +194,10 @@ const PFMultiplayerServerAzureVmSize ConvertAzureVmSizeToPlayfab(TSharedPtr<cons
 	case FPFMultiplayerServerAzureVmSize::Standard_D8ds_v5: return PFMultiplayerServerAzureVmSize::Standard_D8ds_v5;
 	case FPFMultiplayerServerAzureVmSize::Standard_D16ds_v5: return PFMultiplayerServerAzureVmSize::Standard_D16ds_v5;
 	case FPFMultiplayerServerAzureVmSize::Standard_D32ds_v5: return PFMultiplayerServerAzureVmSize::Standard_D32ds_v5;
+	case FPFMultiplayerServerAzureVmSize::Standard_D2ds_v6: return PFMultiplayerServerAzureVmSize::Standard_D2ds_v6;
+	case FPFMultiplayerServerAzureVmSize::Standard_D4ds_v6: return PFMultiplayerServerAzureVmSize::Standard_D4ds_v6;
+	case FPFMultiplayerServerAzureVmSize::Standard_D8ds_v6: return PFMultiplayerServerAzureVmSize::Standard_D8ds_v6;
+	case FPFMultiplayerServerAzureVmSize::Standard_D16ds_v6: return PFMultiplayerServerAzureVmSize::Standard_D16ds_v6;
 	default:
 	return PFMultiplayerServerAzureVmSize::Standard_A1;
 	}

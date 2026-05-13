@@ -4,6 +4,7 @@
 
 #include "OnlineCognitiveServicesInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabPartyNetwork.h"
 #include "PlayFabHelpers.h"
 
 FOnlineCognitiveServicesPlayFab::FOnlineCognitiveServicesPlayFab(class FOnlineSubsystemPlayFab* InSubsystem) 
@@ -221,7 +222,7 @@ bool FOnlineCognitiveServicesPlayFab::SendChatText(const FUniqueNetId& Sender, c
 		return false;
 	}
 
-	PartyNetwork* PlayFabPartyNetwork = OSSPlayFab->Network;
+	PartyNetwork* PlayFabPartyNetwork = OSSPlayFab->PartyNetwork->Network;
 	if (PlayFabPartyNetwork == nullptr)
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineCognitiveServicesPlayFab::SendChatText: PlayFabPartyNetwork was null"));

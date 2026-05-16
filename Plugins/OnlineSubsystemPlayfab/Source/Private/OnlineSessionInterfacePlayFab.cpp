@@ -2276,7 +2276,7 @@ void FOnlineSessionPlayFab::OnCreateSessionCompleted(FName SessionName, bool bPl
 		if (PlayFabSessionState.PendingCreateSessionInfo.PlayerId.IsValid())
 		{
 			FUniqueNetIdPtr NativeNetId;
-			if (bUsesNativeSession && !IsRunningDedicatedServer())
+			if (!IsRunningDedicatedServer())
 			{
 				NativeNetId = OSSPlayFab->GetNativeNetId(PlayFabSessionState.PendingCreateSessionInfo.PlayerId->AsShared());
 			}

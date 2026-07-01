@@ -27,8 +27,10 @@ The plugin supports the following platforms:
 - **XB1** (Xbox One)
 - **PS5** (PlayStation 5)
 - **PS4** (PlayStation 4)
+- **Switch** (Switch)
+- **Switch2** (Switch 2)
 
-To access PlayStation support, please follow the official process outlined in this page: [Request access for secured SDKs and samples](https://review.learn.microsoft.com/en-us/gaming/playfab/sdks/request-access-for-sdks-samples?branch=main).
+To access PlayStation and Switch support, please follow the official process outlined in this page: [Request access for secured SDKs and samples](https://review.learn.microsoft.com/en-us/gaming/playfab/sdks/request-access-for-sdks-samples?branch=main).
 
 ## Setup
 
@@ -39,29 +41,33 @@ The PlayFab plugins require the 2604 GDK but Unreal Engine 5.7 does not support 
 * Set `MinVersion` to `260400` or below
 * Set `MainVersion` somewhere in between like `260400`
 
-### PlayStation Setup
+### Private Platform Setup (PlayStation / Switch)
 
-PlayStation platform support requires additional private components that are distributed as git submodules and NuGet packages.
+PlayStation and Switch support requires additional private components that are distributed as git submodules and NuGet packages. Both platforms share the same setup scripts — only the `-Platform` parameter differs.
+
+> **If you need both PlayStation and Switch:** run the PlayStation setup first, then the Switch setup — the two patches touch the same `.Build.cs` files, and Switch's hunks shift PlayStation's expected line numbers. The setup scripts detect wrong order and refuse to apply; if that happens, revert the affected Build.cs files (`git checkout -- <file>`) and re-run with `-Platform PlayStation` first. If you only have access to one, the ordering note doesn't apply.
 
 #### Prerequisites
 
-- Access to the PlayFab private Azure DevOps repositories (granted through the request access process above)
+- Access to the PlayFab private Azure DevOps repositories for your target platform. PlayStation and Switch access are granted separately; see [Request access for secured SDKs and samples](https://review.learn.microsoft.com/en-us/gaming/playfab/sdks/request-access-for-sdks-samples?branch=main).
 - [NuGet.exe](https://www.nuget.org/downloads) installed and available on your `PATH`
 - Git installed
 
+In the steps below, replace `<Platform>` with `PlayStation` or `Switch` depending on which platform you're setting up. Run the setup once per platform.
+
 #### Setup for Both Plugins
 
-From the root of this repository, run the setup script with the `PlayStation` platform parameter:
+From the root of this repository, run the wrapper script with the desired platform:
 
 ```powershell
-.\SetUpPrivatePlatforms.ps1 -Platform PlayStation
+.\SetUpPrivatePlatforms.ps1 -Platform <Platform>
 ```
 
 This wrapper script runs both plugin setup scripts in sequence:
-1. `Plugins\PlayFabUnreal\SetUpPrivate.ps1` — Downloads NuGet packages and initializes submodules for the PlayFabUnreal plugin
+1. `Plugins\PlayFabUnreal\SetUpPrivate.ps1` — Downloads NuGet packages (and, for PlayStation, initializes submodules) for the PlayFabUnreal plugin
 2. `Plugins\OnlineSubsystemPlayfab\SetUpPrivateOSS.ps1` — Downloads NuGet packages and initializes submodules for the OnlineSubsystemPlayFab plugin
 
-Each script will prompt you to select PS5 and PS4 SDK versions for the NuGet packages.
+Each script prompts you to select the SDK versions for the NuGet packages it downloads. For `-Platform PlayStation` you'll be prompted for PS5 and PS4 SDK versions; for `-Platform Switch` you'll be prompted for Switch and Switch2 SDK versions.
 
 #### Setup for Individual Plugins
 
@@ -70,13 +76,13 @@ If you only need one of the plugins, you can run the setup scripts individually 
 For **PlayFabUnreal** only:
 ```powershell
 cd Plugins\PlayFabUnreal
-.\SetUpPrivate.ps1 -Platform PlayStation
+.\SetUpPrivate.ps1 -Platform <Platform>
 ```
 
 For **OnlineSubsystemPlayFab** only:
 ```powershell
 cd Plugins\OnlineSubsystemPlayfab
-.\SetUpPrivateOSS.ps1 -Platform PlayStation
+.\SetUpPrivateOSS.ps1 -Platform <Platform>
 ```
 
 ### PlayFabUnreal Plugin Only

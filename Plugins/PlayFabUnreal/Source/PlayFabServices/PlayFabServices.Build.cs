@@ -270,6 +270,7 @@ public class PlayFabServices : ModuleRules
         LogPlayFabServices($"Module directory: {ModuleDirectory}");
         
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        bAllowConfidentialPlatformDefines = true;
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -338,11 +339,11 @@ public class PlayFabServices : ModuleRules
             return;
         }
 
-        // Switch Platform
-        if (Target.Platform.ToString() == "Switch")
+        // Switch / Switch2 Platform
+        if (Target.Platform.ToString() == "Switch" || Target.Platform.ToString() == "Switch2")
         {
-            LogPlayFabServices("Using Switch platform configuration");
-            ConfigureForSwitchPlatform();
+            LogPlayFabServices($"Using {Target.Platform} platform configuration");
+            ConfigureForSwitchPlatform(Target.Platform.ToString());
             return;
         }
 
@@ -407,15 +408,14 @@ public class PlayFabServices : ModuleRules
         PublicIncludePaths.Add(IncludePath);
     }
 
-    private void ConfigureForSwitchPlatform()
+    private void ConfigureForSwitchPlatform(string platformFolder = "Switch")
     {
-        string PluginPath = Path.Combine(ModuleDirectory, "../../");
-        string PlatformsPath = Path.Combine(PluginPath, "Platforms", "Switch");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+        NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
+        string PlatformsPath = Path.Combine(ModuleDirectory, "../../", "Platforms", platformFolder);
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
 
-        PublicIncludePaths.Add(IncludePath);
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabServices.a"));
+        PublicSystemIncludePaths.Add(Path.Combine(PlatformsPath, NugetPackageInfo.UnifiedSDKPackagePath, "build", "native", "include"));
     }
 
     private void ConfigureForPlayStation4Platform()

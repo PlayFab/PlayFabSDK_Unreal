@@ -7,3 +7,9 @@
 [submodule "Plugins/OnlineSubsystemPlayfab/Source/PlatformSpecific/PlayStation"]
 	path = Plugins/OnlineSubsystemPlayfab/Source/PlatformSpecific/PlayStation
 	url = https://PlayFabPrivate@dev.azure.com/PlayFabPrivate/PS5/_git/PlayFab.Unreal.OSS.PS
+[submodule "Plugins/PlayFabUnreal/Source/PlayFabCore/PlatformSpecific/Switch"]
+	path = Plugins/PlayFabUnreal/Source/PlayFabCore/PlatformSpecific/Switch
+	url = https://PlayFabPrivate@dev.azure.com/PlayFabPrivate/Switch2/_git/PlayFab.Unreal.Switch
+[submodule "Plugins/OnlineSubsystemPlayfab/Source/PlatformSpecific/Switch"]
+	path = Plugins/OnlineSubsystemPlayfab/Source/PlatformSpecific/Switch
+	url = https://PlayFabPrivate@dev.azure.com/PlayFabPrivate/Switch2/_git/PlayFab.Unreal.OSS.Switch

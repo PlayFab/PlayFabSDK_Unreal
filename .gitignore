@@ -90,3 +90,7 @@ DerivedDataCache/*
 **/Platforms/Switch/Microsoft.PlayFab.PlayFabParty.Cpp.*
 **/Platforms/Switch/Microsoft.PlayFab.Multiplayer.Cpp.*
 **/Platforms/Switch/Microsoft.PlayFab.UnifiedSDK.Cpp.*
+
+**/Platforms/Switch2/Microsoft.PlayFab.PlayFabParty.Cpp.*
+**/Platforms/Switch2/Microsoft.PlayFab.Multiplayer.Cpp.*
+**/Platforms/Switch2/Microsoft.PlayFab.UnifiedSDK.Cpp.*

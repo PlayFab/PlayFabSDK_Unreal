@@ -1,4 +1,5 @@
 #include "PFServices.h"
+#include "PFCore.h"
 
 #if HC_PLATFORM_IS_PLAYSTATION
 bool PLAYFABSERVICES_API FPFServicesInitialize() noexcept

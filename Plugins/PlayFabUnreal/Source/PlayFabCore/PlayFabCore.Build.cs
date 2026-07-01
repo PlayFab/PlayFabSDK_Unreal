@@ -272,6 +272,7 @@ public class PlayFabCore : ModuleRules
         LogPlayFabCore($"Module directory: {ModuleDirectory}");
         
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        bAllowConfidentialPlatformDefines = true;
 
         PublicIncludePathModuleNames.AddRange(
             new string[] {
@@ -336,11 +337,11 @@ public class PlayFabCore : ModuleRules
             return;
         }
 
-        // Switch Platform
-        if (Target.Platform.ToString() == "Switch")
+        // Switch / Switch2 Platform
+        if (Target.Platform.ToString() == "Switch" || Target.Platform.ToString() == "Switch2")
         {
-            LogPlayFabCore("Using Switch platform configuration");
-            ConfigureForSwitchPlatform();
+            LogPlayFabCore($"Using {Target.Platform} platform configuration");
+            ConfigureForSwitchPlatform(Target.Platform.ToString());
             return;
         }
 
@@ -528,22 +529,21 @@ public class PlayFabCore : ModuleRules
         LogPlayFabCore("GDK platform configuration completed");
     }
 
-    private void ConfigureForSwitchPlatform()
+    private void ConfigureForSwitchPlatform(string platformFolder = "Switch")
     {
-        LogPlayFabCore("Configuring PlayFabCore for Switch Platform");
-        
-        string PluginPath = Path.Combine(ModuleDirectory, "../../");
-        string PlatformsPath = Path.Combine(PluginPath, "Platforms", "Switch");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+        NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
+        string PlatformsPath = Path.Combine(ModuleDirectory, "../../", "Platforms", platformFolder);
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
 
-        LogPlayFabCore($"Switch include path: {IncludePath}");
-        LogPlayFabCore($"Switch library path: {LibPath}");
+        PublicSystemIncludePaths.Add(Path.Combine(PlatformsPath, NugetPackageInfo.UnifiedSDKPackagePath, "build", "native", "include"));
 
-        PublicIncludePaths.Add(IncludePath);
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabCore.a"));
-        
-        LogPlayFabCore("Switch platform configuration completed");
+        // Switch2: re-include PlatformSpecific/Switch so its *.Switch.cpp files compile (UBT excludes folders named after other platforms).
+        if (Target.Platform.ToString() == "Switch2")
+        {
+            ConditionalAddModuleDirectory(EpicGames.Core.DirectoryReference.Combine(
+                new EpicGames.Core.DirectoryReference(ModuleDirectory), "PlatformSpecific", "Switch"));
+        }
     }
 
     private void ConfigureForPlayStation4Platform()

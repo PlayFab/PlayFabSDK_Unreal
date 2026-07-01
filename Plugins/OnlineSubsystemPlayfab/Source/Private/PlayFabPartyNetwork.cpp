@@ -100,6 +100,11 @@ bool FPlayFabPartyNetwork::CreateAndConnectToNetwork()
 
 	PartyNetworkDescriptor NewNetworkDescriptor = {};
 
+	uint32_t CachedRegionCount = 0;
+	const PartyRegion* CachedRegions = nullptr;
+	PartyManager::GetSingleton().GetRegions(&CachedRegionCount, &CachedRegions);
+	UE_LOG_ONLINE(Verbose, TEXT("FPlayFabPartyNetwork::CreateAndConnectToNetwork: CachedRegionCount: %u"), CachedRegionCount);
+
 	// Create a new network descriptor
 	PartyError Err = PartyManager::GetSingleton().CreateNewNetwork(
 		LocalPartyUser,				// Local User
@@ -132,7 +137,7 @@ bool FPlayFabPartyNetwork::CreateAndConnectToNetwork()
 
 bool FPlayFabPartyNetwork::ConnectToNetwork(const FString& NewNetworkId, const FString& NewNetworkDescriptorStr)
 {
-	UE_LOG_ONLINE(Log, TEXT("FPlayFabPartyNetwork::ConnectToNetwork()"));
+	UE_LOG_ONLINE(Log, TEXT("FPlayFabPartyNetwork::ConnectToNetwork: NetworkId: %s"), *NewNetworkId);
 
 	if (OSSPlayFab->bPartyInitialized == false)
 	{

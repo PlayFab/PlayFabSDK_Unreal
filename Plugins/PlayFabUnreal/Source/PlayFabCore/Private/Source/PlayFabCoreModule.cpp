@@ -12,6 +12,9 @@
 #if HC_PLATFORM_IS_PLAYSTATION
 #include "PlayStation/PlayFabCoreModule.PS.h"
 #endif
+#if HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
+#include "Switch/PlayFabCoreModule.Switch.h"
+#endif
 
 IMPLEMENT_MODULE(FPlayFabCore, PlayFabCore);
 
@@ -36,11 +39,19 @@ void FPlayFabCore::StartupModule()
 	PlayFabCorePS::InitializePlatform();
 #endif
 
+#if HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
+	PlayFabCoreSwitch::InitializePlatform();
+#endif
+
 }
 
 void FPlayFabCore::ShutdownModule()
 {
 	FXAsyncTaskQueue::PlatformTearDown();
+
+#if HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
+	PlayFabCoreSwitch::ShutdownPlatform();
+#endif
 
 #if defined(PF_UE_GDK_SUPPORT)
 	IGDKRuntimeModule* GDKRuntimeModule = IGDKRuntimeModule::TryGet();

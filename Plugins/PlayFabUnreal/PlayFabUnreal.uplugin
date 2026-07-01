@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 30101,
-	"VersionName": "3.1.1",
+	"Version": 30102,
+	"VersionName": "3.1.2",
 	"Modules": [
 		{
 			"Name": "PlayFabUnreal",
@@ -27,7 +27,7 @@
 			"Name": "PlayFabGameSave",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"PlatformDenyList": [ "PS4" ]
+			"PlatformDenyList": [ "PS4", "Switch", "Switch2" ]
 		}
 	],
 	"FriendlyName": "PlayFabUnreal",

@@ -11,12 +11,23 @@
 #include "XAsyncTaskManager.h"
 #include "PFServicesAsyncTasks.h"
 #include "PFServicesTypes.h"
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/AllowWindowsPlatformAtomics.h"
+#endif
 THIRD_PARTY_INCLUDES_START
 #include <playfab/services/PFServices.h>
 #if HC_PLATFORM_IS_PLAYSTATION
 #include <playfab/services/PFServicesPS.h>
 #endif
+#if HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
+#include <playfab/services/PFServicesSwitch.h>
+#endif
 THIRD_PARTY_INCLUDES_END
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/HideWindowsPlatformAtomics.h"
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 
 extern "C"
 {
@@ -34,7 +45,7 @@ extern "C"
 bool PLAYFABSERVICES_API FPFServicesInitialize() noexcept;
 #endif
 
-#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_MAC
+#if HC_PLATFORM == HC_PLATFORM_GDK || HC_PLATFORM == HC_PLATFORM_LINUX || HC_PLATFORM == HC_PLATFORM_IOS || HC_PLATFORM == HC_PLATFORM_MAC || HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
 /// <summary>
 /// Initializes PlayFab Services global state
 /// </summary>

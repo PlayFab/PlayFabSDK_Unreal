@@ -255,6 +255,9 @@ private:
 #if defined(OSS_PLAYFAB_PLAYSTATION)
 	bool AuthenticateUserPlayStation(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
 #endif // OSS_PLAYFAB_PLAYSTATION
+#if defined(OSS_PLAYFAB_SWITCH)
+	bool AuthenticateUserSwitch(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle);
+#endif // OSS_PLAYFAB_SWITCH
 	bool AuthenticateServerWithSecretKey();
 	bool bServerAuthInFlight = false;
 	bool bServerAuthenticated = false;

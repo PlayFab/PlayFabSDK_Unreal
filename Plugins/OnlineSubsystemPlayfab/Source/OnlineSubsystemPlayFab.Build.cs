@@ -237,6 +237,7 @@ public class OnlineSubsystemPlayFab : ModuleRules
 		}
 
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		bAllowConfidentialPlatformDefines = true;
 
 		// Common Public Module Dependencies
 		PublicDependencyModuleNames.AddRange(
@@ -297,10 +298,10 @@ public class OnlineSubsystemPlayFab : ModuleRules
 			}
 		}
 
-		//Switch
-		if (Target.Platform.ToString() == "Switch")
+		//Switch / Switch2
+		if (Target.Platform.ToString() == "Switch" || Target.Platform.ToString() == "Switch2")
 		{
-			ConfigureForSwitchPlatform();
+			ConfigureForSwitchPlatform(Target.Platform.ToString());
 			return;
 
 		}
@@ -449,6 +450,7 @@ public class OnlineSubsystemPlayFab : ModuleRules
 
 		PublicSystemIncludePaths.AddRange(
 			new string[] {
+				IncludePath,
 				PFCoreIncludePath,
 				PFPartyIncludePath,
 				PFMLPIncludePath,
@@ -470,88 +472,17 @@ public class OnlineSubsystemPlayFab : ModuleRules
 		RuntimeDependencies.Add("$(TargetOutputDir)/PartyXboxLive.pdb", Path.Combine(BinPath, "PartyXboxLive.pdb"), StagedFileType.DebugNonUFS);
 	}
 
-	//Switch
-	private void ConfigureForSwitchPlatform()
+	//Switch / Switch2
+	private void ConfigureForSwitchPlatform(string platformFolder = "Switch")
 	{
-		PublicDependencyModuleNames.Add("OnlineSubsystemSwitch");
+		PublicDependencyModuleNames.Add("OnlineSubsystemNintendo");
 
-		string PlatformDir = Path.Combine(PluginDirectory, "Platforms", "Switch");
+		bAllowConfidentialPlatformDefines = true;
+		PublicDefinitions.Add("OSS_PLAYFAB_SWITCH=1");
 
-		if (!Directory.Exists(PlatformDir))
-		{
-			throw new BuildException("PlayFab precompiled dependencies were not found.");
-		}
-
-		// Find the MLP and Party library names under the PlatformDir.
-		NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
-		NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
-		NuGetLoader.ParsingNuGetPackage(ref PlatformDir, ref NugetPackageInfo);
-
-		// Load Party binaries.
-		string PartyIncludePath = Path.Combine(PlatformDir, NugetPackageInfo.PartyPackagePath, "build", "native", "include");
-		string PartyLibraryPath = Path.Combine(PlatformDir, NugetPackageInfo.PartyPackagePath, "build", "native", "lib", "NX64", "release");
-
-		if (!Directory.Exists(PartyIncludePath) ||
-			!Directory.Exists(PartyLibraryPath))
-		{
-			throw new BuildException("PlayFab Party precompiled dependencies were not found.");
-		}
-
-		string PartyNroPath = Path.Combine(PartyLibraryPath, "Party.nro");
-		string PartyNrrPath = Path.Combine(PartyLibraryPath, "Party.nrr");
-		string PartyNrsPath = Path.Combine(PartyLibraryPath, "Party.nrs");
-
-		if (!File.Exists(PartyNroPath) || !File.Exists(PartyNrrPath) || !File.Exists(PartyNrsPath))
-		{
-			throw new BuildException("Party.nro/.nrr/.nrs not found in: " + PartyLibraryPath);
-		}
-
-		PublicSystemIncludePaths.Add(PartyIncludePath);
-		PublicAdditionalLibraries.Add(PartyNrsPath);
-		RuntimeDependencies.Add("Binaries/Switch/Party.nro", PartyNroPath, StagedFileType.SystemNonUFS);
-
-		// Load Multiplayer binaries
-		string MultiplayerIncludePath = Path.Combine(PlatformDir, NugetPackageInfo.MultiplayerPackagePath, "build", "native", "include");
-		string MultiplayerLibraryPath = Path.Combine(PlatformDir, NugetPackageInfo.MultiplayerPackagePath, "build", "native", "lib", "NX64", "release");
-
-		if (!Directory.Exists(MultiplayerIncludePath) ||
-			!Directory.Exists(MultiplayerLibraryPath))
-		{
-			throw new BuildException("PlayFab Multiplayer precompiled dependencies were not found.");
-		}
-
-		string MpNroPath = Path.Combine(MultiplayerLibraryPath, "libPlayFabMultiplayer.nro");
-		string MpNrrPath = Path.Combine(MultiplayerLibraryPath, "libPlayFabMultiplayer.nrr");
-		string MpNrsPath = Path.Combine(MultiplayerLibraryPath, "libPlayFabMultiplayer.nrs");
-
-		if (!File.Exists(MpNroPath) || !File.Exists(MpNrrPath) || !File.Exists(MpNrsPath))
-		{
-			throw new BuildException("libPlayFabMultiplayer.nro/.nrr/.nrs not found in: " + MultiplayerLibraryPath);
-		}
-
-		PublicSystemIncludePaths.Add(MultiplayerIncludePath);
-		PublicAdditionalLibraries.Add(MpNrsPath);
-		RuntimeDependencies.Add("Binaries/Switch/libPlayFabMultiplayer.nro", MpNroPath, StagedFileType.SystemNonUFS);
-
-		// Load Nintendo SDK dependencies.
-		string NintendoSdkRoot = Environment.GetEnvironmentVariable("NINTENDO_SDK_ROOT");
-		if (string.IsNullOrWhiteSpace(NintendoSdkRoot))
-		{
-			throw new BuildException("NINTENDO_SDK_ROOT environment variable is not set.");
-		}
-
-		string configuration = (Target.Configuration == UnrealTargetConfiguration.Shipping || Target.Configuration == UnrealTargetConfiguration.Test)
-			? "Release"
-			: "Develop";
-
-		string WebSocketLibPath = Path.Combine(NintendoSdkRoot, "Libraries/NX-NXFP2-a64", configuration, "libnn_websocket.a");
-
-		if (!File.Exists(WebSocketLibPath))
-		{
-			throw new BuildException($"libnn_websocket.a not found at: {WebSocketLibPath}");
-		}
-
-		PublicAdditionalLibraries.Add(WebSocketLibPath);
+		UnifiedSDKPackageLoader SDKLoader = new UnifiedSDKPackageLoader();
+		string PlatformDir = Path.Combine(PluginDirectory, "Platforms", platformFolder);
+		SDKLoader.ParsingNuGetPackage(ref PlatformDir);
 	}
 
 	//Windows
@@ -631,7 +562,6 @@ public class OnlineSubsystemPlayFab : ModuleRules
 
 		PublicDependencyModuleNames.Add("OnlineSubsystemPS4");
 
-		bAllowConfidentialPlatformDefines = true;
 		PublicDefinitions.Add("OSS_PLAYFAB_PLAYSTATION=1");
 	}
 
@@ -644,7 +574,6 @@ public class OnlineSubsystemPlayFab : ModuleRules
 
 		PublicDependencyModuleNames.Add("OnlineSubsystemPS5");
 
-		bAllowConfidentialPlatformDefines = true;
 		PublicDefinitions.Add("OSS_PLAYFAB_PLAYSTATION=1");
 	}
 }

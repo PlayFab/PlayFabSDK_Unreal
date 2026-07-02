@@ -291,11 +291,11 @@ public class LibHttpClient: ModuleRules
             return;
         }
 
-        // Switch Platform
-        if (Target.Platform.ToString() == "Switch")
+        // Switch / Switch2 Platform
+        if (Target.Platform.ToString() == "Switch" || Target.Platform.ToString() == "Switch2")
         {
-            LogLibHttpClient("Using Switch platform configuration");
-            ConfigureForSwitchPlatform();
+            LogLibHttpClient($"Using {Target.Platform} platform configuration");
+            ConfigureForSwitchPlatform(Target.Platform.ToString());
             return;
         }
 
@@ -354,12 +354,14 @@ public class LibHttpClient: ModuleRules
         PublicIncludePaths.Add(IncludePath);
     }
 
-    private void ConfigureForSwitchPlatform()
+    private void ConfigureForSwitchPlatform(string platformFolder = "Switch")
     {
-        string PluginPath = Path.Combine(ModuleDirectory, "../../");
-        string PlatformsPath = Path.Combine(PluginPath, "Platforms", "Switch");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
-        PublicIncludePaths.Add(IncludePath);
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+        NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
+        string PlatformsPath = Path.Combine(ModuleDirectory, "../../", "Platforms", platformFolder);
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
+
+        PublicSystemIncludePaths.Add(Path.Combine(PlatformsPath, NugetPackageInfo.UnifiedSDKPackagePath, "build", "native", "include"));
     }
 
     private void ConfigureForPlayStation4Platform()

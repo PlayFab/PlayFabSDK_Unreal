@@ -7,7 +7,7 @@
 #include "Containers/Ticker.h"
 #include "Templates/UniquePtr.h"
 
-#if HC_PLATFORM_IS_PLAYSTATION
+#if HC_PLATFORM_IS_PLAYSTATION || HC_PLATFORM == HC_PLATFORM_NINTENDO_SWITCH
 
 #define INFINITE						0xFFFFFFFF  // Infinite timeout
 #define ERROR_INVALID_PARAMETER			87L    // dderror

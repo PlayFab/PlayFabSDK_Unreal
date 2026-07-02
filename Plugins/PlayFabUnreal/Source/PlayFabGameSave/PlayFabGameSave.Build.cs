@@ -276,6 +276,7 @@ public class PlayFabGameSave : ModuleRules
         }
         
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        bAllowConfidentialPlatformDefines = true;
 
         PrivateIncludePaths.AddRange(
             new string[] {

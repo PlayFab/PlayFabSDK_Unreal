@@ -1,6 +1,7 @@
 #include "PlayFabHelpers.h"
 
 #include "GenericPlatform/GenericPlatformMisc.h"
+#include "Misc/ConfigCacheIni.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemPlayFabPrivate.h"
 #include "OnlineSubsystemPlayFabTypes.h"

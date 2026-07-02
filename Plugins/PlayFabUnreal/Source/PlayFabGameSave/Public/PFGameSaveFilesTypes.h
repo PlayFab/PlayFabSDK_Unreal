@@ -8,9 +8,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/AllowWindowsPlatformAtomics.h"
+#endif
 THIRD_PARTY_INCLUDES_START
 #include <playfab/gamesave/PFGameSaveFilesTypes.h>
 THIRD_PARTY_INCLUDES_END
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/HideWindowsPlatformAtomics.h"
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 
 /// <summary>
 /// Options to use when initializing the game save system.

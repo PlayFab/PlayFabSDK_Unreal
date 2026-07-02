@@ -12,7 +12,9 @@
 #include "OnlineSubsystemNames.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabHelpers.h"
 #include "HAL/PlatformProcess.h"
+#include "HAL/FileManager.h"
 
 IMPLEMENT_MODULE(FOnlineSubsystemPlayFabModule, OnlineSubsystemPlayFab);
 

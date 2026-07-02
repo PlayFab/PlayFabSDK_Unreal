@@ -271,6 +271,7 @@ public class PlayFabUnreal : ModuleRules
         LogPlayFabUnreal($"Module directory: {ModuleDirectory}");
         
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        bAllowConfidentialPlatformDefines = true;
 
         PrivateIncludePaths.AddRange(
             new string[] {
@@ -293,8 +294,8 @@ public class PlayFabUnreal : ModuleRules
             }
         );
 
-        // GameSave is not supported on PS4
-        if (Target.Platform.ToString() != "PS4")
+        // GameSave is not supported on PS4 or Switch (or Switch2)
+        if (Target.Platform.ToString() != "PS4" && Target.Platform.ToString() != "Switch" && Target.Platform.ToString() != "Switch2")
         {
             PublicDependencyModuleNames.Add("PlayFabGameSave");
         }
@@ -342,11 +343,11 @@ public class PlayFabUnreal : ModuleRules
             return;
         }
 
-		// Switch Platform
-		if (Target.Platform.ToString() == "Switch")
+		// Switch / Switch2 Platform
+		if (Target.Platform.ToString() == "Switch" || Target.Platform.ToString() == "Switch2")
         {
-            LogPlayFabUnreal("Using Switch platform configuration");
-            ConfigureForSwitchPlatform();
+            LogPlayFabUnreal($"Using {Target.Platform} platform configuration");
+            ConfigureForSwitchPlatform(Target.Platform.ToString());
             return;
         }
 
@@ -486,18 +487,17 @@ public class PlayFabUnreal : ModuleRules
         }
     }
 
-    private void ConfigureForSwitchPlatform()
+    private void ConfigureForSwitchPlatform(string platformFolder = "Switch")
     {
-        string PluginPath = Path.Combine(ModuleDirectory, "../../");
-        string PlatformsPath = Path.Combine(PluginPath, "Platforms", "Switch");
-        string LibPath = Path.Combine(PlatformsPath, "lib");
-        string IncludePath = Path.Combine(PlatformsPath, "include");
+        NuGetPackageLoader.NuGetPackageInformation NugetPackageInfo = new NuGetPackageLoader.NuGetPackageInformation();
+        NuGetPackageLoader NuGetLoader = new NuGetPackageLoader();
+        string PlatformsPath = Path.Combine(ModuleDirectory, "../../", "Platforms", platformFolder);
+        NuGetLoader.ParsingNuGetPackage(ref PlatformsPath, ref NugetPackageInfo);
 
-        PublicIncludePaths.Add(IncludePath);
+        string NativePath = Path.Combine(PlatformsPath, NugetPackageInfo.UnifiedSDKPackagePath, "build", "native");
+        string BinPath = Path.Combine(NativePath, "bin");
 
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.a"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabCore.a"));
-        PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libPlayFabServices.a"));
+        PublicSystemIncludePaths.Add(Path.Combine(NativePath, "include"));
     }
 
     private void ConfigureForPlayStation4Platform()

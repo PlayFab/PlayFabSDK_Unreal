@@ -13,6 +13,10 @@
 #include "PFCoreTypeConverters.h"
 #include "PFEntityTypes.h"
 #include "ResultMacros.h"
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/AllowWindowsPlatformAtomics.h"
+#endif
 THIRD_PARTY_INCLUDES_START
 #include <playfab/core/PFPal.h>
 #include <playfab/core/PFTypes.h>
@@ -20,6 +24,10 @@ THIRD_PARTY_INCLUDES_START
 #include <playfab/core/PFServiceConfig.h>
 #include <playfab/core/PFEntity.h>
 THIRD_PARTY_INCLUDES_END
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/HideWindowsPlatformAtomics.h"
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 
 extern "C"
 {

@@ -10,6 +10,7 @@ PRAGMA_DISABLE_UNDEFINED_IDENTIFIER_WARNINGS
 
 #include "OnlineVoiceInterfacePlayFab.h"
 #include "OnlineSessionInterfacePlayFab.h"
+#include "Misc/ConfigCacheIni.h"
 
 namespace
 {

@@ -15,6 +15,7 @@
 #include "HttpModule.h"
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
+#include "Misc/CommandLine.h"
 
 #include "PFCore.h"
 #include "PFAuthentication.h"
@@ -562,11 +563,11 @@ bool FOnlineIdentityPlayFab::AuthenticateUserGDK(const FString& PlatformUserIdSt
 
 bool FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey()
 {
-#if defined(OSS_PLAYFAB_PLAYSTATION)
-	// Server auth with secret key not supported on PlayStation.
-	UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey: Not supported on PlayStation"));
+#if defined(OSS_PLAYFAB_PLAYSTATION) || defined(OSS_PLAYFAB_SWITCH)
+	// Server auth with secret key not supported on PlayStation/Switch.
+	UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey: Not supported on this platform"));
 	return false;
-#else // OSS_PLAYFAB_PLAYSTATION
+#else // OSS_PLAYFAB_PLAYSTATION || OSS_PLAYFAB_SWITCH
 	FPFInitialize();
 
 	FPFServiceConfigHandle ServiceConfigHandle;
@@ -772,7 +773,7 @@ bool FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey()
 				}
 			})
 	);
-#endif // !OSS_PLAYFAB_PLAYSTATION
+#endif // !OSS_PLAYFAB_PLAYSTATION && !OSS_PLAYFAB_SWITCH
 }
 
 // Called after platform has appended its headers/body
@@ -802,19 +803,7 @@ bool FOnlineIdentityPlayFab::AuthenticateUserByPlatform(const FString& PlatformU
 	}
 
 #ifdef OSS_PLAYFAB_SWITCH
-	// TODO modify to use LocalUserHandle
-	PFAuthenticationLoginWithNintendoServiceAccountRequest request = {};
-	request.createAccount = true;		
-	return FPFAuthenticationLoginWithNintendoServiceAccountAsync(
-		m_serviceConfigHandle,
-		request,
-		FOnLoginWithNintendoServiceAccountDelegate::CreateLambda([this, PlatformUserIdStr](bool bWasSuccessful, const PFAuthenticationLoginResult* lognResults, PFEntityHandle* entityHandle)
-			{
-				const FPFEntityHandle EntityHandle = entityHandle ? *entityHandle : nullptr;
-				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, EntityHandle);
-				UE_LOG(LogTemp, Display, TEXT("LoginWithNintendoServiceAccount Complete"));
-			})
-	);
+	return AuthenticateUserSwitch(PlatformUserIdStr, m_serviceConfigHandle);
 #elif defined(OSS_PLAYFAB_WIN64)
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	if (IsNativePlatformSubsystemGDK())

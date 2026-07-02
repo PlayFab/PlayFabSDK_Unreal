@@ -6,10 +6,20 @@
 #include "UObject/NoExportTypes.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/ObjectMacros.h"
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/AllowWindowsPlatformAtomics.h"
+#endif
+THIRD_PARTY_INCLUDES_START
 #include "httpClient/config.h"
 #include "httpClient/pal.h"
 #include "httpClient/httpClient.h"
 #include "httpClient/async.h"
+THIRD_PARTY_INCLUDES_END
+#if PLATFORM_WINDOWS || (defined(PLATFORM_XSX) && PLATFORM_XSX) || (defined(PLATFORM_XB1) && PLATFORM_XB1)
+#include "Windows/HideWindowsPlatformAtomics.h"
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 
 // PlayFab Common includes
 #include "XAsyncTaskQueueHelpers.h"
@@ -112,8 +122,8 @@
 #include "PlayStation/PFLocalUser_PS.h"
 #endif
 
-// PlayFab GameSave includes (GameSave not supported on PS4)
-#if !defined(HC_PLATFORM) || HC_PLATFORM != HC_PLATFORM_SONY_PLAYSTATION_4
+// PlayFab GameSave includes (GameSave not supported on PS4 or Switch)
+#if !defined(HC_PLATFORM) || (HC_PLATFORM != HC_PLATFORM_SONY_PLAYSTATION_4 && HC_PLATFORM != HC_PLATFORM_NINTENDO_SWITCH)
 #include "PFGameSaveFiles.h"
 #include "PFGameSaveFilesUi.h"
 #endif

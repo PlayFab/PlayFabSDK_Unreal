@@ -488,6 +488,7 @@ public class OnlineSubsystemPlayFab : ModuleRules
 	//Windows
 	private void ConfigureForWindowsPlatform()
 	{
+		PublicDefinitions.Add("OSS_PLAYFAB_WIN64=1");
 		PublicDefinitions.Add("OSS_PLAYFAB_IS_PC=1");
 
 		// If Unreal GDK Flavor is installed
@@ -506,6 +507,20 @@ public class OnlineSubsystemPlayFab : ModuleRules
 		else
 		{
 			LogOnlineSubsystemPlayFab("Unreal GDK Flavor not detected");
+		}
+
+		// Add Steamworks if available — enables Steam invite/Rich Presence support.
+		// The runtime config (NativePlatformService) determines whether Steam is actually used.
+		string SteamworksPath = Path.Combine(Target.RelativeEnginePath, "Source", "ThirdParty", "Steamworks");
+		if (Directory.Exists(SteamworksPath))
+		{
+			LogOnlineSubsystemPlayFab("Steamworks SDK found - enabling Steam invite support");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "Steamworks");
+			PublicDefinitions.Add("OSS_PLAYFAB_STEAM=1");
+		}
+		else
+		{
+			LogOnlineSubsystemPlayFab("Steamworks SDK not found - Steam invite support disabled");
 		}
 
 		// Use the shared utility helper method

@@ -26,7 +26,7 @@ void FClientDeletePlayerCustomPropertiesAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientDeletePlayerCustomPropertiesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientDeletePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -37,7 +37,7 @@ void FClientDeletePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientDeletePlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientDeletePlayerCustomPropertiesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientDeletePlayerCustomPropertiesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -47,7 +47,7 @@ void FClientDeletePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientDeletePlayerCustomPropertiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientDeletePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -76,7 +76,7 @@ void FClientGetPlayerCustomPropertyAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientGetPlayerCustomPropertyAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetPlayerCustomPropertyResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -87,7 +87,7 @@ void FClientGetPlayerCustomPropertyAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetPlayerCustomPropertyGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientGetPlayerCustomPropertyResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientGetPlayerCustomPropertyResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -97,7 +97,7 @@ void FClientGetPlayerCustomPropertyAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetPlayerCustomPropertyGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetPlayerCustomPropertyResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -129,7 +129,7 @@ void FClientGetUserDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientGetUserDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -140,7 +140,7 @@ void FClientGetUserDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -150,7 +150,7 @@ void FClientGetUserDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -182,7 +182,7 @@ void FClientGetUserPublisherDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientGetUserPublisherDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -193,7 +193,7 @@ void FClientGetUserPublisherDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -203,7 +203,7 @@ void FClientGetUserPublisherDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserPublisherDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -235,7 +235,7 @@ void FClientGetUserPublisherReadOnlyDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientGetUserPublisherReadOnlyDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -246,7 +246,7 @@ void FClientGetUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserPublisherReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -256,7 +256,7 @@ void FClientGetUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserPublisherReadOnlyDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -288,7 +288,7 @@ void FClientGetUserReadOnlyDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientGetUserReadOnlyDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -299,7 +299,7 @@ void FClientGetUserReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -309,7 +309,7 @@ void FClientGetUserReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientGetUserReadOnlyDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -334,7 +334,7 @@ void FClientListPlayerCustomPropertiesAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientListPlayerCustomPropertiesAsync(EntityHandle.Get(), *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientListPlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -345,7 +345,7 @@ void FClientListPlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientListPlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementClientListPlayerCustomPropertiesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementClientListPlayerCustomPropertiesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -355,7 +355,7 @@ void FClientListPlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientListPlayerCustomPropertiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientListPlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -388,7 +388,7 @@ void FClientUpdatePlayerCustomPropertiesAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientUpdatePlayerCustomPropertiesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientUpdatePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -399,7 +399,7 @@ void FClientUpdatePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientUpdatePlayerCustomPropertiesGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementClientUpdatePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -434,7 +434,7 @@ void FClientUpdateUserDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientUpdateUserDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -445,7 +445,7 @@ void FClientUpdateUserDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientUpdateUserDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -480,7 +480,7 @@ void FClientUpdateUserPublisherDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementClientUpdateUserPublisherDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -491,7 +491,7 @@ void FClientUpdateUserPublisherDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementClientUpdateUserPublisherDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -526,7 +526,7 @@ void FServerDeletePlayerCustomPropertiesAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerDeletePlayerCustomPropertiesAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerDeletePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -537,7 +537,7 @@ void FServerDeletePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerDeletePlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerDeletePlayerCustomPropertiesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerDeletePlayerCustomPropertiesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -547,7 +547,7 @@ void FServerDeletePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerDeletePlayerCustomPropertiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerDeletePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -579,7 +579,7 @@ void FServerGetPlayerCustomPropertyAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetPlayerCustomPropertyAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetPlayerCustomPropertyResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -590,7 +590,7 @@ void FServerGetPlayerCustomPropertyAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetPlayerCustomPropertyGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetPlayerCustomPropertyResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetPlayerCustomPropertyResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -600,7 +600,7 @@ void FServerGetPlayerCustomPropertyAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetPlayerCustomPropertyGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetPlayerCustomPropertyResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -634,7 +634,7 @@ void FServerGetUserDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetUserDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -645,7 +645,7 @@ void FServerGetUserDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -655,7 +655,7 @@ void FServerGetUserDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -689,7 +689,7 @@ void FServerGetUserInternalDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetUserInternalDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -700,7 +700,7 @@ void FServerGetUserInternalDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserInternalDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -710,7 +710,7 @@ void FServerGetUserInternalDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserInternalDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -744,7 +744,7 @@ void FServerGetUserPublisherDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetUserPublisherDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -755,7 +755,7 @@ void FServerGetUserPublisherDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -765,7 +765,7 @@ void FServerGetUserPublisherDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserPublisherDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -799,7 +799,7 @@ void FServerGetUserPublisherInternalDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetUserPublisherInternalDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -810,7 +810,7 @@ void FServerGetUserPublisherInternalDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserPublisherInternalDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -820,7 +820,7 @@ void FServerGetUserPublisherInternalDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserPublisherInternalDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -854,7 +854,7 @@ void FServerGetUserPublisherReadOnlyDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetUserPublisherReadOnlyDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -865,7 +865,7 @@ void FServerGetUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserPublisherReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -875,7 +875,7 @@ void FServerGetUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserPublisherReadOnlyDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -909,7 +909,7 @@ void FServerGetUserReadOnlyDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerGetUserReadOnlyDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -920,7 +920,7 @@ void FServerGetUserReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserReadOnlyDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -930,7 +930,7 @@ void FServerGetUserReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerGetUserReadOnlyDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerGetUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -961,7 +961,7 @@ void FServerListPlayerCustomPropertiesAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerListPlayerCustomPropertiesAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerListPlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -972,7 +972,7 @@ void FServerListPlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerListPlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerListPlayerCustomPropertiesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerListPlayerCustomPropertiesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -982,7 +982,7 @@ void FServerListPlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerListPlayerCustomPropertiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerListPlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1018,7 +1018,7 @@ void FServerUpdatePlayerCustomPropertiesAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdatePlayerCustomPropertiesAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1029,7 +1029,7 @@ void FServerUpdatePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdatePlayerCustomPropertiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1039,7 +1039,7 @@ void FServerUpdatePlayerCustomPropertiesAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdatePlayerCustomPropertiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1077,7 +1077,7 @@ void FServerUpdateUserDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdateUserDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1088,7 +1088,7 @@ void FServerUpdateUserDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdateUserDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1125,7 +1125,7 @@ void FServerUpdateUserInternalDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdateUserInternalDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1136,7 +1136,7 @@ void FServerUpdateUserInternalDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdateUserInternalDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1174,7 +1174,7 @@ void FServerUpdateUserPublisherDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdateUserPublisherDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1185,7 +1185,7 @@ void FServerUpdateUserPublisherDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdateUserPublisherDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1222,7 +1222,7 @@ void FServerUpdateUserPublisherInternalDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdateUserPublisherInternalDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1233,7 +1233,7 @@ void FServerUpdateUserPublisherInternalDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdateUserPublisherInternalDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1271,7 +1271,7 @@ void FServerUpdateUserPublisherReadOnlyDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdateUserPublisherReadOnlyDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1282,7 +1282,7 @@ void FServerUpdateUserPublisherReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdateUserPublisherReadOnlyDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1320,7 +1320,7 @@ void FServerUpdateUserReadOnlyDataAsyncTask::DoWork()
 	HResult = PFPlayerDataManagementServerUpdateUserReadOnlyDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1331,7 +1331,7 @@ void FServerUpdateUserReadOnlyDataAsyncTask::ProcessResults()
 	HResult = PFPlayerDataManagementServerUpdateUserReadOnlyDataGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlayerDataManagementUpdateUserDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

@@ -582,6 +582,21 @@ void FOnlineVoicePlayFab::CleanUpPartyXblManager()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineVoicePlayFab::CleanUpPartyXblManager"));
 
+	// Destroy any remaining chat users still tracked
+	for (auto& TalkerKvPair : TalkersMap)
+	{
+		PartyError err = PartyXblManager::GetSingleton().DestroyChatUser(TalkerKvPair.Value);
+		if (PARTY_FAILED(err))
+		{
+			UE_LOG_ONLINE(Error, TEXT("DestroyChatUser failed during cleanup: %hs"), GetXblErrorMessage(err));
+		}
+	}
+	TalkersMap.Empty();
+	TalkersOptionsGDK.Empty();
+	TalkerIdMappingGDK.Empty();
+	LocalChatUser = nullptr;
+	CrossNetworkTalkersGDK.Empty();
+
 	if (bPartyXblManagerInitialized)
 	{
 		PartyError err = PartyXblManager::GetSingleton().Cleanup();

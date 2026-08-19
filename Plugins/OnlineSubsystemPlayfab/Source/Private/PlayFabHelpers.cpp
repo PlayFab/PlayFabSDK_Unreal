@@ -380,7 +380,7 @@ bool ParseTitleAccountIDsFromPlatformIDsResponse(
 
 	for (auto ValueIter = (*JsonTitlePlayerAccounts)->Values.CreateConstIterator(); ValueIter; ++ValueIter)
 	{
-		const FString Xuid = (*ValueIter).Key;
+		const FString Xuid = *(*ValueIter).Key;
 		TSharedPtr< FJsonValue > Value = (*ValueIter).Value;
 		if (Value.IsValid())
 		{
@@ -468,6 +468,49 @@ void ParseDeviceMakeModel(FString& DeviceMake, FString& DeviceModel)
 	DeviceModel = DeviceMakeAndModel.Mid(FirstIdx + 1, (EndSecondWord - FirstIdx) - 1);
 }
 
+FName GetOnlineSubsystemName(FName SubsystemName, FName InstanceName)
+{
+	return FName(*FString::Printf(TEXT("%s:%s"), *SubsystemName.ToString(), *InstanceName.ToString()));
+}
+
+IOnlineSubsystem* GetOnlineSubsystem(FName SubsystemName, FName InstanceName)
+{
+#if WITH_EDITOR
+	if (SubsystemName != NAME_None && InstanceName != NAME_None)
+	{
+		return IOnlineSubsystem::Get(GetOnlineSubsystemName(SubsystemName, InstanceName));
+	}
+
+	return IOnlineSubsystem::Get(SubsystemName);
+#else
+	return IOnlineSubsystem::Get(SubsystemName);
+#endif // WITH_EDITOR
+}
+
+IOnlineSubsystem* GetNativeOnlineSubsystem(FName InstanceName)
+{
+#if WITH_EDITOR
+	if (InstanceName != NAME_None)
+	{
+		return IOnlineSubsystem::Get(GetOnlineSubsystemName(GetNativePlatformSubsystemName(), InstanceName));
+	}
+
+	return IOnlineSubsystem::GetByPlatform();
+#else
+	return IOnlineSubsystem::GetByPlatform();
+#endif // WITH_EDITOR
+}
+
+IOnlineSubsystem* GetNativeOnlineSubsystem(IOnlineSubsystem* OnlineSubsystem)
+{
+	if (!OnlineSubsystem)
+	{
+		return nullptr;
+	}
+
+	return GetNativeOnlineSubsystem(OnlineSubsystem->GetInstanceName());
+}
+
 FName GetNativePlatformSubsystemName()
 {
 	FString InterfaceString;
@@ -487,6 +530,11 @@ bool IsNativePlatformSubsystem(FName ServiceType)
 bool IsNativePlatformSubsystemGDK()
 {
 	return IsNativePlatformSubsystem(FName(TEXT("GDK")));
+}
+
+bool IsNativePlatformSubsystemSteam()
+{
+	return IsNativePlatformSubsystem(FName(TEXT("Steam")));
 }
 
 bool ShouldSubsystemUseNativeSession()

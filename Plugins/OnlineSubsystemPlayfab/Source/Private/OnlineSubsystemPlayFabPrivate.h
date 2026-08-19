@@ -62,8 +62,10 @@
 #endif
 
 // Lobby related search property keys
-// There are already predefined keys defined in PlayFabLobby.cpp from s_SearchKeyMappingTable.
-// FPlayFabLobby::BuildSearchKeyMappingTable() will construct the predefined keys.
+// string_key1-4 below are fixed platform keys reserved by the OSS. All other search
+// keys are assigned by FDynamicSearchKeyAllocator (see PlayFabSearchKeyAllocator.h),
+// seeded from s_DefaultSearchKeyAssignments in PlayFabLobby.cpp and any
+// [OnlineSubsystemPlayFab] ini overrides.
 // Please be careful to avoid overlapping existing keys.
 #define SEARCH_KEY_PREFIX_STRING FString(TEXT("string_"))
 #define SEARCH_KEY_PREFIX_NUMBER FString(TEXT("number_"))

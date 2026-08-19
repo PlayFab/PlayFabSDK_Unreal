@@ -389,6 +389,7 @@ public class PlayFabCore : ModuleRules
         {
             LogPlayFabCore("Unreal GDK Flavor detected - adding GDK support");
             PublicIncludePathModuleNames.Add("GDKRuntime");
+            PrivateDependencyModuleNames.Add("GDKRuntime");
             PublicDependencyModuleNames.Add("XCurl");
             PublicDefinitions.Add("PF_UE_GDK_SUPPORT");
             PublicDefinitions.Add("WITH_GRDK");
@@ -464,6 +465,7 @@ public class PlayFabCore : ModuleRules
         LogPlayFabCore("Configuring PlayFabCore for GDK Platform");
 
 		PublicIncludePathModuleNames.Add("GDKRuntime");
+		PrivateDependencyModuleNames.Add("GDKRuntime");
 		PublicDefinitions.Add("WITH_GRDK");
         
         // Try using real GDK first, fall back to environment variables

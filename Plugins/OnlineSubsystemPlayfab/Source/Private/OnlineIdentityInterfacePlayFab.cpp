@@ -16,6 +16,7 @@
 #include "OnlineSubsystem.h"
 #include "SocketSubsystem.h"
 #include "Misc/CommandLine.h"
+#include "Async/Async.h"
 
 #include "PFCore.h"
 #include "PFAuthentication.h"
@@ -30,13 +31,37 @@ THIRD_PARTY_INCLUDES_END
 #include "PFLocalUser.h"
 #include "Generated/PFAuthentication.h"
 
-#define OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();  IOnlineIdentityPtr NativeIdentityInterface = NativeSubsystem ? NativeSubsystem->GetIdentityInterface() : nullptr; if (NativeIdentityInterface)
+#define OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE IOnlineSubsystem* NativeSubsystem = GetNativeOnlineSubsystem(OSSPlayFab);  IOnlineIdentityPtr NativeIdentityInterface = NativeSubsystem ? NativeSubsystem->GetIdentityInterface() : nullptr; if (NativeIdentityInterface)
 
 static constexpr float AuthCoolDownTime = 3.0f;
+// Upper bound for the exponential backoff applied after repeated auth failures.
+static constexpr float MaxAuthCoolDownTime = 60.0f;
+// Number of consecutive failures after which we stop retrying until the user is re-queued
+// (e.g. via a login status change). Prevents an unrecoverable token from retrying forever.
+static constexpr int32 MaxAuthFailuresBeforeGivingUp = 5;
+
+static bool IsNativePlatformAuthenticationSupported()
+{
+#if defined(OSS_PLAYFAB_WIN64)
+	if (IsNativePlatformSubsystem(FName(TEXT("Steam"))))
+	{
+		return true;
+	}
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	return IsNativePlatformSubsystemGDK();
+#else
+	return false;
+#endif // OSS_PLAYFAB_GDK_SUPPORT
+#else
+	return true;
+#endif // OSS_PLAYFAB_WIN64
+}
 
 FOnlineIdentityPlayFab::FOnlineIdentityPlayFab(class FOnlineSubsystemPlayFab* InSubsystem) : 
 	OSSPlayFab(InSubsystem),
-	TimeSinceLastAuth(AuthCoolDownTime) // Don't wait on the cool down to auth on the very first go
+	TimeSinceLastAuth(AuthCoolDownTime), // Don't wait on the cool down to auth on the very first go
+	CurrentAuthCoolDownTime(AuthCoolDownTime)
 {
 	check(OSSPlayFab);
 }
@@ -292,19 +317,30 @@ void FOnlineIdentityPlayFab::Tick(float DeltaTime)
 			// Dedicated servers authenticate separately via TryAuthenticateUsers()
 			if (!IsRunningDedicatedServer())
 			{
-				for (const auto& User : NativeIdentityInterface->GetAllUserAccounts())
+				if (IsNativePlatformAuthenticationSupported())
 				{
-					FString PlatformUserIdStr;
-					User->GetUserAttribute(USER_ATTR_ID, PlatformUserIdStr);
-					UsersToAuth.Add(PlatformUserIdStr);
-				}
+					for (const auto& User : NativeIdentityInterface->GetAllUserAccounts())
+					{
+						FString PlatformUserIdStr;
+						User->GetUserAttribute(USER_ATTR_ID, PlatformUserIdStr);
+						if (!PlatformUserIdStr.IsEmpty())
+						{
+							UsersToAuth.Add(PlatformUserIdStr);
+						}
+					}
 #if defined(OSS_PLAYFAB_WIN64) || defined(OSS_PLAYFAB_PLAYSTATION)
-				if (OSSPlayFab->bForceAutoLogin && !IsNativePlatformSubsystemGDK())
-				{
-					UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("AutoLogin"));
-					AutoLogin(0);
-				}
+					if (OSSPlayFab->bForceAutoLogin && !IsNativePlatformSubsystemGDK())
+					{
+						UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("AutoLogin"));
+						AutoLogin(0);
+					}
 #endif
+				}
+				else
+				{
+					UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::Tick: Native platform subsystem '%s' does not support PlayFab authentication; skipping initial user authentication"), *GetNativePlatformSubsystemName().ToString());
+					UsersToAuth.Empty();
+				}
 			}
 
 			bAuthAllUsers = false;
@@ -404,7 +440,9 @@ void FOnlineIdentityPlayFab::OnLoginStatusChanged(int32 LocalUserNum, ELoginStat
 		if (NewId.IsValid())
 		{
 			FString PlatformUserIdStr = NewId.ToString();
-			if (NewStatus == ELoginStatus::LoggedIn)
+			if (NewStatus == ELoginStatus::LoggedIn &&
+				IsNativePlatformAuthenticationSupported() &&
+				!PlatformUserIdStr.IsEmpty())
 			{
 				UsersToAuth.Add(PlatformUserIdStr);
 			}
@@ -423,7 +461,10 @@ void FOnlineIdentityPlayFab::OnLoginComplete(int32 LocalUserNum, bool bWasSucces
 
 	OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
 	{
-		if (bWasSuccessful && UserId.IsValid())
+		if (bWasSuccessful &&
+			UserId.IsValid() &&
+			IsNativePlatformAuthenticationSupported() &&
+			!UserId.ToString().IsEmpty())
 		{
 			UsersToAuth.Add(UserId.ToString());
 		}
@@ -464,6 +505,12 @@ void FOnlineIdentityPlayFab::TryAuthenticateUsers()
 		return;
 	}
 
+	if (!IsNativePlatformAuthenticationSupported())
+	{
+		UsersToAuth.Empty();
+		return;
+	}
+
 	// Update any users that need to update their tokens
 	for (TSharedPtr<FPlayFabUser> LocalUser : LocalPlayFabUsers)
 	{
@@ -473,8 +520,10 @@ void FOnlineIdentityPlayFab::TryAuthenticateUsers()
 		}
 	}
 	
-	// Only try to auth if we have waited long enough and have users that need it
-	if (TimeSinceLastAuth > AuthCoolDownTime && UsersToAuth.Num() != 0)
+	// Only try to auth if we have waited long enough and have users that need it.
+	// CurrentAuthCoolDownTime grows after failures (see Auth_PFAuthRequestComplete) so a rejected
+	// login backs off instead of re-firing every tick.
+	if (TimeSinceLastAuth > CurrentAuthCoolDownTime && UsersToAuth.Num() != 0)
 	{
 		for (const FString& PlatformUserIdStr : UsersToAuth)
 		{
@@ -486,6 +535,13 @@ void FOnlineIdentityPlayFab::TryAuthenticateUsers()
 void FOnlineIdentityPlayFab::CleanUpLocalUsers()
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::CleanUpLocalUsers"));
+
+	// Close the PlayFab local user handle to release the C SDK's internal XUserHandle reference
+	if (LocalUserHandle)
+	{
+		FPFLocalUserCloseHandle(LocalUserHandle);
+		LocalUserHandle.Reset();
+	}
 
 	LocalPlayFabUsers.Empty();
 	ServerEntity.Reset();
@@ -517,6 +573,13 @@ bool FOnlineIdentityPlayFab::AuthenticateUser(const FString& PlatformUserIdStr)
 #if defined(OSS_PLAYFAB_WIN64)
 bool FOnlineIdentityPlayFab::AuthenticateUserSteam(const FString& PlatformUserIdStr, FPFServiceConfigHandle ServiceConfigHandle)
 {
+	// Close any prior handle before creating a new one (handles re-auth scenarios)
+	if (LocalUserHandle)
+	{
+		FPFLocalUserCloseHandle(LocalUserHandle);
+		LocalUserHandle.Reset();
+	}
+
 	if (!FPFLocalUserCreateHandleWithSteamUser(ServiceConfigHandle, nullptr, LocalUserHandle))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab:FPFLocalUserCreateHandleWithSteamUser was unable to create PlayFab LocalUser"));
@@ -541,6 +604,13 @@ bool FOnlineIdentityPlayFab::AuthenticateUserGDK(const FString& PlatformUserIdSt
 {
 	int64 xuid = FCString::Atoi64(*PlatformUserIdStr);
 	FGDKUserHandle XboxUser = IGDKRuntimeModule::Get().GetUserHandleByXUserId(xuid);
+
+	// Close any prior handle before creating a new one (handles re-auth scenarios)
+	if (LocalUserHandle)
+	{
+		FPFLocalUserCloseHandle(LocalUserHandle);
+		LocalUserHandle.Reset();
+	}
 
 	if (!FPFLocalUserCreateHandleWithXboxUser(ServiceConfigHandle, XboxUser, nullptr, LocalUserHandle))
 	{
@@ -779,11 +849,14 @@ bool FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey()
 // Called after platform has appended its headers/body
 bool FOnlineIdentityPlayFab::AuthenticateUserByPlatform(const FString& PlatformUserIdStr)
 {
-#if defined(OSS_PLAYFAB_PLAYSTATION)
-	PFInitialize(nullptr);
-#else // OSS_PLAYFAB_PLAYSTATION
-	FPFInitialize();
-#endif // !OSS_PLAYFAB_PLAYSTATION
+#if defined(OSS_PLAYFAB_WIN64)
+	const FName NativePlatformSubsystem = GetNativePlatformSubsystemName();
+	if (!IsNativePlatformAuthenticationSupported())
+	{
+		UE_LOG_ONLINE(Error, TEXT("[FOnlineIdentityPlayFab::AuthenticateUserByPlatform] Native platform subsystem '%s' is not supported. Win64 authentication requires Steam or GDK."), *NativePlatformSubsystem.ToString());
+		return false;
+	}
+#endif // OSS_PLAYFAB_WIN64
 
 	FPFServiceConfigHandle m_serviceConfigHandle;
 
@@ -857,7 +930,37 @@ void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const F
 		}
 
 		TimeSinceLastAuth = 0.0f;
+		// Successful auth clears the backoff state for this user.
+		AuthFailureCountsByUser.Remove(UserPlatformIdStr);
+		CurrentAuthCoolDownTime = AuthCoolDownTime;
 		UsersToAuth.Remove(UserPlatformIdStr);
+	}
+	else
+	{
+		// Authentication failed. Reset the cooldown timer (previously only reset on success), so the
+		// gate in TryAuthenticateUsers is honored instead of re-firing the login every tick and
+		// flooding PlayFab's rate limiter. Apply exponential backoff and cap the retries. Failure
+		// counts are tracked per user so failures for one user don't penalize others.
+		TimeSinceLastAuth = 0.0f;
+
+		int32& FailureCountForUser = AuthFailureCountsByUser.FindOrAdd(UserPlatformIdStr);
+		++FailureCountForUser;
+		CurrentAuthCoolDownTime = FMath::Min(AuthCoolDownTime * FMath::Pow(2.0f, static_cast<float>(FailureCountForUser - 1)), MaxAuthCoolDownTime);
+
+		if (FailureCountForUser >= MaxAuthFailuresBeforeGivingUp)
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete: authentication failed %d times for user %s; giving up until the user is re-queued"), FailureCountForUser, *UserPlatformIdStr);
+			UsersToAuth.Remove(UserPlatformIdStr);
+
+			// Clear backoff state so a later re-queue of this user gets a fresh retry window instead of
+			// inheriting the prior capped failure count/cooldown.
+			AuthFailureCountsByUser.Remove(UserPlatformIdStr);
+			CurrentAuthCoolDownTime = AuthCoolDownTime;
+		}
+		else
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete: authentication failed for user %s (attempt %d); retrying in %.1fs"), *UserPlatformIdStr, FailureCountForUser, CurrentAuthCoolDownTime);
+		}
 	}
 
 	// Remove the in flight data
@@ -925,6 +1028,106 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 
 	// Listening to invite is best effort TODO
 	OSSPlayFab->GetPlayFabLobbyInterface()->RegisterForInvites_PlayFabMultiplayer(EntityHandle.Get());
+}
+
+void FOnlineIdentityPlayFab::GetLocalUserXTokenAsync(const FString& PlatformUserIdStr, TFunction<void(bool, FString)> OnComplete)
+{
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	if (!IsNativePlatformSubsystemGDK() || IsRunningDedicatedServer())
+	{
+		// Always deliver the callback on the game thread, matching the success path below.
+		AsyncTask(ENamedThreads::GameThread, [OnComplete = MoveTemp(OnComplete)]() mutable
+		{
+			OnComplete(false, FString());
+		});
+		return;
+	}
+
+	int64 Xuid = FCString::Atoi64(*PlatformUserIdStr);
+	FGDKUserHandle XboxUser = IGDKRuntimeModule::Get().GetUserHandleByXUserId(Xuid);
+	if (!XboxUser)
+	{
+		UE_LOG_ONLINE_IDENTITY(Warning, TEXT("FOnlineIdentityPlayFab::GetLocalUserXTokenAsync: could not get GDK user handle for XUID %s"), *PlatformUserIdStr);
+		// Always deliver the callback on the game thread, matching the success path below.
+		AsyncTask(ENamedThreads::GameThread, [OnComplete = MoveTemp(OnComplete)]() mutable
+		{
+			OnComplete(false, FString());
+		});
+		return;
+	}
+
+	// The user callback is forwarded to the C-style XAsync callback via the heap-allocated context.
+	TFunction<void(bool, FString)>* CallbackPtr = new TFunction<void(bool, FString)>(MoveTemp(OnComplete));
+
+	XAsyncBlock* AsyncBlock = new XAsyncBlock{};
+	AsyncBlock->context = CallbackPtr;
+	AsyncBlock->callback = [](XAsyncBlock* Async)
+	{
+		TUniquePtr<XAsyncBlock> AsyncBlockPtr{ Async };
+		TUniquePtr<TFunction<void(bool, FString)>> Callback{ static_cast<TFunction<void(bool, FString)>*>(Async->context) };
+
+		bool bSuccess = false;
+		FString XToken;
+		size_t BufferSize = 0;
+		HRESULT Hr = XUserGetTokenAndSignatureResultSize(Async, &BufferSize);
+		if (SUCCEEDED(Hr) && BufferSize > 0)
+		{
+			std::vector<uint8_t> Buffer(BufferSize);
+			XUserGetTokenAndSignatureData* Data = nullptr;
+			Hr = XUserGetTokenAndSignatureResult(Async, Buffer.size(), Buffer.data(), &Data, nullptr);
+			if (SUCCEEDED(Hr) && Data && Data->token)
+			{
+				XToken = FString(UTF8_TO_TCHAR(Data->token));
+				bSuccess = true;
+			}
+			else
+			{
+				UE_LOG_ONLINE_IDENTITY(Warning, TEXT("FOnlineIdentityPlayFab::GetLocalUserXTokenAsync: XUserGetTokenAndSignatureResult failed: 0x%08x"), Hr);
+			}
+		}
+		else
+		{
+			UE_LOG_ONLINE_IDENTITY(Warning, TEXT("FOnlineIdentityPlayFab::GetLocalUserXTokenAsync: XUserGetTokenAndSignatureResultSize failed: 0x%08x"), Hr);
+		}
+
+		// Marshal back to the game thread before invoking the caller, so that any PFMultiplayer
+		// operation issued from the callback runs on the game thread.
+		TFunction<void(bool, FString)> CallbackCopy = MoveTemp(*Callback);
+		AsyncTask(ENamedThreads::GameThread, [CallbackCopy = MoveTemp(CallbackCopy), bSuccess, XToken = MoveTemp(XToken)]() mutable
+		{
+			CallbackCopy(bSuccess, MoveTemp(XToken));
+		});
+	};
+
+	HRESULT Hr = XUserGetTokenAndSignatureAsync(
+		XboxUser,
+		XUserGetTokenAndSignatureOptions::None,
+		"GET",
+		"https://playfabapi.com/",
+		0, nullptr,    // no headers
+		0, nullptr,    // no body
+		AsyncBlock
+	);
+	if (FAILED(Hr))
+	{
+		UE_LOG_ONLINE_IDENTITY(Warning, TEXT("FOnlineIdentityPlayFab::GetLocalUserXTokenAsync: XUserGetTokenAndSignatureAsync failed: 0x%08x"), Hr);
+		TFunction<void(bool, FString)> Callback = MoveTemp(*CallbackPtr);
+		delete CallbackPtr;
+		delete AsyncBlock;
+		// Always deliver the callback on the game thread, matching the success path above.
+		AsyncTask(ENamedThreads::GameThread, [Callback = MoveTemp(Callback)]() mutable
+		{
+			Callback(false, FString());
+		});
+	}
+#else // OSS_PLAYFAB_GDK_SUPPORT
+	// No Xbox Live token exists outside of GDK platforms. Deliver on the game thread for a
+	// consistent callback contract across platforms and failure modes.
+	AsyncTask(ENamedThreads::GameThread, [OnComplete = MoveTemp(OnComplete)]() mutable
+	{
+		OnComplete(false, FString());
+	});
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 }
 
 void FOnlineIdentityPlayFab::RemoveLocalUser(const FString& PlatformUserIdStr)

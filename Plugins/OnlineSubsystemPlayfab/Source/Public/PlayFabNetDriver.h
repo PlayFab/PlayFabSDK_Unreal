@@ -32,9 +32,11 @@ public:
 
 	class FOnlineSubsystemPlayFab* GetOnlineSubsystemPlayFab();
 	class FPlayFabSocketSubsystem* GetPlayFabSocketSubsystem();
+	static FName GetInstanceName(const UNetDriver* NetDriver);
 
 private:
 	bool bFallbackToPlatformSocketSubsystem = false;
+	FName SessionName;
 
 protected:
 	friend class UPlayFabNetConnection;

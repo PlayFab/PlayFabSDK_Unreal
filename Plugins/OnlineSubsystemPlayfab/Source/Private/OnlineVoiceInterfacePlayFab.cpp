@@ -4,6 +4,7 @@
 
 #include "OnlineVoiceInterfacePlayFab.h"
 #include "OnlineSessionInterfacePlayFab.h"
+#include "OnlineSessionSettings.h"
 #include "OnlineSubsystemPlayFab.h"
 #include "PlayFabHelpers.h"
 #include "PlayFabPartyNetwork.h"
@@ -16,6 +17,9 @@ FOnlineVoicePlayFab::FOnlineVoicePlayFab(class FOnlineSubsystemPlayFab* InSubsys
 
 FOnlineVoicePlayFab::~FOnlineVoicePlayFab()
 {
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+	CleanUpPartyXblManager();
+#endif // OSS_PLAYFAB_GDK_SUPPORT
 }
 
 PartyLocalChatControl* FOnlineVoicePlayFab::GetPartyLocalChatControl(const FUniqueNetId& UserId) const
@@ -155,6 +159,24 @@ bool FOnlineVoicePlayFab::RegisterLocalTalker(TSharedPtr<FPlayFabUser> LocalPlay
 		return false;
 	}
 
+	if (LocalTalkers.Contains(LocalPlayer->GetPlatformUserId()))
+	{
+		return true;
+	}
+
+	if (VoiceOwnerName.IsNone())
+	{
+		UE_LOG_ONLINE_VOICE(Verbose, TEXT("FOnlineVoicePlayFab::RegisterLocalTalker: No active voice owner; skipping chat control registration."));
+		return false;
+	}
+
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = OSSPlayFab ? OSSPlayFab->GetPartyNetwork(VoiceOwnerName) : nullptr;
+	if (!ReadyNetwork.IsValid() || ReadyNetwork->NetworkState != EPlayFabPartyNetworkState::NetworkReady)
+	{
+		UE_LOG_ONLINE_VOICE(Verbose, TEXT("FOnlineVoicePlayFab::RegisterLocalTalker: Party network for voice owner '%s' is not yet NetworkReady; deferring chat control registration."), *VoiceOwnerName.ToString());
+		return false;
+	}
+
 	PartyManager& Manager = PartyManager::GetSingleton();
 
 	// Get the local chat user
@@ -199,6 +221,7 @@ bool FOnlineVoicePlayFab::RegisterLocalTalker(TSharedPtr<FPlayFabUser> LocalPlay
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
 	if (!GetPlatformAudioDevice(AudioDeviceSelectionContext, PlatformUserId))
 	{
+		LocalDevice->DestroyChatControl(NewChatControl, nullptr);
 		return false;
 	}
 #endif // OSS_PLAYFAB_PLAYSTATION
@@ -242,8 +265,9 @@ bool FOnlineVoicePlayFab::RegisterLocalTalker(TSharedPtr<FPlayFabUser> LocalPlay
 #endif
 	
 	// Add the chat control into the network mesh
-	if (!OSSPlayFab->PartyNetwork->AddChatControlToNetwork(NewChatControl))
+	if (!ReadyNetwork.IsValid() || !ReadyNetwork->AddChatControlToNetwork(NewChatControl))
 	{
+		LocalDevice->DestroyChatControl(NewChatControl, nullptr);
 		return false;
 	}
 
@@ -401,6 +425,8 @@ void FOnlineVoicePlayFab::RemoveAllRemoteTalkers()
 			FUniqueNetIdRef PlatformNetID = CreatePlatformNetId(RemoteTalker.GetPlatformUserId());
 			OnPlayerTalkingStateChangedDelegates.Broadcast(PlatformNetID, false);
 		}
+
+		StopTrackingPermissionForTalker(RemoteTalker.GetPlatformUserId());
 	}
 
 	// Remotes get destroyed automatically, so we just wipe our cache here
@@ -671,10 +697,42 @@ FString FOnlineVoicePlayFab::GetVoiceDebugState() const
 	return TEXT("");
 }
 
-void FOnlineVoicePlayFab::OnLeavePlayFabPartyNetwork()
+bool FOnlineVoicePlayFab::TryClaimVoiceOwnership(FName OwnerName)
 {
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOG_ONLINE_VOICE(Verbose, TEXT("FOnlineVoicePlayFab::TryClaimVoiceOwnership: Skipping voice claim for owner '%s' on dedicated server."), *OwnerName.ToString());
+		return false;
+	}
+
+	if (!VoiceOwnerName.IsNone() && VoiceOwnerName != OwnerName)
+	{
+		UE_LOG_ONLINE_VOICE(Warning, TEXT("FOnlineVoicePlayFab::TryClaimVoiceOwnership: Owner '%s' requested voice via bUseLobbiesVoiceChatIfAvailable, but voice is already active on owner '%s'. Voice for '%s' will be skipped."),
+			*OwnerName.ToString(), *VoiceOwnerName.ToString(), *OwnerName.ToString());
+		return false;
+	}
+
+	if (VoiceOwnerName == OwnerName)
+	{
+		return true;
+	}
+
+	VoiceOwnerName = OwnerName;
+	UE_LOG_ONLINE_VOICE(Log, TEXT("FOnlineVoicePlayFab::TryClaimVoiceOwnership: Owner '%s' is now the active voice owner."), *OwnerName.ToString());
+	return true;
+}
+
+void FOnlineVoicePlayFab::ReleaseVoiceOwnership(FName OwnerName)
+{
+	if (VoiceOwnerName.IsNone() || VoiceOwnerName != OwnerName)
+	{
+		return;
+	}
+
+	UE_LOG_ONLINE_VOICE(Log, TEXT("FOnlineVoicePlayFab::ReleaseVoiceOwnership: Releasing voice owner '%s'."), *OwnerName.ToString());
 	UnregisterLocalTalkers();
 	RemoveAllRemoteTalkers();
+	VoiceOwnerName = NAME_None;
 }
 
 IVoiceEnginePtr FOnlineVoicePlayFab::CreateVoiceEngine()
@@ -749,6 +807,36 @@ void FOnlineVoicePlayFab::OnChatControlCreated(const PartyStateChange* Change)
 			{
 				if (LocalChatControl == nullptr) // Its remote
 				{
+					bool bOnActiveVoiceNetwork = false;
+					TSharedPtr<FPlayFabPartyNetwork> VoiceNetwork = OSSPlayFab ? OSSPlayFab->GetPartyNetwork(VoiceOwnerName) : nullptr;
+					if (VoiceNetwork.IsValid() && VoiceNetwork->Network != nullptr)
+					{
+						uint32_t NetworkCount = 0;
+						PartyNetworkArray Networks = nullptr;
+						Err = Result->chatControl->GetNetworks(&NetworkCount, &Networks);
+						if (PARTY_FAILED(Err))
+						{
+							UE_LOG_ONLINE(Warning, TEXT("FOnlineVoicePlayFab::OnChatControlCreated chatControl::GetNetworks failed: %s"), *GetPartyErrorMessage(Err));
+						}
+						else
+						{
+							for (uint32_t Index = 0; Index < NetworkCount; ++Index)
+							{
+								if (Networks[Index] == VoiceNetwork->Network)
+								{
+									bOnActiveVoiceNetwork = true;
+									break;
+								}
+							}
+						}
+					}
+
+					if (!bOnActiveVoiceNetwork)
+					{
+						UE_LOG_ONLINE_VOICE(Verbose, TEXT("FOnlineVoicePlayFab::OnChatControlCreated: Ignoring remote chat control for entity '%s' because it is not on the active voice owner's network."), UTF8_TO_TCHAR(SenderEntityId));
+						return;
+					}
+
 					// Store it
 					FRemoteTalkerPlayFab NewTalkerInst(Result->chatControl);
 					RemoteTalkers.Emplace(SenderEntityId, NewTalkerInst);

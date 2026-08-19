@@ -23,8 +23,7 @@
 #define OSS_PLAYFAB_PASSTHROUGH_FUNCTION_DEFINITION(INTERFACE_TYPE, INTERFACE_NAME)\
 INTERFACE_TYPE FOnlineSubsystemPlayFab::INTERFACE_NAME() const\
 { \
-	IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();\
-	return NativeSubsystem ? NativeSubsystem->INTERFACE_NAME() : nullptr; \
+	return NativeOSS ? NativeOSS->INTERFACE_NAME() : nullptr; \
 }
 
 /** Forward declarations of all interface classes */
@@ -131,25 +130,35 @@ public:
 	IOnlineSubsystem* NativeOSS = nullptr;
 
 	bool bNetworkInitialized = false;
+	bool bPFInitialized = false;
 	bool bPartyInitialized = false;
 	bool bMultiplayerInitialized = false;
 	bool bMemoryCallbacksSet = false;
 	bool bForceAutoLogin = true;
 
-	TUniquePtr<FPlayFabPartyNetwork> PartyNetwork;
+	TMap<FName, TSharedRef<FPlayFabPartyNetwork>> PartyNetworks;
+	mutable FCriticalSection PartyNetworksLock;
+
+	TSharedPtr<FPlayFabPartyNetwork> CreateAndConnectToNetwork(FName SessionName);
+	TSharedPtr<FPlayFabPartyNetwork> ConnectToNetwork(FName SessionName, const FString& NetworkId, const FString& NetworkDescriptorStr);
+	TSharedPtr<FPlayFabPartyNetwork> GetPartyNetworkByRawPtr(PartyNetwork* RawNetwork, FName* OutSessionName = nullptr) const;
+	TSharedPtr<FPlayFabPartyNetwork> GetPartyNetwork(FName SessionName) const;
+	void RemovePartyNetwork(FName SessionName);
 
 	FPlayFabLobbyPtr GetPlayFabLobbyInterface() const;
 	FMatchmakingInterfacePtr GetMatchmakingInterface() const;
-	
+
 private:
 	void RegisterNetworkInitCallbacks();
 	void UnregisterNetworkInitCallbacks();
+	void InitializePlayFab();
 	void TryInitializePlayFabParty();
 	void InitializePlayFabParty();
 	void InitializeMultiplayer();
 	void InitializeEventTracer();
 	void SetMemoryCallbacks();
 	void CleanUpPlayFab();
+	void ParseNetworkConfiguration();
 	void OnAppResumeDefault();
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
@@ -180,6 +189,14 @@ private:
 	TUniquePtr<PlayFabEventTracer> EventTracer;
 
 	PFMultiplayerHandle MultiplayerHandle;
+
+	int32 MaxDeviceCount = 8;
+	int32 MaxDevicesPerUserCount = 1;
+	int32 MaxEndpointsPerDeviceCount = 1;
+	int32 MaxUserCount = 8;
+	int32 MaxUsersPerDeviceCount = 1;
+	PartyDirectPeerConnectivityOptions DirectPeerConnectivityOptions
+		= PartyDirectPeerConnectivityOptions::AnyPlatformType | PartyDirectPeerConnectivityOptions::AnyEntityLoginProvider;
 
 #ifdef OSS_PLAYFAB_PLAYSTATION
 	/** Online async task runnable */

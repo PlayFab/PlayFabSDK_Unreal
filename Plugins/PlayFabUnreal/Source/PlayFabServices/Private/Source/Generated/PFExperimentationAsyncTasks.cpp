@@ -24,7 +24,7 @@ void FGetTreatmentAssignmentAsyncTask::DoWork()
 	HResult = PFExperimentationGetTreatmentAssignmentAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFExperimentationGetTreatmentAssignmentResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -35,7 +35,7 @@ void FGetTreatmentAssignmentAsyncTask::ProcessResults()
 	HResult = PFExperimentationGetTreatmentAssignmentGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFExperimentationGetTreatmentAssignmentResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFExperimentationGetTreatmentAssignmentResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -45,7 +45,7 @@ void FGetTreatmentAssignmentAsyncTask::ProcessResults()
 	HResult = PFExperimentationGetTreatmentAssignmentGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFExperimentationGetTreatmentAssignmentResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

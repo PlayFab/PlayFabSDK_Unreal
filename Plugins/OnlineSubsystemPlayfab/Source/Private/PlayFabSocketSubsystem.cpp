@@ -41,6 +41,14 @@ void DestroyPlayFabSocketSubsystem()
 	if (ModuleManager.IsModuleLoaded("Sockets"))
 	{
 		FSocketSubsystemModule& SSS = FModuleManager::GetModuleChecked<FSocketSubsystemModule>("Sockets");
+
+		// Reset the default socket subsystem otherwise things like the editor will get a null for the default subsystem when the PlayFab OSS is unloaded.
+		ISocketSubsystem* PlatformSocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
+		if (PlatformSocketSubsystem)
+		{
+			SSS.RegisterSocketSubsystem(PLATFORM_SOCKETSUBSYSTEM, PlatformSocketSubsystem, true);
+		}
+
 		SSS.UnregisterSocketSubsystem(PLAYFAB_SOCKET_SUBSYSTEM);
 	}
 
@@ -183,7 +191,19 @@ bool FPlayFabSocketSubsystem::GetLocalAdapterAddresses(TArray<TSharedPtr<FIntern
 
 TSharedRef<FInternetAddr> FPlayFabSocketSubsystem::GetLocalBindAddr(FOutputDevice& Out)
 {
-	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab ? OSSPlayFab->PartyNetwork->LocalEndpoint : nullptr;
+	FName SessionName = NAME_GameSession;
+	if (UPlayFabNetDriver* LinkedNetDriver = NetDriver.Get())
+	{
+		SessionName = LinkedNetDriver->SessionName;
+	}
+	
+	return GetLocalBindAddr(SessionName, Out);
+}
+
+TSharedRef<FInternetAddr> FPlayFabSocketSubsystem::GetLocalBindAddr(FName SessionName, FOutputDevice& Out)
+{
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = OSSPlayFab ? OSSPlayFab->GetPartyNetwork(SessionName) : nullptr;
+	PartyLocalEndpoint* LocalEndpoint = ReadyNetwork.IsValid() ? ReadyNetwork->LocalEndpoint : nullptr;
 	if (LocalEndpoint)
 	{
 		uint16 EndpointId = 0;

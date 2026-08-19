@@ -92,9 +92,15 @@ bool ParseTitlePlayerAccountFromPlayerCombinedInfoResponse(
 
 void ParseDeviceMakeModel(FString& DeviceMake, FString& DeviceModel);
 
+FName GetOnlineSubsystemName(FName SubsystemName, FName InstanceName);
+IOnlineSubsystem* GetOnlineSubsystem(FName SubsystemName, FName InstanceName);
+IOnlineSubsystem* GetNativeOnlineSubsystem(FName InstanceName);
+IOnlineSubsystem* GetNativeOnlineSubsystem(IOnlineSubsystem* OnlineSubsystem);
+
 FName GetNativePlatformSubsystemName();
 bool IsNativePlatformSubsystem(FName ServiceType);
 bool IsNativePlatformSubsystemGDK();
+bool IsNativePlatformSubsystemSteam();
 
 bool ShouldSubsystemUseNativeSession();
 

@@ -7,18 +7,6 @@
 #include "OnlineSubsystemPlayFab.h"
 #include "OnlineIdentityInterfacePlayFab.h"
 
-const static TMap<FString, PartyDirectPeerConnectivityOptions> ConnectivityOptionsMap = {
-	{"None", PartyDirectPeerConnectivityOptions::None},
-	{"SamePlatformType", PartyDirectPeerConnectivityOptions::SamePlatformType},
-	{"DifferentPlatformType", PartyDirectPeerConnectivityOptions::DifferentPlatformType},
-	{"AnyPlatformType", PartyDirectPeerConnectivityOptions::SamePlatformType |
-		PartyDirectPeerConnectivityOptions::DifferentPlatformType},
-	{"SameEntityLoginProvider", PartyDirectPeerConnectivityOptions::SameEntityLoginProvider},
-	{"DifferentEntityLoginProvider", PartyDirectPeerConnectivityOptions::DifferentEntityLoginProvider},
-	{"AnyEntityLoginProvider", PartyDirectPeerConnectivityOptions::SameEntityLoginProvider |
-		PartyDirectPeerConnectivityOptions::DifferentEntityLoginProvider},
-};
-
 
 FString GetNetworkStateStateString(EPlayFabPartyNetworkState State)
 {
@@ -34,13 +22,28 @@ FString GetNetworkStateStateString(EPlayFabPartyNetworkState State)
 	return TEXT("Unknown");
 }
 
-FPlayFabPartyNetwork::FPlayFabPartyNetwork(FOnlineSubsystemPlayFab* InOSSPlayFab)
-	: OSSPlayFab(InOSSPlayFab)
+FPlayFabPartyNetwork::FPlayFabPartyNetwork(
+	FOnlineSubsystemPlayFab* InOSSPlayFab,
+	int32 InMaxDeviceCount,
+	int32 InMaxDevicesPerUserCount,
+	int32 InMaxEndpointsPerDeviceCount,
+	int32 InMaxUserCount,
+	int32 InMaxUsersPerDeviceCount,
+	PartyDirectPeerConnectivityOptions InDirectPeerConnectivityOptions
+)
+	: MaxDeviceCount(InMaxDeviceCount)
+	, MaxDevicesPerUserCount(InMaxDevicesPerUserCount)
+	, MaxEndpointsPerDeviceCount(InMaxEndpointsPerDeviceCount)
+	, MaxUserCount(InMaxUserCount)
+	, MaxUsersPerDeviceCount(InMaxUsersPerDeviceCount)
+	, DirectPeerConnectivityOptions(InDirectPeerConnectivityOptions)
+	, OSSPlayFab(InOSSPlayFab)
 {
 }
 
 FPlayFabPartyNetwork::~FPlayFabPartyNetwork()
 {
+	LeaveNetwork();
 }
 
 bool FPlayFabPartyNetwork::CreateAndConnectToNetwork()
@@ -195,16 +198,10 @@ void FPlayFabPartyNetwork::LeaveNetwork()
 {
 	UE_LOG_ONLINE(Log, TEXT("FPlayFabPartyNetwork::LeaveNetwork()"));
 
-	if (NetworkState != EPlayFabPartyNetworkState::LeavingNetwork && Network)
+	if (NetworkState != EPlayFabPartyNetworkState::LeavingNetwork && NetworkState != EPlayFabPartyNetworkState::NoNetwork && Network)
 	{
 		NetworkState = EPlayFabPartyNetworkState::LeavingNetwork;
 		Network->LeaveNetwork(nullptr);
-
-		FOnlineVoicePlayFabPtr VoiceInterface = OSSPlayFab->GetVoiceInterfacePlayFab();
-		if (VoiceInterface)
-		{
-			VoiceInterface->OnLeavePlayFabPartyNetwork();
-		}
 	}
 }
 
@@ -276,31 +273,6 @@ PartyEndpoint* FPlayFabPartyNetwork::GetEndpoint(uint32 EndpointId)
 	}
 
 	return nullptr;
-}
-
-void FPlayFabPartyNetwork::ParseDirectPeerConnectivityOptions()
-{
-	TArray<FString> ConnectivityOptionsArr;
-	GConfig->GetArray(TEXT("OnlineSubsystemPlayFab"), TEXT("DirectPeerConnectivityOptions"), ConnectivityOptionsArr, GEngineIni);
-	if (!ConnectivityOptionsArr.Num())
-	{
-		UE_LOG_ONLINE(Warning, TEXT("DirectPeerConnectivityOptions not provided - using default."));
-		return; // use default value for DirectPeerConnectivity Options
-	}
-	
-	PartyDirectPeerConnectivityOptions ConnectivityOptions = PartyDirectPeerConnectivityOptions::None;
-	for (const FString& ConnType : ConnectivityOptionsArr)
-	{
-		const PartyDirectPeerConnectivityOptions* ConnectivityOption = ConnectivityOptionsMap.Find(ConnType);
-		if (!ConnectivityOption)
-		{ // LOG error and exit, default value will be used
-			UE_LOG_ONLINE(Error, TEXT("Engine INI OnlineSubsystemPlayFab section contains erroneous value for key DirectPeerConnectivityOptions"));
-			return;
-		}
-		ConnectivityOptions |= *ConnectivityOption;
-	}
-	// On success, set class variable
-	DirectPeerConnectivityOptions = ConnectivityOptions;
 }
 
 

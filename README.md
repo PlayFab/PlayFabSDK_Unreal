@@ -15,8 +15,8 @@ The PlayFab Unreal Engine Plugin provides comprehensive integration with PlayFab
 Before integrating the PlayFab Unreal Plugin into your project, ensure you have the following:
 
 ### Software Requirements
-- **[Game Development Kit](https://learn.microsoft.com/en-us/gaming/gdk/) 2604 or later**  installed with legacy layouts
-- **Unreal Engine 5.7** (either public version or built from source)
+- **[Game Development Kit](https://learn.microsoft.com/en-us/gaming/gdk/) 2604 Update 2 (260402)**, or a later version supported by your Unreal Engine build
+- **Unreal Engine 5.8** (either public version or built from source)
 - **PlayFab Account** with a configured title
 
 ### Platform Support
@@ -36,10 +36,7 @@ To access PlayStation and Switch support, please follow the official process out
 
 ### GDK Setup
 
-The PlayFab plugins require the 2604 GDK but Unreal Engine 5.7 does not support it out of the box so you'll need to make the following changes to `Engine\Platforms\GDK\Config\GDK_SDK.json`:
-* Set `MaxVersion` to `260400` or above
-* Set `MinVersion` to `260400` or below
-* Set `MainVersion` somewhere in between like `260400`
+Unreal Engine 5.8 reads its supported GDK range from `Engine\Config\Microsoft\GDK_SDK.json`. The default UE 5.8 integration supports GDK 2604 Update 2 (`260402`). Ensure the installed GDK falls within the `MinGDKVersion` and `MaxGDKVersion` configured by your engine build. To use a different compatible GDK version, update the version fields in that file.
 
 ### Private Platform Setup (PlayStation / Switch)
 
@@ -189,7 +186,7 @@ bHasPlayFabVoiceEnabled=<REPLACE ME with true/false>
 
 [/Script/OnlineSubsystemPlayFab.PlayFabNetDriver] 
 NetConnectionClassName="OnlineSubsystemPlayFab.PlayFabNetConnection" 
-ReplicationDriverClassName="<REPLACE ME with your existing replication driver class name or skip if the game does not have a replication driver class (https://docs.unrealengine.com/5.7/en-US/replication-graph-in-unreal-engine/).>"
+ReplicationDriverClassName="<REPLACE ME with your existing replication driver class name or skip if the game does not have a replication driver class (https://dev.epicgames.com/documentation/en-us/unreal-engine/replication-graph-in-unreal-engine?application_version=5.8).>"
 ConnectionTimeout=15.0 
 InitialConnectTimeout=30.0 
 
@@ -382,7 +379,7 @@ The code examples cover:
 
 - [PlayFab Documentation](https://docs.microsoft.com/gaming/playfab/)
 - [PlayFab REST API Reference](https://docs.microsoft.com/rest/api/playfab/)
-- [Unreal Engine GDK Documentation](https://docs.unrealengine.com/5.0/gdk/)
+- [Unreal Engine Microsoft GDK Plugins](https://dev.epicgames.com/documentation/en-us/unreal-engine/microsoft-gdk-plugins-for-unreal-engine)
 
 ## Troubleshooting
 
@@ -400,18 +397,17 @@ The code examples cover:
 
 For additional support, refer to the PlayFab community forums and documentation.
 
-
 #### Runtime dependency Party.dll is configured to be staged from X and Y
 
-When using the PlayFab Online Subsystem, you may encounter the following runtime error: 
+When using the PlayFab Online Subsystem with an older Unreal Engine or legacy GDK layout, you may encounter the following runtime dependency error:
 
 ````
 Runtime dependency 'Party.dll' is configured to be staged from 'C:\Program Files (x86)\Microsoft GDK\260400\GRDK\ExtensionLibraries\PlayFab.Party.Cpp\Redist\x64\Party.dll' and 'C:\Program Files (x86)\Microsoft GDK\260400\windows\bin\x64\Party.dll'
 ````
 
-Some of these steps will be unnecessary once UE 5.7 officially supports the new GDK layout but until then you can make the following modifications if applicable to work around the issue.
+This issue does not apply to the UE 5.8 and GDK 260402 modern layout supported by release 3.1.3, where both integrations stage the same `Party.dll`. For older configurations, disable the engine-provided PlayFab Party integration where applicable so that OnlineSubsystemPlayFab is the only provider.
 
-* Disable `PlayFabParty` in `\Engine\Platforms\GDK\Plugins\Online\OnlineSubsystemGDK\OnlineSubsystemGDK.uplugin`: 
+* Disable `PlayFabParty` in `\Engine\Platforms\GDK\Plugins\Online\OnlineSubsystemGDK\OnlineSubsystemGDK.uplugin`:
 
 ````json
 {
@@ -420,7 +416,7 @@ Some of these steps will be unnecessary once UE 5.7 officially supports the new 
 }
 ````
 
-* Disable `PlayFabParty` in your project's `.uplugin` file like in the previous point.
+* Disable `PlayFabParty` in your project's `.uplugin` file.
 * Comment out the existing `PlayFabParty` dependency in `\Engine\Platforms\GDK\Plugins\Online\OnlineSubsystemGDK\Source\OnlineSubsystemGDK.Build.cs`:
 
 ````cs
@@ -430,14 +426,15 @@ if (Target.bCompileAgainstEngine)
 }
 ````
 
-* Disable Unreal Engine's built-in PlayFab matchmaking if enabled by editing the platform's `Engine.ini` with:
+* Disable Unreal Engine's built-in PlayFab matchmaking if enabled by editing the platform's `Engine.ini`:
 
 ````ini
 [PlayFab]
 EnablePlayfabMatchmaking=false
 ````
 
-* Disable `PlayFabParty` if it's being enabled in one of your target files:
+* Disable `PlayFabParty` if it is enabled in one of your target files:
+
 ````cs
 public class YourGameTarget_XSX : YourGame
 {
@@ -453,7 +450,7 @@ public class YourGameTarget_XSX : YourGame
 ````
 
 #### Plugin 'OnlineSubsystemPlayFab' failed to load
-You may encounter the following error when launching the editor. This is fixed in the latest release but if you're using an older version you can make the following modifications to work around the issue.
+You may encounter the following error when launching the editor. This is fixed in release 3.1.0 and later, but if you're using an older version you can make the following modifications to work around the issue.
 
 `Plugin 'OnlineSubsystemPlayFab' failed to load because module 'OnlineSubsystemPlayFab' could not be loaded. There may be an operating system error or the module may not be properly set up.`
 
@@ -472,14 +469,15 @@ Make sure `OnlineSubsystemGDK` plugin’s `PlatformAllowList` field with `Win64`
 }
 ````
 
-#### Unhandled exception throw: read access violation - handle was nullptr
-You may encounter this error if the GDKRuntime module is shutdown before OnlineSubsystemPlayFab. An example is if your project is configured to use `OnlineSubsystemSteam` and you have the `MSGamingRuntime` plugin enabled.
+#### Unhandled exception: read access violation - handle was nullptr
 
-This will be addressed in an upcoming update to the PlayFab unified SDK in the GDK but until then you can enable the following lines in `FOnlineSubsystemPlayFab::IsEnabled()` to force the correct module load order:
+You may encounter this error if the GDKRuntime module shuts down before OnlineSubsystemPlayFab, such as when a project uses `OnlineSubsystemSteam` with the `MSGamingRuntime` plugin enabled. This is fixed in release 3.1.3 and later.
+
+For older releases, add the following code to `FOnlineSubsystemPlayFab::IsEnabled()` to force the required module load order:
 
 ````cpp
 if (bEnabled)
 {
-	IGDKRuntimeModule::Get();
+    IGDKRuntimeModule::Get();
 }
 ````

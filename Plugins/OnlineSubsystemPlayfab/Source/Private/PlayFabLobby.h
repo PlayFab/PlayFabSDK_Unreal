@@ -10,6 +10,8 @@
 #include "OnlineSubsystemPlayFabPackage.h"
 #include "OnlineSubsystemPlayFabTypes.h"
 #include "OnlineSubsystemPlayFabPrivate.h"
+#include "PlayFabSearchKeyAllocator.h"
+#include "PlayFabLobbyCompletion.h"
 
 class FPlayFabUser;
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnLobbyCreatedAndJoinCompleted, bool, FName);
@@ -64,7 +66,7 @@ public:
 	bool LeaveLobby(const FUniqueNetId& PlayerId, FName SessionName, const FOnDestroySessionCompleteDelegate& CompletionDelegate, const FOnUnregisterLocalPlayerCompleteDelegate& UnregisterLocalPlayerCompleteDelegate, bool bDestroyingSession);
 	bool FindLobbies(const FUniqueNetId& UserId, TSharedPtr<FOnlineSessionSearch> SearchSettings);
 	bool FindFriendLobbies(const FUniqueNetId& UserId);
-	const TPair<FString, EOnlineKeyValuePairDataType::Type>* FindSearchKey(const FString& SearchKey) const;
+	const FDynamicSearchKeyAllocator::FSettingKeyType* FindSearchKey(const FString& SearchKey) const;
 
 	void RegisterForInvites_PlayFabMultiplayer(const PFEntityHandle ListenerEntityHandle);
 	void UnregisterForInvites_PlayFabMultiplayer(const PFEntityHandle ListenerEntityHandle);
@@ -105,17 +107,39 @@ PACKAGE_SCOPE:
 	int32 SearchingUserNum;
 
 private:
+	void ProcessPendingCreateAndJoinLobbyCompletions();
+	void CompleteCreateAndJoinLobby(
+		PFLobbyHandle Lobby,
+		FName SessionName,
+		const PlayFabLobbyCompletion::FReadResult& ReadResult);
+	void FailCreateAndJoinLobby(
+		PFLobbyHandle Lobby,
+		FName SessionName,
+		HRESULT Error,
+		const TCHAR* FailureContext,
+		bool bLeaveCreatedLobby = false);
+	bool CancelPendingCreateAndJoinLobbyCompletion(PFLobbyHandle Lobby, HRESULT Error, const TCHAR* FailureContext);
 	bool GetLobbyFromSession(const FName SessionName, PFLobbyHandle& LobbyHandle);
 	bool ValidateSessionForInvite(const FName SessionName);
 	FOnlineSessionSearchResult CreateSearchResultFromLobby(const PFLobbySearchResult& Lobby);
 	bool IsSearchKey(const FString& Name);
 	FString ComposeLobbySearchQueryFilter(const FSearchParams& SearchParams);
 	void BuildSearchKeyMappingTable();
-	bool GetSearchKeyFromSettingMappingTable(const FString& SettingKey, FString& SearchKey, EOnlineKeyValuePairDataType::Type& Type) const;
 	EOnJoinSessionCompleteResult::Type ConvertMultiplayerErrorToJoinSessionResult(HRESULT result);
 
 	// we can eliminate this map if we pass SessionName as asyncIdentifier to lobby calls
 	TMap<PFLobbyHandle, FName> LobbySessionMap;
+
+	struct FPendingCreateAndJoinLobbyCompletion
+	{
+		FName SessionName;
+		double DeadlineSeconds = 0.0;
+		double NextRetrySeconds = 0.0;
+		int32 RetryCount = 0;
+	};
+
+	TMap<PFLobbyHandle, FPendingCreateAndJoinLobbyCompletion> PendingCreateAndJoinLobbyCompletions;
+	TSet<PFLobbyHandle> FailedCreateLobbyCleanupHandles;
 
 	struct FPendingSendInviteData
 	{
@@ -138,7 +162,7 @@ private:
 	};
 	FRemoveLocalPlayerData RemoveLocalPlayerData;
 
-	TMap<FString, TPair<FString, EOnlineKeyValuePairDataType::Type>> SearchKeyMappingTable;
+	FDynamicSearchKeyAllocator SearchKeyAllocator;
 	
 	struct FUpdateLobbyCompletionState
 	{

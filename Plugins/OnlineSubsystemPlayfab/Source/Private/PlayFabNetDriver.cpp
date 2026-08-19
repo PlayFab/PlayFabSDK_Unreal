@@ -9,6 +9,7 @@
 #include "OnlineSubsystemPlayFabPrivate.h"
 #include "OnlineSubsystemSessionSettings.h"
 #include "PlayFabSocket.h"
+#include "PlayFabHelpers.h"
 
 UPlayFabNetDriver::UPlayFabNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -22,8 +23,12 @@ class ISocketSubsystem* UPlayFabNetDriver::GetSocketSubsystem()
 
 bool UPlayFabNetDriver::IsAvailable() const
 {
-	IOnlineSubsystem* OSSPlayFab = IOnlineSubsystem::Get(PLAYFAB_SUBSYSTEM);
-	if (OSSPlayFab && !bFallbackToPlatformSocketSubsystem)
+	FName SubsystemName = PLAYFAB_SUBSYSTEM;
+#if WITH_EDITOR
+	SubsystemName = GetOnlineSubsystemName(PLAYFAB_SUBSYSTEM, GetInstanceName(this));
+#endif
+
+	if (IOnlineSubsystem::DoesInstanceExist(SubsystemName) && !bFallbackToPlatformSocketSubsystem)
 	{
 		ISocketSubsystem* PlayFabSocketSubsystem = ISocketSubsystem::Get(PLAYFAB_SOCKET_SUBSYSTEM);
 		if (PlayFabSocketSubsystem)
@@ -43,11 +48,34 @@ bool UPlayFabNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, c
 		return Super::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error);
 	}
 
+	// Parse SessionName from URL options if present
+	SessionName = NAME_GameSession;
+	for (const FString& Option : URL.Op)
+	{
+		if (Option.StartsWith(TEXT("SessionName=")))
+		{
+			FString SessionNameStr = Option.Mid(FCString::Strlen(TEXT("SessionName=")));
+			if (!SessionNameStr.IsEmpty())
+			{
+				SessionName = FName(*SessionNameStr);
+			}
+			break;
+		}
+	}
+
 	if (FOnlineSubsystemPlayFab* OSSPlayFab = GetOnlineSubsystemPlayFab())
 	{
 		if (FPlayFabSocketSubsystem* SocketSubsystem = GetPlayFabSocketSubsystem())
 		{
 			FUniqueSocket NewSocket = CreateSocketForProtocol(FNetworkProtocolTypes::PlayFab);
+			if (!NewSocket.IsValid())
+			{
+				UE_LOG(LogSockets, Error, TEXT("PlayFabNetDriver::InitBase: Failed to create PlayFab socket"));
+				return false;
+			}
+
+			FPlayFabSocket* PlayFabSocket = static_cast<FPlayFabSocket*>(NewSocket.Get());
+			PlayFabSocket->SetPartyNetwork(OSSPlayFab->GetPartyNetwork(SessionName));
 
 			SetSocketAndLocalAddress(TSharedPtr<FSocket>(NewSocket.Release(), FSocketDeleter(GetSocketSubsystem())));
 
@@ -98,7 +126,30 @@ void UPlayFabNetDriver::TickDispatch(float DeltaTime)
 
 FOnlineSubsystemPlayFab* UPlayFabNetDriver::GetOnlineSubsystemPlayFab()
 {
-	return static_cast<FOnlineSubsystemPlayFab*>(IOnlineSubsystem::Get(PLAYFAB_SUBSYSTEM));
+	FName InstanceName = GetInstanceName(this);
+	IOnlineSubsystem* OSSPlayFab = GetOnlineSubsystem(PLAYFAB_SUBSYSTEM, InstanceName);
+	return static_cast<FOnlineSubsystemPlayFab*>(OSSPlayFab);
+}
+
+FName UPlayFabNetDriver::GetInstanceName(const UNetDriver* NetDriver)
+{
+	if (UWorld* InWorld = NetDriver->GetWorld())
+	{
+		if (FWorldContext* WorldContext = GEngine->GetWorldContextFromWorld(InWorld))
+		{
+			return FName(WorldContext->ContextHandle.ToString());
+		}
+	}
+
+	if (GEngine)
+	{
+		if (FWorldContext* WorldContext = GEngine->GetWorldContextFromPendingNetGameNetDriver(NetDriver))
+		{
+			return FName(WorldContext->ContextHandle.ToString());
+		}
+	}
+
+	return FOnlineSubsystemImpl::DefaultInstanceName;
 }
 
 FPlayFabSocketSubsystem* UPlayFabNetDriver::GetPlayFabSocketSubsystem()

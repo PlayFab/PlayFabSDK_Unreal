@@ -31,7 +31,7 @@ void FAddInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryAddInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryAddInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -42,7 +42,7 @@ void FAddInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryAddInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryAddInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryAddInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -52,7 +52,7 @@ void FAddInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryAddInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryAddInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -85,7 +85,7 @@ void FDeleteInventoryCollectionAsyncTask::DoWork()
 	HResult = PFInventoryDeleteInventoryCollectionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -94,7 +94,7 @@ void FDeleteInventoryCollectionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -127,7 +127,7 @@ void FDeleteInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryDeleteInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryDeleteInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -138,7 +138,7 @@ void FDeleteInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryDeleteInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryDeleteInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryDeleteInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -148,7 +148,7 @@ void FDeleteInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryDeleteInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryDeleteInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -184,7 +184,7 @@ void FExecuteInventoryOperationsAsyncTask::DoWork()
 	HResult = PFInventoryExecuteInventoryOperationsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryExecuteInventoryOperationsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -195,7 +195,7 @@ void FExecuteInventoryOperationsAsyncTask::ProcessResults()
 	HResult = PFInventoryExecuteInventoryOperationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryExecuteInventoryOperationsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryExecuteInventoryOperationsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -205,7 +205,7 @@ void FExecuteInventoryOperationsAsyncTask::ProcessResults()
 	HResult = PFInventoryExecuteInventoryOperationsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryExecuteInventoryOperationsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -244,7 +244,7 @@ void FExecuteTransferOperationsAsyncTask::DoWork()
 	HResult = PFInventoryExecuteTransferOperationsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryExecuteTransferOperationsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -255,7 +255,7 @@ void FExecuteTransferOperationsAsyncTask::ProcessResults()
 	HResult = PFInventoryExecuteTransferOperationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryExecuteTransferOperationsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryExecuteTransferOperationsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -265,7 +265,7 @@ void FExecuteTransferOperationsAsyncTask::ProcessResults()
 	HResult = PFInventoryExecuteTransferOperationsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryExecuteTransferOperationsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -299,7 +299,7 @@ void FGetInventoryCollectionIdsAsyncTask::DoWork()
 	HResult = PFInventoryGetInventoryCollectionIdsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetInventoryCollectionIdsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -310,7 +310,7 @@ void FGetInventoryCollectionIdsAsyncTask::ProcessResults()
 	HResult = PFInventoryGetInventoryCollectionIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryGetInventoryCollectionIdsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryGetInventoryCollectionIdsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -320,7 +320,7 @@ void FGetInventoryCollectionIdsAsyncTask::ProcessResults()
 	HResult = PFInventoryGetInventoryCollectionIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetInventoryCollectionIdsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -355,7 +355,7 @@ void FGetInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryGetInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -366,7 +366,7 @@ void FGetInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryGetInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryGetInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryGetInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -376,7 +376,7 @@ void FGetInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryGetInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -410,7 +410,7 @@ void FGetInventoryOperationStatusAsyncTask::DoWork()
 	HResult = PFInventoryGetInventoryOperationStatusAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetInventoryOperationStatusResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -421,7 +421,7 @@ void FGetInventoryOperationStatusAsyncTask::ProcessResults()
 	HResult = PFInventoryGetInventoryOperationStatusGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryGetInventoryOperationStatusResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryGetInventoryOperationStatusResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -431,7 +431,7 @@ void FGetInventoryOperationStatusAsyncTask::ProcessResults()
 	HResult = PFInventoryGetInventoryOperationStatusGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetInventoryOperationStatusResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -469,7 +469,7 @@ void FGetTransactionHistoryAsyncTask::DoWork()
 	HResult = PFInventoryGetTransactionHistoryAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetTransactionHistoryResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -480,7 +480,7 @@ void FGetTransactionHistoryAsyncTask::ProcessResults()
 	HResult = PFInventoryGetTransactionHistoryGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryGetTransactionHistoryResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryGetTransactionHistoryResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -490,7 +490,7 @@ void FGetTransactionHistoryAsyncTask::ProcessResults()
 	HResult = PFInventoryGetTransactionHistoryGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryGetTransactionHistoryResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -533,7 +533,7 @@ void FPurchaseInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryPurchaseInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryPurchaseInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -544,7 +544,7 @@ void FPurchaseInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryPurchaseInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryPurchaseInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryPurchaseInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -554,7 +554,7 @@ void FPurchaseInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryPurchaseInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryPurchaseInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -588,7 +588,7 @@ void FRedeemAppleAppStoreInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryRedeemAppleAppStoreInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemAppleAppStoreInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -599,7 +599,7 @@ void FRedeemAppleAppStoreInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemAppleAppStoreInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryRedeemAppleAppStoreInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryRedeemAppleAppStoreInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -609,7 +609,7 @@ void FRedeemAppleAppStoreInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemAppleAppStoreInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemAppleAppStoreInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -645,7 +645,7 @@ void FRedeemGooglePlayInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryRedeemGooglePlayInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemGooglePlayInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -656,7 +656,7 @@ void FRedeemGooglePlayInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemGooglePlayInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryRedeemGooglePlayInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryRedeemGooglePlayInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -666,7 +666,7 @@ void FRedeemGooglePlayInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemGooglePlayInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemGooglePlayInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -705,7 +705,7 @@ void FRedeemMicrosoftStoreInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryRedeemMicrosoftStoreInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -716,7 +716,7 @@ void FRedeemMicrosoftStoreInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemMicrosoftStoreInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -726,7 +726,7 @@ void FRedeemMicrosoftStoreInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemMicrosoftStoreInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemMicrosoftStoreInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -761,7 +761,7 @@ void FRedeemNintendoEShopInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryRedeemNintendoEShopInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemNintendoEShopInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -772,7 +772,7 @@ void FRedeemNintendoEShopInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemNintendoEShopInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryRedeemNintendoEShopInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryRedeemNintendoEShopInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -782,7 +782,7 @@ void FRedeemNintendoEShopInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemNintendoEShopInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemNintendoEShopInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -819,7 +819,7 @@ void FRedeemPlayStationStoreInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryRedeemPlayStationStoreInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemPlayStationStoreInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -830,7 +830,7 @@ void FRedeemPlayStationStoreInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemPlayStationStoreInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryRedeemPlayStationStoreInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryRedeemPlayStationStoreInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -840,7 +840,7 @@ void FRedeemPlayStationStoreInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemPlayStationStoreInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemPlayStationStoreInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -874,7 +874,7 @@ void FRedeemSteamInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryRedeemSteamInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemSteamInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -885,7 +885,7 @@ void FRedeemSteamInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemSteamInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryRedeemSteamInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryRedeemSteamInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -895,7 +895,7 @@ void FRedeemSteamInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryRedeemSteamInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryRedeemSteamInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -934,7 +934,7 @@ void FSubtractInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventorySubtractInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventorySubtractInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -945,7 +945,7 @@ void FSubtractInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventorySubtractInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventorySubtractInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventorySubtractInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -955,7 +955,7 @@ void FSubtractInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventorySubtractInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventorySubtractInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -996,7 +996,7 @@ void FTransferInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryTransferInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryTransferInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1007,7 +1007,7 @@ void FTransferInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryTransferInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryTransferInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryTransferInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1017,7 +1017,7 @@ void FTransferInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryTransferInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryTransferInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1052,7 +1052,7 @@ void FUpdateInventoryItemsAsyncTask::DoWork()
 	HResult = PFInventoryUpdateInventoryItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryUpdateInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1063,7 +1063,7 @@ void FUpdateInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryUpdateInventoryItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFInventoryUpdateInventoryItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFInventoryUpdateInventoryItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1073,7 +1073,7 @@ void FUpdateInventoryItemsAsyncTask::ProcessResults()
 	HResult = PFInventoryUpdateInventoryItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFInventoryUpdateInventoryItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

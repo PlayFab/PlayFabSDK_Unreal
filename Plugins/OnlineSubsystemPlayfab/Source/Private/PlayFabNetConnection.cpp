@@ -8,11 +8,13 @@
 #include "Net/DataChannel.h"
 
 #include "OnlineSubsystem.h"
+#include "OnlineSubsystemPlayFab.h"
 #include "OnlineSubsystemPlayFabDefines.h"
 #include "OnlineSubsystemSessionSettings.h"
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSubsystemPlayfabPrivate.h"
+#include "PlayFabHelpers.h"
 
 #include "Runtime/Launch/Resources/Version.h"
 
@@ -39,17 +41,19 @@ void UPlayFabNetConnection::InitLocalConnection(UNetDriver* InDriver, class FSoc
 	PlayerId.SetUniqueNetId(nullptr);
 
 	FString HostConnectInfo;
-	IOnlineSubsystem* OSSPlayFab = IOnlineSubsystem::Get(PLAYFAB_SUBSYSTEM);
+	FName InstanceName = UPlayFabNetDriver::GetInstanceName(InDriver);
+	IOnlineSubsystem* OSSPlayFab = GetOnlineSubsystem(PLAYFAB_SUBSYSTEM, InstanceName);
 	if (OSSPlayFab)
 	{
-		FNamedOnlineSession* Session = OSSPlayFab->GetSessionInterface()->GetNamedSession(NAME_GameSession);
+		FName SessionName = PlayFabNetDriver ? PlayFabNetDriver->SessionName : NAME_GameSession;
+		FNamedOnlineSession* Session = OSSPlayFab->GetSessionInterface()->GetNamedSession(SessionName);
 		if (Session)
 		{
 			Session->SessionSettings.Get(SETTING_HOST_CONNECT_INFO, HostConnectInfo);
 		}
 		else
 		{
-			UE_LOG_ONLINE(Error, TEXT("UPlayFabNetConnection::InitLocalConnection failed: Named Session GameSession is null"));
+			UE_LOG_ONLINE(Error, TEXT("UPlayFabNetConnection::InitLocalConnection failed: Named Session %s is null"), *SessionName.ToString());
 		}
 	}
 	else

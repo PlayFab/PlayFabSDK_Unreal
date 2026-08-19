@@ -18,7 +18,7 @@ void FClientGetPlayerSegmentsAsyncTask::DoWork()
 	HResult = PFSegmentsClientGetPlayerSegmentsAsync(EntityHandle.Get(), *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -29,7 +29,7 @@ void FClientGetPlayerSegmentsAsyncTask::ProcessResults()
 	HResult = PFSegmentsClientGetPlayerSegmentsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -39,7 +39,7 @@ void FClientGetPlayerSegmentsAsyncTask::ProcessResults()
 	HResult = PFSegmentsClientGetPlayerSegmentsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -71,7 +71,7 @@ void FClientGetPlayerTagsAsyncTask::DoWork()
 	HResult = PFSegmentsClientGetPlayerTagsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -82,7 +82,7 @@ void FClientGetPlayerTagsAsyncTask::ProcessResults()
 	HResult = PFSegmentsClientGetPlayerTagsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -92,7 +92,7 @@ void FClientGetPlayerTagsAsyncTask::ProcessResults()
 	HResult = PFSegmentsClientGetPlayerTagsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -125,7 +125,7 @@ void FServerAddPlayerTagAsyncTask::DoWork()
 	HResult = PFSegmentsServerAddPlayerTagAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -134,7 +134,7 @@ void FServerAddPlayerTagAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -159,7 +159,7 @@ void FServerGetAllSegmentsAsyncTask::DoWork()
 	HResult = PFSegmentsServerGetAllSegmentsAsync(TitleEntityHandle.Get(), *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetAllSegmentsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -170,7 +170,7 @@ void FServerGetAllSegmentsAsyncTask::ProcessResults()
 	HResult = PFSegmentsServerGetAllSegmentsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFSegmentsGetAllSegmentsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFSegmentsGetAllSegmentsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -180,7 +180,7 @@ void FServerGetAllSegmentsAsyncTask::ProcessResults()
 	HResult = PFSegmentsServerGetAllSegmentsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetAllSegmentsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -213,7 +213,7 @@ void FServerGetPlayerSegmentsAsyncTask::DoWork()
 	HResult = PFSegmentsServerGetPlayerSegmentsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -224,7 +224,7 @@ void FServerGetPlayerSegmentsAsyncTask::ProcessResults()
 	HResult = PFSegmentsServerGetPlayerSegmentsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -234,7 +234,7 @@ void FServerGetPlayerSegmentsAsyncTask::ProcessResults()
 	HResult = PFSegmentsServerGetPlayerSegmentsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerSegmentsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -268,7 +268,7 @@ void FServerGetPlayerTagsAsyncTask::DoWork()
 	HResult = PFSegmentsServerGetPlayerTagsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -279,7 +279,7 @@ void FServerGetPlayerTagsAsyncTask::ProcessResults()
 	HResult = PFSegmentsServerGetPlayerTagsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -289,7 +289,7 @@ void FServerGetPlayerTagsAsyncTask::ProcessResults()
 	HResult = PFSegmentsServerGetPlayerTagsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFSegmentsGetPlayerTagsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -323,7 +323,7 @@ void FServerRemovePlayerTagAsyncTask::DoWork()
 	HResult = PFSegmentsServerRemovePlayerTagAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -332,7 +332,7 @@ void FServerRemovePlayerTagAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{

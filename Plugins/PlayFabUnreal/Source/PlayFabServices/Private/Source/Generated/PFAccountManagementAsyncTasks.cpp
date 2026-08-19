@@ -25,7 +25,7 @@ void FClientAddOrUpdateContactEmailAsyncTask::DoWork()
 	HResult = PFAccountManagementClientAddOrUpdateContactEmailAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -34,7 +34,7 @@ void FClientAddOrUpdateContactEmailAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -67,7 +67,7 @@ void FClientAddUsernamePasswordAsyncTask::DoWork()
 	HResult = PFAccountManagementClientAddUsernamePasswordAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementAddUsernamePasswordResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -78,7 +78,7 @@ void FClientAddUsernamePasswordAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientAddUsernamePasswordGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementAddUsernamePasswordResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementAddUsernamePasswordResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -88,7 +88,7 @@ void FClientAddUsernamePasswordAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientAddUsernamePasswordGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementAddUsernamePasswordResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -121,7 +121,7 @@ void FClientGetAccountInfoAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetAccountInfoAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetAccountInfoResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -132,7 +132,7 @@ void FClientGetAccountInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetAccountInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetAccountInfoResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetAccountInfoResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -142,7 +142,7 @@ void FClientGetAccountInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetAccountInfoGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetAccountInfoResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -174,7 +174,7 @@ void FClientGetPlayerCombinedInfoAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayerCombinedInfoAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -185,7 +185,7 @@ void FClientGetPlayerCombinedInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayerCombinedInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -195,7 +195,7 @@ void FClientGetPlayerCombinedInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayerCombinedInfoGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -227,7 +227,7 @@ void FClientGetPlayerProfileAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayerProfileAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -238,7 +238,7 @@ void FClientGetPlayerProfileAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayerProfileGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -248,7 +248,7 @@ void FClientGetPlayerProfileAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayerProfileGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -278,7 +278,7 @@ void FClientGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromBattleNetAccountIdsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -289,7 +289,7 @@ void FClientGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromBattleNetAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -299,7 +299,7 @@ void FClientGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromBattleNetAccountIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -330,7 +330,7 @@ void FClientGetPlayFabIDsFromFacebookIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -341,7 +341,7 @@ void FClientGetPlayFabIDsFromFacebookIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -351,7 +351,7 @@ void FClientGetPlayFabIDsFromFacebookIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -383,7 +383,7 @@ void FClientGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookInstantGamesIdsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -394,7 +394,7 @@ void FClientGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookInstantGamesIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -404,7 +404,7 @@ void FClientGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromFacebookInstantGamesIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -436,7 +436,7 @@ void FClientGetPlayFabIDsFromGameCenterIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGameCenterIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -447,7 +447,7 @@ void FClientGetPlayFabIDsFromGameCenterIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGameCenterIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -457,7 +457,7 @@ void FClientGetPlayFabIDsFromGameCenterIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGameCenterIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGameCenterIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -489,7 +489,7 @@ void FClientGetPlayFabIDsFromGoogleIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGoogleIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -500,7 +500,7 @@ void FClientGetPlayFabIDsFromGoogleIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGoogleIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -510,7 +510,7 @@ void FClientGetPlayFabIDsFromGoogleIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGoogleIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGoogleIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -542,7 +542,7 @@ void FClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -553,7 +553,7 @@ void FClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -563,7 +563,7 @@ void FClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromGooglePlayGamesPlayerIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromGooglePlayGamesPlayerIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -595,7 +595,7 @@ void FClientGetPlayFabIDsFromKongregateIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromKongregateIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -606,7 +606,7 @@ void FClientGetPlayFabIDsFromKongregateIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromKongregateIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -616,7 +616,7 @@ void FClientGetPlayFabIDsFromKongregateIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromKongregateIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromKongregateIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -648,7 +648,7 @@ void FClientGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoServiceAccountIdsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -659,7 +659,7 @@ void FClientGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::ProcessResults(
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoServiceAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -669,7 +669,7 @@ void FClientGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::ProcessResults(
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoServiceAccountIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -701,7 +701,7 @@ void FClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -712,7 +712,7 @@ void FClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoSwitchDeviceIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -722,7 +722,7 @@ void FClientGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromNintendoSwitchDeviceIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -754,7 +754,7 @@ void FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -765,7 +765,7 @@ void FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -775,7 +775,7 @@ void FClientGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -808,7 +808,7 @@ void FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNAccountIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -819,7 +819,7 @@ void FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNAccountIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -829,7 +829,7 @@ void FClientGetPlayFabIDsFromPSNAccountIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNAccountIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -861,7 +861,7 @@ void FClientGetPlayFabIDsFromPSNOnlineIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNOnlineIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -872,7 +872,7 @@ void FClientGetPlayFabIDsFromPSNOnlineIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNOnlineIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -882,7 +882,7 @@ void FClientGetPlayFabIDsFromPSNOnlineIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromPSNOnlineIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -913,7 +913,7 @@ void FClientGetPlayFabIDsFromSteamIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -924,7 +924,7 @@ void FClientGetPlayFabIDsFromSteamIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -934,7 +934,7 @@ void FClientGetPlayFabIDsFromSteamIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -965,7 +965,7 @@ void FClientGetPlayFabIDsFromSteamNamesAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamNamesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -976,7 +976,7 @@ void FClientGetPlayFabIDsFromSteamNamesAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamNamesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -986,7 +986,7 @@ void FClientGetPlayFabIDsFromSteamNamesAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromSteamNamesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1017,7 +1017,7 @@ void FClientGetPlayFabIDsFromTwitchIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromTwitchIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1028,7 +1028,7 @@ void FClientGetPlayFabIDsFromTwitchIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromTwitchIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1038,7 +1038,7 @@ void FClientGetPlayFabIDsFromTwitchIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromTwitchIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1071,7 +1071,7 @@ void FClientGetPlayFabIDsFromXboxLiveIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromXboxLiveIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1082,7 +1082,7 @@ void FClientGetPlayFabIDsFromXboxLiveIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromXboxLiveIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1092,7 +1092,7 @@ void FClientGetPlayFabIDsFromXboxLiveIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientGetPlayFabIDsFromXboxLiveIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1128,7 +1128,7 @@ void FClientLinkAndroidDeviceIDAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkAndroidDeviceIDAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1137,7 +1137,7 @@ void FClientLinkAndroidDeviceIDAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1169,7 +1169,7 @@ void FClientLinkAppleAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkAppleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1178,7 +1178,7 @@ void FClientLinkAppleAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1210,7 +1210,7 @@ void FClientLinkBattleNetAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkBattleNetAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1219,7 +1219,7 @@ void FClientLinkBattleNetAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1250,7 +1250,7 @@ void FClientLinkCustomIDAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkCustomIDAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1259,7 +1259,7 @@ void FClientLinkCustomIDAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1291,7 +1291,7 @@ void FClientLinkFacebookAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkFacebookAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1300,7 +1300,7 @@ void FClientLinkFacebookAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1332,7 +1332,7 @@ void FClientLinkFacebookInstantGamesIdAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkFacebookInstantGamesIdAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1341,7 +1341,7 @@ void FClientLinkFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1377,7 +1377,7 @@ void FClientLinkGameCenterAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkGameCenterAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1386,7 +1386,7 @@ void FClientLinkGameCenterAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1418,7 +1418,7 @@ void FClientLinkGoogleAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkGoogleAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1427,7 +1427,7 @@ void FClientLinkGoogleAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1459,7 +1459,7 @@ void FClientLinkGooglePlayGamesServicesAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkGooglePlayGamesServicesAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1468,7 +1468,7 @@ void FClientLinkGooglePlayGamesServicesAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1502,7 +1502,7 @@ void FClientLinkIOSDeviceIDAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkIOSDeviceIDAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1511,7 +1511,7 @@ void FClientLinkIOSDeviceIDAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1544,7 +1544,7 @@ void FClientLinkKongregateAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkKongregateAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1553,7 +1553,7 @@ void FClientLinkKongregateAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1585,7 +1585,7 @@ void FClientLinkNintendoServiceAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkNintendoServiceAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1594,7 +1594,7 @@ void FClientLinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1626,7 +1626,7 @@ void FClientLinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkNintendoSwitchDeviceIdAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1635,7 +1635,7 @@ void FClientLinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1667,7 +1667,7 @@ void FClientLinkOpenIdConnectAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkOpenIdConnectAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1676,7 +1676,7 @@ void FClientLinkOpenIdConnectAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1709,7 +1709,7 @@ void FClientLinkPSNAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkPSNAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1718,7 +1718,7 @@ void FClientLinkPSNAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1751,7 +1751,7 @@ void FClientLinkSteamAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkSteamAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1760,7 +1760,7 @@ void FClientLinkSteamAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1792,7 +1792,7 @@ void FClientLinkTwitchAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkTwitchAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1801,7 +1801,7 @@ void FClientLinkTwitchAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1837,7 +1837,7 @@ void FClientLinkXboxAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientLinkXboxAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1846,7 +1846,7 @@ void FClientLinkXboxAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1876,7 +1876,7 @@ void FClientRemoveContactEmailAsyncTask::DoWork()
 	HResult = PFAccountManagementClientRemoveContactEmailAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1885,7 +1885,7 @@ void FClientRemoveContactEmailAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1916,7 +1916,7 @@ void FClientReportPlayerAsyncTask::DoWork()
 	HResult = PFAccountManagementClientReportPlayerAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementReportPlayerClientResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1927,7 +1927,7 @@ void FClientReportPlayerAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientReportPlayerGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementReportPlayerClientResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1961,7 +1961,7 @@ void FClientSendAccountRecoveryEmailAsyncTask::DoWork()
 	HResult = PFAccountManagementClientSendAccountRecoveryEmailAsync(ServiceConfigHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1970,7 +1970,7 @@ void FClientSendAccountRecoveryEmailAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2001,7 +2001,7 @@ void FClientUnlinkAndroidDeviceIDAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkAndroidDeviceIDAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2010,7 +2010,7 @@ void FClientUnlinkAndroidDeviceIDAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2040,7 +2040,7 @@ void FClientUnlinkAppleAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkAppleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2049,7 +2049,7 @@ void FClientUnlinkAppleAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2079,7 +2079,7 @@ void FClientUnlinkBattleNetAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkBattleNetAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2088,7 +2088,7 @@ void FClientUnlinkBattleNetAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2118,7 +2118,7 @@ void FClientUnlinkCustomIDAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkCustomIDAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2127,7 +2127,7 @@ void FClientUnlinkCustomIDAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2156,7 +2156,7 @@ void FClientUnlinkFacebookAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkFacebookAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2165,7 +2165,7 @@ void FClientUnlinkFacebookAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2196,7 +2196,7 @@ void FClientUnlinkFacebookInstantGamesIdAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkFacebookInstantGamesIdAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2205,7 +2205,7 @@ void FClientUnlinkFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2235,7 +2235,7 @@ void FClientUnlinkGameCenterAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkGameCenterAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2244,7 +2244,7 @@ void FClientUnlinkGameCenterAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2274,7 +2274,7 @@ void FClientUnlinkGoogleAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkGoogleAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2283,7 +2283,7 @@ void FClientUnlinkGoogleAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2313,7 +2313,7 @@ void FClientUnlinkGooglePlayGamesServicesAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkGooglePlayGamesServicesAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2322,7 +2322,7 @@ void FClientUnlinkGooglePlayGamesServicesAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2353,7 +2353,7 @@ void FClientUnlinkIOSDeviceIDAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkIOSDeviceIDAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2362,7 +2362,7 @@ void FClientUnlinkIOSDeviceIDAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2392,7 +2392,7 @@ void FClientUnlinkKongregateAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkKongregateAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2401,7 +2401,7 @@ void FClientUnlinkKongregateAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2431,7 +2431,7 @@ void FClientUnlinkNintendoServiceAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkNintendoServiceAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2440,7 +2440,7 @@ void FClientUnlinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2471,7 +2471,7 @@ void FClientUnlinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkNintendoSwitchDeviceIdAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2480,7 +2480,7 @@ void FClientUnlinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2510,7 +2510,7 @@ void FClientUnlinkOpenIdConnectAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkOpenIdConnectAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2519,7 +2519,7 @@ void FClientUnlinkOpenIdConnectAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2548,7 +2548,7 @@ void FClientUnlinkPSNAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkPSNAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2557,7 +2557,7 @@ void FClientUnlinkPSNAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2587,7 +2587,7 @@ void FClientUnlinkSteamAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkSteamAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2596,7 +2596,7 @@ void FClientUnlinkSteamAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2627,7 +2627,7 @@ void FClientUnlinkTwitchAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkTwitchAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2636,7 +2636,7 @@ void FClientUnlinkTwitchAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2666,7 +2666,7 @@ void FClientUnlinkXboxAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUnlinkXboxAccountAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2675,7 +2675,7 @@ void FClientUnlinkXboxAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2703,7 +2703,7 @@ void FClientUpdateAvatarUrlAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUpdateAvatarUrlAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2712,7 +2712,7 @@ void FClientUpdateAvatarUrlAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2742,7 +2742,7 @@ void FClientUpdateUserTitleDisplayNameAsyncTask::DoWork()
 	HResult = PFAccountManagementClientUpdateUserTitleDisplayNameAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementUpdateUserTitleDisplayNameResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -2753,7 +2753,7 @@ void FClientUpdateUserTitleDisplayNameAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientUpdateUserTitleDisplayNameGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementUpdateUserTitleDisplayNameResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementUpdateUserTitleDisplayNameResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -2763,7 +2763,7 @@ void FClientUpdateUserTitleDisplayNameAsyncTask::ProcessResults()
 	HResult = PFAccountManagementClientUpdateUserTitleDisplayNameGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementUpdateUserTitleDisplayNameResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -2797,7 +2797,7 @@ void FServerAddOrUpdateContactEmailAsyncTask::DoWork()
 	HResult = PFAccountManagementServerAddOrUpdateContactEmailAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2806,7 +2806,7 @@ void FServerAddOrUpdateContactEmailAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2838,7 +2838,7 @@ void FServerBanUsersAsyncTask::DoWork()
 	HResult = PFAccountManagementServerBanUsersAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementBanUsersResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -2849,7 +2849,7 @@ void FServerBanUsersAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerBanUsersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementBanUsersResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementBanUsersResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -2859,7 +2859,7 @@ void FServerBanUsersAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerBanUsersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementBanUsersResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -2890,7 +2890,7 @@ void FServerDeletePlayerAsyncTask::DoWork()
 	HResult = PFAccountManagementServerDeletePlayerAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -2899,7 +2899,7 @@ void FServerDeletePlayerAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -2931,7 +2931,7 @@ void FServerGetPlayerCombinedInfoAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayerCombinedInfoAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -2942,7 +2942,7 @@ void FServerGetPlayerCombinedInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayerCombinedInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -2952,7 +2952,7 @@ void FServerGetPlayerCombinedInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayerCombinedInfoGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerCombinedInfoResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -2986,7 +2986,7 @@ void FServerGetPlayerProfileAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayerProfileAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -2997,7 +2997,7 @@ void FServerGetPlayerProfileAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayerProfileGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3007,7 +3007,7 @@ void FServerGetPlayerProfileAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayerProfileGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayerProfileResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3039,7 +3039,7 @@ void FServerGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromBattleNetAccountIdsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3050,7 +3050,7 @@ void FServerGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromBattleNetAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3060,7 +3060,7 @@ void FServerGetPlayFabIDsFromBattleNetAccountIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromBattleNetAccountIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromBattleNetAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3092,7 +3092,7 @@ void FServerGetPlayFabIDsFromFacebookIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3103,7 +3103,7 @@ void FServerGetPlayFabIDsFromFacebookIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3113,7 +3113,7 @@ void FServerGetPlayFabIDsFromFacebookIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3145,7 +3145,7 @@ void FServerGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookInstantGamesIdsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3156,7 +3156,7 @@ void FServerGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookInstantGamesIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3166,7 +3166,7 @@ void FServerGetPlayFabIDsFromFacebookInstantGamesIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromFacebookInstantGamesIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromFacebookInstantGamesIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3198,7 +3198,7 @@ void FServerGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoServiceAccountIdsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3209,7 +3209,7 @@ void FServerGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::ProcessResults(
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoServiceAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3219,7 +3219,7 @@ void FServerGetPlayFabIDsFromNintendoServiceAccountIdsAsyncTask::ProcessResults(
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoServiceAccountIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoServiceAccountIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3251,7 +3251,7 @@ void FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3262,7 +3262,7 @@ void FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoSwitchDeviceIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3272,7 +3272,7 @@ void FServerGetPlayFabIDsFromNintendoSwitchDeviceIdsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromNintendoSwitchDeviceIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromNintendoSwitchDeviceIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3304,7 +3304,7 @@ void FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3315,7 +3315,7 @@ void FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3325,7 +3325,7 @@ void FServerGetPlayFabIDsFromOpenIdSubjectIdentifiersAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromOpenIdSubjectIdentifiersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromOpenIdsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3358,7 +3358,7 @@ void FServerGetPlayFabIDsFromPSNAccountIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNAccountIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3369,7 +3369,7 @@ void FServerGetPlayFabIDsFromPSNAccountIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNAccountIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3379,7 +3379,7 @@ void FServerGetPlayFabIDsFromPSNAccountIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNAccountIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3412,7 +3412,7 @@ void FServerGetPlayFabIDsFromPSNOnlineIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNOnlineIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3423,7 +3423,7 @@ void FServerGetPlayFabIDsFromPSNOnlineIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNOnlineIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3433,7 +3433,7 @@ void FServerGetPlayFabIDsFromPSNOnlineIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromPSNOnlineIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3465,7 +3465,7 @@ void FServerGetPlayFabIDsFromSteamIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3476,7 +3476,7 @@ void FServerGetPlayFabIDsFromSteamIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3486,7 +3486,7 @@ void FServerGetPlayFabIDsFromSteamIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3518,7 +3518,7 @@ void FServerGetPlayFabIDsFromSteamNamesAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamNamesAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3529,7 +3529,7 @@ void FServerGetPlayFabIDsFromSteamNamesAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamNamesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3539,7 +3539,7 @@ void FServerGetPlayFabIDsFromSteamNamesAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromSteamNamesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromSteamNamesResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3571,7 +3571,7 @@ void FServerGetPlayFabIDsFromTwitchIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromTwitchIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3582,7 +3582,7 @@ void FServerGetPlayFabIDsFromTwitchIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromTwitchIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3592,7 +3592,7 @@ void FServerGetPlayFabIDsFromTwitchIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromTwitchIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromTwitchIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3625,7 +3625,7 @@ void FServerGetPlayFabIDsFromXboxLiveIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromXboxLiveIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3636,7 +3636,7 @@ void FServerGetPlayFabIDsFromXboxLiveIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromXboxLiveIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3646,7 +3646,7 @@ void FServerGetPlayFabIDsFromXboxLiveIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetPlayFabIDsFromXboxLiveIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetPlayFabIDsFromXboxLiveIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3678,7 +3678,7 @@ void FServerGetServerCustomIDsFromPlayFabIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetServerCustomIDsFromPlayFabIDsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3689,7 +3689,7 @@ void FServerGetServerCustomIDsFromPlayFabIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetServerCustomIDsFromPlayFabIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3699,7 +3699,7 @@ void FServerGetServerCustomIDsFromPlayFabIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetServerCustomIDsFromPlayFabIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetServerCustomIDsFromPlayFabIDsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3730,7 +3730,7 @@ void FServerGetUserAccountInfoAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetUserAccountInfoAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetUserAccountInfoResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3741,7 +3741,7 @@ void FServerGetUserAccountInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetUserAccountInfoGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetUserAccountInfoResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetUserAccountInfoResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3751,7 +3751,7 @@ void FServerGetUserAccountInfoAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetUserAccountInfoGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetUserAccountInfoResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3782,7 +3782,7 @@ void FServerGetUserBansAsyncTask::DoWork()
 	HResult = PFAccountManagementServerGetUserBansAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetUserBansResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -3793,7 +3793,7 @@ void FServerGetUserBansAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetUserBansGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetUserBansResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetUserBansResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -3803,7 +3803,7 @@ void FServerGetUserBansAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerGetUserBansGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetUserBansResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -3838,7 +3838,7 @@ void FServerLinkBattleNetAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkBattleNetAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -3847,7 +3847,7 @@ void FServerLinkBattleNetAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -3880,7 +3880,7 @@ void FServerLinkNintendoServiceAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkNintendoServiceAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -3889,7 +3889,7 @@ void FServerLinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -3922,7 +3922,7 @@ void FServerLinkNintendoServiceAccountSubjectAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkNintendoServiceAccountSubjectAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -3931,7 +3931,7 @@ void FServerLinkNintendoServiceAccountSubjectAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -3964,7 +3964,7 @@ void FServerLinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkNintendoSwitchDeviceIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -3973,7 +3973,7 @@ void FServerLinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4008,7 +4008,7 @@ void FServerLinkPSNAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkPSNAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4017,7 +4017,7 @@ void FServerLinkPSNAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4051,7 +4051,7 @@ void FServerLinkPSNIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkPSNIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4060,7 +4060,7 @@ void FServerLinkPSNIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4093,7 +4093,7 @@ void FServerLinkServerCustomIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkServerCustomIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4102,7 +4102,7 @@ void FServerLinkServerCustomIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4135,7 +4135,7 @@ void FServerLinkSteamIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkSteamIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4144,7 +4144,7 @@ void FServerLinkSteamIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4177,7 +4177,7 @@ void FServerLinkTwitchAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkTwitchAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4186,7 +4186,7 @@ void FServerLinkTwitchAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4219,7 +4219,7 @@ void FServerLinkXboxAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkXboxAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4228,7 +4228,7 @@ void FServerLinkXboxAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4262,7 +4262,7 @@ void FServerLinkXboxIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerLinkXboxIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4271,7 +4271,7 @@ void FServerLinkXboxIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4300,7 +4300,7 @@ void FServerRevokeAllBansForUserAsyncTask::DoWork()
 	HResult = PFAccountManagementServerRevokeAllBansForUserAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementRevokeAllBansForUserResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -4311,7 +4311,7 @@ void FServerRevokeAllBansForUserAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerRevokeAllBansForUserGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementRevokeAllBansForUserResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementRevokeAllBansForUserResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -4321,7 +4321,7 @@ void FServerRevokeAllBansForUserAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerRevokeAllBansForUserGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementRevokeAllBansForUserResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -4353,7 +4353,7 @@ void FServerRevokeBansAsyncTask::DoWork()
 	HResult = PFAccountManagementServerRevokeBansAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementRevokeBansResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -4364,7 +4364,7 @@ void FServerRevokeBansAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerRevokeBansGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementRevokeBansResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementRevokeBansResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -4374,7 +4374,7 @@ void FServerRevokeBansAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerRevokeBansGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementRevokeBansResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -4409,7 +4409,7 @@ void FServerSendCustomAccountRecoveryEmailAsyncTask::DoWork()
 	HResult = PFAccountManagementServerSendCustomAccountRecoveryEmailAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4418,7 +4418,7 @@ void FServerSendCustomAccountRecoveryEmailAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4450,7 +4450,7 @@ void FServerSendEmailFromTemplateAsyncTask::DoWork()
 	HResult = PFAccountManagementServerSendEmailFromTemplateAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4459,7 +4459,7 @@ void FServerSendEmailFromTemplateAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4490,7 +4490,7 @@ void FServerUnlinkBattleNetAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkBattleNetAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4499,7 +4499,7 @@ void FServerUnlinkBattleNetAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4530,7 +4530,7 @@ void FServerUnlinkFacebookAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkFacebookAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4539,7 +4539,7 @@ void FServerUnlinkFacebookAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4571,7 +4571,7 @@ void FServerUnlinkFacebookInstantGamesIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkFacebookInstantGamesIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4580,7 +4580,7 @@ void FServerUnlinkFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4611,7 +4611,7 @@ void FServerUnlinkNintendoServiceAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkNintendoServiceAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4620,7 +4620,7 @@ void FServerUnlinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4652,7 +4652,7 @@ void FServerUnlinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkNintendoSwitchDeviceIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4661,7 +4661,7 @@ void FServerUnlinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4692,7 +4692,7 @@ void FServerUnlinkPSNAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkPSNAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4701,7 +4701,7 @@ void FServerUnlinkPSNAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4733,7 +4733,7 @@ void FServerUnlinkServerCustomIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkServerCustomIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4742,7 +4742,7 @@ void FServerUnlinkServerCustomIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4773,7 +4773,7 @@ void FServerUnlinkSteamIdAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkSteamIdAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4782,7 +4782,7 @@ void FServerUnlinkSteamIdAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4814,7 +4814,7 @@ void FServerUnlinkTwitchAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkTwitchAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4823,7 +4823,7 @@ void FServerUnlinkTwitchAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4854,7 +4854,7 @@ void FServerUnlinkXboxAccountAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUnlinkXboxAccountAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4863,7 +4863,7 @@ void FServerUnlinkXboxAccountAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4893,7 +4893,7 @@ void FServerUpdateAvatarUrlAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUpdateAvatarUrlAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -4902,7 +4902,7 @@ void FServerUpdateAvatarUrlAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -4932,7 +4932,7 @@ void FServerUpdateBansAsyncTask::DoWork()
 	HResult = PFAccountManagementServerUpdateBansAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementUpdateBansResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -4943,7 +4943,7 @@ void FServerUpdateBansAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerUpdateBansGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementUpdateBansResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementUpdateBansResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -4953,7 +4953,7 @@ void FServerUpdateBansAsyncTask::ProcessResults()
 	HResult = PFAccountManagementServerUpdateBansGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementUpdateBansResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -4989,7 +4989,7 @@ void FGetTitlePlayersFromXboxLiveIDsAsyncTask::DoWork()
 	HResult = PFAccountManagementGetTitlePlayersFromXboxLiveIDsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetTitlePlayersFromProviderIDsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -5000,7 +5000,7 @@ void FGetTitlePlayersFromXboxLiveIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementGetTitlePlayersFromXboxLiveIDsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementGetTitlePlayersFromProviderIDsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementGetTitlePlayersFromProviderIDsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -5010,7 +5010,7 @@ void FGetTitlePlayersFromXboxLiveIDsAsyncTask::ProcessResults()
 	HResult = PFAccountManagementGetTitlePlayersFromXboxLiveIDsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementGetTitlePlayersFromProviderIDsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -5044,7 +5044,7 @@ void FSetDisplayNameAsyncTask::DoWork()
 	HResult = PFAccountManagementSetDisplayNameAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementSetDisplayNameResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -5055,7 +5055,7 @@ void FSetDisplayNameAsyncTask::ProcessResults()
 	HResult = PFAccountManagementSetDisplayNameGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFAccountManagementSetDisplayNameResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFAccountManagementSetDisplayNameResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -5065,7 +5065,7 @@ void FSetDisplayNameAsyncTask::ProcessResults()
 	HResult = PFAccountManagementSetDisplayNameGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFAccountManagementSetDisplayNameResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

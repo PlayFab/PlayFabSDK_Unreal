@@ -27,9 +27,20 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesInitialize(
 /// <summary>
 /// Delegate called when a FPFGameSaveFilesAddUserWithUiAsync operation is complete.
 /// </summary>
-DECLARE_DELEGATE_OneParam(
+/// <param name="result">
+/// The outcome of the operation. Branch on this to decide how to proceed:
+/// Success (play online), SuccessOffline (play with local saves), Cancelled
+/// (user backed out — do not allow play), or Failed (see errorMessage / handle
+/// the sync-failed delegate for the specific failure HRESULT).
+/// </param>
+/// <param name="errorMessage">
+/// On Failed, the HRESULT as a hex string (e.g. "0x89237008") for logging.
+/// Empty on Success, SuccessOffline, and Cancelled.
+/// </param>
+DECLARE_DELEGATE_TwoParams(
     FPFGameSaveFilesAddUserWithUiAsyncComplete,
-    bool /* succeeded */
+    FPFGameSaveFilesAddUserResult /* result */,
+    const FString& /* errorMessage */
 );
 
 /// <summary>
@@ -81,9 +92,19 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesGetFolder(
 /// <summary>
 /// Delegate called when a FPFGameSaveFilesUploadWithUiAsync operation is complete.
 /// </summary>
-DECLARE_DELEGATE_OneParam(
+/// <param name="result">
+/// The outcome of the upload. Branch on this to decide how to proceed:
+/// Success (saved to cloud), Cancelled (user backed out), or Failed
+/// (see errorMessage / handle the sync-failed delegate for the specific HRESULT).
+/// </param>
+/// <param name="errorMessage">
+/// On Failed, the HRESULT as a hex string (e.g. "0x89237004") for logging.
+/// Empty on Success and Cancelled.
+/// </param>
+DECLARE_DELEGATE_TwoParams(
     FPFGameSaveFilesUploadWithUiAsyncComplete,
-    bool /* succeeded */
+    FPFGameSaveFilesUploadResult /* result */,
+    const FString& /* errorMessage */
 );
 
 /// <summary>
@@ -194,4 +215,50 @@ DECLARE_DELEGATE_OneParam(
 /// </remarks>
 bool PLAYFABGAMESAVE_API FPFGameSaveFilesUninitializeAsync(
     _In_ FPFGameSaveFilesUninitializeComplete delegate
+) noexcept;
+
+/// <summary>
+/// Delegate called when a FPFGameSaveFilesResetCloudAsync operation is complete.
+/// </summary>
+DECLARE_DELEGATE_TwoParams(
+    FPFGameSaveFilesResetCloudAsyncComplete,
+    bool /* succeeded */,
+    const FString& /* errorMessage */
+);
+
+/// <summary>
+/// Resets cloud game save state for a user. This is useful during development and testing.
+/// Does not delete or alter local game saves.
+/// The user must be added first using FPFGameSaveFilesAddUserWithUiAsync.
+/// </summary>
+/// <param name="localUserHandle">Local user whose cloud state to reset.</param>
+/// <param name="delegate">A delegate that gets called upon completion.</param>
+/// <returns>Result code for this API operation.</returns>
+bool PLAYFABGAMESAVE_API FPFGameSaveFilesResetCloudAsync(
+    _In_ FPFLocalUserHandle localUserHandle,
+    _In_ FPFGameSaveFilesResetCloudAsyncComplete delegate
+) noexcept;
+
+/// <summary>
+/// Delegate called when a FPFGameSaveFilesSetSaveDescriptionAsync operation is complete.
+/// </summary>
+DECLARE_DELEGATE_TwoParams(
+    FPFGameSaveFilesSetSaveDescriptionAsyncComplete,
+    bool /* succeeded */,
+    const FString& /* errorMessage */
+);
+
+/// <summary>
+/// Sets a short save description of the pending game save. This description is visible in
+/// conflict and active device contention UI.
+/// The user must be added first using FPFGameSaveFilesAddUserWithUiAsync.
+/// </summary>
+/// <param name="localUserHandle">Local user whose save description to set.</param>
+/// <param name="description">Short description of the save game.</param>
+/// <param name="delegate">A delegate that gets called upon completion.</param>
+/// <returns>Result code for this API operation.</returns>
+bool PLAYFABGAMESAVE_API FPFGameSaveFilesSetSaveDescriptionAsync(
+    _In_ FPFLocalUserHandle localUserHandle,
+    _In_ const FString& description,
+    _In_ FPFGameSaveFilesSetSaveDescriptionAsyncComplete delegate
 ) noexcept;

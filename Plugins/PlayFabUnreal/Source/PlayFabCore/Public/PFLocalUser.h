@@ -101,6 +101,19 @@ bool PLAYFABCORE_API FPFLocalUserCreateHandleWithPersistedLocalId(
 ) noexcept;
 
 /// <summary>
+/// Compares two FPFLocalUserHandle values to determine if they refer to the same underlying user.
+/// This is necessary because the SDK may duplicate handles internally, resulting in different pointer
+/// values that still refer to the same user.
+/// </summary>
+/// <param name="handle1">First local user handle to compare.</param>
+/// <param name="handle2">Second local user handle to compare.</param>
+/// <returns>0 if the handles refer to the same user, non-zero otherwise.</returns>
+int32 PLAYFABCORE_API FPFLocalUserHandleCompare(
+    _In_ FPFLocalUserHandle handle1,
+    _In_ FPFLocalUserHandle handle2
+) noexcept;
+
+/// <summary>
 /// Duplicates a FPFLocalUserHandle.
 /// </summary>
 /// <param name="localUserHandle">LocalUser handle to duplicate.</param>

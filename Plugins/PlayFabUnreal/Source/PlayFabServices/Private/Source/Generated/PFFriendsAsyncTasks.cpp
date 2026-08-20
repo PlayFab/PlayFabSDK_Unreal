@@ -25,7 +25,7 @@ void FClientAddFriendAsyncTask::DoWork()
 	HResult = PFFriendsClientAddFriendAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFFriendsAddFriendResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -36,7 +36,7 @@ void FClientAddFriendAsyncTask::ProcessResults()
 	HResult = PFFriendsClientAddFriendGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFFriendsAddFriendResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -73,7 +73,7 @@ void FClientGetFriendsListAsyncTask::DoWork()
 	HResult = PFFriendsClientGetFriendsListAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -84,7 +84,7 @@ void FClientGetFriendsListAsyncTask::ProcessResults()
 	HResult = PFFriendsClientGetFriendsListGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -94,7 +94,7 @@ void FClientGetFriendsListAsyncTask::ProcessResults()
 	HResult = PFFriendsClientGetFriendsListGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -123,7 +123,7 @@ void FClientRemoveFriendAsyncTask::DoWork()
 	HResult = PFFriendsClientRemoveFriendAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -132,7 +132,7 @@ void FClientRemoveFriendAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -161,7 +161,7 @@ void FClientSetFriendTagsAsyncTask::DoWork()
 	HResult = PFFriendsClientSetFriendTagsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -170,7 +170,7 @@ void FClientSetFriendTagsAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -202,7 +202,7 @@ void FServerAddFriendAsyncTask::DoWork()
 	HResult = PFFriendsServerAddFriendAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -211,7 +211,7 @@ void FServerAddFriendAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -245,7 +245,7 @@ void FServerGetFriendsListAsyncTask::DoWork()
 	HResult = PFFriendsServerGetFriendsListAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -256,7 +256,7 @@ void FServerGetFriendsListAsyncTask::ProcessResults()
 	HResult = PFFriendsServerGetFriendsListGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -266,7 +266,7 @@ void FServerGetFriendsListAsyncTask::ProcessResults()
 	HResult = PFFriendsServerGetFriendsListGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFFriendsGetFriendsListResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -298,7 +298,7 @@ void FServerRemoveFriendAsyncTask::DoWork()
 	HResult = PFFriendsServerRemoveFriendAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -307,7 +307,7 @@ void FServerRemoveFriendAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -339,7 +339,7 @@ void FServerSetFriendTagsAsyncTask::DoWork()
 	HResult = PFFriendsServerSetFriendTagsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -348,7 +348,7 @@ void FServerSetFriendTagsAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{

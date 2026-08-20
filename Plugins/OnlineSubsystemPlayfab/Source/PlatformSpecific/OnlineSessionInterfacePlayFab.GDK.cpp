@@ -8,10 +8,11 @@
 #include "OnlineSubsystemPlayFab.h"
 #include "OnlineSubsystemGDK.h"
 #include "GenericPlatform/GenericPlatformHttp.h"
+#include "PlayFabHelpers.h"
 
 THIRD_PARTY_INCLUDES_START
 #include <xsapi-c/multiplayer_activity_c.h>
-#include <XGameInvite.h>
+#include <XGameActivation.h>
 #include <XGameRuntimeFeature.h>
 THIRD_PARTY_INCLUDES_END
 
@@ -66,19 +67,19 @@ uint64 GetXuidForEntityKey(FOnlineSubsystemPlayFab* OSSPlayFab, const PFEntityKe
 	return Xuid;
 }
 
-FGDKContextHandle GetGDKContextForXuid(uint64 Xuid)
+FGDKContextHandle GetGDKContextForXuid(uint64 Xuid, IOnlineSubsystem* OSSPlayFab)
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::GetGDKContextForXuid()"));
 
-	if (FOnlineSubsystemGDK* GDKSubsystem = static_cast<FOnlineSubsystemGDK*>(IOnlineSubsystem::Get(GDK_SUBSYSTEM)))
+	if (OSSPlayFab)
 	{
-		return GDKSubsystem->GetGDKContext(Xuid);
-	}
-	else
-	{
-		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::GetGDKContextForXuid: GDKSubsystem was null"));
+		if (FOnlineSubsystemGDK* GDKSubsystem = static_cast<FOnlineSubsystemGDK*>(GetOnlineSubsystem(GDK_SUBSYSTEM, OSSPlayFab->GetInstanceName())))
+		{
+			return GDKSubsystem->GetGDKContext(Xuid);
+		}
 	}
 
+	UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::GetGDKContextForXuid: GDKSubsystem was null"));
 	return FGDKContextHandle();
 }
 
@@ -88,15 +89,36 @@ void FOnlineSessionPlayFab::RegisterForInvites()
 
 	if (XGameRuntimeIsFeatureAvailable(XGameRuntimeFeature::XGameInvite))
 	{
-		auto InviteHandlerLambda = [](void* Context, const char* InviteUri)
+		auto ActivationHandlerLambda = [](void* Context, const XGameActivationInfo* ActivationInfo)
 		{
-			reinterpret_cast<FOnlineSessionPlayFab*>(Context)->SaveInviteFromEvent(Context, FString(UTF8_TO_TCHAR(InviteUri)));
+			if (ActivationInfo == nullptr)
+			{
+				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: ActivationInfo was null"));
+				return;
+			}
+
+			if (ActivationInfo->type != XGameActivationType::AcceptedGameInvite)
+			{
+				return;
+			}
+
+			if (ActivationInfo->inviteUri == nullptr)
+			{
+				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: Accepted invite URI was null"));
+				return;
+			}
+
+			reinterpret_cast<FOnlineSessionPlayFab*>(Context)->SaveInviteFromEvent(Context, FString(UTF8_TO_TCHAR(ActivationInfo->inviteUri)));
 		};
 
-		HRESULT Hr = XGameInviteRegisterForEvent(FGDKAsyncTaskQueue::GetGenericQueue(), this, InviteHandlerLambda, &InviteAcceptedHandler);
+		HRESULT Hr = XGameActivationRegisterForEvent(FGDKAsyncTaskQueue::GetGenericQueue(), this, ActivationHandlerLambda, &ActivationHandler);
 		if (FAILED(Hr))
 		{
-			UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForUpdates: XGameInviteRegisterForEvent failed: ErrorCode=[0x%08x]!"), Hr);
+			UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: XGameActivationRegisterForEvent failed: ErrorCode=[0x%08x]!"), Hr);
+		}
+		else
+		{
+			bActivationHandlerRegistered = true;
 		}
 	}
 }
@@ -105,7 +127,11 @@ void FOnlineSessionPlayFab::UnregisterForInvites()
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::UnregisterForInvites()"));
 
-	XGameInviteUnregisterForEvent(InviteAcceptedHandler, true /* Wait for pending event callbacks to complete.*/);
+	if (bActivationHandlerRegistered)
+	{
+		XGameActivationUnregisterForEvent(ActivationHandler, true /* Wait for pending event callbacks to complete.*/);
+		bActivationHandlerRegistered = false;
+	}
 }
 
 #if defined(OSS_PLAYFAB_GDK)
@@ -162,7 +188,7 @@ bool FOnlineSessionPlayFab::SendInviteGDK(const FUniqueNetId& SenderId, FName Se
 	}
 
 	uint64 SenderXuid = FCString::Strtoi64(*SenderId.ToString(), NULL, 10);
-	FGDKContextHandle GDKContext = GetGDKContextForXuid(SenderXuid);
+	FGDKContextHandle GDKContext = GetGDKContextForXuid(SenderXuid, OSSPlayFab);
 	if (!GDKContext.IsValid())
 	{
 		UE_LOG_ONLINE_SESSION(Error, TEXT("FOnlineSessionPlayFab::SendInvite: GDKContext was null"));
@@ -224,6 +250,7 @@ void FOnlineSessionPlayFab::SaveInviteFromEvent(void* Context, const FString& Ac
 	
 	TSharedRef<FOnlineSessionInfoPlayFab> NewSessionInfo = MakeShared<FOnlineSessionInfoPlayFab>();
 	SearchResult.Session.SessionInfo = NewSessionInfo;
+	SearchResult.Session.OwningUserId = FUniqueNetIdPlayFab::EmptyId();
 	NewSessionInfo->ConnectionString = ConnectionStr;
 
 	const int32 ControllerIndex = 0;
@@ -352,7 +379,7 @@ void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, co
 	for (const PFEntityKey& EntityKey : EntityKeys)
 	{
 		uint64 Xuid = GetXuidForEntityKey(OSSPlayFab, EntityKey);
-		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid);
+		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid, OSSPlayFab);
 		if (GDKContext.IsValid())
 		{
 			TUniquePtr<XAsyncBlock> NewAsyncBlock = MakeUnique<XAsyncBlock>();
@@ -413,7 +440,7 @@ void FOnlineSessionPlayFab::DeleteMultiplayerActivity(PFLobbyHandle LobbyHandle,
 	for (const PFEntityKey& EntityKey : EntityKeys)
 	{
 		uint64 Xuid = GetXuidForEntityKey(OSSPlayFab, EntityKey);
-		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid);
+		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid, OSSPlayFab);
 		if (GDKContext.IsValid())
 		{
 			TUniquePtr<XAsyncBlock> NewAsyncBlock = MakeUnique<XAsyncBlock>();
@@ -473,7 +500,7 @@ void FOnlineSessionPlayFab::RecordRecentlyMetPlayer(PFLobbyHandle LobbyHandle, c
 	for (const PFEntityKey& EntityKey : EntityKeys)
 	{
 		uint64 Xuid = GetXuidForEntityKey(OSSPlayFab, EntityKey);
-		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid);
+		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid, OSSPlayFab);
 		if (GDKContext.IsValid())
 		{
 			HRESULT Hr = XblMultiplayerActivityUpdateRecentPlayers(GDKContext, &RecentPlayer, 1);

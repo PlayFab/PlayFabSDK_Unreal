@@ -1,7 +1,8 @@
 #include "XAsyncTask.h"
 
-FXAsyncTask::FXAsyncTask(const FString& asyncTaskName)
+FXAsyncTask::FXAsyncTask(const FString& asyncTaskName, XTaskQueueHandle InTaskQueue)
 	: mAsyncTaskName(asyncTaskName)
+	, mTaskQueue(InTaskQueue)
 {
 	mAsyncBlock = CreateAsyncBlock();
 }
@@ -17,7 +18,9 @@ FXAsyncTask::~FXAsyncTask()
 
 FXAsyncBlockPtr FXAsyncTask::CreateAsyncBlock(void* userData, FXAsyncBlockDelegate delegate)
 {
-	FXAsyncBlockPtr localAsyncBlock = MakeShared<FXAsyncBlock>(userData, delegate);
+	// Run completion on this task's queue (mTaskQueue). nullptr keeps the historical behavior
+	// (generic queue => game-thread completion) for every task that doesn't opt in.
+	FXAsyncBlockPtr localAsyncBlock = MakeShared<FXAsyncBlock>(userData, delegate, mTaskQueue);
 	mAsyncBlocks.Add(localAsyncBlock);
 	return localAsyncBlock;
 }

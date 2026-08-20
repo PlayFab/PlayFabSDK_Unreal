@@ -63,9 +63,63 @@ enum class FPFGameSaveFilesAddUserOptions : uint32
     /// Default behavior
     /// </summary>
     None = 0x00, 
+
+    /// <summary>
+    /// Sync using the most recently verified prior cloud save state (a previously loaded save
+    /// that was later replaced by a newer upload). Use when you suspect the latest upload is bad
+    /// (e.g. load failure, failed integrity/version check, crash during or immediately after save).
+    /// If no such prior state exists this behaves like None and the current latest is kept.
+    /// </summary>
+    RollbackToLastKnownGood = 0x01,
+
+    /// <summary>
+    /// Sync using the save state that was kept aside (the "losing" choice) from the most recent
+    /// conflict resolution; falls back to the latest save if none exists.
+    /// </summary>
+    RollbackToLastConflict = 0x02,
 };
 
 DEFINE_ENUM_FLAG_OPERATORS(FPFGameSaveFilesAddUserOptions);
+
+/// <summary>
+/// Outcome of an FPFGameSaveFilesAddUserWithUiAsync operation.
+///
+/// Branch on this value to decide how to proceed. It collapses every possible
+/// end state of the operation (success online, success offline, user cancel, and
+/// failure) into the small set of cases a game actually needs to handle.
+/// </summary>
+enum class FPFGameSaveFilesAddUserResult : uint32
+{
+    /// <summary>
+    /// The user was added and is connected to the cloud. Saves will sync.
+    /// Proceed to play online.
+    /// </summary>
+    Success = 0,
+
+    /// <summary>
+    /// The user was added but is in offline mode (the user chose "Use Offline"
+    /// on a sync-failure prompt, or another device became the active device).
+    /// A local save folder is available, but saves will not sync until reconnected.
+    /// Detectable afterwards via FPFGameSaveFilesIsConnectedToCloud (the isConnectedToCloud out-param is false).
+    /// Proceed to play with local saves and inform the player.
+    /// </summary>
+    SuccessOffline,
+
+    /// <summary>
+    /// The user cancelled (chose Cancel, or "Quit game" on out-of-process platforms),
+    /// or the operation was otherwise aborted by the user. The user was NOT added and
+    /// there is no save folder. Do not allow play; return to a safe menu.
+    /// </summary>
+    Cancelled,
+
+    /// <summary>
+    /// The operation failed for a reason other than user cancellation (for example
+    /// invalid arguments, wrong call sequence, or a service/storage error). The user
+    /// was NOT added. The completion delegate's errorMessage carries the HRESULT as a
+    /// hex string; handle the sync-failed delegate for the raw HRESULT as an int32.
+    /// </summary>
+    Failed,
+};
 
 /// <summary>
 /// Sync state of the game save system
@@ -120,6 +174,35 @@ enum class FPFGameSaveFilesUploadOption : uint32
     /// To upload again on the same session, call PFGameSaveUninitializeAsync and wait for it to complete.
     /// </summary>
     ReleaseDeviceAsActive
+};
+
+/// <summary>
+/// Outcome of an FPFGameSaveFilesUploadWithUiAsync operation.
+///
+/// Branch on this value to decide how to proceed. Unlike AddUser, an upload cannot
+/// enter offline mode (uploading while offline fails), so there is no offline case.
+/// </summary>
+enum class FPFGameSaveFilesUploadResult : uint32
+{
+    /// <summary>
+    /// The upload completed and the save data is synced to the cloud.
+    /// </summary>
+    Success = 0,
+
+    /// <summary>
+    /// The user cancelled the upload (chose Cancel on the progress or sync-failure UI,
+    /// or "Quit game" on out-of-process platforms). The upload did not complete.
+    /// </summary>
+    Cancelled,
+
+    /// <summary>
+    /// The upload failed for a reason other than user cancellation (for example the
+    /// device is offline / disconnected from cloud, a transient network failure, the
+    /// device is no longer the active device, or wrong call sequence). The completion
+    /// delegate's errorMessage carries the HRESULT as a hex string; handle the
+    /// sync-failed delegate for the raw HRESULT as an int32.
+    /// </summary>
+    Failed,
 };
 
 /// <summary>

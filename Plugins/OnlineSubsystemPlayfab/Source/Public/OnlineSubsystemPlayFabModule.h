@@ -16,7 +16,7 @@ class FOnlineSubsystemPlayFabModule : public IModuleInterface
 private:
 
 	// Class responsible for creating instance(s) of the subsystem
-	class FOnlineFactoryPlayFab* PlayFabFactory;
+	class IOnlineFactory* PlayFabFactory;
 
 public:
 

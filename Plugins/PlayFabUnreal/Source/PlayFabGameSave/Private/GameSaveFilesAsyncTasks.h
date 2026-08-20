@@ -47,6 +47,42 @@ private:
     FPFGameSaveFilesUploadWithUiAsyncComplete m_delegate;
 };
 
+class GameSaveFilesResetCloudAsyncTask : public FXAsyncTask
+{
+public:
+    GameSaveFilesResetCloudAsyncTask(
+        FPFLocalUserHandle localUserHandle,
+        FPFGameSaveFilesResetCloudAsyncComplete delegate
+    );
+
+    void DoWork() override;
+
+    void ProcessResults() override;
+
+private:
+    LocalUser m_localUser;
+    FPFGameSaveFilesResetCloudAsyncComplete m_delegate;
+};
+
+class GameSaveFilesSetSaveDescriptionAsyncTask : public FXAsyncTask
+{
+public:
+    GameSaveFilesSetSaveDescriptionAsyncTask(
+        FPFLocalUserHandle localUserHandle,
+        const FString& description,
+        FPFGameSaveFilesSetSaveDescriptionAsyncComplete delegate
+    );
+
+    void DoWork() override;
+
+    void ProcessResults() override;
+
+private:
+    LocalUser m_localUser;
+    FString m_description;
+    FPFGameSaveFilesSetSaveDescriptionAsyncComplete m_delegate;
+};
+
 class GameSaveFilesUninitializeAsyncTask : public FXAsyncTask
 {
 public:

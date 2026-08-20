@@ -27,7 +27,7 @@ void FAbortFileUploadsAsyncTask::DoWork()
 	HResult = PFDataAbortFileUploadsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataAbortFileUploadsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -38,7 +38,7 @@ void FAbortFileUploadsAsyncTask::ProcessResults()
 	HResult = PFDataAbortFileUploadsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataAbortFileUploadsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataAbortFileUploadsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -48,7 +48,7 @@ void FAbortFileUploadsAsyncTask::ProcessResults()
 	HResult = PFDataAbortFileUploadsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataAbortFileUploadsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -82,7 +82,7 @@ void FDeleteFilesAsyncTask::DoWork()
 	HResult = PFDataDeleteFilesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataDeleteFilesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -93,7 +93,7 @@ void FDeleteFilesAsyncTask::ProcessResults()
 	HResult = PFDataDeleteFilesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataDeleteFilesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataDeleteFilesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -103,7 +103,7 @@ void FDeleteFilesAsyncTask::ProcessResults()
 	HResult = PFDataDeleteFilesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataDeleteFilesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -137,7 +137,7 @@ void FFinalizeFileUploadsAsyncTask::DoWork()
 	HResult = PFDataFinalizeFileUploadsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataFinalizeFileUploadsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -148,7 +148,7 @@ void FFinalizeFileUploadsAsyncTask::ProcessResults()
 	HResult = PFDataFinalizeFileUploadsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataFinalizeFileUploadsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataFinalizeFileUploadsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -158,7 +158,7 @@ void FFinalizeFileUploadsAsyncTask::ProcessResults()
 	HResult = PFDataFinalizeFileUploadsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataFinalizeFileUploadsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -189,7 +189,7 @@ void FGetFilesAsyncTask::DoWork()
 	HResult = PFDataGetFilesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataGetFilesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -200,7 +200,7 @@ void FGetFilesAsyncTask::ProcessResults()
 	HResult = PFDataGetFilesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataGetFilesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataGetFilesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -210,7 +210,7 @@ void FGetFilesAsyncTask::ProcessResults()
 	HResult = PFDataGetFilesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataGetFilesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -242,7 +242,7 @@ void FGetObjectsAsyncTask::DoWork()
 	HResult = PFDataGetObjectsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataGetObjectsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -253,7 +253,7 @@ void FGetObjectsAsyncTask::ProcessResults()
 	HResult = PFDataGetObjectsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataGetObjectsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataGetObjectsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -263,7 +263,7 @@ void FGetObjectsAsyncTask::ProcessResults()
 	HResult = PFDataGetObjectsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataGetObjectsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -297,7 +297,7 @@ void FInitiateFileUploadsAsyncTask::DoWork()
 	HResult = PFDataInitiateFileUploadsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataInitiateFileUploadsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -308,7 +308,7 @@ void FInitiateFileUploadsAsyncTask::ProcessResults()
 	HResult = PFDataInitiateFileUploadsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataInitiateFileUploadsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataInitiateFileUploadsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -318,7 +318,7 @@ void FInitiateFileUploadsAsyncTask::ProcessResults()
 	HResult = PFDataInitiateFileUploadsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataInitiateFileUploadsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -352,7 +352,7 @@ void FSetObjectsAsyncTask::DoWork()
 	HResult = PFDataSetObjectsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataSetObjectsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -363,7 +363,7 @@ void FSetObjectsAsyncTask::ProcessResults()
 	HResult = PFDataSetObjectsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFDataSetObjectsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFDataSetObjectsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -373,7 +373,7 @@ void FSetObjectsAsyncTask::ProcessResults()
 	HResult = PFDataSetObjectsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFDataSetObjectsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

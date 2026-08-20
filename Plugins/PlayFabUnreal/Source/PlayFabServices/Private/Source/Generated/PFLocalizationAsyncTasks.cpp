@@ -24,7 +24,7 @@ void FGetLanguageListAsyncTask::DoWork()
 	HResult = PFLocalizationGetLanguageListAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLocalizationGetLanguageListResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -35,7 +35,7 @@ void FGetLanguageListAsyncTask::ProcessResults()
 	HResult = PFLocalizationGetLanguageListGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLocalizationGetLanguageListResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLocalizationGetLanguageListResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -45,7 +45,7 @@ void FGetLanguageListAsyncTask::ProcessResults()
 	HResult = PFLocalizationGetLanguageListGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLocalizationGetLanguageListResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

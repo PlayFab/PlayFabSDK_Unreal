@@ -25,7 +25,7 @@ void FClientAndroidDevicePushNotificationRegistrationAsyncTask::DoWork()
 	HResult = PFPlatformSpecificClientAndroidDevicePushNotificationRegistrationAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -34,7 +34,7 @@ void FClientAndroidDevicePushNotificationRegistrationAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -65,7 +65,7 @@ void FClientRefreshPSNAuthTokenAsyncTask::DoWork()
 	HResult = PFPlatformSpecificClientRefreshPSNAuthTokenAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -74,7 +74,7 @@ void FClientRefreshPSNAuthTokenAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -105,7 +105,7 @@ void FClientRegisterForIOSPushNotificationAsyncTask::DoWork()
 	HResult = PFPlatformSpecificClientRegisterForIOSPushNotificationAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -114,7 +114,7 @@ void FClientRegisterForIOSPushNotificationAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -144,7 +144,7 @@ void FServerAwardSteamAchievementAsyncTask::DoWork()
 	HResult = PFPlatformSpecificServerAwardSteamAchievementAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlatformSpecificAwardSteamAchievementResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -155,7 +155,7 @@ void FServerAwardSteamAchievementAsyncTask::ProcessResults()
 	HResult = PFPlatformSpecificServerAwardSteamAchievementGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFPlatformSpecificAwardSteamAchievementResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFPlatformSpecificAwardSteamAchievementResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -165,7 +165,7 @@ void FServerAwardSteamAchievementAsyncTask::ProcessResults()
 	HResult = PFPlatformSpecificServerAwardSteamAchievementGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFPlatformSpecificAwardSteamAchievementResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

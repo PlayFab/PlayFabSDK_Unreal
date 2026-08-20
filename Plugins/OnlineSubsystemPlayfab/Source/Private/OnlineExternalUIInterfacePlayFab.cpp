@@ -1,6 +1,7 @@
 #include "OnlineExternalUIInterfacePlayFab.h"
+#include "PlayFabHelpers.h"
 
-#define OSS_PLAYFAB_GET_NATIVE_EXTERNALUI_INTERFACE IOnlineSubsystem* NativeSubsystem = IOnlineSubsystem::GetByPlatform();  IOnlineExternalUIPtr NativeExternalUIInterface = NativeSubsystem ? NativeSubsystem->GetExternalUIInterface() : nullptr; if (NativeExternalUIInterface)
+#define OSS_PLAYFAB_GET_NATIVE_EXTERNALUI_INTERFACE IOnlineSubsystem* NativeSubsystem = GetNativeOnlineSubsystem(OSSPlayFab);  IOnlineExternalUIPtr NativeExternalUIInterface = NativeSubsystem ? NativeSubsystem->GetExternalUIInterface() : nullptr; if (NativeExternalUIInterface)
 
 FOnlineExternalUIPlayFab::FOnlineExternalUIPlayFab(FOnlineSubsystemPlayFab* InSubsystem)
 	: OSSPlayFab(InSubsystem)

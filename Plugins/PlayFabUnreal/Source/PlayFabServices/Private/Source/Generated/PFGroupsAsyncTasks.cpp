@@ -25,7 +25,7 @@ void FAcceptGroupApplicationAsyncTask::DoWork()
 	HResult = PFGroupsAcceptGroupApplicationAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -34,7 +34,7 @@ void FAcceptGroupApplicationAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -64,7 +64,7 @@ void FAcceptGroupInvitationAsyncTask::DoWork()
 	HResult = PFGroupsAcceptGroupInvitationAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -73,7 +73,7 @@ void FAcceptGroupInvitationAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -105,7 +105,7 @@ void FAddMembersAsyncTask::DoWork()
 	HResult = PFGroupsAddMembersAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -114,7 +114,7 @@ void FAddMembersAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -145,7 +145,7 @@ void FApplyToGroupAsyncTask::DoWork()
 	HResult = PFGroupsApplyToGroupAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsApplyToGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -156,7 +156,7 @@ void FApplyToGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsApplyToGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsApplyToGroupResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsApplyToGroupResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -166,7 +166,7 @@ void FApplyToGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsApplyToGroupGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsApplyToGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -198,7 +198,7 @@ void FBlockEntityAsyncTask::DoWork()
 	HResult = PFGroupsBlockEntityAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -207,7 +207,7 @@ void FBlockEntityAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -240,7 +240,7 @@ void FChangeMemberRoleAsyncTask::DoWork()
 	HResult = PFGroupsChangeMemberRoleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -249,7 +249,7 @@ void FChangeMemberRoleAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -279,7 +279,7 @@ void FCreateGroupAsyncTask::DoWork()
 	HResult = PFGroupsCreateGroupAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsCreateGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -290,7 +290,7 @@ void FCreateGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsCreateGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsCreateGroupResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsCreateGroupResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -300,7 +300,7 @@ void FCreateGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsCreateGroupGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsCreateGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -333,7 +333,7 @@ void FCreateRoleAsyncTask::DoWork()
 	HResult = PFGroupsCreateRoleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsCreateGroupRoleResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -344,7 +344,7 @@ void FCreateRoleAsyncTask::ProcessResults()
 	HResult = PFGroupsCreateRoleGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsCreateGroupRoleResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsCreateGroupRoleResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -354,7 +354,7 @@ void FCreateRoleAsyncTask::ProcessResults()
 	HResult = PFGroupsCreateRoleGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsCreateGroupRoleResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -385,7 +385,7 @@ void FDeleteGroupAsyncTask::DoWork()
 	HResult = PFGroupsDeleteGroupAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -394,7 +394,7 @@ void FDeleteGroupAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -424,7 +424,7 @@ void FDeleteRoleAsyncTask::DoWork()
 	HResult = PFGroupsDeleteRoleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -433,7 +433,7 @@ void FDeleteRoleAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -463,7 +463,7 @@ void FGetGroupAsyncTask::DoWork()
 	HResult = PFGroupsGetGroupAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsGetGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -474,7 +474,7 @@ void FGetGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsGetGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsGetGroupResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsGetGroupResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -484,7 +484,7 @@ void FGetGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsGetGroupGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsGetGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -518,7 +518,7 @@ void FInviteToGroupAsyncTask::DoWork()
 	HResult = PFGroupsInviteToGroupAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsInviteToGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -529,7 +529,7 @@ void FInviteToGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsInviteToGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsInviteToGroupResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsInviteToGroupResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -539,7 +539,7 @@ void FInviteToGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsInviteToGroupGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsInviteToGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -572,7 +572,7 @@ void FIsMemberAsyncTask::DoWork()
 	HResult = PFGroupsIsMemberAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsIsMemberResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -583,7 +583,7 @@ void FIsMemberAsyncTask::ProcessResults()
 	HResult = PFGroupsIsMemberGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsIsMemberResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -614,7 +614,7 @@ void FListGroupApplicationsAsyncTask::DoWork()
 	HResult = PFGroupsListGroupApplicationsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupApplicationsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -625,7 +625,7 @@ void FListGroupApplicationsAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupApplicationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsListGroupApplicationsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsListGroupApplicationsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -635,7 +635,7 @@ void FListGroupApplicationsAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupApplicationsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupApplicationsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -666,7 +666,7 @@ void FListGroupBlocksAsyncTask::DoWork()
 	HResult = PFGroupsListGroupBlocksAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupBlocksResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -677,7 +677,7 @@ void FListGroupBlocksAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupBlocksGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsListGroupBlocksResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsListGroupBlocksResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -687,7 +687,7 @@ void FListGroupBlocksAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupBlocksGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupBlocksResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -718,7 +718,7 @@ void FListGroupInvitationsAsyncTask::DoWork()
 	HResult = PFGroupsListGroupInvitationsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupInvitationsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -729,7 +729,7 @@ void FListGroupInvitationsAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupInvitationsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsListGroupInvitationsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsListGroupInvitationsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -739,7 +739,7 @@ void FListGroupInvitationsAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupInvitationsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupInvitationsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -770,7 +770,7 @@ void FListGroupMembersAsyncTask::DoWork()
 	HResult = PFGroupsListGroupMembersAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupMembersResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -781,7 +781,7 @@ void FListGroupMembersAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupMembersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsListGroupMembersResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsListGroupMembersResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -791,7 +791,7 @@ void FListGroupMembersAsyncTask::ProcessResults()
 	HResult = PFGroupsListGroupMembersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListGroupMembersResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -822,7 +822,7 @@ void FListMembershipAsyncTask::DoWork()
 	HResult = PFGroupsListMembershipAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListMembershipResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -833,7 +833,7 @@ void FListMembershipAsyncTask::ProcessResults()
 	HResult = PFGroupsListMembershipGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsListMembershipResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsListMembershipResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -843,7 +843,7 @@ void FListMembershipAsyncTask::ProcessResults()
 	HResult = PFGroupsListMembershipGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListMembershipResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -874,7 +874,7 @@ void FListMembershipOpportunitiesAsyncTask::DoWork()
 	HResult = PFGroupsListMembershipOpportunitiesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListMembershipOpportunitiesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -885,7 +885,7 @@ void FListMembershipOpportunitiesAsyncTask::ProcessResults()
 	HResult = PFGroupsListMembershipOpportunitiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsListMembershipOpportunitiesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsListMembershipOpportunitiesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -895,7 +895,7 @@ void FListMembershipOpportunitiesAsyncTask::ProcessResults()
 	HResult = PFGroupsListMembershipOpportunitiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsListMembershipOpportunitiesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -927,7 +927,7 @@ void FRemoveGroupApplicationAsyncTask::DoWork()
 	HResult = PFGroupsRemoveGroupApplicationAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -936,7 +936,7 @@ void FRemoveGroupApplicationAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -966,7 +966,7 @@ void FRemoveGroupInvitationAsyncTask::DoWork()
 	HResult = PFGroupsRemoveGroupInvitationAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -975,7 +975,7 @@ void FRemoveGroupInvitationAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1007,7 +1007,7 @@ void FRemoveMembersAsyncTask::DoWork()
 	HResult = PFGroupsRemoveMembersAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1016,7 +1016,7 @@ void FRemoveMembersAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1046,7 +1046,7 @@ void FUnblockEntityAsyncTask::DoWork()
 	HResult = PFGroupsUnblockEntityAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1055,7 +1055,7 @@ void FUnblockEntityAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1088,7 +1088,7 @@ void FUpdateGroupAsyncTask::DoWork()
 	HResult = PFGroupsUpdateGroupAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsUpdateGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1099,7 +1099,7 @@ void FUpdateGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsUpdateGroupGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsUpdateGroupResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsUpdateGroupResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1109,7 +1109,7 @@ void FUpdateGroupAsyncTask::ProcessResults()
 	HResult = PFGroupsUpdateGroupGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsUpdateGroupResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1143,7 +1143,7 @@ void FUpdateRoleAsyncTask::DoWork()
 	HResult = PFGroupsUpdateRoleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsUpdateGroupRoleResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1154,7 +1154,7 @@ void FUpdateRoleAsyncTask::ProcessResults()
 	HResult = PFGroupsUpdateRoleGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFGroupsUpdateGroupRoleResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFGroupsUpdateGroupRoleResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1164,7 +1164,7 @@ void FUpdateRoleAsyncTask::ProcessResults()
 	HResult = PFGroupsUpdateRoleGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFGroupsUpdateGroupRoleResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

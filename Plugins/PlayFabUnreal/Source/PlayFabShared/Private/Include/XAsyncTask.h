@@ -23,6 +23,9 @@ PACKAGE_SCOPE:
 	FXAsyncBlockPtr mAsyncBlock;
 	FString mAsyncTaskName;
 	FTSTicker::FDelegateHandle mTickHandle;
+	// Queue this task's async-block completion runs on. nullptr => shared generic queue
+	// (game-thread completion). See the constructor doc for why GameSave overrides this.
+	XTaskQueueHandle mTaskQueue = nullptr;
 
 protected:
 	FXAsyncTask() = delete;
@@ -30,8 +33,16 @@ protected:
 	/**
 	* Constructor to initialize the async task with a name.
 	* @param InAsyncTaskName - The name of the async task.
+	* @param InTaskQueue - Optional XTaskQueue to run this task's async-block completion on.
+	*                      Defaults to nullptr, which uses the shared generic queue (completion
+	*                      pumped on the game thread via the core ticker) — unchanged behavior
+	*                      for all existing tasks. Pass FXAsyncTaskQueue::GetBackgroundTaskQueue()
+	*                      to complete on an MTA thread-pool worker instead (required for the
+	*                      GameSave WithUi tasks, whose completion makes blocking cross-process
+	*                      calls that must NOT run on the game thread or they deadlock the modal
+	*                      sync-UX handshake with the out-of-process GRTS provider).
 	*/
-	explicit FXAsyncTask(const FString& asyncTaskName);
+	explicit FXAsyncTask(const FString& asyncTaskName, XTaskQueueHandle InTaskQueue = nullptr);
 
 	/**
 	 * Destructor for the FXAsyncTask class.

@@ -19,6 +19,7 @@ void LocalUserLoginAsyncTask::DoWork()
     if (FAILED(hr))
     {
         m_delegate.ExecuteIfBound(nullptr, nullptr, false);
+        m_localUser = LocalUser::Wrap(nullptr);
     }
 }
 
@@ -53,4 +54,6 @@ void LocalUserLoginAsyncTask::ProcessResults()
     {
         m_delegate.ExecuteIfBound(nullptr, nullptr, false);
     }
+
+    m_localUser = LocalUser::Wrap(nullptr);
 }

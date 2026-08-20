@@ -104,6 +104,23 @@ bool PLAYFABCORE_API FPFLocalUserCreateHandleWithPersistedLocalId(
     return true;
 }
 
+int32 PLAYFABCORE_API FPFLocalUserHandleCompare(
+    _In_ FPFLocalUserHandle handle1,
+    _In_ FPFLocalUserHandle handle2
+) noexcept
+{
+    if (!handle1 && !handle2)
+    {
+        return 0;
+    }
+    if (!handle1 || !handle2)
+    {
+        return handle1 ? 1 : -1;
+    }
+
+    return PFLocalUserHandleCompare(handle1.Get(), handle2.Get());
+}
+
 bool PLAYFABCORE_API FPFLocalUserDuplicateHandle(
     _In_ FPFLocalUserHandle localUserHandle,
     _Out_ FPFLocalUserHandle& duplicatedHandle

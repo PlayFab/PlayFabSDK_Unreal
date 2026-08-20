@@ -9,12 +9,13 @@
 #include "OnlineSessionInterfacePlayFab.h"
 #include "Online/OnlineSessionNames.h"
 
-static struct FSearchKeyMappingTable
+namespace
 {
-	FName SettingKey;
-	int32 KeyNumber;
-	EOnlineKeyValuePairDataType::Type Type;
-} s_SearchKeyMappingTable[] =
+	constexpr double CreateLobbyCompletionRetryIntervalSeconds = 0.1;
+	constexpr double CreateLobbyCompletionTimeoutSeconds = 5.0;
+}
+
+static const FDynamicSearchKeyAllocator::FDefaultAssignment s_DefaultSearchKeyAssignments[] =
 {
 	// String
 	{SETTING_MAPNAME, 					30, EOnlineKeyValuePairDataType::String},
@@ -188,7 +189,7 @@ bool FPlayFabLobby::CreateLobbyWithUser(const FUniqueNetId& HostingPlayerId, FNa
 		{
 			FString SearchKey;
 			EOnlineKeyValuePairDataType::Type Type;
-			if (GetSearchKeyFromSettingMappingTable(SettingNameString, SearchKey, Type))
+			if (SearchKeyAllocator.GetKeyForSetting(SettingNameString, SearchKey, Type))
 			{
 				UE_LOG_ONLINE(Verbose, TEXT("CreateLobbyWithUser: predefined item %s(%s): %s Type: %d."), *SettingNameString, *SearchKey, *SettingValueString, Type);
 				switch (Type)
@@ -226,6 +227,7 @@ bool FPlayFabLobby::CreateLobbyWithUser(const FUniqueNetId& HostingPlayerId, FNa
 		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinViaPresence) << BitShift++;
 		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinViaPresenceFriendsOnly) << BitShift++;
 		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAntiCheatProtected) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bUseLobbiesVoiceChatIfAvailable) << BitShift++;
 
 		FString SessionSettingsFlagsName(TEXT("_flags"));
 		const FString SessionSettingsFlagsValue(FString::FromInt(SessionSettingsFlags));
@@ -347,7 +349,7 @@ bool FPlayFabLobby::CreateServerLobby(const FUniqueNetId& HostingPlayerId, FName
 		{
 			FString SearchKey;
 			EOnlineKeyValuePairDataType::Type Type;
-			if (GetSearchKeyFromSettingMappingTable(SettingNameString, SearchKey, Type))
+			if (SearchKeyAllocator.GetKeyForSetting(SettingNameString, SearchKey, Type))
 			{
 				UE_LOG_ONLINE(Verbose, TEXT("CreateServerLobby: predefined item %s(%s): %s Type: %d."), *SettingNameString, *SearchKey, *SettingValueString, Type);
 				switch (Type)
@@ -385,6 +387,7 @@ bool FPlayFabLobby::CreateServerLobby(const FUniqueNetId& HostingPlayerId, FName
 		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinViaPresence) << BitShift++;
 		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAllowJoinViaPresenceFriendsOnly) << BitShift++;
 		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bAntiCheatProtected) << BitShift++;
+		SessionSettingsFlags |= ((int32)UpdateSessionSettings.bUseLobbiesVoiceChatIfAvailable) << BitShift++;
 
 		FString SessionSettingsFlagsName(TEXT("_flags"));
 		const FString SessionSettingsFlagsValue(FString::FromInt(SessionSettingsFlags));
@@ -769,7 +772,7 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 		{
 			FString SearchKey;
 			EOnlineKeyValuePairDataType::Type Type;
-			if (GetSearchKeyFromSettingMappingTable(SettingNameString, SearchKey, Type))
+			if (SearchKeyAllocator.GetKeyForSetting(SettingNameString, SearchKey, Type))
 			{
 				UE_LOG_ONLINE(Verbose, TEXT("UpdateLobby: predefined item %s(%s): %s Type: %d."), *SettingNameString, *SearchKey, *SettingValueString, Type);
 				switch (Type)
@@ -807,6 +810,7 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 		SessionSettingsFlags |= ((int32)SessionSettings.bAllowJoinViaPresence) << BitShift++;
 		SessionSettingsFlags |= ((int32)SessionSettings.bAllowJoinViaPresenceFriendsOnly) << BitShift++;
 		SessionSettingsFlags |= ((int32)SessionSettings.bAntiCheatProtected) << BitShift++;
+		SessionSettingsFlags |= ((int32)SessionSettings.bUseLobbiesVoiceChatIfAvailable) << BitShift++;
 
 		FString SessionSettingsFlagsName(TEXT("_flags"));
 		const FString SessionSettingsFlagsValue(FString::FromInt(SessionSettingsFlags));
@@ -1064,8 +1068,8 @@ bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 		return false;
 	}
 
-	// Don't start another search while one is in progress
-	if (!CurrentSessionSearch.IsValid())
+	// Don't start another search while one is in progress (matches FindLobbies guard)
+	if (!CurrentSessionSearch.IsValid() || CurrentSessionSearch->SearchState != EOnlineAsyncTaskState::InProgress)
 	{
 		CurrentSessionSearch = MakeShareable(new FOnlineSessionSearch());
 		CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::InProgress;
@@ -1080,6 +1084,7 @@ bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 	if (!IdentityIntPtr.IsValid())
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::FindFriendLobbies Identity Interface is invalid"));
+		CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
 		CurrentSessionSearch = nullptr;
 		return false;
 	}
@@ -1090,6 +1095,7 @@ bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 	if (LocalUser == nullptr)
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::GetPartyLocalUserFromPlatformId returned empty user!"));
+		CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
 		CurrentSessionSearch = nullptr;
 		return false;
 	}
@@ -1097,27 +1103,50 @@ bool FPlayFabLobby::FindFriendLobbies(const FUniqueNetId& UserId)
 	// Get LocalUserNum for callback
 	SearchingUserNum = PlayFabIdentityInt->GetPlatformUserIdFromUniqueNetId(UserId);
 
-	// TODO Fill up with SearchSettings
-	PFLobbySearchConfiguration LobbySearchConfig{};
-	PFLobbySearchFriendsFilter LobbySearchFriendsFilter;
+	// Acquire a fresh Xbox Live token for friend resolution, then perform the search once it
+	// arrives. Fetching the token per-search (instead of relying on a value cached during user
+	// creation) means it can never be unset or expired at the point of use, and removes the
+	// login-time race between token acquisition and the search. The token callback is delivered on
+	// the game thread, so the PFMultiplayer call below is issued on the game thread.
+	PlayFabIdentityInt->GetLocalUserXTokenAsync(LocalUser->GetPlatformUserId(),
+		[this, LocalUser](bool bTokenSuccess, FString XToken)
+		{
+			if (!bTokenSuccess)
+			{
+				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::FindFriendLobbies: failed to acquire Xbox friends token"));
+				if (CurrentSessionSearch.IsValid())
+				{
+					CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
+					// FindFriendLobbies already returned true, so notify callers waiting on the async
+					// search of the failure (mirrors HandleFindLobbiesCompleted) before clearing it.
+					TriggerOnFindLobbiesCompletedDelegates(SearchingUserNum, false, CurrentSessionSearch);
+					CurrentSessionSearch = nullptr;
+				}
+				return;
+			}
 
-	LobbySearchFriendsFilter.includeFacebookFriends = false;
-	LobbySearchFriendsFilter.includeSteamFriends = false;
-	FString XToken = PlayFabIdentityInt->GetLocalUserXToken();
-	std::string XTokenString(TCHAR_TO_UTF8(*XToken));
-	LobbySearchFriendsFilter.includeXboxFriendsToken = XTokenString.c_str();
+			PFLobbySearchConfiguration LobbySearchConfig{};
+			PFLobbySearchFriendsFilter LobbySearchFriendsFilter{};
+			LobbySearchFriendsFilter.includeFacebookFriends = false;
+			LobbySearchFriendsFilter.includeSteamFriends = false;
+			std::string XTokenString(TCHAR_TO_UTF8(*XToken));
+			LobbySearchFriendsFilter.includeXboxFriendsToken = XTokenString.c_str();
+			LobbySearchConfig.friendsFilter = &LobbySearchFriendsFilter;
 
-	LobbySearchConfig.friendsFilter = &LobbySearchFriendsFilter;
-
-	PFEntityKey EntityKey = LocalUser->GetEntityKey();
-
-	HRESULT Hr = PFMultiplayerFindLobbies(OSSPlayFab->GetMultiplayerHandle(), &EntityKey, &LobbySearchConfig, nullptr);
-	if (FAILED(Hr))
-	{
-		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::FindFriendLobbies failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
-		CurrentSessionSearch = nullptr;
-		return false;
-	}
+			HRESULT Hr = PFMultiplayerFindLobbiesWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), LocalUser->GetEntityHandle().Get(), &LobbySearchConfig, nullptr);
+			if (FAILED(Hr))
+			{
+				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::FindFriendLobbies failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
+				if (CurrentSessionSearch.IsValid())
+				{
+					CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
+					// FindFriendLobbies already returned true, so notify callers waiting on the async
+					// search of the failure (mirrors HandleFindLobbiesCompleted) before clearing it.
+					TriggerOnFindLobbiesCompletedDelegates(SearchingUserNum, false, CurrentSessionSearch);
+					CurrentSessionSearch = nullptr;
+				}
+			}
+		});
 
 	return true;
 #endif // !OSS_PLAYFAB_GDK_SUPPORT
@@ -1147,6 +1176,8 @@ void FPlayFabLobby::UnregisterForInvites_PlayFabMultiplayer(const PFEntityHandle
 
 void FPlayFabLobby::DoWork()
 {
+	ProcessPendingCreateAndJoinLobbyCompletions();
+
 	uint32 StateChangeCount = 0u;
 	const PFLobbyStateChange* const* StateChanges = nullptr;
 
@@ -1366,78 +1397,244 @@ void FPlayFabLobby::HandleCreateAndJoinLobbyCompleted(const PFLobbyCreateAndJoin
 {
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyCreateAndJoinLobbyCompletedStateChange(%u) event"), StateChange.stateChangeType);
 
-	bool bSuccess = false;
-
 	FName SessionName = NAME_None;
-
 	if (FName* FoundSessionName = LobbySessionMap.Find(StateChange.lobby))
 	{
 		SessionName = *FoundSessionName;
-
-		FOnlineSessionPlayFabPtr SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
-		if (SessionInterface.IsValid())
-		{
-			FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(SessionName);
-			if (ExistingNamedSession.IsValid())
-			{
-				const char* LobbyId;
-				HRESULT Hr = PFLobbyGetLobbyId(StateChange.lobby, &LobbyId);
-				if (SUCCEEDED(Hr))
-				{
-					const char* ConnectionString;
-					Hr = PFLobbyGetConnectionString(StateChange.lobby, &ConnectionString);
-					if (SUCCEEDED(Hr))
-					{
-						FOnlineSessionInfoPlayFabPtr NewSessionInfo = StaticCastSharedPtr<FOnlineSessionInfoPlayFab>(ExistingNamedSession->SessionInfo);
-						if (NewSessionInfo.IsValid())
-						{
-							bSuccess = true;
-
-							NewSessionInfo->LobbyHandle = StateChange.lobby;
-							NewSessionInfo->SetSessionId(UTF8_TO_TCHAR(LobbyId));
-							NewSessionInfo->ConnectionString = UTF8_TO_TCHAR(ConnectionString);
-
-							ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
-
-#if defined(OSS_PLAYFAB_GDK_SUPPORT)
-							if (IsNativePlatformSubsystemGDK())
-							{
-								ExistingNamedSession->SessionInfo = NewSessionInfo;
-								SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
-							}
-#endif
-						}
-						else
-						{
-							UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreateAndJoinLobbyCompleted: SessionInfo was null"));
-						}
-					}
-					else
-					{
-						UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted: failed to GetConnectionString: 0x%08x"), Hr);
-					}
-				}
-				else
-				{
-					UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted: failed to GetLobbyId: 0x%08x"), Hr);
-				}
-			}
-			else
-			{
-				UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted: ExistingNamedSession was null"));
-			}
-		}
-		else
-		{
-			UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted: SessionInterface was null"));
-		}
 	}
 	else
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted: could not find session name from lobby handle"));
+		TriggerOnLobbyCreatedAndJoinCompletedDelegates(false, SessionName);
+		return;
 	}
 
+	const PlayFabLobbyCompletion::FReadResult ReadResult = PlayFabLobbyCompletion::TryReadCreatedLobby(
+		StateChange.result,
+		StateChange.lobby,
+		PFLobbyGetLobbyId,
+		PFLobbyGetConnectionString);
+
+	if (ReadResult.Result == PlayFabLobbyCompletion::EReadResult::Success)
+	{
+		CompleteCreateAndJoinLobby(StateChange.lobby, SessionName, ReadResult);
+		return;
+	}
+
+	if (ReadResult.Result == PlayFabLobbyCompletion::EReadResult::Pending)
+	{
+		const double CurrentTimeSeconds = FPlatformTime::Seconds();
+		FPendingCreateAndJoinLobbyCompletion& PendingCompletion = PendingCreateAndJoinLobbyCompletions.FindOrAdd(StateChange.lobby);
+		PendingCompletion.SessionName = SessionName;
+		PendingCompletion.DeadlineSeconds = CurrentTimeSeconds + CreateLobbyCompletionTimeoutSeconds;
+		PendingCompletion.NextRetrySeconds = CurrentTimeSeconds + CreateLobbyCompletionRetryIntervalSeconds;
+		PendingCompletion.RetryCount = 0;
+
+		UE_LOG_ONLINE(
+			Warning,
+			TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted: lobby data is still pending after a successful completion; retrying for %.1f seconds"),
+			CreateLobbyCompletionTimeoutSeconds);
+		return;
+	}
+
+	FailCreateAndJoinLobby(
+		StateChange.lobby,
+		SessionName,
+		ReadResult.Error,
+		TEXT("create-and-join operation failed"),
+		SUCCEEDED(StateChange.result));
+}
+
+void FPlayFabLobby::ProcessPendingCreateAndJoinLobbyCompletions()
+{
+	struct FFailedRead
+	{
+		PFLobbyHandle Lobby = nullptr;
+		FName SessionName;
+		HRESULT Error = S_OK;
+		bool bTimedOut = false;
+	};
+
+	const double CurrentTimeSeconds = FPlatformTime::Seconds();
+	TArray<TPair<PFLobbyHandle, PlayFabLobbyCompletion::FReadResult>> CompletedReads;
+	TArray<FFailedRead> FailedReads;
+
+	for (TPair<PFLobbyHandle, FPendingCreateAndJoinLobbyCompletion>& PendingPair : PendingCreateAndJoinLobbyCompletions)
+	{
+		FPendingCreateAndJoinLobbyCompletion& PendingCompletion = PendingPair.Value;
+		if (CurrentTimeSeconds < PendingCompletion.NextRetrySeconds)
+		{
+			continue;
+		}
+
+		PlayFabLobbyCompletion::FReadResult ReadResult = PlayFabLobbyCompletion::TryReadCreatedLobby(
+			S_OK,
+			PendingPair.Key,
+			PFLobbyGetLobbyId,
+			PFLobbyGetConnectionString);
+
+		if (ReadResult.Result == PlayFabLobbyCompletion::EReadResult::Success)
+		{
+			CompletedReads.Emplace(PendingPair.Key, MoveTemp(ReadResult));
+			continue;
+		}
+
+		++PendingCompletion.RetryCount;
+		if (ReadResult.Result == PlayFabLobbyCompletion::EReadResult::Failed ||
+			CurrentTimeSeconds >= PendingCompletion.DeadlineSeconds)
+		{
+			FFailedRead& FailedRead = FailedReads.Emplace_GetRef();
+			FailedRead.Lobby = PendingPair.Key;
+			FailedRead.SessionName = PendingCompletion.SessionName;
+			FailedRead.Error = ReadResult.Error;
+			FailedRead.bTimedOut = ReadResult.Result == PlayFabLobbyCompletion::EReadResult::Pending;
+			continue;
+		}
+
+		PendingCompletion.NextRetrySeconds = CurrentTimeSeconds + CreateLobbyCompletionRetryIntervalSeconds;
+	}
+
+	for (TPair<PFLobbyHandle, PlayFabLobbyCompletion::FReadResult>& CompletedRead : CompletedReads)
+	{
+		FPendingCreateAndJoinLobbyCompletion PendingCompletion;
+		if (!PendingCreateAndJoinLobbyCompletions.RemoveAndCopyValue(CompletedRead.Key, PendingCompletion))
+		{
+			continue;
+		}
+
+		UE_LOG_ONLINE(
+			Display,
+			TEXT("FPlayFabLobby::ProcessPendingCreateAndJoinLobbyCompletions: lobby data became available after %d retries"),
+			PendingCompletion.RetryCount + 1);
+		CompleteCreateAndJoinLobby(CompletedRead.Key, PendingCompletion.SessionName, CompletedRead.Value);
+	}
+
+	for (const FFailedRead& FailedRead : FailedReads)
+	{
+		if (!PendingCreateAndJoinLobbyCompletions.Contains(FailedRead.Lobby))
+		{
+			continue;
+		}
+
+		FailCreateAndJoinLobby(
+			FailedRead.Lobby,
+			FailedRead.SessionName,
+			FailedRead.Error,
+			FailedRead.bTimedOut
+				? TEXT("timed out waiting for completed lobby data")
+				: TEXT("failed while reading completed lobby data"),
+			true);
+	}
+}
+
+void FPlayFabLobby::CompleteCreateAndJoinLobby(
+	PFLobbyHandle Lobby,
+	FName SessionName,
+	const PlayFabLobbyCompletion::FReadResult& ReadResult)
+{
+	bool bSuccess = false;
+	FOnlineSessionPlayFabPtr SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
+	if (SessionInterface.IsValid())
+	{
+		FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(SessionName);
+		if (ExistingNamedSession.IsValid())
+		{
+			FOnlineSessionInfoPlayFabPtr NewSessionInfo = StaticCastSharedPtr<FOnlineSessionInfoPlayFab>(ExistingNamedSession->SessionInfo);
+			if (NewSessionInfo.IsValid())
+			{
+				bSuccess = true;
+				NewSessionInfo->LobbyHandle = Lobby;
+				NewSessionInfo->SetSessionId(ReadResult.LobbyId);
+				NewSessionInfo->ConnectionString = ReadResult.ConnectionString;
+				ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
+
+#if defined(OSS_PLAYFAB_GDK_SUPPORT)
+				if (IsNativePlatformSubsystemGDK())
+				{
+					ExistingNamedSession->SessionInfo = NewSessionInfo;
+					SessionInterface->SetMultiplayerActivityForSession(ExistingNamedSession);
+				}
+#endif
+			}
+			else
+			{
+				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::OnCreateAndJoinLobbyCompleted: SessionInfo was null"));
+			}
+		}
+		else
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::CompleteCreateAndJoinLobby: ExistingNamedSession was null"));
+		}
+	}
+	else
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::CompleteCreateAndJoinLobby: SessionInterface was null"));
+	}
+
+	if (!bSuccess)
+	{
+		FailCreateAndJoinLobby(
+			Lobby,
+			SessionName,
+			E_FAIL,
+			TEXT("failed to finalize completed lobby"),
+			true);
+		return;
+	}
 	TriggerOnLobbyCreatedAndJoinCompletedDelegates(bSuccess, SessionName);
+}
+
+void FPlayFabLobby::FailCreateAndJoinLobby(
+	PFLobbyHandle Lobby,
+	FName SessionName,
+	HRESULT Error,
+	const TCHAR* FailureContext,
+	bool bLeaveCreatedLobby)
+{
+	UE_LOG_ONLINE(
+		Error,
+		TEXT("FPlayFabLobby::FailCreateAndJoinLobby: %s for session '%s'. ErrorCode=[0x%08x], Error message:%s"),
+		FailureContext,
+		*SessionName.ToString(),
+		Error,
+		*GetMultiplayerErrorMessage(Error));
+
+	PendingCreateAndJoinLobbyCompletions.Remove(Lobby);
+	if (bLeaveCreatedLobby)
+	{
+		const HRESULT LeaveResult = PFLobbyLeave(Lobby, nullptr, nullptr);
+		if (SUCCEEDED(LeaveResult))
+		{
+			FailedCreateLobbyCleanupHandles.Add(Lobby);
+		}
+		else
+		{
+			UE_LOG_ONLINE(
+				Error,
+				TEXT("FPlayFabLobby::FailCreateAndJoinLobby: failed to leave lobby after create failure. ErrorCode=[0x%08x], Error message:%s"),
+				LeaveResult,
+				*GetMultiplayerErrorMessage(LeaveResult));
+			LobbySessionMap.Remove(Lobby);
+		}
+	}
+	else
+	{
+		LobbySessionMap.Remove(Lobby);
+	}
+	TriggerOnLobbyCreatedAndJoinCompletedDelegates(false, SessionName);
+}
+
+bool FPlayFabLobby::CancelPendingCreateAndJoinLobbyCompletion(PFLobbyHandle Lobby, HRESULT Error, const TCHAR* FailureContext)
+{
+	const FPendingCreateAndJoinLobbyCompletion* PendingCompletion = PendingCreateAndJoinLobbyCompletions.Find(Lobby);
+	if (PendingCompletion == nullptr)
+	{
+		return false;
+	}
+
+	const FName SessionName = PendingCompletion->SessionName;
+	FailCreateAndJoinLobby(Lobby, SessionName, Error, FailureContext);
+	return true;
 }
 
 void FPlayFabLobby::HandleCreateAndClaimServerLobbyCompleted(const PFLobbyCreateAndClaimServerLobbyCompletedStateChange& StateChange)
@@ -1768,6 +1965,25 @@ void FPlayFabLobby::HandleLeaveLobbyCompleted(const PFLobbyLeaveLobbyCompletedSt
 
 	if (StateChange.lobby != nullptr)
 	{
+		if (FailedCreateLobbyCleanupHandles.Remove(StateChange.lobby) > 0)
+		{
+			LobbySessionMap.Remove(StateChange.lobby);
+			return;
+		}
+
+		const FPendingCreateAndJoinLobbyCompletion* PendingCompletion =
+			PendingCreateAndJoinLobbyCompletions.Find(StateChange.lobby);
+		const FName PendingSessionName =
+			PendingCompletion != nullptr ? PendingCompletion->SessionName : FName();
+		if (CancelPendingCreateAndJoinLobbyCompletion(
+			StateChange.lobby,
+			E_ABORT,
+			TEXT("lobby was left while waiting for completed lobby data")))
+		{
+			TriggerOnLeaveLobbyCompletedDelegates(PendingSessionName, true);
+			return;
+		}
+
 		FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
 		auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
 		FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(*SessionName);
@@ -1884,11 +2100,22 @@ void FPlayFabLobby::HandleInvitationReceived(const PFLobbyInviteReceivedStateCha
 void FPlayFabLobby::HandleLobbyDisconnected(const PFLobbyDisconnectedStateChange& StateChange)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyDisconnectedStateChange(%u) event"), StateChange.stateChangeType);
-	FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
-	if (SessionName != nullptr)
+
+	FailedCreateLobbyCleanupHandles.Remove(StateChange.lobby);
+	if (CancelPendingCreateAndJoinLobbyCompletion(
+		StateChange.lobby,
+		E_ABORT,
+		TEXT("lobby disconnected while waiting for completed lobby data")))
+	{
+		return;
+	}
+
+	const FName* FoundSessionName = LobbySessionMap.Find(StateChange.lobby);
+	const FName SessionName = FoundSessionName != nullptr ? *FoundSessionName : FName();
+	if (!SessionName.IsNone())
 	{
 		LobbySessionMap.Remove(StateChange.lobby);
-		TriggerOnLobbyDisconnectedDelegates(*SessionName);
+		TriggerOnLobbyDisconnectedDelegates(SessionName);
 	}
 	else
 	{
@@ -2024,19 +2251,19 @@ FOnlineSessionSearchResult FPlayFabLobby::CreateSearchResultFromLobby(const PFLo
 		}
 
 		// return search properties back to session settings
-		auto SettingKey = SearchKeyMappingTable.Find(SearchPropertyKey);
+		auto SettingKey = SearchKeyAllocator.FindSetting(SearchPropertyKey);
 		if (SettingKey)
 		{
-			switch (SettingKey->Value)
+			switch (SettingKey->Type)
 			{
 				case EOnlineKeyValuePairDataType::Bool:
-					NewSearchResult.Session.SessionSettings.Set(FName(SettingKey->Key), LobbySearchResult.searchPropertyValues[i][0] == '1' ? true : false, EOnlineDataAdvertisementType::ViaOnlineService);
+					NewSearchResult.Session.SessionSettings.Set(FName(SettingKey->SettingName), LobbySearchResult.searchPropertyValues[i][0] == '1' ? true : false, EOnlineDataAdvertisementType::ViaOnlineService);
 					break;
 				case EOnlineKeyValuePairDataType::Int32:
-					NewSearchResult.Session.SessionSettings.Set(FName(SettingKey->Key), FCString::Atoi(*SearchPropertyValue), EOnlineDataAdvertisementType::ViaOnlineService);
+					NewSearchResult.Session.SessionSettings.Set(FName(SettingKey->SettingName), FCString::Atoi(*SearchPropertyValue), EOnlineDataAdvertisementType::ViaOnlineService);
 					break;
 				case EOnlineKeyValuePairDataType::String:
-					NewSearchResult.Session.SessionSettings.Set(FName(SettingKey->Key), SearchPropertyValue, EOnlineDataAdvertisementType::ViaOnlineService);
+					NewSearchResult.Session.SessionSettings.Set(FName(SettingKey->SettingName), SearchPropertyValue, EOnlineDataAdvertisementType::ViaOnlineService);
 					break;
 			}
 		}
@@ -2146,7 +2373,7 @@ FString FPlayFabLobby::ComposeLobbySearchQueryFilter(const FSearchParams& Search
 
 		FString SearchKey;
 		EOnlineKeyValuePairDataType::Type Type;
-		if (GetSearchKeyFromSettingMappingTable(SettingName, SearchKey, Type))
+		if (SearchKeyAllocator.GetKeyForSetting(SettingName, SearchKey, Type))
 		{
 			UE_LOG_ONLINE(Verbose, TEXT("ComposeLobbySearchQueryFilter: predefined item %s(%s): %s Type: %d."), *SettingName, *SearchKey, *SettingValue.ToString(), Type);
 			switch (Type)
@@ -2180,7 +2407,7 @@ FString FPlayFabLobby::ComposeLobbySearchQueryFilter(const FSearchParams& Search
 		}
 		else
 		{
-			UE_LOG_ONLINE(Error, TEXT("ComposeLobbySearchQueryFilter: Unhandled search parameter. Add %s to the s_SearchKeyMappingTable to filter the lobby searching"), *SettingName);
+			UE_LOG_ONLINE(Error, TEXT("ComposeLobbySearchQueryFilter: Unhandled search parameter. Add %s to s_DefaultSearchKeyAssignments or declare it in [OnlineSubsystemPlayFab] to filter the lobby searching"), *SettingName);
 		}
 	}
 
@@ -2290,41 +2517,13 @@ void  FPlayFabLobby::InviteTitleAccountIDsToLobby(FPendingSendInviteData Pending
 
 void FPlayFabLobby::BuildSearchKeyMappingTable()
 {
-	int32 SizeOfMappingTable = sizeof(s_SearchKeyMappingTable) / sizeof(struct FSearchKeyMappingTable);
-	for (int32 i = 0; i < SizeOfMappingTable; ++ i)
-	{
-		FString SearchKey;
-		switch (s_SearchKeyMappingTable[i].Type)
-		{
-			case EOnlineKeyValuePairDataType::Bool:
-			case EOnlineKeyValuePairDataType::Int32:
-				SearchKey = FString::Printf(TEXT("%skey%d"), *SEARCH_KEY_PREFIX_NUMBER, s_SearchKeyMappingTable[i].KeyNumber);
-				break;
-			case EOnlineKeyValuePairDataType::String:
-				SearchKey = FString::Printf(TEXT("%skey%d"), *SEARCH_KEY_PREFIX_STRING, s_SearchKeyMappingTable[i].KeyNumber);
-				break;
-		}
-		SearchKeyMappingTable.Add(SearchKey, TPair<FString, EOnlineKeyValuePairDataType::Type>(s_SearchKeyMappingTable[i].SettingKey.ToString(), s_SearchKeyMappingTable[i].Type));
-	}
+	const int32 DefaultsCount = sizeof(s_DefaultSearchKeyAssignments) / sizeof(FDynamicSearchKeyAllocator::FDefaultAssignment);
+	SearchKeyAllocator.Initialize(s_DefaultSearchKeyAssignments, DefaultsCount);
 }
 
-bool FPlayFabLobby::GetSearchKeyFromSettingMappingTable(const FString& SettingKey, FString& SearchKey, EOnlineKeyValuePairDataType::Type& Type) const
+const FDynamicSearchKeyAllocator::FSettingKeyType* FPlayFabLobby::FindSearchKey(const FString& SearchKey) const
 {
-	for (const auto& SearchFilter : SearchKeyMappingTable)
-	{
-		if (SearchFilter.Value.Key.Equals(SettingKey, ESearchCase::IgnoreCase))
-		{
-			SearchKey = SearchFilter.Key;
-			Type = SearchFilter.Value.Value;
-			return true;
-		}
-	}
-	return false;
-}
-
-const TPair<FString, EOnlineKeyValuePairDataType::Type>* FPlayFabLobby::FindSearchKey(const FString& SearchKey) const
-{
-	return SearchKeyMappingTable.Find(SearchKey);
+	return SearchKeyAllocator.FindSetting(SearchKey);
 }
 
 EOnJoinSessionCompleteResult::Type FPlayFabLobby::ConvertMultiplayerErrorToJoinSessionResult(

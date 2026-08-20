@@ -47,7 +47,8 @@ bool FPlayFabSocket::SendTo(const uint8* Data, int32 Count, int32& BytesSent, co
 		return false;
 	}
 
-	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab->PartyNetwork->LocalEndpoint;
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = PartyNetwork.Pin();
+	PartyLocalEndpoint* LocalEndpoint = ReadyNetwork.IsValid() ? ReadyNetwork->LocalEndpoint : nullptr;
 
 	if (LocalEndpoint == nullptr)
 	{
@@ -58,7 +59,7 @@ bool FPlayFabSocket::SendTo(const uint8* Data, int32 Count, int32& BytesSent, co
 
 	uint32 EndpointId;
 	Destination.GetIp(EndpointId);
-	PartyEndpoint* RemoteEndpoint = OSSPlayFab->PartyNetwork->GetEndpoint(EndpointId);
+	PartyEndpoint* RemoteEndpoint = ReadyNetwork->GetEndpoint(EndpointId);
 	if (RemoteEndpoint == nullptr)
 	{
 		// Might be disconnected peer
@@ -167,7 +168,8 @@ bool FPlayFabSocket::HasPendingData(uint32& PendingDataSize)
 
 ESocketConnectionState FPlayFabSocket::GetConnectionState()
 {
-	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab ? OSSPlayFab->PartyNetwork->LocalEndpoint : nullptr;
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = PartyNetwork.Pin();
+	PartyLocalEndpoint* LocalEndpoint = ReadyNetwork.IsValid() ? ReadyNetwork->LocalEndpoint : nullptr;
 	return LocalEndpoint ? SCS_Connected : SCS_NotConnected;
 }
 
@@ -175,7 +177,8 @@ int32 FPlayFabSocket::GetPortNo()
 {
 	uint16 EndpointId = 0;
 
-	PartyLocalEndpoint* LocalEndpoint = OSSPlayFab ? OSSPlayFab->PartyNetwork->LocalEndpoint : nullptr;
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = PartyNetwork.Pin();
+	PartyLocalEndpoint* LocalEndpoint = ReadyNetwork.IsValid() ? ReadyNetwork->LocalEndpoint : nullptr;
 	if (LocalEndpoint)
 	{
 		LocalEndpoint->GetUniqueIdentifier(&EndpointId);
@@ -196,4 +199,9 @@ void FPlayFabSocket::AddNewPendingData(uint16 SourceEndpoint, TArray<uint8> NewD
 
 		PendingPackets.Enqueue(PartyPacket(SourceEndpoint, NewData));
 	}
+}
+
+void FPlayFabSocket::SetPartyNetwork(TSharedPtr<FPlayFabPartyNetwork> InPartyNetwork)
+{
+	PartyNetwork = InPartyNetwork;
 }

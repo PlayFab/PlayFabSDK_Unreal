@@ -15,7 +15,7 @@ PRAGMA_DISABLE_UNDEFINED_IDENTIFIER_WARNINGS
 
 namespace
 {
-	XTaskQueueRegistrationToken NetworkInitRegistration;
+	XTaskQueueRegistrationToken NetworkInitRegistration = { 0 };
 }
 
 #if defined(OSS_PLAYFAB_GDK)
@@ -65,7 +65,11 @@ void FOnlineSubsystemPlayFab::UnregisterNetworkInitCallbacksGDK()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::UnregisterNetworkInitCallbacks"));
 
-	XNetworkingUnregisterConnectivityHintChanged(NetworkInitRegistration, true);
+	if (NetworkInitRegistration.token != 0)
+	{
+		XNetworkingUnregisterConnectivityHintChanged(NetworkInitRegistration, true);
+		NetworkInitRegistration = { 0 };
+	}
 }
 
 void FOnlineSubsystemPlayFab::TryInitializePlayFabPartyGDK()

@@ -4,6 +4,7 @@
 
 #include "OnlineCognitiveServicesInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "OnlineVoiceInterfacePlayFab.h"
 #include "PlayFabPartyNetwork.h"
 #include "PlayFabHelpers.h"
 
@@ -222,7 +223,18 @@ bool FOnlineCognitiveServicesPlayFab::SendChatText(const FUniqueNetId& Sender, c
 		return false;
 	}
 
-	PartyNetwork* PlayFabPartyNetwork = OSSPlayFab->PartyNetwork->Network;
+	IOnlineVoicePtr VoiceIntPtr = OSSPlayFab->GetVoiceInterface();
+	FName VoiceOwnerName = VoiceIntPtr.IsValid()
+		? static_cast<FOnlineVoicePlayFab*>(VoiceIntPtr.Get())->GetVoiceOwnerName()
+		: NAME_None;
+	if (VoiceOwnerName.IsNone())
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FOnlineCognitiveServicesPlayFab::SendChatText: No active voice owner, cannot send chat text"));
+		return false;
+	}
+	
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = OSSPlayFab->GetPartyNetwork(VoiceOwnerName);
+	PartyNetwork* PlayFabPartyNetwork = ReadyNetwork.IsValid() ? ReadyNetwork->Network : nullptr;
 	if (PlayFabPartyNetwork == nullptr)
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineCognitiveServicesPlayFab::SendChatText: PlayFabPartyNetwork was null"));

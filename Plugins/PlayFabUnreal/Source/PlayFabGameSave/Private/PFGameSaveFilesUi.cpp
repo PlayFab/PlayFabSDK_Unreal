@@ -47,23 +47,23 @@ void CALLBACK GameSaveFilesUiActiveDeviceContentionCallback(
     _In_ void* /*context*/
 ) noexcept
 {
+    if (localUserHandle == nullptr || _localGameSave == nullptr || _remoteGameSave == nullptr)
+    {
+        UE_LOG(LogPlayFabUnreal, Warning, TEXT("GameSaveFilesUiActiveDeviceContentionCallback: localUserHandle or game save descriptor is null"));
+        return;
+    }
+
     FPFGameSaveDescriptor localGameSave{};
     localGameSave.time = _localGameSave->time;
     localGameSave.totalBytes = _localGameSave->totalBytes;
-    localGameSave.uploadedBytes = _localGameSave->totalBytes;
+    localGameSave.uploadedBytes = _localGameSave->uploadedBytes;
     localGameSave.deviceType = _localGameSave->deviceType;
 
     FPFGameSaveDescriptor remoteGameSave{};
     remoteGameSave.time = _remoteGameSave->time;
     remoteGameSave.totalBytes = _remoteGameSave->totalBytes;
-    remoteGameSave.uploadedBytes = _remoteGameSave->totalBytes;
+    remoteGameSave.uploadedBytes = _remoteGameSave->uploadedBytes;
     remoteGameSave.deviceType = _remoteGameSave->deviceType;
-
-    if (localUserHandle == nullptr)
-    {
-        UE_LOG(LogPlayFabUnreal, Warning, TEXT("GameSaveFilesUiActiveDeviceContentionCallback: localUserHandle is null"));
-        return;
-    }
 
     FPFLocalUserHandle localUserHandleWrapper;
     *reinterpret_cast<PFLocalUserHandle*>(&localUserHandleWrapper) = localUserHandle;
@@ -78,23 +78,23 @@ void CALLBACK GameSaveFilesUiConflictCallback(
     _In_ void* /*context*/
 ) noexcept
 {
+    if (localUserHandle == nullptr || _localGameSave == nullptr || _remoteGameSave == nullptr)
+    {
+        UE_LOG(LogPlayFabUnreal, Warning, TEXT("GameSaveFilesUiConflictCallback: localUserHandle or game save descriptor is null"));
+        return;
+    }
+
     FPFGameSaveDescriptor localGameSave{};
     localGameSave.time = _localGameSave->time;
     localGameSave.totalBytes = _localGameSave->totalBytes;
-    localGameSave.uploadedBytes = _localGameSave->totalBytes;
+    localGameSave.uploadedBytes = _localGameSave->uploadedBytes;
     localGameSave.deviceType = _localGameSave->deviceType;
 
     FPFGameSaveDescriptor remoteGameSave{};
     remoteGameSave.time = _remoteGameSave->time;
     remoteGameSave.totalBytes = _remoteGameSave->totalBytes;
-    remoteGameSave.uploadedBytes = _remoteGameSave->totalBytes;
+    remoteGameSave.uploadedBytes = _remoteGameSave->uploadedBytes;
     remoteGameSave.deviceType = _remoteGameSave->deviceType;
-
-    if (localUserHandle == nullptr)
-    {
-        UE_LOG(LogPlayFabUnreal, Warning, TEXT("GameSaveFilesUiConflictCallback: localUserHandle is null"));
-        return;
-    }
 
     FPFLocalUserHandle localUserHandleWrapper;
     *reinterpret_cast<PFLocalUserHandle*>(&localUserHandleWrapper) = localUserHandle;
@@ -157,7 +157,10 @@ bool PLAYFABGAMESAVE_API FPFGameSaveFilesUiProgressGetProgress(
 {
     PFGameSaveFilesSyncState cSyncState{};
     RETURN_FALSE_IF_FAILED(PFGameSaveFilesUiProgressGetProgress(localUserHandle.Get(), &cSyncState, reinterpret_cast<uint64_t*>(current), reinterpret_cast<uint64_t*>(total)));
-    *syncState = static_cast<FPFGameSaveFilesSyncState>(cSyncState);
+    if (syncState != nullptr)
+    {
+        *syncState = static_cast<FPFGameSaveFilesSyncState>(cSyncState);
+    }
 
     return true;
 }

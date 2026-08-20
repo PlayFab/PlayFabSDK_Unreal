@@ -73,6 +73,7 @@ public:
 	static XTaskQueueHandle GetBackgroundTaskQueue();	// completion callbacks happen on a background thread
 
 	// internal use - shutdown the queue system
+	static void PlatformInit();
 	static void PlatformTearDown();
 
 protected:

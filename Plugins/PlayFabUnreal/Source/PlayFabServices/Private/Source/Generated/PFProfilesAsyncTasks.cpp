@@ -25,7 +25,7 @@ void FGetProfileAsyncTask::DoWork()
 	HResult = PFProfilesGetProfileAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesGetEntityProfileResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -36,7 +36,7 @@ void FGetProfileAsyncTask::ProcessResults()
 	HResult = PFProfilesGetProfileGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFProfilesGetEntityProfileResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFProfilesGetEntityProfileResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -46,7 +46,7 @@ void FGetProfileAsyncTask::ProcessResults()
 	HResult = PFProfilesGetProfileGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesGetEntityProfileResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -79,7 +79,7 @@ void FGetProfilesAsyncTask::DoWork()
 	HResult = PFProfilesGetProfilesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesGetEntityProfilesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -90,7 +90,7 @@ void FGetProfilesAsyncTask::ProcessResults()
 	HResult = PFProfilesGetProfilesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFProfilesGetEntityProfilesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFProfilesGetEntityProfilesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -100,7 +100,7 @@ void FGetProfilesAsyncTask::ProcessResults()
 	HResult = PFProfilesGetProfilesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesGetEntityProfilesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -133,7 +133,7 @@ void FGetTitlePlayersFromMasterPlayerAccountIdsAsyncTask::DoWork()
 	HResult = PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -144,7 +144,7 @@ void FGetTitlePlayersFromMasterPlayerAccountIdsAsyncTask::ProcessResults()
 	HResult = PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -154,7 +154,7 @@ void FGetTitlePlayersFromMasterPlayerAccountIdsAsyncTask::ProcessResults()
 	HResult = PFProfilesGetTitlePlayersFromMasterPlayerAccountIdsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesGetTitlePlayersFromMasterPlayerAccountIdsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -187,7 +187,7 @@ void FSetProfileLanguageAsyncTask::DoWork()
 	HResult = PFProfilesSetProfileLanguageAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesSetProfileLanguageResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -198,7 +198,7 @@ void FSetProfileLanguageAsyncTask::ProcessResults()
 	HResult = PFProfilesSetProfileLanguageGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFProfilesSetProfileLanguageResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFProfilesSetProfileLanguageResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -208,7 +208,7 @@ void FSetProfileLanguageAsyncTask::ProcessResults()
 	HResult = PFProfilesSetProfileLanguageGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesSetProfileLanguageResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -241,7 +241,7 @@ void FSetProfilePolicyAsyncTask::DoWork()
 	HResult = PFProfilesSetProfilePolicyAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesSetEntityProfilePolicyResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -252,7 +252,7 @@ void FSetProfilePolicyAsyncTask::ProcessResults()
 	HResult = PFProfilesSetProfilePolicyGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFProfilesSetEntityProfilePolicyResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFProfilesSetEntityProfilePolicyResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -262,7 +262,7 @@ void FSetProfilePolicyAsyncTask::ProcessResults()
 	HResult = PFProfilesSetProfilePolicyGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFProfilesSetEntityProfilePolicyResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

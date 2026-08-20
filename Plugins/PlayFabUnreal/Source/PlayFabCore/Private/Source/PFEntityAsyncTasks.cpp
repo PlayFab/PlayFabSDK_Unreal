@@ -1,4 +1,5 @@
 #include "PFEntityAsyncTasks.h"
+#include "PFCoreTypeConverters.h"
 
 FPFEntityGetEntityTokenAsyncTask::FPFEntityGetEntityTokenAsyncTask(
 	FPFEntityHandle entityHandle,
@@ -28,15 +29,18 @@ void FPFEntityGetEntityTokenAsyncTask::ProcessResults()
 
 	if (SUCCEEDED(hr))
 	{
-		bufferArray.Reserve(resultSize);
+		bufferArray.SetNumUninitialized(resultSize);
 
 		PFEntityToken const* result;
 		hr = PFEntityGetEntityTokenResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, nullptr);
 
 		if (SUCCEEDED(hr))
 		{
-			FPFEntityToken* entityToken = reinterpret_cast<FPFEntityToken*>(&result);
-			delegate.ExecuteIfBound(true, entityToken);
+			FPFEntityToken entityToken{
+				UTF8_TO_TCHAR(result->token),
+				ConvertTimeToUnreal(result->expiration)
+			};
+			delegate.ExecuteIfBound(true, &entityToken);
 		}
 		else
 		{

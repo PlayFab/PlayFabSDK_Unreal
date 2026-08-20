@@ -32,7 +32,7 @@ void FCreateStatisticDefinitionAsyncTask::DoWork()
 	HResult = PFStatisticsCreateStatisticDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -41,7 +41,7 @@ void FCreateStatisticDefinitionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -72,7 +72,7 @@ void FDeleteStatisticDefinitionAsyncTask::DoWork()
 	HResult = PFStatisticsDeleteStatisticDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -81,7 +81,7 @@ void FDeleteStatisticDefinitionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -113,7 +113,7 @@ void FDeleteStatisticsAsyncTask::DoWork()
 	HResult = PFStatisticsDeleteStatisticsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsDeleteStatisticsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -124,7 +124,7 @@ void FDeleteStatisticsAsyncTask::ProcessResults()
 	HResult = PFStatisticsDeleteStatisticsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFStatisticsDeleteStatisticsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFStatisticsDeleteStatisticsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -134,7 +134,7 @@ void FDeleteStatisticsAsyncTask::ProcessResults()
 	HResult = PFStatisticsDeleteStatisticsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsDeleteStatisticsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -166,7 +166,7 @@ void FGetStatisticDefinitionAsyncTask::DoWork()
 	HResult = PFStatisticsGetStatisticDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsGetStatisticDefinitionResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -177,7 +177,7 @@ void FGetStatisticDefinitionAsyncTask::ProcessResults()
 	HResult = PFStatisticsGetStatisticDefinitionGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFStatisticsGetStatisticDefinitionResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFStatisticsGetStatisticDefinitionResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -187,7 +187,7 @@ void FGetStatisticDefinitionAsyncTask::ProcessResults()
 	HResult = PFStatisticsGetStatisticDefinitionGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsGetStatisticDefinitionResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -221,7 +221,7 @@ void FGetStatisticsAsyncTask::DoWork()
 	HResult = PFStatisticsGetStatisticsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsGetStatisticsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -232,7 +232,7 @@ void FGetStatisticsAsyncTask::ProcessResults()
 	HResult = PFStatisticsGetStatisticsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFStatisticsGetStatisticsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFStatisticsGetStatisticsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -242,7 +242,7 @@ void FGetStatisticsAsyncTask::ProcessResults()
 	HResult = PFStatisticsGetStatisticsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsGetStatisticsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -277,7 +277,7 @@ void FGetStatisticsForEntitiesAsyncTask::DoWork()
 	HResult = PFStatisticsGetStatisticsForEntitiesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsGetStatisticsForEntitiesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -288,7 +288,7 @@ void FGetStatisticsForEntitiesAsyncTask::ProcessResults()
 	HResult = PFStatisticsGetStatisticsForEntitiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFStatisticsGetStatisticsForEntitiesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFStatisticsGetStatisticsForEntitiesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -298,7 +298,7 @@ void FGetStatisticsForEntitiesAsyncTask::ProcessResults()
 	HResult = PFStatisticsGetStatisticsForEntitiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsGetStatisticsForEntitiesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -331,7 +331,7 @@ void FIncrementStatisticVersionAsyncTask::DoWork()
 	HResult = PFStatisticsIncrementStatisticVersionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsIncrementStatisticVersionResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -342,7 +342,7 @@ void FIncrementStatisticVersionAsyncTask::ProcessResults()
 	HResult = PFStatisticsIncrementStatisticVersionGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsIncrementStatisticVersionResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -376,7 +376,7 @@ void FListStatisticDefinitionsAsyncTask::DoWork()
 	HResult = PFStatisticsListStatisticDefinitionsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsListStatisticDefinitionsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -387,7 +387,7 @@ void FListStatisticDefinitionsAsyncTask::ProcessResults()
 	HResult = PFStatisticsListStatisticDefinitionsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFStatisticsListStatisticDefinitionsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFStatisticsListStatisticDefinitionsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -397,7 +397,7 @@ void FListStatisticDefinitionsAsyncTask::ProcessResults()
 	HResult = PFStatisticsListStatisticDefinitionsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsListStatisticDefinitionsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -431,7 +431,7 @@ void FUnlinkAggregationSourceFromStatisticAsyncTask::DoWork()
 	HResult = PFStatisticsUnlinkAggregationSourceFromStatisticAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -440,7 +440,7 @@ void FUnlinkAggregationSourceFromStatisticAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -473,7 +473,7 @@ void FUpdateStatisticDefinitionAsyncTask::DoWork()
 	HResult = PFStatisticsUpdateStatisticDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -482,7 +482,7 @@ void FUpdateStatisticDefinitionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -515,7 +515,7 @@ void FUpdateStatisticsAsyncTask::DoWork()
 	HResult = PFStatisticsUpdateStatisticsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsUpdateStatisticsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -526,7 +526,7 @@ void FUpdateStatisticsAsyncTask::ProcessResults()
 	HResult = PFStatisticsUpdateStatisticsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFStatisticsUpdateStatisticsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFStatisticsUpdateStatisticsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -536,7 +536,7 @@ void FUpdateStatisticsAsyncTask::ProcessResults()
 	HResult = PFStatisticsUpdateStatisticsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFStatisticsUpdateStatisticsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

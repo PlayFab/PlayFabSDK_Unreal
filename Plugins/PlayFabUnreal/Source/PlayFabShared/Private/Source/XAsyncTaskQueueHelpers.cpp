@@ -117,9 +117,17 @@ static bool bIsTornDown = false;
 static TUniquePtr<FThreadPoolTaskQueue> GThreadPoolTaskQueue;
 static TUniquePtr<FBackgroundTaskQueue> GBackgroundTaskQueue;
 
+void FXAsyncTaskQueue::PlatformInit()
+{
+	bIsTornDown = false;
+}
+
 void FXAsyncTaskQueue::PlatformTearDown()
 {
-	check(!bIsTornDown);
+	if (bIsTornDown)
+	{
+		return;
+	}
 	bIsTornDown = true;
 
 	// destroy our task queues

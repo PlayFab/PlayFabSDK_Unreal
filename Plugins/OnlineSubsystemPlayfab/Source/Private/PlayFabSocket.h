@@ -80,8 +80,11 @@ public:
 
 
 	void AddNewPendingData(uint16 sourceEndpoint, TArray<uint8> NewData);
+	void SetPartyNetwork(TSharedPtr<class FPlayFabPartyNetwork> InPartyNetwork);
 
 private:
+	TWeakPtr<class FPlayFabPartyNetwork> PartyNetwork;
+
 	// Party instance send message mode
 	Party::PartySendMessageOptions PlayFabPartySendMode = Party::PartySendMessageOptions::Default;
 

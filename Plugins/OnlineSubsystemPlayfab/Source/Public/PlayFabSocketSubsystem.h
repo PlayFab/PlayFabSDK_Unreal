@@ -55,6 +55,8 @@ public:
 	virtual bool RequiresChatDataBeSeparate() override { return false; }
 	virtual bool RequiresEncryptedPackets() override { return false; }
 
+	TSharedRef<FInternetAddr> GetLocalBindAddr(FName SessionName, FOutputDevice& Out);
+
 	void LinkNetDriver(UPlayFabNetDriver* InNetDriver);
 	UPlayFabNetDriver* GetLinkedNetDriver() const
 	{

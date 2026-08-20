@@ -289,25 +289,25 @@ void FMatchmakingInterfacePlayFab::OnMatchmakingStatusChanged(const FName Sessio
 			FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(SessionName);
 			if (!ExistingNamedSession.IsValid())
 			{
-				// Create a named session from the search result data
-				FNamedOnlineSessionRef NamedSession = SessionInterface->AddNamedSessionRef(SessionName, Ticket->SessionSettings);
-				NamedSession->HostingPlayerNum = INDEX_NONE;
-				NamedSession->OwningUserId = Ticket->SearchingPlayerNetId;
-				NamedSession->LocalOwnerId = Ticket->SearchingPlayerNetId;
-
-				OnJoinArrangedLobbyCompletedDelegate = FOnJoinArrangedLobbyCompletedDelegate::CreateRaw(this, &FMatchmakingInterfacePlayFab::OnJoinArrangedLobbyCompleted);
-				OnJoinArrangedLobbyCompleteDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnJoinArrangedLobbyCompletedDelegate_Handle(OnJoinArrangedLobbyCompletedDelegate);
-
-				if (!OSSPlayFab->GetPlayFabLobbyInterface()->JoinArrangedLobby(SessionName, Ticket))
-				{
-					UE_LOG_ONLINE_SESSION(Log, TEXT("Failed JoinArrangedLobby operation"));
-					RemoveMatchmakingTicket(SessionName);
-					TriggerOnMatchmakingTicketCompletedDelegates(false, SessionName);
-					isRemoved = true;
-					return;
-				}
-				Ticket->MatchmakingState = EOnlinePlayFabMatchmakingState::JoiningArrangedLobby;
+				UE_LOG_ONLINE_SESSION(Log, TEXT("MatchFound but NamedSession for '%s' is missing; aborting."), *SessionName.ToString());
+				RemoveMatchmakingTicket(SessionName);
+				TriggerOnMatchmakingTicketCompletedDelegates(false, SessionName);
+				isRemoved = true;
+				return;
 			}
+
+			OnJoinArrangedLobbyCompletedDelegate = FOnJoinArrangedLobbyCompletedDelegate::CreateRaw(this, &FMatchmakingInterfacePlayFab::OnJoinArrangedLobbyCompleted);
+			OnJoinArrangedLobbyCompleteDelegateHandle = OSSPlayFab->GetPlayFabLobbyInterface()->AddOnJoinArrangedLobbyCompletedDelegate_Handle(OnJoinArrangedLobbyCompletedDelegate);
+
+			if (!OSSPlayFab->GetPlayFabLobbyInterface()->JoinArrangedLobby(SessionName, Ticket))
+			{
+				UE_LOG_ONLINE_SESSION(Log, TEXT("Failed JoinArrangedLobby operation"));
+				RemoveMatchmakingTicket(SessionName);
+				TriggerOnMatchmakingTicketCompletedDelegates(false, SessionName);
+				isRemoved = true;
+				return;
+			}
+			Ticket->MatchmakingState = EOnlinePlayFabMatchmakingState::JoiningArrangedLobby;
 			break;
 		}
 		case EOnlinePlayFabMatchmakingState::Cancelled:

@@ -25,7 +25,7 @@ void FDeleteSecretAsyncTask::DoWork()
 	HResult = PFMultiplayerServerDeleteSecretAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -34,7 +34,7 @@ void FDeleteSecretAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -65,7 +65,7 @@ void FListBuildAliasesAsyncTask::DoWork()
 	HResult = PFMultiplayerServerListBuildAliasesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListBuildAliasesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -76,7 +76,7 @@ void FListBuildAliasesAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListBuildAliasesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFMultiplayerServerListBuildAliasesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFMultiplayerServerListBuildAliasesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -86,7 +86,7 @@ void FListBuildAliasesAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListBuildAliasesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListBuildAliasesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -118,7 +118,7 @@ void FListBuildSummariesV2AsyncTask::DoWork()
 	HResult = PFMultiplayerServerListBuildSummariesV2Async(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListBuildSummariesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -129,7 +129,7 @@ void FListBuildSummariesV2AsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListBuildSummariesV2GetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFMultiplayerServerListBuildSummariesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFMultiplayerServerListBuildSummariesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -139,7 +139,7 @@ void FListBuildSummariesV2AsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListBuildSummariesV2GetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListBuildSummariesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -171,7 +171,7 @@ void FListQosServersForTitleAsyncTask::DoWork()
 	HResult = PFMultiplayerServerListQosServersForTitleAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListQosServersForTitleResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -182,7 +182,7 @@ void FListQosServersForTitleAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListQosServersForTitleGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFMultiplayerServerListQosServersForTitleResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFMultiplayerServerListQosServersForTitleResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -192,7 +192,7 @@ void FListQosServersForTitleAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListQosServersForTitleGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListQosServersForTitleResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -225,7 +225,7 @@ void FListSecretSummariesAsyncTask::DoWork()
 	HResult = PFMultiplayerServerListSecretSummariesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListSecretSummariesResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -236,7 +236,7 @@ void FListSecretSummariesAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListSecretSummariesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFMultiplayerServerListSecretSummariesResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFMultiplayerServerListSecretSummariesResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -246,7 +246,7 @@ void FListSecretSummariesAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerListSecretSummariesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerListSecretSummariesResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -285,7 +285,7 @@ void FRequestMultiplayerServerAsyncTask::DoWork()
 	HResult = PFMultiplayerServerRequestMultiplayerServerAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerRequestMultiplayerServerResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -296,7 +296,7 @@ void FRequestMultiplayerServerAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerRequestMultiplayerServerGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFMultiplayerServerRequestMultiplayerServerResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFMultiplayerServerRequestMultiplayerServerResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -306,7 +306,7 @@ void FRequestMultiplayerServerAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerRequestMultiplayerServerGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerRequestMultiplayerServerResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -342,7 +342,7 @@ void FRequestPartyServiceAsyncTask::DoWork()
 	HResult = PFMultiplayerServerRequestPartyServiceAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerRequestPartyServiceResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -353,7 +353,7 @@ void FRequestPartyServiceAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerRequestPartyServiceGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFMultiplayerServerRequestPartyServiceResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFMultiplayerServerRequestPartyServiceResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -363,7 +363,7 @@ void FRequestPartyServiceAsyncTask::ProcessResults()
 	HResult = PFMultiplayerServerRequestPartyServiceGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFMultiplayerServerRequestPartyServiceResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -397,7 +397,7 @@ void FUploadSecretAsyncTask::DoWork()
 	HResult = PFMultiplayerServerUploadSecretAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -406,7 +406,7 @@ void FUploadSecretAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{

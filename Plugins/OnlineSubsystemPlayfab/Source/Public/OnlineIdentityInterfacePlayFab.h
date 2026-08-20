@@ -206,9 +206,18 @@ public:
 
 	bool IsUserLocal(const PFEntityKey& UserEntityKey);
 	const TArray<PFEntityKey> GetLocalUserEntityKeys() const;
-	const FString& GetLocalUserXToken() const { return LocalUserXToken; }
 	PFEntityHandle GetLocalUserEntityHandleFromEntityKey(const PFEntityKey* EntityKey);
 	TSharedPtr<FPlayFabUser> GetPartyLocalUserFromEntityHandle(const PFEntityHandle EntityHandle);
+
+	/**
+	 * Asynchronously acquires the local user's Xbox Live token (XToken). The token is fetched fresh
+	 * per call (rather than cached at user creation) so it is never stale/expired and the caller
+	 * cannot observe an unset token. OnComplete is always invoked on the game thread with
+	 * (bSuccess, XToken). On non-GDK platforms there is no XToken, so OnComplete is invoked with
+	 * (false, empty). The token is currently consumed by friend lobby search to resolve the user's
+	 * Xbox friends list, but is not specific to that use.
+	 */
+	void GetLocalUserXTokenAsync(const FString& PlatformUserIdStr, TFunction<void(bool, FString)> OnComplete);
 
 protected:
 	bool AuthenticateUser(const FString& UserPlatformIdStr);
@@ -225,7 +234,12 @@ private:
 	bool bRegisterAuthDelegates = true;
 	bool bAuthAllUsers = true;
 	float TimeSinceLastAuth = 0.0f;
-	FString LocalUserXToken;
+	// Consecutive failed authentication attempts, tracked per platform user id so failures for one
+	// user don't penalize others. Drives exponential backoff and the retry cap so a persistently
+	// rejected token cannot flood PlayFab's rate limiter.
+	TMap<FString, int32> AuthFailureCountsByUser;
+	// Current cooldown the auth gate enforces. Grows with the failing user's count and resets on success.
+	float CurrentAuthCoolDownTime = 0.0f;
 
     FPFLocalUserHandle LocalUserHandle{ nullptr };
 

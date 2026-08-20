@@ -28,7 +28,7 @@ void FClientExecuteCloudScriptAsyncTask::DoWork()
 	HResult = PFCloudScriptClientExecuteCloudScriptAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -39,7 +39,7 @@ void FClientExecuteCloudScriptAsyncTask::ProcessResults()
 	HResult = PFCloudScriptClientExecuteCloudScriptGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -49,7 +49,7 @@ void FClientExecuteCloudScriptAsyncTask::ProcessResults()
 	HResult = PFCloudScriptClientExecuteCloudScriptGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -86,7 +86,7 @@ void FServerExecuteCloudScriptAsyncTask::DoWork()
 	HResult = PFCloudScriptServerExecuteCloudScriptAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -97,7 +97,7 @@ void FServerExecuteCloudScriptAsyncTask::ProcessResults()
 	HResult = PFCloudScriptServerExecuteCloudScriptGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -107,7 +107,7 @@ void FServerExecuteCloudScriptAsyncTask::ProcessResults()
 	HResult = PFCloudScriptServerExecuteCloudScriptGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -144,7 +144,7 @@ void FExecuteEntityCloudScriptAsyncTask::DoWork()
 	HResult = PFCloudScriptExecuteEntityCloudScriptAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -155,7 +155,7 @@ void FExecuteEntityCloudScriptAsyncTask::ProcessResults()
 	HResult = PFCloudScriptExecuteEntityCloudScriptGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -165,7 +165,7 @@ void FExecuteEntityCloudScriptAsyncTask::ProcessResults()
 	HResult = PFCloudScriptExecuteEntityCloudScriptGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteCloudScriptResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -199,7 +199,7 @@ void FExecuteFunctionAsyncTask::DoWork()
 	HResult = PFCloudScriptExecuteFunctionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteFunctionResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -210,7 +210,7 @@ void FExecuteFunctionAsyncTask::ProcessResults()
 	HResult = PFCloudScriptExecuteFunctionGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCloudScriptExecuteFunctionResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCloudScriptExecuteFunctionResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -220,7 +220,7 @@ void FExecuteFunctionAsyncTask::ProcessResults()
 	HResult = PFCloudScriptExecuteFunctionGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptExecuteFunctionResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -251,7 +251,7 @@ void FListEventHubFunctionsAsyncTask::DoWork()
 	HResult = PFCloudScriptListEventHubFunctionsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptListEventHubFunctionsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -262,7 +262,7 @@ void FListEventHubFunctionsAsyncTask::ProcessResults()
 	HResult = PFCloudScriptListEventHubFunctionsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCloudScriptListEventHubFunctionsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCloudScriptListEventHubFunctionsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -272,7 +272,7 @@ void FListEventHubFunctionsAsyncTask::ProcessResults()
 	HResult = PFCloudScriptListEventHubFunctionsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCloudScriptListEventHubFunctionsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -307,7 +307,7 @@ void FRegisterEventHubFunctionAsyncTask::DoWork()
 	HResult = PFCloudScriptRegisterEventHubFunctionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -316,7 +316,7 @@ void FRegisterEventHubFunctionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{

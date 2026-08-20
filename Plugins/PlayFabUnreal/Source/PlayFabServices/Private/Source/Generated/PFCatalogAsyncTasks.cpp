@@ -25,7 +25,7 @@ void FCreateDraftItemAsyncTask::DoWork()
 	HResult = PFCatalogCreateDraftItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogCreateDraftItemResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -36,7 +36,7 @@ void FCreateDraftItemAsyncTask::ProcessResults()
 	HResult = PFCatalogCreateDraftItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogCreateDraftItemResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogCreateDraftItemResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -46,7 +46,7 @@ void FCreateDraftItemAsyncTask::ProcessResults()
 	HResult = PFCatalogCreateDraftItemGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogCreateDraftItemResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -78,7 +78,7 @@ void FCreateUploadUrlsAsyncTask::DoWork()
 	HResult = PFCatalogCreateUploadUrlsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogCreateUploadUrlsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -89,7 +89,7 @@ void FCreateUploadUrlsAsyncTask::ProcessResults()
 	HResult = PFCatalogCreateUploadUrlsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogCreateUploadUrlsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogCreateUploadUrlsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -99,7 +99,7 @@ void FCreateUploadUrlsAsyncTask::ProcessResults()
 	HResult = PFCatalogCreateUploadUrlsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogCreateUploadUrlsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -131,7 +131,7 @@ void FDeleteEntityItemReviewsAsyncTask::DoWork()
 	HResult = PFCatalogDeleteEntityItemReviewsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -140,7 +140,7 @@ void FDeleteEntityItemReviewsAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -172,7 +172,7 @@ void FDeleteItemAsyncTask::DoWork()
 	HResult = PFCatalogDeleteItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -181,7 +181,7 @@ void FDeleteItemAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -210,7 +210,7 @@ void FGetCatalogConfigAsyncTask::DoWork()
 	HResult = PFCatalogGetCatalogConfigAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetCatalogConfigResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -221,7 +221,7 @@ void FGetCatalogConfigAsyncTask::ProcessResults()
 	HResult = PFCatalogGetCatalogConfigGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetCatalogConfigResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetCatalogConfigResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -231,7 +231,7 @@ void FGetCatalogConfigAsyncTask::ProcessResults()
 	HResult = PFCatalogGetCatalogConfigGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetCatalogConfigResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -265,7 +265,7 @@ void FGetDraftItemAsyncTask::DoWork()
 	HResult = PFCatalogGetDraftItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetDraftItemResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -276,7 +276,7 @@ void FGetDraftItemAsyncTask::ProcessResults()
 	HResult = PFCatalogGetDraftItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetDraftItemResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetDraftItemResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -286,7 +286,7 @@ void FGetDraftItemAsyncTask::ProcessResults()
 	HResult = PFCatalogGetDraftItemGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetDraftItemResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -323,7 +323,7 @@ void FGetDraftItemsAsyncTask::DoWork()
 	HResult = PFCatalogGetDraftItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetDraftItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -334,7 +334,7 @@ void FGetDraftItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetDraftItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetDraftItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetDraftItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -344,7 +344,7 @@ void FGetDraftItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetDraftItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetDraftItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -378,7 +378,7 @@ void FGetEntityDraftItemsAsyncTask::DoWork()
 	HResult = PFCatalogGetEntityDraftItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetEntityDraftItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -389,7 +389,7 @@ void FGetEntityDraftItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetEntityDraftItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetEntityDraftItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetEntityDraftItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -399,7 +399,7 @@ void FGetEntityDraftItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetEntityDraftItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetEntityDraftItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -432,7 +432,7 @@ void FGetEntityItemReviewAsyncTask::DoWork()
 	HResult = PFCatalogGetEntityItemReviewAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetEntityItemReviewResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -443,7 +443,7 @@ void FGetEntityItemReviewAsyncTask::ProcessResults()
 	HResult = PFCatalogGetEntityItemReviewGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetEntityItemReviewResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetEntityItemReviewResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -453,7 +453,7 @@ void FGetEntityItemReviewAsyncTask::ProcessResults()
 	HResult = PFCatalogGetEntityItemReviewGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetEntityItemReviewResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -486,7 +486,7 @@ void FGetItemAsyncTask::DoWork()
 	HResult = PFCatalogGetItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -497,7 +497,7 @@ void FGetItemAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -507,7 +507,7 @@ void FGetItemAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -542,7 +542,7 @@ void FGetItemContainersAsyncTask::DoWork()
 	HResult = PFCatalogGetItemContainersAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemContainersResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -553,7 +553,7 @@ void FGetItemContainersAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemContainersGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemContainersResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemContainersResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -563,7 +563,7 @@ void FGetItemContainersAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemContainersGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemContainersResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -596,7 +596,7 @@ void FGetItemModerationStateAsyncTask::DoWork()
 	HResult = PFCatalogGetItemModerationStateAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemModerationStateResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -607,7 +607,7 @@ void FGetItemModerationStateAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemModerationStateGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemModerationStateResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemModerationStateResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -617,7 +617,7 @@ void FGetItemModerationStateAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemModerationStateGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemModerationStateResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -651,7 +651,7 @@ void FGetItemPublishStatusAsyncTask::DoWork()
 	HResult = PFCatalogGetItemPublishStatusAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemPublishStatusResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -662,7 +662,7 @@ void FGetItemPublishStatusAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemPublishStatusGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemPublishStatusResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemPublishStatusResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -672,7 +672,7 @@ void FGetItemPublishStatusAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemPublishStatusGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemPublishStatusResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -707,7 +707,7 @@ void FGetItemReviewsAsyncTask::DoWork()
 	HResult = PFCatalogGetItemReviewsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemReviewsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -718,7 +718,7 @@ void FGetItemReviewsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemReviewsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemReviewsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemReviewsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -728,7 +728,7 @@ void FGetItemReviewsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemReviewsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemReviewsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -760,7 +760,7 @@ void FGetItemReviewSummaryAsyncTask::DoWork()
 	HResult = PFCatalogGetItemReviewSummaryAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemReviewSummaryResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -771,7 +771,7 @@ void FGetItemReviewSummaryAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemReviewSummaryGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemReviewSummaryResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemReviewSummaryResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -781,7 +781,7 @@ void FGetItemReviewSummaryAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemReviewSummaryGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemReviewSummaryResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -816,7 +816,7 @@ void FGetItemsAsyncTask::DoWork()
 	HResult = PFCatalogGetItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -827,7 +827,7 @@ void FGetItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogGetItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogGetItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -837,7 +837,7 @@ void FGetItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogGetItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogGetItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -871,7 +871,7 @@ void FPublishDraftItemAsyncTask::DoWork()
 	HResult = PFCatalogPublishDraftItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -880,7 +880,7 @@ void FPublishDraftItemAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -913,7 +913,7 @@ void FReportItemAsyncTask::DoWork()
 	HResult = PFCatalogReportItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -922,7 +922,7 @@ void FReportItemAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -956,7 +956,7 @@ void FReportItemReviewAsyncTask::DoWork()
 	HResult = PFCatalogReportItemReviewAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -965,7 +965,7 @@ void FReportItemReviewAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -997,7 +997,7 @@ void FReviewItemAsyncTask::DoWork()
 	HResult = PFCatalogReviewItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1006,7 +1006,7 @@ void FReviewItemAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1043,7 +1043,7 @@ void FSearchItemsAsyncTask::DoWork()
 	HResult = PFCatalogSearchItemsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogSearchItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1054,7 +1054,7 @@ void FSearchItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogSearchItemsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogSearchItemsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogSearchItemsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1064,7 +1064,7 @@ void FSearchItemsAsyncTask::ProcessResults()
 	HResult = PFCatalogSearchItemsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogSearchItemsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -1099,7 +1099,7 @@ void FSetItemModerationStateAsyncTask::DoWork()
 	HResult = PFCatalogSetItemModerationStateAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1108,7 +1108,7 @@ void FSetItemModerationStateAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1142,7 +1142,7 @@ void FSubmitItemReviewVoteAsyncTask::DoWork()
 	HResult = PFCatalogSubmitItemReviewVoteAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1151,7 +1151,7 @@ void FSubmitItemReviewVoteAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1182,7 +1182,7 @@ void FTakedownItemReviewsAsyncTask::DoWork()
 	HResult = PFCatalogTakedownItemReviewsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1191,7 +1191,7 @@ void FTakedownItemReviewsAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1222,7 +1222,7 @@ void FUpdateCatalogConfigAsyncTask::DoWork()
 	HResult = PFCatalogUpdateCatalogConfigAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -1231,7 +1231,7 @@ void FUpdateCatalogConfigAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -1262,7 +1262,7 @@ void FUpdateDraftItemAsyncTask::DoWork()
 	HResult = PFCatalogUpdateDraftItemAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogUpdateDraftItemResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -1273,7 +1273,7 @@ void FUpdateDraftItemAsyncTask::ProcessResults()
 	HResult = PFCatalogUpdateDraftItemGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFCatalogUpdateDraftItemResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFCatalogUpdateDraftItemResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -1283,7 +1283,7 @@ void FUpdateDraftItemAsyncTask::ProcessResults()
 	HResult = PFCatalogUpdateDraftItemGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFCatalogUpdateDraftItemResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}

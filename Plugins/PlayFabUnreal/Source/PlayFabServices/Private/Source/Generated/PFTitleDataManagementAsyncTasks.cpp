@@ -23,7 +23,7 @@ void FClientGetPublisherDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementClientGetPublisherDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -34,7 +34,7 @@ void FClientGetPublisherDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -44,7 +44,7 @@ void FClientGetPublisherDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetPublisherDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -69,7 +69,7 @@ void FClientGetTimeAsyncTask::DoWork()
 	HResult = PFTitleDataManagementClientGetTimeAsync(EntityHandle.Get(), *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTimeResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -80,7 +80,7 @@ void FClientGetTimeAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetTimeGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTimeResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -111,7 +111,7 @@ void FClientGetTitleDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementClientGetTitleDataAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -122,7 +122,7 @@ void FClientGetTitleDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetTitleDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -132,7 +132,7 @@ void FClientGetTitleDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetTitleDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -161,7 +161,7 @@ void FClientGetTitleNewsAsyncTask::DoWork()
 	HResult = PFTitleDataManagementClientGetTitleNewsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -172,7 +172,7 @@ void FClientGetTitleNewsAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetTitleNewsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -182,7 +182,7 @@ void FClientGetTitleNewsAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementClientGetTitleNewsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -213,7 +213,7 @@ void FServerGetPublisherDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerGetPublisherDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -224,7 +224,7 @@ void FServerGetPublisherDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetPublisherDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -234,7 +234,7 @@ void FServerGetPublisherDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetPublisherDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetPublisherDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -261,7 +261,7 @@ void FServerGetTimeAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerGetTimeAsync(TitleEntityHandle.Get(), *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTimeResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -272,7 +272,7 @@ void FServerGetTimeAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTimeGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTimeResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -305,7 +305,7 @@ void FServerGetTitleDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerGetTitleDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -316,7 +316,7 @@ void FServerGetTitleDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTitleDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -326,7 +326,7 @@ void FServerGetTitleDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTitleDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -359,7 +359,7 @@ void FServerGetTitleInternalDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerGetTitleInternalDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -370,7 +370,7 @@ void FServerGetTitleInternalDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTitleInternalDataGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -380,7 +380,7 @@ void FServerGetTitleInternalDataAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTitleInternalDataGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleDataResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -411,7 +411,7 @@ void FServerGetTitleNewsAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerGetTitleNewsAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -422,7 +422,7 @@ void FServerGetTitleNewsAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTitleNewsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -432,7 +432,7 @@ void FServerGetTitleNewsAsyncTask::ProcessResults()
 	HResult = PFTitleDataManagementServerGetTitleNewsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFTitleDataManagementGetTitleNewsResult{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -464,7 +464,7 @@ void FServerSetPublisherDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerSetPublisherDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -473,7 +473,7 @@ void FServerSetPublisherDataAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -503,7 +503,7 @@ void FServerSetTitleDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerSetTitleDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -512,7 +512,7 @@ void FServerSetTitleDataAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -542,7 +542,7 @@ void FServerSetTitleInternalDataAsyncTask::DoWork()
 	HResult = PFTitleDataManagementServerSetTitleInternalDataAsync(TitleEntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -551,7 +551,7 @@ void FServerSetTitleInternalDataAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{

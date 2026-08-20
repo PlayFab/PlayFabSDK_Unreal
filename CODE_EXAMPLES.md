@@ -267,16 +267,28 @@ void AYourGameMode::InitializeGameSaves()
     succeeded = FPFGameSaveFilesAddUserWithUiAsync(
         LocalUserHandle,
         FPFGameSaveFilesAddUserOptions::None,
-        FPFGameSaveFilesAddUserWithUiAsyncComplete::CreateLambda([this](bool succeeded)
+        FPFGameSaveFilesAddUserWithUiAsyncComplete::CreateLambda([this](FPFGameSaveFilesAddUserResult Result, const FString& ErrorMessage)
         {
-            if (succeeded)
+            switch (Result)
             {
-                UE_LOG(LogTemp, Log, TEXT("User added to game save system"));
+            case FPFGameSaveFilesAddUserResult::Success:
+                UE_LOG(LogTemp, Log, TEXT("User added to game save system (online)"));
                 SaveGameData(); // Save some initial data
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to add user to game save system"));
+                break;
+
+            case FPFGameSaveFilesAddUserResult::SuccessOffline:
+                UE_LOG(LogTemp, Warning, TEXT("User added in offline mode; saves will not sync until reconnected"));
+                SaveGameData(); // Local saves still work
+                break;
+
+            case FPFGameSaveFilesAddUserResult::Cancelled:
+                UE_LOG(LogTemp, Log, TEXT("User cancelled sign-in to game saves; returning to menu"));
+                // No save folder is available — do not allow play.
+                break;
+
+            case FPFGameSaveFilesAddUserResult::Failed:
+                UE_LOG(LogTemp, Error, TEXT("Failed to add user to game save system: %s"), *ErrorMessage);
+                break;
             }
         }));
 }
@@ -308,15 +320,21 @@ void AYourGameMode::SaveGameData()
     succeeded = FPFGameSaveFilesUploadWithUiAsync(
         LocalUserHandle,
         FPFGameSaveFilesUploadOption::KeepDeviceActive,
-        FPFGameSaveFilesUploadWithUiAsyncComplete::CreateLambda([](bool succeeded)
+        FPFGameSaveFilesUploadWithUiAsyncComplete::CreateLambda([](FPFGameSaveFilesUploadResult Result, const FString& ErrorMessage)
         {
-            if (succeeded)
+            switch (Result)
             {
+            case FPFGameSaveFilesUploadResult::Success:
                 UE_LOG(LogTemp, Log, TEXT("Successfully uploaded save data to cloud"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to upload save data"));
+                break;
+
+            case FPFGameSaveFilesUploadResult::Cancelled:
+                UE_LOG(LogTemp, Log, TEXT("User cancelled the save upload"));
+                break;
+
+            case FPFGameSaveFilesUploadResult::Failed:
+                UE_LOG(LogTemp, Error, TEXT("Failed to upload save data: %s"), *ErrorMessage);
+                break;
             }
         })
     );
@@ -347,6 +365,52 @@ void AYourGameMode::OnGameSaveConflict(FPFLocalUserHandle user, FPFGameSaveDescr
 void AYourGameMode::OnGameSaveOutOfStorage(FPFLocalUserHandle user, uint64 bytesRequired)
 {
     UE_LOG(LogTemp, Error, TEXT("Game save out of storage: %llu bytes required"), bytesRequired);
+}
+
+// Compare two local user handles (useful for splitscreen scenarios where callbacks
+// return duplicated handles with different pointer values)
+bool AYourGameMode::IsSameUser(FPFLocalUserHandle handle1, FPFLocalUserHandle handle2)
+{
+    return FPFLocalUserHandleCompare(handle1, handle2) == 0;
+}
+
+// Reset cloud game save state (development/testing utility)
+void AYourGameMode::ResetCloudSaves()
+{
+    FPFGameSaveFilesResetCloudAsync(
+        LocalUserHandle,
+        FPFGameSaveFilesResetCloudAsyncComplete::CreateLambda([](bool succeeded, const FString& errorMessage)
+        {
+            if (succeeded)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Cloud game save state reset successfully"));
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to reset cloud game save state: %s"), *errorMessage);
+            }
+        })
+    );
+}
+
+// Set a save description visible in conflict/active device contention UI
+void AYourGameMode::SetSaveDescription()
+{
+    FPFGameSaveFilesSetSaveDescriptionAsync(
+        LocalUserHandle,
+        TEXT("Level 5 - Score 1000"),
+        FPFGameSaveFilesSetSaveDescriptionAsyncComplete::CreateLambda([](bool succeeded, const FString& errorMessage)
+        {
+            if (succeeded)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Save description set successfully"));
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Failed to set save description: %s"), *errorMessage);
+            }
+        })
+    );
 }
 #endif
 ````

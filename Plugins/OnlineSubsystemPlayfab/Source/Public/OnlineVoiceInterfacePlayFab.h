@@ -152,7 +152,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual FString GetVoiceDebugState() const override;
 
-	void OnLeavePlayFabPartyNetwork();
+	// We only support one active voice chat at a time and currently only sessions are wired
+	// up to use voice chat when the bUseLobbiesVoiceChatIfAvailable session setting is enabled.
+	bool TryClaimVoiceOwnership(FName OwnerName);
+	void ReleaseVoiceOwnership(FName OwnerName);
+	FName GetVoiceOwnerName() const { return VoiceOwnerName; }
+	bool IsVoiceOwner(FName OwnerName) const { return !VoiceOwnerName.IsNone() && VoiceOwnerName == OwnerName; }
 
 	// PlayFab Party Network Events
 	void OnChatControlJoinedNetwork(const PartyStateChange* Change);
@@ -216,6 +221,9 @@ private:
 	void ProcessTalkingDelegates(float DeltaTime);
 
 	float VoiceNotificationDelta = 0.2f;
+
+	// Name of the owner that currently owns voice chat. NAME_None when no owner is hosting voice.
+	FName VoiceOwnerName;
 
 	FString LocalChatControlLanguage;
 	TMap<FString, FLocalTalkerPlayFab> LocalTalkers;

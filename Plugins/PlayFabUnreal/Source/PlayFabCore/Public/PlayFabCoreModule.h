@@ -22,8 +22,17 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+#if defined(PF_GDK_AVAILABLE) || defined(PF_UE_GDK_SUPPORT)
+	void EnsureXGameRuntimeInitialized();
+#endif // PF_GDK_AVAILABLE || PF_UE_GDK_SUPPORT
+
 private:
 #if defined(PF_GDK_AVAILABLE) || defined(PF_UE_GDK_SUPPORT)
-	void InitializeXGameRuntime();
+	bool bXGameRuntimeInitialized = false;
 #endif // PF_GDK_AVAILABLE || PF_UE_GDK_SUPPORT
+
+#if defined(PF_UE_GDK_SUPPORT) && WITH_EDITOR
+	void OnInitForPIE();
+	void OnTeardownForPIE();
+#endif // PF_UE_GDK_SUPPORT && WITH_EDITOR
 };

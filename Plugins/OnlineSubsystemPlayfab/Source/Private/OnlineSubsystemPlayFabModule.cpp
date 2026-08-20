@@ -8,13 +8,20 @@
 #include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
 #include "Modules/ModuleManager.h"
+#include "PlayFabHelpers.h"
+#include "OnlineSubsystemImpl.h"
 #include "OnlineSubsystemModule.h"
 #include "OnlineSubsystemNames.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
+#include "PlayFabCoreModule.h"
 #include "PlayFabHelpers.h"
 #include "HAL/PlatformProcess.h"
 #include "HAL/FileManager.h"
+
+#if WITH_EDITOR && OSS_PLAYFAB_GDK_SUPPORT
+#include "GDKRuntimeModule.h"
+#endif // WITH_EDITOR && OSS_PLAYFAB_GDK_SUPPORT
 
 IMPLEMENT_MODULE(FOnlineSubsystemPlayFabModule, OnlineSubsystemPlayFab);
 
@@ -79,8 +86,145 @@ public:
 	}
 };
 
+#if WITH_EDITOR && OSS_PLAYFAB_GDK_SUPPORT
+
+typedef TWeakPtr<FOnlineSubsystemPlayFab, ESPMode::ThreadSafe> FOnlineSubsystemPlayFabWeakPtr;
+
+// Return a mock PF OSS for the editor instance so that the real PF OSS can be used for the PIE session.
+class FMockOnlineSubsystemPlayFab : public FOnlineSubsystemImpl
+{
+public:
+	FMockOnlineSubsystemPlayFab(FName InstanceName) : FOnlineSubsystemImpl(PLAYFAB_SUBSYSTEM, InstanceName)
+	{
+	}
+
+	virtual FText GetOnlineServiceName() const override
+	{
+		return FText::GetEmpty();
+	}
+
+	virtual FString GetAppId() const override
+	{
+		return TEXT("");
+	}
+
+	IOnlineSessionPtr GetSessionInterface() const
+	{
+		return nullptr;
+	}
+
+	IOnlineFriendsPtr GetFriendsInterface() const
+	{
+		return nullptr;
+	}
+	bool Init()
+	{
+		return true;
+	}
+};
+
+class FOnlineFactoryPlayFab_ForPIE : public IOnlineFactory
+{
+
+private:
+
+	FOnlineSubsystemPlayFabWeakPtr& GetWeakSingleton() const
+	{
+		static FOnlineSubsystemPlayFabWeakPtr PlayFabSingleton;
+		return PlayFabSingleton;
+	}
+
+	virtual void DestroySubsystem()
+	{
+		FOnlineSubsystemPlayFabWeakPtr& PlayFabSingleton = GetWeakSingleton();
+		if (PlayFabSingleton.IsValid())
+		{
+			PlayFabSingleton.Pin()->Shutdown();
+			PlayFabSingleton.Reset();
+		}
+	}
+
+	void OnInitForPIE()
+	{
+		FOnlineSubsystemPlayFabWeakPtr& PlayFabSingleton = GetWeakSingleton();
+		if (PlayFabSingleton.IsValid() && PlayFabSingleton.Pin()->IsEnabled())
+		{
+			if (!PlayFabSingleton.Pin()->Init())
+			{
+				UE_LOG_ONLINE(Warning, TEXT("PlayFab API failed to initialize for PIE!"));
+				DestroySubsystem();
+			}
+		}
+	}
+
+	void OnTeardownForPIE()
+	{
+		DestroySubsystem();
+	}
+
+public:
+
+	FOnlineFactoryPlayFab_ForPIE()
+	{
+		IGDKRuntimeModule::Get().GetOnInitForPIE().AddRaw(this, &FOnlineFactoryPlayFab_ForPIE::OnInitForPIE);
+		IGDKRuntimeModule::Get().GetOnTeardownForPIE().AddRaw(this, &FOnlineFactoryPlayFab_ForPIE::OnTeardownForPIE);
+	}
+
+	virtual ~FOnlineFactoryPlayFab_ForPIE()
+	{
+		DestroySubsystem();
+
+		if (IGDKRuntimeModule* GDKRuntime = IGDKRuntimeModule::TryGet())
+		{
+			GDKRuntime->GetOnInitForPIE().RemoveAll(this);
+			GDKRuntime->GetOnTeardownForPIE().RemoveAll(this);
+		}
+	}
+
+	virtual IOnlineSubsystemPtr CreateSubsystem(FName InstanceName) override
+	{
+		if (InstanceName == FOnlineSubsystemImpl::DefaultInstanceName)
+		{
+			UE_LOG_ONLINE(Warning, TEXT("PlayFab OSS only available during PIE when running in the editor - returning mock OSS instead"));
+			return MakeShared<FMockOnlineSubsystemPlayFab, ESPMode::ThreadSafe>(InstanceName);
+		}
+
+		FOnlineSubsystemPlayFabWeakPtr& PlayFabSingleton = GetWeakSingleton();
+		if (PlayFabSingleton.IsValid())
+		{
+			UE_LOG_ONLINE(Warning, TEXT("Can't create more than one instance of PlayFab online subsystem!"));
+			return nullptr;
+		}
+
+		FOnlineSubsystemPlayFabPtr NewInstance = MakeShared<FOnlineSubsystemPlayFab, ESPMode::ThreadSafe>(InstanceName);
+		PlayFabSingleton = NewInstance;
+
+		if (NewInstance->IsEnabled())
+		{
+			if (!NewInstance->Init())
+			{
+				UE_LOG_ONLINE(Warning, TEXT("PlayFab API failed to initialize!"));
+				DestroySubsystem();
+				return nullptr;
+			}
+		}
+		else
+		{
+			UE_LOG_ONLINE(Warning, TEXT("PlayFab API disabled!"));
+			DestroySubsystem();
+			return nullptr;
+		}
+
+		return NewInstance;
+	}
+};
+
+#endif // WITH_EDITOR && OSS_PLAYFAB_GDK_SUPPORT
+
 void FOnlineSubsystemPlayFabModule::StartupModule()
 {
+	FModuleManager::LoadModuleChecked<FPlayFabCore>(TEXT("PlayFabCore"));
+
 	// Check if we should apply any config overrides specified by the command line
 	FString PlayFabConfigOverridePrefix;
 	if (FParse::Value(FCommandLine::Get(), TEXT("PlayFabConfigOverridePrefix="), PlayFabConfigOverridePrefix))
@@ -119,7 +263,19 @@ void FOnlineSubsystemPlayFabModule::StartupModule()
 	}
 
 	// Create and register our singleton factory with the main online subsystem for easy access
+#if WITH_EDITOR && OSS_PLAYFAB_GDK_SUPPORT
+	// Steam OSS does not support PIE so just fallback to the normal factory if the native platform isn't GDK.
+	if (IsNativePlatformSubsystemGDK())
+	{
+		PlayFabFactory = new FOnlineFactoryPlayFab_ForPIE();
+	}
+	else
+	{
+		PlayFabFactory = new FOnlineFactoryPlayFab();
+	}
+#else
 	PlayFabFactory = new FOnlineFactoryPlayFab();
+#endif // WITH_EDITOR && OSS_PLAYFAB_GDK_SUPPORT
 
 	FOnlineSubsystemModule& OSS = FModuleManager::GetModuleChecked<FOnlineSubsystemModule>("OnlineSubsystem");
 	OSS.RegisterPlatformService(PLAYFAB_SUBSYSTEM, PlayFabFactory);

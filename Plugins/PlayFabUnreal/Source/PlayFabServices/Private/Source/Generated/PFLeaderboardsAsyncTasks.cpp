@@ -31,7 +31,7 @@ void FCreateLeaderboardDefinitionAsyncTask::DoWork()
 	HResult = PFLeaderboardsCreateLeaderboardDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -40,7 +40,7 @@ void FCreateLeaderboardDefinitionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -71,7 +71,7 @@ void FDeleteLeaderboardDefinitionAsyncTask::DoWork()
 	HResult = PFLeaderboardsDeleteLeaderboardDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -80,7 +80,7 @@ void FDeleteLeaderboardDefinitionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -113,7 +113,7 @@ void FDeleteLeaderboardEntriesAsyncTask::DoWork()
 	HResult = PFLeaderboardsDeleteLeaderboardEntriesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -122,7 +122,7 @@ void FDeleteLeaderboardEntriesAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -156,7 +156,7 @@ void FGetFriendLeaderboardForEntityAsyncTask::DoWork()
 	HResult = PFLeaderboardsGetFriendLeaderboardForEntityAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -167,7 +167,7 @@ void FGetFriendLeaderboardForEntityAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetFriendLeaderboardForEntityGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -177,7 +177,7 @@ void FGetFriendLeaderboardForEntityAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetFriendLeaderboardForEntityGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -211,7 +211,7 @@ void FGetLeaderboardAsyncTask::DoWork()
 	HResult = PFLeaderboardsGetLeaderboardAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -222,7 +222,7 @@ void FGetLeaderboardAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -232,7 +232,7 @@ void FGetLeaderboardAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -266,7 +266,7 @@ void FGetLeaderboardAroundEntityAsyncTask::DoWork()
 	HResult = PFLeaderboardsGetLeaderboardAroundEntityAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -277,7 +277,7 @@ void FGetLeaderboardAroundEntityAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardAroundEntityGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -287,7 +287,7 @@ void FGetLeaderboardAroundEntityAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardAroundEntityGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -319,7 +319,7 @@ void FGetLeaderboardDefinitionAsyncTask::DoWork()
 	HResult = PFLeaderboardsGetLeaderboardDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetLeaderboardDefinitionResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -330,7 +330,7 @@ void FGetLeaderboardDefinitionAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardDefinitionGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLeaderboardsGetLeaderboardDefinitionResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLeaderboardsGetLeaderboardDefinitionResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -340,7 +340,7 @@ void FGetLeaderboardDefinitionAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardDefinitionGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetLeaderboardDefinitionResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -376,7 +376,7 @@ void FGetLeaderboardForEntitiesAsyncTask::DoWork()
 	HResult = PFLeaderboardsGetLeaderboardForEntitiesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -387,7 +387,7 @@ void FGetLeaderboardForEntitiesAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardForEntitiesGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -397,7 +397,7 @@ void FGetLeaderboardForEntitiesAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsGetLeaderboardForEntitiesGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsGetEntityLeaderboardResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -430,7 +430,7 @@ void FIncrementLeaderboardVersionAsyncTask::DoWork()
 	HResult = PFLeaderboardsIncrementLeaderboardVersionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsIncrementLeaderboardVersionResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -441,7 +441,7 @@ void FIncrementLeaderboardVersionAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsIncrementLeaderboardVersionGetResult(*mAsyncBlock, &Result);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsIncrementLeaderboardVersionResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -475,7 +475,7 @@ void FListLeaderboardDefinitionsAsyncTask::DoWork()
 	HResult = PFLeaderboardsListLeaderboardDefinitionsAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsListLeaderboardDefinitionsResponse{ .ErrorMessage = ErrorMessage }, false);
 	}
 };
@@ -486,7 +486,7 @@ void FListLeaderboardDefinitionsAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsListLeaderboardDefinitionsGetResultSize(*mAsyncBlock, &ResultSize);
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FPFLeaderboardsListLeaderboardDefinitionsResponse{ .ErrorMessage = FString("GetResultSize failure") }, false);
+		Delegate.Execute(FPFLeaderboardsListLeaderboardDefinitionsResponse{ .ErrorMessage = FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(HResult)) }, false);
 		return;
 	}
 
@@ -496,7 +496,7 @@ void FListLeaderboardDefinitionsAsyncTask::ProcessResults()
 	HResult = PFLeaderboardsListLeaderboardDefinitionsGetResult(*mAsyncBlock, ResultSize, BufferArray.GetData(), &Result, nullptr);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("GetResult failure");
+		FString ErrorMessage = FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(FPFLeaderboardsListLeaderboardDefinitionsResponse{ .ErrorMessage = ErrorMessage }, false);
 		return;
 	}
@@ -530,7 +530,7 @@ void FUnlinkLeaderboardFromStatisticAsyncTask::DoWork()
 	HResult = PFLeaderboardsUnlinkLeaderboardFromStatisticAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -539,7 +539,7 @@ void FUnlinkLeaderboardFromStatisticAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -573,7 +573,7 @@ void FUpdateLeaderboardDefinitionAsyncTask::DoWork()
 	HResult = PFLeaderboardsUpdateLeaderboardDefinitionAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -582,7 +582,7 @@ void FUpdateLeaderboardDefinitionAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{
@@ -615,7 +615,7 @@ void FUpdateLeaderboardEntriesAsyncTask::DoWork()
 	HResult = PFLeaderboardsUpdateLeaderboardEntriesAsync(EntityHandle.Get(), &RequestType, *mAsyncBlock);
 	if (HResult != S_OK)
 	{
-		FString ErrorMessage = FString("DoWork failure");
+		FString ErrorMessage = FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(HResult));
 		Delegate.Execute(ErrorMessage, false);
 	}
 };
@@ -624,7 +624,7 @@ void FUpdateLeaderboardEntriesAsyncTask::ProcessResults()
 {
 	if (HResult != S_OK)
 	{
-		Delegate.Execute(FString("Async task failure"), false);
+		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
 	}
 	else
 	{

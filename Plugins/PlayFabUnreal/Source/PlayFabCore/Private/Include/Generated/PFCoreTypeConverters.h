@@ -315,6 +315,18 @@ PLAYFABCORE_API const PFDateTimeDictionaryEntry* ConvertFDateTimeMapToPlayfab(TM
 PLAYFABCORE_API const time_t* ConvertFDateTimeToPlayfab(TSharedPtr<const FDateTime> Time);
 PLAYFABCORE_API TSharedPtr<const FDateTime> ConvertTimeToUnreal(const time_t* Time);
 
+// Optional scalar converter. The source pointer aliases memory owned by the PlayFab
+// result buffer, so the value must be copied rather than adopted by the TSharedPtr.
+template <typename T>
+TSharedPtr<const T> ConvertOptionalToUnreal(const T* Value)
+{
+	if (Value == nullptr)
+	{
+		return nullptr;
+	}
+	return MakeShared<T>(*Value);
+}
+
 PLAYFABCORE_API TSharedPtr<const FPFEntityKey> ConvertEntityKeyToUnreal(const PFEntityKey* Datatype);
 PLAYFABCORE_API const PFEntityKey* ConvertEntityKeyToPlayfab(TSharedPtr<const FPFEntityKey> Datatype);
 

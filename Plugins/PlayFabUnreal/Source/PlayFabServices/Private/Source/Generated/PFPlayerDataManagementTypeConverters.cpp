@@ -12,7 +12,7 @@ TSharedPtr<const FPFPlayerDataManagementClientDeletePlayerCustomPropertiesReques
 	TSharedPtr<const FPFPlayerDataManagementClientDeletePlayerCustomPropertiesRequest> ConvertedType = MakeShared<FPFPlayerDataManagementClientDeletePlayerCustomPropertiesRequest>(FPFPlayerDataManagementClientDeletePlayerCustomPropertiesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.expectedPropertiesVersion = TSharedPtr<const int32>(Datatype->expectedPropertiesVersion),
+		.expectedPropertiesVersion = ConvertOptionalToUnreal(Datatype->expectedPropertiesVersion),
 		.propertyNames = ConvertCharArrayToUnreal(Datatype->propertyNames, Datatype->propertyNamesCount),
 		.propertyNamesCount = Datatype->propertyNamesCount
 	});
@@ -184,7 +184,7 @@ TSharedPtr<const FPFPlayerDataManagementGetUserDataRequest> ConvertGetUserDataRe
 	}
 
 	TSharedPtr<const FPFPlayerDataManagementGetUserDataRequest> ConvertedType = MakeShared<FPFPlayerDataManagementGetUserDataRequest>(FPFPlayerDataManagementGetUserDataRequest{
-		.ifChangedFromDataVersion = TSharedPtr<const uint32>(Datatype->ifChangedFromDataVersion),
+		.ifChangedFromDataVersion = ConvertOptionalToUnreal(Datatype->ifChangedFromDataVersion),
 		.keys = ConvertCharArrayToUnreal(Datatype->keys, Datatype->keysCount),
 		.keysCount = Datatype->keysCount,
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
@@ -306,7 +306,7 @@ TSharedPtr<const FPFPlayerDataManagementClientUpdatePlayerCustomPropertiesReques
 	TSharedPtr<const FPFPlayerDataManagementClientUpdatePlayerCustomPropertiesRequest> ConvertedType = MakeShared<FPFPlayerDataManagementClientUpdatePlayerCustomPropertiesRequest>(FPFPlayerDataManagementClientUpdatePlayerCustomPropertiesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.expectedPropertiesVersion = TSharedPtr<const int32>(Datatype->expectedPropertiesVersion),
+		.expectedPropertiesVersion = ConvertOptionalToUnreal(Datatype->expectedPropertiesVersion),
 		.properties = ConvertPlayfabArrayToUnreal<PFPlayerDataManagementUpdateProperty, FPFPlayerDataManagementUpdateProperty>(Datatype->properties, Datatype->propertiesCount, ConvertUpdatePropertyToUnreal),
 		.propertiesCount = Datatype->propertiesCount
 	});
@@ -430,7 +430,7 @@ TSharedPtr<const FPFPlayerDataManagementServerDeletePlayerCustomPropertiesReques
 	TSharedPtr<const FPFPlayerDataManagementServerDeletePlayerCustomPropertiesRequest> ConvertedType = MakeShared<FPFPlayerDataManagementServerDeletePlayerCustomPropertiesRequest>(FPFPlayerDataManagementServerDeletePlayerCustomPropertiesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.expectedPropertiesVersion = TSharedPtr<const int32>(Datatype->expectedPropertiesVersion),
+		.expectedPropertiesVersion = ConvertOptionalToUnreal(Datatype->expectedPropertiesVersion),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.propertyNames = ConvertCharArrayToUnreal(Datatype->propertyNames, Datatype->propertyNamesCount),
 		.propertyNamesCount = Datatype->propertyNamesCount
@@ -646,7 +646,7 @@ TSharedPtr<const FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesReques
 	TSharedPtr<const FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesRequest> ConvertedType = MakeShared<FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesRequest>(FPFPlayerDataManagementServerUpdatePlayerCustomPropertiesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.expectedPropertiesVersion = TSharedPtr<const int32>(Datatype->expectedPropertiesVersion),
+		.expectedPropertiesVersion = ConvertOptionalToUnreal(Datatype->expectedPropertiesVersion),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.properties = ConvertPlayfabArrayToUnreal<PFPlayerDataManagementUpdateProperty, FPFPlayerDataManagementUpdateProperty>(Datatype->properties, Datatype->propertiesCount, ConvertUpdatePropertyToUnreal),
 		.propertiesCount = Datatype->propertiesCount

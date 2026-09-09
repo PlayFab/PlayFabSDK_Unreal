@@ -46,9 +46,9 @@ TSharedPtr<const FPFCloudScriptExecuteCloudScriptRequest> ConvertExecuteCloudScr
 		.customTagsCount = Datatype->customTagsCount,
 		.functionName = Datatype->functionName == nullptr ? FString() : FString(Datatype->functionName),
 		.functionParameter = FPFJsonObject{ .stringValue = FString(Datatype->functionParameter.stringValue) },
-		.generatePlayStreamEvent = TSharedPtr<const bool>(Datatype->generatePlayStreamEvent),
+		.generatePlayStreamEvent = ConvertOptionalToUnreal(Datatype->generatePlayStreamEvent),
 		.revisionSelection = MakeShared<FPFCloudScriptCloudScriptRevisionOption>(ConvertCloudScriptRevisionOptionToUnreal(Datatype->revisionSelection)),
-		.specificRevision = TSharedPtr<const int32>(Datatype->specificRevision)
+		.specificRevision = ConvertOptionalToUnreal(Datatype->specificRevision)
 	});
 
 	return ConvertedType;
@@ -145,11 +145,11 @@ TSharedPtr<const FPFCloudScriptExecuteCloudScriptResult> ConvertExecuteCloudScri
 		.executionTimeSeconds = Datatype->executionTimeSeconds,
 		.functionName = Datatype->functionName == nullptr ? FString() : FString(Datatype->functionName),
 		.functionResult = FPFJsonObject{ .stringValue = FString(Datatype->functionResult.stringValue) },
-		.functionResultTooLarge = TSharedPtr<const bool>(Datatype->functionResultTooLarge),
+		.functionResultTooLarge = ConvertOptionalToUnreal(Datatype->functionResultTooLarge),
 		.httpRequestsIssued = Datatype->httpRequestsIssued,
 		.logs = ConvertPlayfabArrayToUnreal<PFCloudScriptLogStatement, FPFCloudScriptLogStatement>(Datatype->logs, Datatype->logsCount, ConvertLogStatementToUnreal),
 		.logsCount = Datatype->logsCount,
-		.logsTooLarge = TSharedPtr<const bool>(Datatype->logsTooLarge),
+		.logsTooLarge = ConvertOptionalToUnreal(Datatype->logsTooLarge),
 		.memoryConsumedBytes = Datatype->memoryConsumedBytes,
 		.processorTimeSeconds = Datatype->processorTimeSeconds,
 		.revision = Datatype->revision
@@ -194,10 +194,10 @@ TSharedPtr<const FPFCloudScriptExecuteCloudScriptServerRequest> ConvertExecuteCl
 		.customTagsCount = Datatype->customTagsCount,
 		.functionName = Datatype->functionName == nullptr ? FString() : FString(Datatype->functionName),
 		.functionParameter = FPFJsonObject{ .stringValue = FString(Datatype->functionParameter.stringValue) },
-		.generatePlayStreamEvent = TSharedPtr<const bool>(Datatype->generatePlayStreamEvent),
+		.generatePlayStreamEvent = ConvertOptionalToUnreal(Datatype->generatePlayStreamEvent),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.revisionSelection = MakeShared<FPFCloudScriptCloudScriptRevisionOption>(ConvertCloudScriptRevisionOptionToUnreal(Datatype->revisionSelection)),
-		.specificRevision = TSharedPtr<const int32>(Datatype->specificRevision)
+		.specificRevision = ConvertOptionalToUnreal(Datatype->specificRevision)
 	});
 
 	return ConvertedType;
@@ -235,9 +235,9 @@ TSharedPtr<const FPFCloudScriptExecuteEntityCloudScriptRequest> ConvertExecuteEn
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.functionName = Datatype->functionName == nullptr ? FString() : FString(Datatype->functionName),
 		.functionParameter = FPFJsonObject{ .stringValue = FString(Datatype->functionParameter.stringValue) },
-		.generatePlayStreamEvent = TSharedPtr<const bool>(Datatype->generatePlayStreamEvent),
+		.generatePlayStreamEvent = ConvertOptionalToUnreal(Datatype->generatePlayStreamEvent),
 		.revisionSelection = MakeShared<FPFCloudScriptCloudScriptRevisionOption>(ConvertCloudScriptRevisionOptionToUnreal(Datatype->revisionSelection)),
-		.specificRevision = TSharedPtr<const int32>(Datatype->specificRevision)
+		.specificRevision = ConvertOptionalToUnreal(Datatype->specificRevision)
 	});
 
 	return ConvertedType;
@@ -275,7 +275,7 @@ TSharedPtr<const FPFCloudScriptExecuteFunctionRequest> ConvertExecuteFunctionReq
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.functionName = Datatype->functionName == nullptr ? FString() : FString(Datatype->functionName),
 		.functionParameter = FPFJsonObject{ .stringValue = FString(Datatype->functionParameter.stringValue) },
-		.generatePlayStreamEvent = TSharedPtr<const bool>(Datatype->generatePlayStreamEvent)
+		.generatePlayStreamEvent = ConvertOptionalToUnreal(Datatype->generatePlayStreamEvent)
 	});
 
 	return ConvertedType;
@@ -340,8 +340,8 @@ TSharedPtr<const FPFCloudScriptExecuteFunctionResult> ConvertExecuteFunctionResu
 		.executionTimeMilliseconds = Datatype->executionTimeMilliseconds,
 		.functionName = Datatype->functionName == nullptr ? FString() : FString(Datatype->functionName),
 		.functionResult = FPFJsonObject{ .stringValue = FString(Datatype->functionResult.stringValue) },
-		.functionResultSize = TSharedPtr<const int32>(Datatype->functionResultSize),
-		.functionResultTooLarge = TSharedPtr<const bool>(Datatype->functionResultTooLarge)
+		.functionResultSize = ConvertOptionalToUnreal(Datatype->functionResultSize),
+		.functionResultTooLarge = ConvertOptionalToUnreal(Datatype->functionResultTooLarge)
 	});
 
 	return ConvertedType;

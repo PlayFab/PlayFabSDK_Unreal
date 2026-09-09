@@ -42,7 +42,7 @@ TSharedPtr<const FPFProfilesGetEntityProfileRequest> ConvertGetEntityProfileRequ
 	TSharedPtr<const FPFProfilesGetEntityProfileRequest> ConvertedType = MakeShared<FPFProfilesGetEntityProfileRequest>(FPFProfilesGetEntityProfileRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.dataAsObject = TSharedPtr<const bool>(Datatype->dataAsObject),
+		.dataAsObject = ConvertOptionalToUnreal(Datatype->dataAsObject),
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity)
 	});
 
@@ -292,7 +292,7 @@ TSharedPtr<const FPFProfilesGetEntityProfilesRequest> ConvertGetEntityProfilesRe
 	TSharedPtr<const FPFProfilesGetEntityProfilesRequest> ConvertedType = MakeShared<FPFProfilesGetEntityProfilesRequest>(FPFProfilesGetEntityProfilesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.dataAsObject = TSharedPtr<const bool>(Datatype->dataAsObject),
+		.dataAsObject = ConvertOptionalToUnreal(Datatype->dataAsObject),
 		.entities = ConvertPlayfabArrayToUnreal<PFEntityKey, FPFEntityKey>(Datatype->entities, Datatype->entitiesCount, ConvertEntityKeyToUnreal),
 		.entitiesCount = Datatype->entitiesCount
 	});
@@ -419,7 +419,7 @@ TSharedPtr<const FPFProfilesSetProfileLanguageRequest> ConvertSetProfileLanguage
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.expectedVersion = TSharedPtr<const int32>(Datatype->expectedVersion),
+		.expectedVersion = ConvertOptionalToUnreal(Datatype->expectedVersion),
 		.language = Datatype->language == nullptr ? FString() : FString(Datatype->language)
 	});
 
@@ -451,7 +451,7 @@ TSharedPtr<const FPFProfilesSetProfileLanguageResponse> ConvertSetProfileLanguag
 
 	TSharedPtr<const FPFProfilesSetProfileLanguageResponse> ConvertedType = MakeShared<FPFProfilesSetProfileLanguageResponse>(FPFProfilesSetProfileLanguageResponse{
 		.operationResult = MakeShared<FPFOperationTypes>(ConvertOperationTypesToUnreal(Datatype->operationResult)),
-		.versionNumber = TSharedPtr<const int32>(Datatype->versionNumber)
+		.versionNumber = ConvertOptionalToUnreal(Datatype->versionNumber)
 	});
 
 	return ConvertedType;

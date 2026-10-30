@@ -8,6 +8,7 @@
 #include "OnlineSubsystemPlayFab.h"
 #include "PlayFabHelpers.h"
 #include "PlayFabPartyNetwork.h"
+#include "PlayFabVoiceInitialization.h"
 
 FOnlineVoicePlayFab::FOnlineVoicePlayFab(class FOnlineSubsystemPlayFab* InSubsystem) :
 	OSSPlayFab(InSubsystem)
@@ -749,7 +750,8 @@ void FOnlineVoicePlayFab::ProcessMuteChangeNotification()
 bool FOnlineVoicePlayFab::Init()
 {
 	bool bHasVoiceEnabled = true;
-	if (GConfig->GetBool(TEXT("OnlineSubsystemPlayFab"), TEXT("bHasPlayFabVoiceEnabled"), bHasVoiceEnabled, GEngineIni) && !bHasVoiceEnabled)
+	const bool bConfigValueFound = GConfig->GetBool(TEXT("OnlineSubsystemPlayFab"), TEXT("bHasPlayFabVoiceEnabled"), bHasVoiceEnabled, GEngineIni);
+	if (!PlayFabVoiceInitialization::IsEnabled(bConfigValueFound, bHasVoiceEnabled))
 	{
 		UE_LOG_ONLINE_VOICE(Log, TEXT("Voice Chat is Disabled"));
 		return false;

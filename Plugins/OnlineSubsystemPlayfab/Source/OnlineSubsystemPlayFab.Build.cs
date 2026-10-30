@@ -229,11 +229,10 @@ public class OnlineSubsystemPlayFab : ModuleRules
 
 	public OnlineSubsystemPlayFab(ReadOnlyTargetRules Target) : base(Target)
 	{
-		// We don't want to try and load when doing project gen
+		// Disable precompilation without skipping the rules needed by IntelliSense.
 		if (Target.bGenerateProjectFiles)
 		{
 			PrecompileForTargets = PrecompileTargetsType.None;
-			return;
 		}
 
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;

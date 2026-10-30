@@ -10,6 +10,11 @@
 #include "OnlineSubsystemSessionSettings.h"
 #include "PlayFabSocket.h"
 #include "PlayFabHelpers.h"
+#include "PlayFabPartyNetwork.h"
+#include "PlayFabCustomData.h"
+
+FOnFillCustomMulticastPayload UPlayFabNetDriver::FillCustomMulticastPayloadDelegate;
+FOnCustomDataReceived UPlayFabNetDriver::OnCustomDataReceivedDelegate;
 
 UPlayFabNetDriver::UPlayFabNetDriver(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -83,6 +88,8 @@ bool UPlayFabNetDriver::InitBase(bool bInitAsClient, FNetworkNotify* InNotify, c
 
 			if (UNetDriver::InitBase(bInitAsClient, InNotify, URL, bReuseAddressAndPort, Error))
 			{
+				OnCustomDataMessageReceivedDelegateHandle = OSSPlayFab->AddOnCustomDataMessageReceivedDelegate_Handle(
+					FOnCustomDataMessageReceivedDelegate::CreateUObject(this, &UPlayFabNetDriver::OnCustomDataMessageReceived));
 				return true;
 			}
 		}
@@ -115,6 +122,14 @@ bool UPlayFabNetDriver::InitConnect(FNetworkNotify* InNotify, const FURL& InConn
 void UPlayFabNetDriver::Shutdown()
 {
 	UE_LOG(LogSockets, Verbose, TEXT("PlayFabNetDriver: Shutdown called on netdriver"));
+	if (OnCustomDataMessageReceivedDelegateHandle.IsValid())
+	{
+		if (FOnlineSubsystemPlayFab* OSSPlayFab = GetOnlineSubsystemPlayFab())
+		{
+			OSSPlayFab->ClearOnCustomDataMessageReceivedDelegate_Handle(OnCustomDataMessageReceivedDelegateHandle);
+		}
+		OnCustomDataMessageReceivedDelegateHandle.Reset();
+	}
 
 	Super::Shutdown();
 }
@@ -122,6 +137,66 @@ void UPlayFabNetDriver::Shutdown()
 void UPlayFabNetDriver::TickDispatch(float DeltaTime)
 {
 	Super::TickDispatch(DeltaTime);
+
+	TPair<FString, TArray<uint8>> Packet;
+	while (PendingCustomDataPackets.Dequeue(Packet))
+	{
+		OnCustomDataReceivedDelegate.ExecuteIfBound(GetWorld(), this, Packet.Key, Packet.Value);
+	}
+}
+
+void UPlayFabNetDriver::TickFlush(float DeltaSeconds)
+{
+	Super::TickFlush(DeltaSeconds);
+	if (IsServer() && !bFallbackToPlatformSocketSubsystem)
+	{
+		SendCustomMulticastDataForTick();
+	}
+}
+
+void UPlayFabNetDriver::SendCustomMulticastDataForTick()
+{
+	FOnlineSubsystemPlayFab* OSSPlayFab = GetOnlineSubsystemPlayFab();
+	TSharedPtr<FPlayFabPartyNetwork> PartyNetwork = OSSPlayFab ? OSSPlayFab->GetPartyNetwork(SessionName) : nullptr;
+	if (!PartyNetwork.IsValid() || !FillCustomMulticastPayloadDelegate.IsBound())
+	{
+		return;
+	}
+
+	TArray<uint8> Payload;
+	if (FillCustomMulticastPayloadDelegate.Execute(GetWorld(), this, Payload) && !Payload.IsEmpty())
+	{
+		PartyNetwork->MulticastCustomData(Payload);
+	}
+}
+
+void UPlayFabNetDriver::OnCustomDataMessageReceived(const PartyEndpointMessageReceivedStateChange* Change)
+{
+	if (!Change || !Change->senderEndpoint || !Change->messageBuffer || Change->messageSize == 0)
+	{
+		return;
+	}
+
+	FOnlineSubsystemPlayFab* OSSPlayFab = GetOnlineSubsystemPlayFab();
+	TSharedPtr<FPlayFabPartyNetwork> PartyNetwork = OSSPlayFab ? OSSPlayFab->GetPartyNetwork(SessionName) : nullptr;
+	if (!PartyNetwork.IsValid() || !PlayFabCustomData::IsMessageForNetwork(*Change, PartyNetwork->Network))
+	{
+		return;
+	}
+
+	PartyString SenderEntityId = nullptr;
+	const PartyError Err = Change->senderEndpoint->GetEntityId(&SenderEntityId);
+	if (PARTY_FAILED(Err) || !SenderEntityId)
+	{
+		UE_LOG(LogSockets, Warning, TEXT("UPlayFabNetDriver::OnCustomDataMessageReceived: Failed to resolve sender EntityId: %s"), *GetPartyErrorMessage(Err));
+		return;
+	}
+
+	TArray<uint8> Payload;
+	if (PlayFabCustomData::CopyPayload(*Change, Payload))
+	{
+		PendingCustomDataPackets.Enqueue(TPair<FString, TArray<uint8>>(UTF8_TO_TCHAR(SenderEntityId), MoveTemp(Payload)));
+	}
 }
 
 FOnlineSubsystemPlayFab* UPlayFabNetDriver::GetOnlineSubsystemPlayFab()

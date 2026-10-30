@@ -5,12 +5,59 @@
 #include "PlayFabSocketSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
 #include "PlayFabPartyNetwork.h"
+#include "PlayFabNetDriverRouting.h"
 #include "PlayFabSocket.h"
+#include "PlayFabSocketSelection.h"
 #include "SocketSubsystemModule.h"
 #include "PlayFabSocketSubsystem.h"
 #include "IPAddressPlayFab.h"
 
 FPlayFabSocketSubsystem* FPlayFabSocketSubsystem::SocketSingleton = nullptr;
+
+namespace
+{
+	FPlayFabSocket* LinkedSocket = nullptr;
+	TMap<PartyNetwork*, TWeakObjectPtr<UPlayFabNetDriver>> NetDriversByNetwork;
+}
+
+namespace PlayFabNetDriverRouting
+{
+	UPlayFabNetDriver* Get(PartyNetwork* Network)
+	{
+		const TWeakObjectPtr<UPlayFabNetDriver>* NetDriver = NetDriversByNetwork.Find(Network);
+		return NetDriver ? NetDriver->Get() : nullptr;
+	}
+
+	void Link(PartyNetwork* Network, UPlayFabNetDriver* NetDriver)
+	{
+		for (auto It = NetDriversByNetwork.CreateIterator(); It; ++It)
+		{
+			if (It.Value().Get() == NetDriver)
+			{
+				It.RemoveCurrent();
+			}
+		}
+
+		if (Network && NetDriver)
+		{
+			NetDriversByNetwork.Add(Network, NetDriver);
+		}
+	}
+
+	void Unlink(PartyNetwork* Network, UPlayFabNetDriver* NetDriver)
+	{
+		const TWeakObjectPtr<UPlayFabNetDriver>* LinkedNetDriver = NetDriversByNetwork.Find(Network);
+		if (LinkedNetDriver && LinkedNetDriver->Get() == NetDriver)
+		{
+			NetDriversByNetwork.Remove(Network);
+		}
+	}
+
+	void Reset()
+	{
+		NetDriversByNetwork.Reset();
+	}
+}
 
  // Create the socket subsystem for the given platform service
 FName CreatePlayFabSocketSubsystem()
@@ -90,9 +137,19 @@ void FPlayFabSocketSubsystem::OnEndpointMessageReceived(const PartyEndpointMessa
 		PartyError Err = MessagedReceivedChange->senderEndpoint->GetUniqueIdentifier(&SenderEndpointId);
 		if (PARTY_SUCCEEDED(Err))
 		{
-			if (FPlayFabSocket* Socket = GetSocket())
+			FPlayFabSocket* Socket = PlayFabSocketSelection::SelectSocket(
+				ActiveSockets,
+				LinkedSocket,
+				MessagedReceivedChange->network,
+				[](FPlayFabSocket* Candidate) { return Candidate->GetPartyNetworkHandle(); });
+			if (Socket)
 			{
+				UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocketSubsystem::OnEndpointMessageReceived: Routing endpoint=%u bytes=%u network=%p to socket=%p"), SenderEndpointId, MessagedReceivedChange->messageSize, MessagedReceivedChange->network, Socket);
 				Socket->AddNewPendingData(SenderEndpointId, Payload);
+			}
+			else
+			{
+				UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocketSubsystem::OnEndpointMessageReceived: Dropping endpoint=%u bytes=%u network=%p; no matching active socket"), SenderEndpointId, MessagedReceivedChange->messageSize, MessagedReceivedChange->network);
 			}
 		}
 		else
@@ -122,6 +179,7 @@ void FPlayFabSocketSubsystem::Shutdown()
 	UE_LOG(LogSockets, Log, TEXT("FPlayFabSocketSubsystem: Shutting down"));
 
 	CleanUpActiveSockets();
+	PlayFabNetDriverRouting::Reset();
 
 	// Clean up our delegates here
 	if (OSSPlayFab)
@@ -237,15 +295,11 @@ const TCHAR* FPlayFabSocketSubsystem::GetSocketAPIName() const
 
 FPlayFabSocket* FPlayFabSocketSubsystem::GetSocket()
 {
-	FPlayFabSocket* FoundSocket = nullptr;
-	for (FPlayFabSocket* Socket : ActiveSockets)
-	{
-		if (Socket)
-		{
-			FoundSocket = Socket;
-			break;
-		}
-	}
+	FPlayFabSocket* FoundSocket = PlayFabSocketSelection::SelectSocket(
+		ActiveSockets,
+		LinkedSocket,
+		static_cast<PartyNetwork*>(nullptr),
+		[](FPlayFabSocket* Socket) { return Socket->GetPartyNetworkHandle(); });
 
 	if (FoundSocket == nullptr)
 	{
@@ -273,7 +327,15 @@ void FPlayFabSocketSubsystem::RemoveSocket(FPlayFabSocket* Socket)
 {
 	UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocketSubsystem::RemoveSocket"));
 
-	ActiveSockets.RemoveSingleSwap(Socket);
+	if (Socket)
+	{
+		PlayFabNetDriverRouting::Unlink(Socket->GetPartyNetworkHandle(), Socket->NetDriver.Get());
+	}
+	ActiveSockets.RemoveSingle(Socket);
+	if (LinkedSocket == Socket)
+	{
+		LinkedSocket = nullptr;
+	}
 }
 
 void FPlayFabSocketSubsystem::CleanUpActiveSockets()
@@ -292,5 +354,23 @@ void FPlayFabSocketSubsystem::CleanUpActiveSockets()
 
 void FPlayFabSocketSubsystem::LinkNetDriver(UPlayFabNetDriver* InNetDriver)
 {
+	if (InNetDriver == nullptr)
+	{
+		if (LinkedSocket && LinkedSocket->NetDriver.IsValid())
+		{
+			PlayFabNetDriverRouting::Unlink(LinkedSocket->GetPartyNetworkHandle(), LinkedSocket->NetDriver.Get());
+			LinkedSocket->NetDriver = nullptr;
+		}
+		NetDriver = nullptr;
+		LinkedSocket = nullptr;
+		return;
+	}
+
 	NetDriver = InNetDriver;
+	LinkedSocket = ActiveSockets.Num() > 0 ? ActiveSockets.Last() : nullptr;
+	if (LinkedSocket)
+	{
+		LinkedSocket->NetDriver = InNetDriver;
+		PlayFabNetDriverRouting::Link(LinkedSocket->GetPartyNetworkHandle(), InNetDriver);
+	}
 }

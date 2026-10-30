@@ -34,16 +34,15 @@ THIRD_PARTY_INCLUDES_END
 #define OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE IOnlineSubsystem* NativeSubsystem = GetNativeOnlineSubsystem(OSSPlayFab);  IOnlineIdentityPtr NativeIdentityInterface = NativeSubsystem ? NativeSubsystem->GetIdentityInterface() : nullptr; if (NativeIdentityInterface)
 
 static constexpr float AuthCoolDownTime = 3.0f;
-// Upper bound for the exponential backoff applied after repeated auth failures.
 static constexpr float MaxAuthCoolDownTime = 60.0f;
-// Number of consecutive failures after which we stop retrying until the user is re-queued
-// (e.g. via a login status change). Prevents an unrecoverable token from retrying forever.
 static constexpr int32 MaxAuthFailuresBeforeGivingUp = 5;
+// Deadline for deferred AutoLogin fallback when no auth callback arrives.
+static constexpr double PendingAutoLoginTimeout = 30.0;
 
 static bool IsNativePlatformAuthenticationSupported()
 {
 #if defined(OSS_PLAYFAB_WIN64)
-	if (IsNativePlatformSubsystem(FName(TEXT("Steam"))))
+	if (IsNativePlatformSubsystemSteam())
 	{
 		return true;
 	}
@@ -100,7 +99,96 @@ bool FOnlineIdentityPlayFab::Logout(int32 LocalUserNum)
 
 bool FOnlineIdentityPlayFab::AutoLogin(int32 LocalUserNum)
 {
-	return Login(LocalUserNum, FOnlineAccountCredentials());
+	TArray<FString> PlatformUserIdCandidates;
+	GetPlatformUserIdCandidates(LocalUserNum, PlatformUserIdCandidates);
+
+	// LocalPlayFabUsers is insertion-ordered, so resolve by platform id.
+	const bool bAlreadyAuthenticated = IsPlayFabAuthenticated(PlatformUserIdCandidates);
+
+	// Defer only when this local user's auth is queued or in flight.
+	bool bThisUserAuthPending = false;
+	for (const FString& Candidate : PlatformUserIdCandidates)
+	{
+		if (UsersToAuth.Contains(Candidate) || UserAuthRequestsInFlight.Contains(Candidate))
+		{
+			bThisUserAuthPending = true;
+			break;
+		}
+	}
+
+	// If native sign-in already exists but queueing has not happened yet, queue now.
+	if (!bAlreadyAuthenticated
+		&& !bThisUserAuthPending
+		&& !IsRunningDedicatedServer()
+		&& PlatformUserIdCandidates.Num() > 0
+		&& IsNativePlatformAuthenticationSupported())
+	{
+		OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
+		{
+			if (NativeIdentityInterface->GetLoginStatus(LocalUserNum) == ELoginStatus::LoggedIn)
+			{
+				UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::AutoLogin: LocalUserNum=%d is signed in natively but not queued for PlayFab authentication yet; queueing '%s'."), LocalUserNum, *PlatformUserIdCandidates[0]);
+				UsersToAuth.Add(PlatformUserIdCandidates[0]);
+				bThisUserAuthPending = true;
+			}
+		}
+	}
+
+	if (const FPendingAutoLogin* ExistingPending = PendingAutoLoginHandles.Find(LocalUserNum))
+	{
+		if (ExistingPending->Handle.IsValid())
+		{
+			return true;
+		}
+	}
+
+	if (bAlreadyAuthenticated || !bThisUserAuthPending)
+	{
+		return Login(LocalUserNum, FOnlineAccountCredentials());
+	}
+
+	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::AutoLogin: deferring native login until PlayFab authentication completes (LocalUserNum=%d)."), LocalUserNum);
+
+	const FDelegateHandle AuthHandle = AddOnAuthenticateUserCompleteDelegate_Handle(
+		LocalUserNum,
+		FOnAuthenticateUserCompleteDelegate::CreateLambda(
+			[this, LocalUserNum](int32 /*InLocalUserNum*/, bool bWasSuccessful, const FString& /*PlatformUserIdStr*/, const FString& /*ErrorStr*/)
+			{
+				// Copy captured values before unregistering this delegate.
+				FOnlineIdentityPlayFab* const Self = this;
+				const int32 AutoLoginUserNum = LocalUserNum;
+
+				FDelegateHandle HandleToClear;
+				if (const FPendingAutoLogin* Found = Self->PendingAutoLoginHandles.Find(AutoLoginUserNum))
+				{
+					HandleToClear = Found->Handle;
+				}
+
+				Self->PendingAutoLoginHandles.Remove(AutoLoginUserNum);
+				if (HandleToClear.IsValid())
+				{
+					Self->ClearOnAuthenticateUserCompleteDelegate_Handle(AutoLoginUserNum, HandleToClear);
+				}
+
+				// Complete the login either way. On failure the caller sees NotLoggedIn and can fall back, rather than waiting forever.
+				UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::AutoLogin: PlayFab authentication %s for LocalUserNum=%d; completing native login."),
+					bWasSuccessful ? TEXT("succeeded") : TEXT("failed"), AutoLoginUserNum);
+
+				Self->Login(AutoLoginUserNum, FOnlineAccountCredentials());
+			}));
+
+	if (!AuthHandle.IsValid())
+	{
+		return Login(LocalUserNum, FOnlineAccountCredentials());
+	}
+
+	FPendingAutoLogin Pending;
+	Pending.Handle = AuthHandle;
+	Pending.PlatformUserIdCandidates = PlatformUserIdCandidates;
+	Pending.DeadlineSeconds = FPlatformTime::Seconds() + PendingAutoLoginTimeout;
+	PendingAutoLoginHandles.Add(LocalUserNum, Pending);
+
+	return true;
 }
 
 TSharedPtr<FUserOnlineAccount> FOnlineIdentityPlayFab::GetUserAccount(const FUniqueNetId& UserId) const
@@ -179,10 +267,6 @@ ELoginStatus::Type FOnlineIdentityPlayFab::GetLoginStatus(int32 LocalUserNum) co
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::GetLoginStatus"));
 
-	// Only report LoggedIn once the PlayFab user has been fully authenticated
-	// (i.e., present in LocalPlayFabUsers or ServerEntity). This ensures titles
-	// can rely on GetLoginStatus to know when session APIs are safe to call,
-	// rather than seeing the native platform's early "logged in" status.
 	if (IsRunningDedicatedServer())
 	{
 		if (ServerEntity.IsValid())
@@ -190,9 +274,14 @@ ELoginStatus::Type FOnlineIdentityPlayFab::GetLoginStatus(int32 LocalUserNum) co
 			return ELoginStatus::LoggedIn;
 		}
 	}
-	else if (LocalUserNum < LocalPlayFabUsers.Num() && LocalPlayFabUsers[LocalUserNum].IsValid())
+	else
 	{
-		return ELoginStatus::LoggedIn;
+		TArray<FString> PlatformUserIdCandidates;
+		GetPlatformUserIdCandidates(LocalUserNum, PlatformUserIdCandidates);
+		if (IsPlayFabAuthenticated(PlatformUserIdCandidates))
+		{
+			return ELoginStatus::LoggedIn;
+		}
 	}
 
 	return ELoginStatus::NotLoggedIn;
@@ -202,8 +291,6 @@ ELoginStatus::Type FOnlineIdentityPlayFab::GetLoginStatus(const FUniqueNetId& Us
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::GetLoginStatus"));
 
-	// Only report LoggedIn once the PlayFab user has been fully authenticated.
-	// Check PlayFab local users by platform ID string lookup.
 	TSharedPtr<FPlayFabUser> LocalUser = const_cast<FOnlineIdentityPlayFab*>(this)->GetPartyLocalUserFromPlatformIdString(UserId.ToString());
 	if (LocalUser.IsValid())
 	{
@@ -352,12 +439,34 @@ void FOnlineIdentityPlayFab::Tick(float DeltaTime)
 	{
 		TryAuthenticateUsers();
 	}
+
+	// Handle deferred AutoLogin timeout even when Party never initializes.
+	ResolveTimedOutPendingAutoLogins();
 }
 
 void FOnlineIdentityPlayFab::OnAppSuspend()
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::OnAppSuspend"));
-	
+
+	// Win64 may invoke suspend off the game thread.
+#if defined(OSS_PLAYFAB_WIN64)
+	if (!IsInGameThread())
+	{
+		TWeakPtr<FOnlineIdentityPlayFab, ESPMode::ThreadSafe> WeakThis = AsShared();
+		AsyncTask(ENamedThreads::GameThread, [WeakThis]()
+		{
+			TSharedPtr<FOnlineIdentityPlayFab, ESPMode::ThreadSafe> PinnedThis = WeakThis.Pin();
+			if (PinnedThis.IsValid())
+			{
+				PinnedThis->OnAppSuspend();
+			}
+		});
+		return;
+	}
+#endif // OSS_PLAYFAB_WIN64
+
+	ResolveAllPendingAutoLogins();
+
 	CleanUpLocalUsers();
 }
 
@@ -525,9 +634,46 @@ void FOnlineIdentityPlayFab::TryAuthenticateUsers()
 	// login backs off instead of re-firing every tick.
 	if (TimeSinceLastAuth > CurrentAuthCoolDownTime && UsersToAuth.Num() != 0)
 	{
-		for (const FString& PlatformUserIdStr : UsersToAuth)
+		TArray<FString> UsersPendingAuth = UsersToAuth.Array();
+		for (const FString& PlatformUserIdStr : UsersPendingAuth)
 		{
-			AuthenticateUser(PlatformUserIdStr);
+			if (UserAuthRequestsInFlight.Contains(PlatformUserIdStr))
+			{
+				continue;
+			}
+
+			if (!AuthenticateUser(PlatformUserIdStr))
+			{
+				// Keep queued and retry with backoff when startup fails.
+				TimeSinceLastAuth = 0.0f;
+
+				int32& FailureCountForUser = AuthFailureCountsByUser.FindOrAdd(PlatformUserIdStr);
+				++FailureCountForUser;
+				CurrentAuthCoolDownTime = FMath::Min(AuthCoolDownTime * FMath::Pow(2.0f, static_cast<float>(FailureCountForUser - 1)), MaxAuthCoolDownTime);
+
+				if (FailureCountForUser >= MaxAuthFailuresBeforeGivingUp)
+				{
+					UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::TryAuthenticateUsers: could not start authentication %d times for user %s; giving up until the user is re-queued"), FailureCountForUser, *PlatformUserIdStr);
+					UsersToAuth.Remove(PlatformUserIdStr);
+					AuthFailureCountsByUser.Remove(PlatformUserIdStr);
+					CurrentAuthCoolDownTime = AuthCoolDownTime;
+
+					const int32 ResolvedUserNum = ResolveLocalUserNumForPlatformUserId(PlatformUserIdStr);
+					if (ResolvedUserNum != INDEX_NONE)
+					{
+						TriggerOnAuthenticateUserCompleteDelegates(ResolvedUserNum, false, PlatformUserIdStr, TEXT("Failed to start PlayFab authentication"));
+						ResolvePendingAutoLogin(ResolvedUserNum);
+					}
+					else
+					{
+						ResolvePendingAutoLoginForPlatformUserId(PlatformUserIdStr);
+					}
+				}
+				else
+				{
+					UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::TryAuthenticateUsers: could not start authentication for user %s (attempt %d); retrying in %.1fs"), *PlatformUserIdStr, FailureCountForUser, CurrentAuthCoolDownTime);
+				}
+			}
 		}
 	}
 }
@@ -549,6 +695,18 @@ void FOnlineIdentityPlayFab::CleanUpLocalUsers()
 	UsersToAuth.Empty();
 	UserAuthRequestsInFlight.Empty();
 	bServerAuthFailed = false;
+
+	// Teardown only: clear pending delegate handles without starting new login work.
+	for (const TPair<int32, FPendingAutoLogin>& Pending : PendingAutoLoginHandles)
+	{
+		if (Pending.Value.Handle.IsValid())
+		{
+			FDelegateHandle HandleToClear = Pending.Value.Handle;
+			ClearOnAuthenticateUserCompleteDelegate_Handle(Pending.Key, HandleToClear);
+		}
+	}
+	PendingAutoLoginHandles.Empty();
+
 }
 
 bool FOnlineIdentityPlayFab::AuthenticateUser(const FString& PlatformUserIdStr)
@@ -589,7 +747,7 @@ bool FOnlineIdentityPlayFab::AuthenticateUserSteam(const FString& PlatformUserId
 	return FPFLocalUserLoginAsync(
 		LocalUserHandle,
 		true,
-		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
+		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, const FString& ErrorMessage, bool bWasSuccessful)
 			{
 				const FPFEntityHandle EntityHandle = entityHandle ? *entityHandle : nullptr;
 				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, EntityHandle);
@@ -597,6 +755,7 @@ bool FOnlineIdentityPlayFab::AuthenticateUserSteam(const FString& PlatformUserId
 			})
 	);
 }
+
 #endif // OSS_PLAYFAB_WIN64
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
@@ -621,7 +780,7 @@ bool FOnlineIdentityPlayFab::AuthenticateUserGDK(const FString& PlatformUserIdSt
 	return FPFLocalUserLoginAsync(
 		LocalUserHandle,
 		true,
-		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, bool bWasSuccessful)
+		FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this, PlatformUserIdStr](const FPFAuthenticationLoginResult* lognResults, FPFEntityHandle* entityHandle, const FString& ErrorMessage, bool bWasSuccessful)
 			{
 				const FPFEntityHandle EntityHandle = entityHandle ? *entityHandle : nullptr;
 				Auth_PFAuthRequestComplete(bWasSuccessful, PlatformUserIdStr, EntityHandle);
@@ -638,8 +797,6 @@ bool FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey()
 	UE_LOG_ONLINE(Error, TEXT("FOnlineIdentityPlayFab::AuthenticateServerWithSecretKey: Not supported on this platform"));
 	return false;
 #else // OSS_PLAYFAB_PLAYSTATION || OSS_PLAYFAB_SWITCH
-	FPFInitialize();
-
 	FPFServiceConfigHandle ServiceConfigHandle;
 
 	FString TitleIdStr = OSSPlayFab->GetAppId();
@@ -895,37 +1052,220 @@ bool FOnlineIdentityPlayFab::AuthenticateUserByPlatform(const FString& PlatformU
 #endif // OSS_PLAYFAB_SWITCH
 }
 
+void FOnlineIdentityPlayFab::GetPlatformUserIdCandidates(int32 LocalUserNum, TArray<FString>& OutPlatformUserIds) const
+{
+	OSS_PLAYFAB_GET_NATIVE_IDENTITY_INTERFACE
+	{
+		TSharedPtr<const FUniqueNetId> UserId = NativeIdentityInterface->GetUniquePlayerId(LocalUserNum);
+		if (!UserId.IsValid())
+		{
+			return;
+		}
+
+		// Match both queue key forms used by auth flow.
+		TSharedPtr<FUserOnlineAccount> UserAccount = NativeIdentityInterface->GetUserAccount(*UserId);
+		FString UserAttributeIdStr;
+		if (UserAccount.IsValid() && UserAccount->GetUserAttribute(USER_ATTR_ID, UserAttributeIdStr) && !UserAttributeIdStr.IsEmpty())
+		{
+			OutPlatformUserIds.AddUnique(UserAttributeIdStr);
+		}
+
+		const FString NetIdStr = UserId->ToString();
+		if (!NetIdStr.IsEmpty())
+		{
+			OutPlatformUserIds.AddUnique(NetIdStr);
+		}
+	}
+}
+
+bool FOnlineIdentityPlayFab::IsPlayFabAuthenticated(const TArray<FString>& PlatformUserIdCandidates) const
+{
+	for (const FString& Candidate : PlatformUserIdCandidates)
+	{
+		if (ServerEntity.IsValid() && ServerEntity->GetPlatformUserId().Equals(Candidate, ESearchCase::IgnoreCase))
+		{
+			return true;
+		}
+
+		for (const TSharedPtr<FPlayFabUser>& LocalUser : LocalPlayFabUsers)
+		{
+			if (LocalUser.IsValid() && LocalUser->GetPlatformUserId().Equals(Candidate, ESearchCase::IgnoreCase))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+int32 FOnlineIdentityPlayFab::ResolveLocalUserNumForPlatformUserId(const FString& UserPlatformIdStr)
+{
+	if (IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer"))
+	{
+		return 0;
+	}
+
+	// Delegate maps are keyed by native local user num.
+	for (int32 i = 0; i < MAX_LOCAL_PLAYERS; ++i)
+	{
+		TArray<FString> PlatformUserIdCandidates;
+		GetPlatformUserIdCandidates(i, PlatformUserIdCandidates);
+
+		for (const FString& Candidate : PlatformUserIdCandidates)
+		{
+			if (Candidate.Equals(UserPlatformIdStr, ESearchCase::IgnoreCase))
+			{
+				return i;
+			}
+		}
+	}
+
+	// No fallback to insertion index; wrong index can resolve the wrong pending login.
+	return INDEX_NONE;
+}
+
+void FOnlineIdentityPlayFab::ResolvePendingAutoLoginForPlatformUserId(const FString& UserPlatformIdStr)
+{
+	if (UserPlatformIdStr.IsEmpty())
+	{
+		return;
+	}
+
+	const int32 ResolvedUserNum = ResolveLocalUserNumForPlatformUserId(UserPlatformIdStr);
+	if (ResolvedUserNum != INDEX_NONE)
+	{
+		ResolvePendingAutoLogin(ResolvedUserNum);
+		return;
+	}
+
+	// Native mapping may already be gone; fall back to cached candidates.
+	int32 PendingUserNumToResolve = INDEX_NONE;
+	for (const TPair<int32, FPendingAutoLogin>& Pending : PendingAutoLoginHandles)
+	{
+		for (const FString& Candidate : Pending.Value.PlatformUserIdCandidates)
+		{
+			if (Candidate.Equals(UserPlatformIdStr, ESearchCase::IgnoreCase))
+			{
+				PendingUserNumToResolve = Pending.Key;
+				break;
+			}
+		}
+
+		if (PendingUserNumToResolve != INDEX_NONE)
+		{
+			break;
+		}
+	}
+
+	if (PendingUserNumToResolve != INDEX_NONE)
+	{
+		ResolvePendingAutoLogin(PendingUserNumToResolve);
+	}
+}
+
+void FOnlineIdentityPlayFab::ResolvePendingAutoLogin(int32 LocalUserNum)
+{
+	FDelegateHandle HandleToClear;
+	if (const FPendingAutoLogin* Found = PendingAutoLoginHandles.Find(LocalUserNum))
+	{
+		HandleToClear = Found->Handle;
+	}
+
+	if (!HandleToClear.IsValid())
+	{
+		return;
+	}
+
+	PendingAutoLoginHandles.Remove(LocalUserNum);
+	ClearOnAuthenticateUserCompleteDelegate_Handle(LocalUserNum, HandleToClear);
+
+	UE_LOG_ONLINE_IDENTITY(Warning, TEXT("FOnlineIdentityPlayFab::ResolvePendingAutoLogin: PlayFab authentication ended without a completion event; completing native login for LocalUserNum=%d so the caller is not left waiting."), LocalUserNum);
+
+	Login(LocalUserNum, FOnlineAccountCredentials());
+}
+
+void FOnlineIdentityPlayFab::ResolveAllPendingAutoLogins()
+{
+	TArray<int32> PendingUserNums;
+	PendingAutoLoginHandles.GetKeys(PendingUserNums);
+
+	for (int32 PendingUserNum : PendingUserNums)
+	{
+		ResolvePendingAutoLogin(PendingUserNum);
+	}
+}
+
+void FOnlineIdentityPlayFab::ResolveTimedOutPendingAutoLogins()
+{
+	if (PendingAutoLoginHandles.Num() == 0)
+	{
+		return;
+	}
+
+	const double Now = FPlatformTime::Seconds();
+
+	TArray<int32> TimedOutUserNums;
+	for (const TPair<int32, FPendingAutoLogin>& Pending : PendingAutoLoginHandles)
+	{
+		if (Now >= Pending.Value.DeadlineSeconds)
+		{
+			TimedOutUserNums.Add(Pending.Key);
+		}
+	}
+
+	for (int32 TimedOutUserNum : TimedOutUserNums)
+	{
+		UE_LOG_ONLINE_IDENTITY(Warning, TEXT("FOnlineIdentityPlayFab::ResolveTimedOutPendingAutoLogins: no PlayFab authentication result for LocalUserNum=%d after %.0fs; completing the native login so the caller can fall back to its own sign-in flow."), TimedOutUserNum, PendingAutoLoginTimeout);
+		ResolvePendingAutoLogin(TimedOutUserNum);
+	}
+}
+
 void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const FString& UserPlatformIdStr, FPFEntityHandle handle)
 {
 	UE_LOG(LogTemp, Display, TEXT("Auth_PFAuthRequestComplete In"));
+
+	// Callback can arrive off-thread; auth/delegate state must be updated on the game thread.
+	if (!IsInGameThread())
+	{
+		TWeakPtr<FOnlineIdentityPlayFab, ESPMode::ThreadSafe> WeakThis = AsShared();
+		AsyncTask(ENamedThreads::GameThread, [WeakThis, bSucceeded, UserPlatformIdStr, handle]()
+		{
+			TSharedPtr<FOnlineIdentityPlayFab, ESPMode::ThreadSafe> PinnedThis = WeakThis.Pin();
+			if (PinnedThis.IsValid())
+			{
+				PinnedThis->Auth_PFAuthRequestComplete(bSucceeded, UserPlatformIdStr, handle);
+			}
+		});
+		return;
+	}
+
 	if (bSucceeded)
 	{
 		int32 Index;
 		TSharedPtr<FPlayFabUser> LocalUser = GetPartyLocalUserFromPlatformIdString(UserPlatformIdStr, &Index);
 		if (LocalUser)
 		{
-			// Re-auth completed - update entity handle in case it changed (e.g., Steam AutoLogin
-			// triggering a second auth that creates a new entity handle via the SDK)
 			LocalUser->SetEntityHandle(handle);
 			LocalUser->SetNewEntityTokenUpdateTime();
-			TriggerOnAuthenticateUserCompleteDelegates(Index, true, UserPlatformIdStr, TEXT(""));
 
-			// Notify titles that a re-auth occurred so they can react (e.g., re-fetch entity handles).
-			// Use a guard flag to prevent our own OnLoginStatusChanged handler from re-queuing
-			// this user for another auth cycle.
-			TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(Index);
+			const int32 ResolvedUserNum = ResolveLocalUserNumForPlatformUserId(UserPlatformIdStr);
+			const int32 NotifyUserNum = ResolvedUserNum != INDEX_NONE ? ResolvedUserNum : Index;
+
+			TriggerOnAuthenticateUserCompleteDelegates(NotifyUserNum, true, UserPlatformIdStr, TEXT(""));
+
+			// Re-auth notification for listeners that track login-status events.
+			TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(NotifyUserNum);
 			if (UserId.IsValid())
 			{
 				bFiringReAuthLoginStatusChanged = true;
-				TriggerOnLoginStatusChangedDelegates(Index, ELoginStatus::LoggedIn, ELoginStatus::LoggedIn, *UserId);
+				TriggerOnLoginStatusChangedDelegates(NotifyUserNum, ELoginStatus::LoggedIn, ELoginStatus::LoggedIn, *UserId);
 				bFiringReAuthLoginStatusChanged = false;
 			}
 			UE_LOG(LogTemp, Display, TEXT("TriggerOnAuthenticateUserCompleteDelegates true"));
 		}
 		else
 		{
-			// Verify returned values
-			// Create a new user if we don't already have one
 			CreateLocalUser(UserPlatformIdStr, handle);
 		}
 
@@ -937,10 +1277,6 @@ void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const F
 	}
 	else
 	{
-		// Authentication failed. Reset the cooldown timer (previously only reset on success), so the
-		// gate in TryAuthenticateUsers is honored instead of re-firing the login every tick and
-		// flooding PlayFab's rate limiter. Apply exponential backoff and cap the retries. Failure
-		// counts are tracked per user so failures for one user don't penalize others.
 		TimeSinceLastAuth = 0.0f;
 
 		int32& FailureCountForUser = AuthFailureCountsByUser.FindOrAdd(UserPlatformIdStr);
@@ -952,14 +1288,26 @@ void FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete(bool bSucceeded, const F
 			UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete: authentication failed %d times for user %s; giving up until the user is re-queued"), FailureCountForUser, *UserPlatformIdStr);
 			UsersToAuth.Remove(UserPlatformIdStr);
 
-			// Clear backoff state so a later re-queue of this user gets a fresh retry window instead of
-			// inheriting the prior capped failure count/cooldown.
 			AuthFailureCountsByUser.Remove(UserPlatformIdStr);
 			CurrentAuthCoolDownTime = AuthCoolDownTime;
 		}
 		else
 		{
 			UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete: authentication failed for user %s (attempt %d); retrying in %.1fs"), *UserPlatformIdStr, FailureCountForUser, CurrentAuthCoolDownTime);
+		}
+
+		// Broadcast failures per attempt so deferred AutoLogin callers do not hang.
+		UserAuthRequestsInFlight.Remove(UserPlatformIdStr);
+
+		const int32 FailedUserNum = ResolveLocalUserNumForPlatformUserId(UserPlatformIdStr);
+		if (FailedUserNum != INDEX_NONE)
+		{
+			TriggerOnAuthenticateUserCompleteDelegates(FailedUserNum, false, UserPlatformIdStr, TEXT("PlayFab authentication failed"));
+		}
+		else
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineIdentityPlayFab::Auth_PFAuthRequestComplete: could not resolve a local user num for '%s'; resolving matching deferred AutoLogin if present"), *UserPlatformIdStr);
+			ResolvePendingAutoLoginForPlatformUserId(UserPlatformIdStr);
 		}
 	}
 
@@ -971,6 +1319,11 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 {
 	UE_LOG_ONLINE_IDENTITY(Verbose, TEXT("FOnlineIdentityPlayFab::CreateLocalUser"));
 	UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab::CreateLocalUser"));
+
+	auto ResolveDeferredAutoLoginOnFailure = [this, &UserPlatformIdStr]()
+	{
+		ResolvePendingAutoLoginForPlatformUserId(UserPlatformIdStr);
+	};
 
 	PartyLocalUser* NewPartyLocalUser = nullptr;
 	PartyError Err;
@@ -985,6 +1338,7 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab PartyManager::CreateLocalUser failed: %s"), *GetPartyErrorMessage(Err));
 		UE_LOG(LogTemp, Display, TEXT("FOnlineIdentityPlayFab::CreateLocalUser failed"));
+		ResolveDeferredAutoLoginOnFailure();
 		return;
 	}
 
@@ -996,6 +1350,7 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 	if (FAILED(hr))
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CreateLocalUser FPFEntityGetEntityKeySize failed: 0x%x"), hr);
+		ResolveDeferredAutoLoginOnFailure();
 		return;
 	}
 
@@ -1006,10 +1361,12 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 	if (FAILED(hr))
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CreateLocalUser FPFEntityGetEntityKey failed: 0x%x"), hr);
+		ResolveDeferredAutoLoginOnFailure();
 		return;
 	}
 
 	TSharedPtr<FPlayFabUser> NewLocalUser = MakeShared<FPlayFabUser>(UserPlatformIdStr, EntityHandle, EntityKeyptr, NewPartyLocalUser);
+	NewLocalUser->SetNewEntityTokenUpdateTime();
 
 	// Store server entity separately from player entities
 	if (IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer"))
@@ -1022,9 +1379,25 @@ void FOnlineIdentityPlayFab::CreateLocalUser(const FString& UserPlatformIdStr, c
 		LocalPlayFabUsers.Add(NewLocalUser);
 	}
 
-	int32 LocalUserNum = IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer") ? 0 : LocalPlayFabUsers.Num() - 1;
+	int32 LocalUserNum = ResolveLocalUserNumForPlatformUserId(UserPlatformIdStr);
+	if (LocalUserNum == INDEX_NONE)
+	{
+		LocalUserNum = IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer") ? 0 : LocalPlayFabUsers.Num() - 1;
+	}
+
 	TriggerOnAuthenticateUserCompleteDelegates(LocalUserNum, true, UserPlatformIdStr, TEXT(""));
 	UE_LOG(LogTemp, Display, TEXT("TriggerOnAuthenticateUserCompleteDelegates:true"));
+
+	if (!(IsRunningDedicatedServer() && UserPlatformIdStr == TEXT("DedicatedServer")))
+	{
+		TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(LocalUserNum);
+		if (UserId.IsValid())
+		{
+			bFiringReAuthLoginStatusChanged = true;
+			TriggerOnLoginStatusChangedDelegates(LocalUserNum, ELoginStatus::NotLoggedIn, ELoginStatus::LoggedIn, *UserId);
+			bFiringReAuthLoginStatusChanged = false;
+		}
+	}
 
 	// Listening to invite is best effort TODO
 	OSSPlayFab->GetPlayFabLobbyInterface()->RegisterForInvites_PlayFabMultiplayer(EntityHandle.Get());
@@ -1136,6 +1509,9 @@ void FOnlineIdentityPlayFab::RemoveLocalUser(const FString& PlatformUserIdStr)
 
 	if (PlatformUserIdStr.IsEmpty() == false)
 	{
+		// Resolve only this user's deferred AutoLogin.
+		ResolvePendingAutoLoginForPlatformUserId(PlatformUserIdStr);
+
 		UserAuthRequestsInFlight.Remove(PlatformUserIdStr);
 		UsersToAuth.Remove(PlatformUserIdStr);
 

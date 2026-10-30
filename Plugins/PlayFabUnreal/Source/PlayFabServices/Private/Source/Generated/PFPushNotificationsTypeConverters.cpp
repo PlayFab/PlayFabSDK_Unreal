@@ -10,7 +10,7 @@ TSharedPtr<const FPFPushNotificationsAdvancedPushPlatformMsg> ConvertAdvancedPus
 	}
 
 	TSharedPtr<const FPFPushNotificationsAdvancedPushPlatformMsg> ConvertedType = MakeShared<FPFPushNotificationsAdvancedPushPlatformMsg>(FPFPushNotificationsAdvancedPushPlatformMsg{
-		.gCMDataOnly = TSharedPtr<const bool>(Datatype->gCMDataOnly),
+		.gCMDataOnly = ConvertOptionalToUnreal(Datatype->gCMDataOnly),
 		.json = Datatype->json == nullptr ? FString() : FString(Datatype->json),
 		.platform = ConvertPushNotificationPlatformToUnreal(&Datatype->platform)
 	});

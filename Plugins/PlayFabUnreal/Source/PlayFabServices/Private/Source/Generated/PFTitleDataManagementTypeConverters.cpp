@@ -150,7 +150,7 @@ TSharedPtr<const FPFTitleDataManagementGetTitleNewsRequest> ConvertGetTitleNewsR
 	}
 
 	TSharedPtr<const FPFTitleDataManagementGetTitleNewsRequest> ConvertedType = MakeShared<FPFTitleDataManagementGetTitleNewsRequest>(FPFTitleDataManagementGetTitleNewsRequest{
-		.count = TSharedPtr<const int32>(Datatype->count)
+		.count = ConvertOptionalToUnreal(Datatype->count)
 	});
 
 	return ConvertedType;

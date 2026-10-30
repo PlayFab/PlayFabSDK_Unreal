@@ -15,7 +15,7 @@ TSharedPtr<const FPFDataAbortFileUploadsRequest> ConvertAbortFileUploadsRequestT
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.fileNames = ConvertCharArrayToUnreal(Datatype->fileNames, Datatype->fileNamesCount),
 		.fileNamesCount = Datatype->fileNamesCount,
-		.profileVersion = TSharedPtr<const int32>(Datatype->profileVersion)
+		.profileVersion = ConvertOptionalToUnreal(Datatype->profileVersion)
 	});
 
 	return ConvertedType;
@@ -79,7 +79,7 @@ TSharedPtr<const FPFDataDeleteFilesRequest> ConvertDeleteFilesRequestToUnreal(co
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.fileNames = ConvertCharArrayToUnreal(Datatype->fileNames, Datatype->fileNamesCount),
 		.fileNamesCount = Datatype->fileNamesCount,
-		.profileVersion = TSharedPtr<const int32>(Datatype->profileVersion)
+		.profileVersion = ConvertOptionalToUnreal(Datatype->profileVersion)
 	});
 
 	return ConvertedType;
@@ -305,7 +305,7 @@ TSharedPtr<const FPFDataGetObjectsRequest> ConvertGetObjectsRequestToUnreal(cons
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.escapeObject = TSharedPtr<const bool>(Datatype->escapeObject)
+		.escapeObject = ConvertOptionalToUnreal(Datatype->escapeObject)
 	});
 
 	return ConvertedType;
@@ -401,7 +401,7 @@ TSharedPtr<const FPFDataInitiateFileUploadsRequest> ConvertInitiateFileUploadsRe
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.fileNames = ConvertCharArrayToUnreal(Datatype->fileNames, Datatype->fileNamesCount),
 		.fileNamesCount = Datatype->fileNamesCount,
-		.profileVersion = TSharedPtr<const int32>(Datatype->profileVersion)
+		.profileVersion = ConvertOptionalToUnreal(Datatype->profileVersion)
 	});
 
 	return ConvertedType;
@@ -493,7 +493,7 @@ TSharedPtr<const FPFDataSetObject> ConvertSetObjectToUnreal(const PFDataSetObjec
 
 	TSharedPtr<const FPFDataSetObject> ConvertedType = MakeShared<FPFDataSetObject>(FPFDataSetObject{
 		.dataObject = FPFJsonObject{ .stringValue = FString(Datatype->dataObject.stringValue) },
-		.deleteObject = TSharedPtr<const bool>(Datatype->deleteObject),
+		.deleteObject = ConvertOptionalToUnreal(Datatype->deleteObject),
 		.escapedDataObject = Datatype->escapedDataObject == nullptr ? FString() : FString(Datatype->escapedDataObject),
 		.objectName = Datatype->objectName == nullptr ? FString() : FString(Datatype->objectName)
 	});
@@ -527,7 +527,7 @@ TSharedPtr<const FPFDataSetObjectsRequest> ConvertSetObjectsRequestToUnreal(cons
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.expectedProfileVersion = TSharedPtr<const int32>(Datatype->expectedProfileVersion),
+		.expectedProfileVersion = ConvertOptionalToUnreal(Datatype->expectedProfileVersion),
 		.objects = ConvertPlayfabArrayToUnreal<PFDataSetObject, FPFDataSetObject>(Datatype->objects, Datatype->objectsCount, ConvertSetObjectToUnreal),
 		.objectsCount = Datatype->objectsCount
 	});

@@ -32,7 +32,7 @@ void FPFAuthenticationLoginWithAndroidDeviceIDAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -56,16 +56,16 @@ void FPFAuthenticationLoginWithAndroidDeviceIDAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -99,7 +99,7 @@ void FPFAuthenticationLoginWithAppleAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -123,16 +123,16 @@ void FPFAuthenticationLoginWithAppleAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -166,7 +166,7 @@ void FPFAuthenticationLoginWithBattleNetAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -190,16 +190,16 @@ void FPFAuthenticationLoginWithBattleNetAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -232,7 +232,7 @@ void FPFAuthenticationLoginWithCustomIDAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -256,16 +256,16 @@ void FPFAuthenticationLoginWithCustomIDAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -297,7 +297,7 @@ void FPFAuthenticationLoginWithEmailAddressAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -321,16 +321,16 @@ void FPFAuthenticationLoginWithEmailAddressAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -365,7 +365,7 @@ void FPFAuthenticationLoginWithFacebookAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -389,16 +389,16 @@ void FPFAuthenticationLoginWithFacebookAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -432,7 +432,7 @@ void FPFAuthenticationLoginWithFacebookInstantGamesIdAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -456,16 +456,16 @@ void FPFAuthenticationLoginWithFacebookInstantGamesIdAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -503,7 +503,7 @@ void FPFAuthenticationLoginWithGameCenterAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -527,16 +527,16 @@ void FPFAuthenticationLoginWithGameCenterAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -571,7 +571,7 @@ void FPFAuthenticationLoginWithGoogleAccountAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -595,16 +595,16 @@ void FPFAuthenticationLoginWithGoogleAccountAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -638,7 +638,7 @@ void FPFAuthenticationLoginWithGooglePlayGamesServicesAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -662,16 +662,16 @@ void FPFAuthenticationLoginWithGooglePlayGamesServicesAsyncTask::ProcessResults(
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -707,7 +707,7 @@ void FPFAuthenticationLoginWithIOSDeviceIDAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -731,16 +731,16 @@ void FPFAuthenticationLoginWithIOSDeviceIDAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -775,7 +775,7 @@ void FPFAuthenticationLoginWithKongregateAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -799,16 +799,16 @@ void FPFAuthenticationLoginWithKongregateAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -842,7 +842,7 @@ void FPFAuthenticationLoginWithNintendoServiceAccountAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -866,16 +866,16 @@ void FPFAuthenticationLoginWithNintendoServiceAccountAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -909,7 +909,7 @@ void FPFAuthenticationLoginWithNintendoSwitchDeviceIdAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -933,16 +933,16 @@ void FPFAuthenticationLoginWithNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -976,7 +976,7 @@ void FPFAuthenticationLoginWithOpenIdConnectAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1000,16 +1000,16 @@ void FPFAuthenticationLoginWithOpenIdConnectAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1041,7 +1041,7 @@ void FPFAuthenticationLoginWithPlayFabAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1065,16 +1065,16 @@ void FPFAuthenticationLoginWithPlayFabAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1110,7 +1110,7 @@ void FPFAuthenticationLoginWithPSNAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1134,16 +1134,16 @@ void FPFAuthenticationLoginWithPSNAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1178,7 +1178,7 @@ void FPFAuthenticationLoginWithSteamAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1202,16 +1202,16 @@ void FPFAuthenticationLoginWithSteamAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1245,7 +1245,7 @@ void FPFAuthenticationLoginWithTwitchAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1269,16 +1269,16 @@ void FPFAuthenticationLoginWithTwitchAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1312,7 +1312,7 @@ void FPFAuthenticationLoginWithXboxAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1336,16 +1336,16 @@ void FPFAuthenticationLoginWithXboxAsyncTask::ProcessResults()
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
 			*reinterpret_cast<PFEntityHandle*>(&m_entityHandle) = handle;
-			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &m_entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1454,7 +1454,7 @@ void FPFAuthenticationServerLoginWithAndroidDeviceIDAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1477,16 +1477,16 @@ void FPFAuthenticationServerLoginWithAndroidDeviceIDAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1521,7 +1521,7 @@ void FPFAuthenticationServerLoginWithBattleNetAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1544,16 +1544,16 @@ void FPFAuthenticationServerLoginWithBattleNetAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1588,7 +1588,7 @@ void FPFAuthenticationServerLoginWithCustomIDAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1611,16 +1611,16 @@ void FPFAuthenticationServerLoginWithCustomIDAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1657,7 +1657,7 @@ void FPFAuthenticationServerLoginWithIOSDeviceIDAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1680,16 +1680,16 @@ void FPFAuthenticationServerLoginWithIOSDeviceIDAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1726,7 +1726,7 @@ void FPFAuthenticationServerLoginWithPSNAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1749,16 +1749,16 @@ void FPFAuthenticationServerLoginWithPSNAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1794,7 +1794,7 @@ void FPFAuthenticationServerLoginWithServerCustomIdAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1817,16 +1817,16 @@ void FPFAuthenticationServerLoginWithServerCustomIdAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1861,7 +1861,7 @@ void FPFAuthenticationServerLoginWithSteamIdAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1884,16 +1884,16 @@ void FPFAuthenticationServerLoginWithSteamIdAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1930,7 +1930,7 @@ void FPFAuthenticationServerLoginWithTwitchAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1953,16 +1953,16 @@ void FPFAuthenticationServerLoginWithTwitchAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -1997,7 +1997,7 @@ void FPFAuthenticationServerLoginWithXboxAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -2020,16 +2020,16 @@ void FPFAuthenticationServerLoginWithXboxAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -2065,7 +2065,7 @@ void FPFAuthenticationServerLoginWithXboxIdAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -2088,16 +2088,16 @@ void FPFAuthenticationServerLoginWithXboxIdAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, true);
+			delegate.ExecuteIfBound(ResultType.Get(), &entityTokenResponse, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);	
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);	
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -2182,7 +2182,16 @@ void FPFAuthenticationDeleteAsyncTask::DoWork()
 
 void FPFAuthenticationDeleteAsyncTask::ProcessResults()
 {
-	delegate.ExecuteIfBound(true);
+	HRESULT hr = XAsyncGetStatus(*mAsyncBlock, false);
+
+	if (SUCCEEDED(hr))
+	{
+		delegate.ExecuteIfBound(true);
+	}
+	else
+	{
+		delegate.ExecuteIfBound(false);
+	}
 }
 	
 #endif

@@ -226,6 +226,30 @@ protected:
 	void CreateLocalUser(const FString& UserPlatformIdStr, const FPFEntityHandle EntityHandle);
 	void RemoveLocalUser(const FString& PlatformUserIdStr);
 
+	/** Maps a platform user id back to a local user index, or INDEX_NONE when it cannot be resolved. */
+	int32 ResolveLocalUserNumForPlatformUserId(const FString& UserPlatformIdStr);
+
+	/**
+	 * Collects the platform user id strings a queued auth request could be keyed by for this local
+	 * user, most canonical first (USER_ATTR_ID, then the net id string).
+	 */
+	void GetPlatformUserIdCandidates(int32 LocalUserNum, TArray<FString>& OutPlatformUserIds) const;
+
+	/** True when a PlayFab user already exists for any platform id this local user is known by. */
+	bool IsPlayFabAuthenticated(const TArray<FString>& PlatformUserIdCandidates) const;
+
+	/** Completes a deferred AutoLogin for one user that will never receive an auth result. */
+	void ResolvePendingAutoLogin(int32 LocalUserNum);
+
+	/** Completes deferred AutoLogin for the user matching this platform id, if one is pending. */
+	void ResolvePendingAutoLoginForPlatformUserId(const FString& UserPlatformIdStr);
+
+	/** Completes every deferred AutoLogin, for teardown paths that end all outstanding auth work. */
+	void ResolveAllPendingAutoLogins();
+
+	/** Completes any deferred AutoLogin that has passed its deadline without a result. */
+	void ResolveTimedOutPendingAutoLogins();
+
 private:
 	TArray<TSharedPtr<FPlayFabUser>> LocalPlayFabUsers;
 	TSharedPtr<FPlayFabUser> ServerEntity;
@@ -234,11 +258,8 @@ private:
 	bool bRegisterAuthDelegates = true;
 	bool bAuthAllUsers = true;
 	float TimeSinceLastAuth = 0.0f;
-	// Consecutive failed authentication attempts, tracked per platform user id so failures for one
-	// user don't penalize others. Drives exponential backoff and the retry cap so a persistently
-	// rejected token cannot flood PlayFab's rate limiter.
+	// Per-user retry state for auth backoff/cap.
 	TMap<FString, int32> AuthFailureCountsByUser;
-	// Current cooldown the auth gate enforces. Grows with the failing user's count and resets on success.
 	float CurrentAuthCoolDownTime = 0.0f;
 
     FPFLocalUserHandle LocalUserHandle{ nullptr };
@@ -249,9 +270,19 @@ private:
 	TArray<FDelegateHandle> LoginCompleteDelegateHandles;
 	TArray<FDelegateHandle> LogoutCompleteDelegateHandles;
 
-	// Guard to prevent OnLoginStatusChanged from re-queuing a user for auth
-	// when we fire the delegate ourselves during re-auth completion.
+	// Prevent self-generated re-auth notifications from re-queueing auth.
 	bool bFiringReAuthLoginStatusChanged = false;
+
+	// Deferred AutoLogin state keyed by native local user num.
+	struct FPendingAutoLogin
+	{
+		FDelegateHandle Handle;
+		TArray<FString> PlatformUserIdCandidates;
+
+		// Fallback completion deadline.
+		double DeadlineSeconds = 0.0;
+	};
+	TMap<int32, FPendingAutoLogin> PendingAutoLoginHandles;
 
 	void RegisterAuthDelegates();
 	void CleanUpAuthDelegates();

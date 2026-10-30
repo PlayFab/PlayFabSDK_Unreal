@@ -130,6 +130,11 @@ void FClientRemoveFriendAsyncTask::DoWork()
 
 void FClientRemoveFriendAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -168,6 +173,11 @@ void FClientSetFriendTagsAsyncTask::DoWork()
 
 void FClientSetFriendTagsAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -209,6 +219,11 @@ void FServerAddFriendAsyncTask::DoWork()
 
 void FServerAddFriendAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -305,6 +320,11 @@ void FServerRemoveFriendAsyncTask::DoWork()
 
 void FServerRemoveFriendAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -346,6 +366,11 @@ void FServerSetFriendTagsAsyncTask::DoWork()
 
 void FServerSetFriendTagsAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);

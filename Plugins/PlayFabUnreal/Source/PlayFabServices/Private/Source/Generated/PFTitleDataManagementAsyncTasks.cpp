@@ -471,6 +471,11 @@ void FServerSetPublisherDataAsyncTask::DoWork()
 
 void FServerSetPublisherDataAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -510,6 +515,11 @@ void FServerSetTitleDataAsyncTask::DoWork()
 
 void FServerSetTitleDataAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -549,6 +559,11 @@ void FServerSetTitleInternalDataAsyncTask::DoWork()
 
 void FServerSetTitleInternalDataAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);

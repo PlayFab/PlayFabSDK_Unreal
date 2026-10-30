@@ -7,14 +7,55 @@
 #include "OnlineIdentityInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFab.h"
 #include "OnlineSubsystemGDK.h"
+#include "GDKRuntimeModule.h"
 #include "GenericPlatform/GenericPlatformHttp.h"
+#include "Online/OnlineSessionNames.h"
 #include "PlayFabHelpers.h"
+#include <string>
 
 THIRD_PARTY_INCLUDES_START
 #include <xsapi-c/multiplayer_activity_c.h>
-#include <XGameActivation.h>
-#include <XGameRuntimeFeature.h>
 THIRD_PARTY_INCLUDES_END
+
+namespace
+{
+	constexpr TCHAR SessionInvitePayloadPrefix[] = TEXT("PFOSSINVITE1|");
+
+	struct FSetMultiplayerActivityContext
+	{
+		std::string ConnectionString;
+		std::string LobbyId;
+	};
+
+	FString BuildSessionInvitePayload(FName SessionName, const FString& ConnectionString)
+	{
+		if (SessionName == NAME_GameSession)
+		{
+			return ConnectionString;
+		}
+
+		return FString::Printf(TEXT("%s%s|%s"), SessionInvitePayloadPrefix, *SessionName.ToString(), *ConnectionString);
+	}
+
+	bool ParseSessionInvitePayload(const FString& Payload, FName& OutSessionName, FString& OutConnectionString)
+	{
+		if (!Payload.StartsWith(SessionInvitePayloadPrefix))
+		{
+			return false;
+		}
+
+		const int32 SessionNameStart = UE_ARRAY_COUNT(SessionInvitePayloadPrefix) - 1;
+		const int32 SeparatorIndex = Payload.Find(TEXT("|"), ESearchCase::CaseSensitive, ESearchDir::FromStart, SessionNameStart);
+		if (SeparatorIndex == INDEX_NONE || SeparatorIndex == SessionNameStart)
+		{
+			return false;
+		}
+
+		OutSessionName = FName(Payload.Mid(SessionNameStart, SeparatorIndex - SessionNameStart));
+		OutConnectionString = Payload.Mid(SeparatorIndex + 1);
+		return !OutConnectionString.IsEmpty();
+	}
+}
 
 static FString FindUrlParameter(FString Url, const TCHAR* Name)
 {
@@ -87,50 +128,33 @@ void FOnlineSessionPlayFab::RegisterForInvites()
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::RegisterForInvites()"));
 
-	if (XGameRuntimeIsFeatureAvailable(XGameRuntimeFeature::XGameInvite))
+	// GDK delivers the launch activation only to the first registrant (GDKRuntime). It forwards every invite
+	// here and replays the most recent one, including the invite that launched the title.
+	IGDKRuntimeModule* GDKRuntime = IGDKRuntimeModule::TryGet();
+	if (GDKRuntime == nullptr)
 	{
-		auto ActivationHandlerLambda = [](void* Context, const XGameActivationInfo* ActivationInfo)
-		{
-			if (ActivationInfo == nullptr)
-			{
-				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: ActivationInfo was null"));
-				return;
-			}
-
-			if (ActivationInfo->type != XGameActivationType::AcceptedGameInvite)
-			{
-				return;
-			}
-
-			if (ActivationInfo->inviteUri == nullptr)
-			{
-				UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: Accepted invite URI was null"));
-				return;
-			}
-
-			reinterpret_cast<FOnlineSessionPlayFab*>(Context)->SaveInviteFromEvent(Context, FString(UTF8_TO_TCHAR(ActivationInfo->inviteUri)));
-		};
-
-		HRESULT Hr = XGameActivationRegisterForEvent(FGDKAsyncTaskQueue::GetGenericQueue(), this, ActivationHandlerLambda, &ActivationHandler);
-		if (FAILED(Hr))
-		{
-			UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: XGameActivationRegisterForEvent failed: ErrorCode=[0x%08x]!"), Hr);
-		}
-		else
-		{
-			bActivationHandlerRegistered = true;
-		}
+		UE_LOG_ONLINE_SESSION(Warning, TEXT("FOnlineSessionPlayFab::RegisterForInvites: GDKRuntime module unavailable; game invites will not be received"));
+		return;
 	}
+
+	InviteReceivedHandle = GDKRuntime->RegisterGameInviteReceivedDelegate(FGDKOnGameInviteReceivedDelegate::CreateLambda([this](const FString& InviteUri)
+	{
+		UE_LOG_ONLINE_SESSION(Log, TEXT("FOnlineSessionPlayFab::RegisterForInvites: Game invite received"));
+		SaveInviteFromEvent(this, InviteUri);
+	}));
 }
 
 void FOnlineSessionPlayFab::UnregisterForInvites()
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::UnregisterForInvites()"));
 
-	if (bActivationHandlerRegistered)
+	if (InviteReceivedHandle.IsValid())
 	{
-		XGameActivationUnregisterForEvent(ActivationHandler, true /* Wait for pending event callbacks to complete.*/);
-		bActivationHandlerRegistered = false;
+		if (IGDKRuntimeModule* GDKRuntime = IGDKRuntimeModule::TryGet())
+		{
+			GDKRuntime->UnregisterGameInviteReceivedDelegate(InviteReceivedHandle);
+		}
+		InviteReceivedHandle.Reset();
 	}
 }
 
@@ -211,11 +235,12 @@ bool FOnlineSessionPlayFab::SendInviteGDK(const FUniqueNetId& SenderId, FName Se
 		Xuids.Add(Xuid);
 	}
 
+	const FString InvitePayload = BuildSessionInvitePayload(SessionName, UTF8_TO_TCHAR(ConnectionStr));
 	Hr = XblMultiplayerActivitySendInvitesAsync(GDKContext,
 		Xuids.GetData(),
 		Xuids.Num(),
 		true /*Send the invite to platforms that may be different than senders platform*/,
-		ConnectionStr,
+		TCHAR_TO_UTF8(*InvitePayload),
 		NewAsyncBlock.Get());
 
 	if (SUCCEEDED(Hr))
@@ -244,9 +269,16 @@ void FOnlineSessionPlayFab::SaveInviteFromEvent(void* Context, const FString& Ac
 
 	// connectionString is encoded in the URI - use Engine API to decode it
 	FString ConnectionStr = FGenericPlatformHttp::UrlDecode(EncodedConnectionString);
+	FName InvitedSessionName = NAME_GameSession;
+	FString ParsedConnectionString;
+	if (ParseSessionInvitePayload(ConnectionStr, InvitedSessionName, ParsedConnectionString))
+	{
+		ConnectionStr = MoveTemp(ParsedConnectionString);
+	}
 
 	FOnlineSessionSearchResult SearchResult;
 	SearchResult.Session.SessionSettings.Set(SETTING_CONNECTION_STRING, FString(ConnectionStr), EOnlineDataAdvertisementType::ViaOnlineService);
+	SearchResult.Session.SessionSettings.Set(SETTING_SESSION_TEMPLATE_NAME, InvitedSessionName.ToString(), EOnlineDataAdvertisementType::ViaOnlineService);
 	
 	TSharedRef<FOnlineSessionInfoPlayFab> NewSessionInfo = MakeShared<FOnlineSessionInfoPlayFab>();
 	SearchResult.Session.SessionInfo = NewSessionInfo;
@@ -310,20 +342,38 @@ void FOnlineSessionPlayFab::SetMultiplayerActivityForSession(const FNamedOnlineS
 		return;
 	}
 
-	SetMultiplayerActivity(SessionInfo->LobbyHandle, PlayFabIdentityInt->GetLocalUserEntityKeys(), ExistingNamedSession->SessionSettings);
+	if (SessionInfo->LobbyHandle == nullptr)
+	{
+		// Lobby member/update events can arrive before create or join completion stores the handle.
+		// The completion path republishes activity after the session info is ready.
+		UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::SetMultiplayerActivityForSession: Lobby handle is not available yet"));
+		return;
+	}
+
+	SetMultiplayerActivity(SessionInfo->LobbyHandle, ExistingNamedSession->SessionName, PlayFabIdentityInt->GetLocalUserEntityKeys(), ExistingNamedSession->SessionSettings);
 }
 
 void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, const PFEntityKey& EntityKey, const FOnlineSessionSettings& OnlineSessionSettings) const
+{
+	SetMultiplayerActivity(LobbyHandle, NAME_GameSession, EntityKey, OnlineSessionSettings);
+}
+
+void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, FName SessionName, const PFEntityKey& EntityKey, const FOnlineSessionSettings& OnlineSessionSettings) const
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::SetMultiplayerActivity()"));
 
 	TArray<PFEntityKey> EntityKeys;
 	EntityKeys.Add(EntityKey);
 
-	SetMultiplayerActivity(LobbyHandle, EntityKeys, OnlineSessionSettings);
+	SetMultiplayerActivity(LobbyHandle, SessionName, EntityKeys, OnlineSessionSettings);
 }
 
 void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, const TArray<PFEntityKey>& EntityKeys, const FOnlineSessionSettings& OnlineSessionSettings) const
+{
+	SetMultiplayerActivity(LobbyHandle, NAME_GameSession, EntityKeys, OnlineSessionSettings);
+}
+
+void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, FName SessionName, const TArray<PFEntityKey>& EntityKeys, const FOnlineSessionSettings& OnlineSessionSettings) const
 {
 	UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::SetMultiplayerActivity()"));
 
@@ -340,6 +390,8 @@ void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, co
 		LogMultiplayerErrorWithMessage("PFLobbyGetConnectionString", Hr);
 		return;
 	}
+
+	const FString InviteConnectionString = BuildSessionInvitePayload(SessionName, UTF8_TO_TCHAR(connectionString));
 
 	uint32 MaxPlayerCount;
 	Hr = PFLobbyGetMaxMemberCount(LobbyHandle, &MaxPlayerCount);
@@ -382,27 +434,34 @@ void FOnlineSessionPlayFab::SetMultiplayerActivity(PFLobbyHandle LobbyHandle, co
 		FGDKContextHandle GDKContext = GetGDKContextForXuid(Xuid, OSSPlayFab);
 		if (GDKContext.IsValid())
 		{
+			TUniquePtr<FSetMultiplayerActivityContext> ActivityContext = MakeUnique<FSetMultiplayerActivityContext>();
+			ActivityContext->ConnectionString = TCHAR_TO_UTF8(*InviteConnectionString);
+			ActivityContext->LobbyId = LobbyId;
+
 			TUniquePtr<XAsyncBlock> NewAsyncBlock = MakeUnique<XAsyncBlock>();
 			NewAsyncBlock->queue = FGDKAsyncTaskQueue::GetGenericQueue();
+			NewAsyncBlock->context = ActivityContext.Get();
 
 			NewAsyncBlock->callback = [](XAsyncBlock* ab)
 			{
 				TUniquePtr<XAsyncBlock> AsyncBlock{ ab }; // take ownership of XAsyncBlock
+				TUniquePtr<FSetMultiplayerActivityContext> ActivityContext{ static_cast<FSetMultiplayerActivityContext*>(ab->context) };
 				HRESULT Hr = XAsyncGetStatus(ab, false);
 				UE_LOG_ONLINE_SESSION(Verbose, TEXT("FOnlineSessionPlayFab::SetMultiplayerActivities: XAsyncGetStatus: result 0x%08x"), Hr);
 			};
 
 			XblMultiplayerActivityInfo MultiplayerActivityInfo{};
-			MultiplayerActivityInfo.connectionString = connectionString;
+			MultiplayerActivityInfo.connectionString = ActivityContext->ConnectionString.c_str();
 			MultiplayerActivityInfo.joinRestriction = JoinRestriction;
 			MultiplayerActivityInfo.maxPlayers = MaxPlayerCount;
 			MultiplayerActivityInfo.currentPlayers = LobbyMemberCount;
-			MultiplayerActivityInfo.groupId = LobbyId;
+			MultiplayerActivityInfo.groupId = ActivityContext->LobbyId.c_str();
 			MultiplayerActivityInfo.xuid = Xuid;
 
 			Hr = XblMultiplayerActivitySetActivityAsync(GDKContext, &MultiplayerActivityInfo, true, NewAsyncBlock.Get());
 			if (SUCCEEDED(Hr))
 			{
+				(void)ActivityContext.Release();
 				(void)NewAsyncBlock.Release();
 			}
 			else

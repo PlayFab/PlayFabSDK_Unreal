@@ -430,7 +430,7 @@ TSharedPtr<const FPFAuthenticationLoginWithGoogleAccountRequest> ConvertLoginWit
 		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToUnreal(Datatype->infoRequestParameters),
 		.playerSecret = Datatype->playerSecret == nullptr ? FString() : FString(Datatype->playerSecret),
 		.serverAuthCode = Datatype->serverAuthCode == nullptr ? FString() : FString(Datatype->serverAuthCode),
-		.setEmail = TSharedPtr<const bool>(Datatype->setEmail)
+		.setEmail = ConvertOptionalToUnreal(Datatype->setEmail)
 	});
 
 	return ConvertedType;
@@ -725,7 +725,7 @@ TSharedPtr<const FPFAuthenticationLoginWithPSNRequest> ConvertLoginWithPSNReques
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToUnreal(Datatype->infoRequestParameters),
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.playerSecret = Datatype->playerSecret == nullptr ? FString() : FString(Datatype->playerSecret),
 		.redirectUri = Datatype->redirectUri == nullptr ? FString() : FString(Datatype->redirectUri)
 	});
@@ -766,7 +766,7 @@ TSharedPtr<const FPFAuthenticationLoginWithSteamRequest> ConvertLoginWithSteamRe
 		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToUnreal(Datatype->infoRequestParameters),
 		.playerSecret = Datatype->playerSecret == nullptr ? FString() : FString(Datatype->playerSecret),
 		.steamTicket = Datatype->steamTicket == nullptr ? FString() : FString(Datatype->steamTicket),
-		.ticketIsServiceSpecific = TSharedPtr<const bool>(Datatype->ticketIsServiceSpecific)
+		.ticketIsServiceSpecific = ConvertOptionalToUnreal(Datatype->ticketIsServiceSpecific)
 	});
 
 	return ConvertedType;
@@ -878,7 +878,7 @@ TSharedPtr<const FPFAuthenticationRegisterPlayFabUserRequest> ConvertRegisterPla
 		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToUnreal(Datatype->infoRequestParameters),
 		.password = Datatype->password == nullptr ? FString() : FString(Datatype->password),
 		.playerSecret = Datatype->playerSecret == nullptr ? FString() : FString(Datatype->playerSecret),
-		.requireBothUsernameAndEmail = TSharedPtr<const bool>(Datatype->requireBothUsernameAndEmail),
+		.requireBothUsernameAndEmail = ConvertOptionalToUnreal(Datatype->requireBothUsernameAndEmail),
 		.titleId = Datatype->titleId == nullptr ? FString() : FString(Datatype->titleId),
 		.username = Datatype->username == nullptr ? FString() : FString(Datatype->username)
 	});
@@ -1095,7 +1095,7 @@ TSharedPtr<const FPFAuthenticationServerLoginWithPSNRequest> ConvertServerLoginW
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.infoRequestParameters = ConvertGetPlayerCombinedInfoRequestParamsToUnreal(Datatype->infoRequestParameters),
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.redirectUri = Datatype->redirectUri == nullptr ? FString() : FString(Datatype->redirectUri)
 	});
 

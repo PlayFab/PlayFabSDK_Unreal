@@ -1176,7 +1176,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest> Conv
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest>(FPFAccountManagementGetPlayFabIDsFromPSNAccountIDsRequest{
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.PSNAccountIDs = ConvertCharArrayToUnreal(Datatype->PSNAccountIDs, Datatype->PSNAccountIDsCount),
 		.PSNAccountIDsCount = Datatype->PSNAccountIDsCount
 	});
@@ -1262,7 +1262,7 @@ TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsRequest> Conve
 	}
 
 	TSharedPtr<const FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsRequest> ConvertedType = MakeShared<FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsRequest>(FPFAccountManagementGetPlayFabIDsFromPSNOnlineIDsRequest{
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.PSNOnlineIDs = ConvertCharArrayToUnreal(Datatype->PSNOnlineIDs, Datatype->PSNOnlineIDsCount),
 		.PSNOnlineIDsCount = Datatype->PSNOnlineIDsCount
 	});
@@ -1690,7 +1690,7 @@ TSharedPtr<const FPFAccountManagementLinkAndroidDeviceIDRequest> ConvertLinkAndr
 		.androidDeviceId = Datatype->androidDeviceId == nullptr ? FString() : FString(Datatype->androidDeviceId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.OS = Datatype->OS == nullptr ? FString() : FString(Datatype->OS)
 	});
 
@@ -1724,7 +1724,7 @@ TSharedPtr<const FPFAccountManagementLinkAppleRequest> ConvertLinkAppleRequestTo
 	TSharedPtr<const FPFAccountManagementLinkAppleRequest> ConvertedType = MakeShared<FPFAccountManagementLinkAppleRequest>(FPFAccountManagementLinkAppleRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.identityToken = Datatype->identityToken == nullptr ? FString() : FString(Datatype->identityToken)
 	});
 
@@ -1756,7 +1756,7 @@ TSharedPtr<const FPFAccountManagementClientLinkBattleNetAccountRequest> ConvertC
 	TSharedPtr<const FPFAccountManagementClientLinkBattleNetAccountRequest> ConvertedType = MakeShared<FPFAccountManagementClientLinkBattleNetAccountRequest>(FPFAccountManagementClientLinkBattleNetAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.identityToken = Datatype->identityToken == nullptr ? FString() : FString(Datatype->identityToken)
 	});
 
@@ -1789,7 +1789,7 @@ TSharedPtr<const FPFAccountManagementLinkCustomIDRequest> ConvertLinkCustomIDReq
 		.customId = Datatype->customId == nullptr ? FString() : FString(Datatype->customId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink)
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink)
 	});
 
 	return ConvertedType;
@@ -1822,7 +1822,7 @@ TSharedPtr<const FPFAccountManagementLinkFacebookAccountRequest> ConvertLinkFace
 		.authenticationToken = Datatype->authenticationToken == nullptr ? FString() : FString(Datatype->authenticationToken),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink)
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink)
 	});
 
 	return ConvertedType;
@@ -1855,7 +1855,7 @@ TSharedPtr<const FPFAccountManagementLinkFacebookInstantGamesIdRequest> ConvertL
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.facebookInstantGamesSignature = Datatype->facebookInstantGamesSignature == nullptr ? FString() : FString(Datatype->facebookInstantGamesSignature),
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink)
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink)
 	});
 
 	return ConvertedType;
@@ -1886,7 +1886,7 @@ TSharedPtr<const FPFAccountManagementLinkGameCenterAccountRequest> ConvertLinkGa
 	TSharedPtr<const FPFAccountManagementLinkGameCenterAccountRequest> ConvertedType = MakeShared<FPFAccountManagementLinkGameCenterAccountRequest>(FPFAccountManagementLinkGameCenterAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.gameCenterId = Datatype->gameCenterId == nullptr ? FString() : FString(Datatype->gameCenterId),
 		.publicKeyUrl = Datatype->publicKeyUrl == nullptr ? FString() : FString(Datatype->publicKeyUrl),
 		.salt = Datatype->salt == nullptr ? FString() : FString(Datatype->salt),
@@ -1926,7 +1926,7 @@ TSharedPtr<const FPFAccountManagementLinkGoogleAccountRequest> ConvertLinkGoogle
 	TSharedPtr<const FPFAccountManagementLinkGoogleAccountRequest> ConvertedType = MakeShared<FPFAccountManagementLinkGoogleAccountRequest>(FPFAccountManagementLinkGoogleAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.serverAuthCode = Datatype->serverAuthCode == nullptr ? FString() : FString(Datatype->serverAuthCode)
 	});
 
@@ -1958,7 +1958,7 @@ TSharedPtr<const FPFAccountManagementLinkGooglePlayGamesServicesAccountRequest> 
 	TSharedPtr<const FPFAccountManagementLinkGooglePlayGamesServicesAccountRequest> ConvertedType = MakeShared<FPFAccountManagementLinkGooglePlayGamesServicesAccountRequest>(FPFAccountManagementLinkGooglePlayGamesServicesAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.serverAuthCode = Datatype->serverAuthCode == nullptr ? FString() : FString(Datatype->serverAuthCode)
 	});
 
@@ -1992,7 +1992,7 @@ TSharedPtr<const FPFAccountManagementLinkIOSDeviceIDRequest> ConvertLinkIOSDevic
 		.customTagsCount = Datatype->customTagsCount,
 		.deviceId = Datatype->deviceId == nullptr ? FString() : FString(Datatype->deviceId),
 		.deviceModel = Datatype->deviceModel == nullptr ? FString() : FString(Datatype->deviceModel),
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.OS = Datatype->OS == nullptr ? FString() : FString(Datatype->OS)
 	});
 
@@ -2027,7 +2027,7 @@ TSharedPtr<const FPFAccountManagementLinkKongregateAccountRequest> ConvertLinkKo
 		.authTicket = Datatype->authTicket == nullptr ? FString() : FString(Datatype->authTicket),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.kongregateId = Datatype->kongregateId == nullptr ? FString() : FString(Datatype->kongregateId)
 	});
 
@@ -2060,7 +2060,7 @@ TSharedPtr<const FPFAccountManagementClientLinkNintendoServiceAccountRequest> Co
 	TSharedPtr<const FPFAccountManagementClientLinkNintendoServiceAccountRequest> ConvertedType = MakeShared<FPFAccountManagementClientLinkNintendoServiceAccountRequest>(FPFAccountManagementClientLinkNintendoServiceAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.identityToken = Datatype->identityToken == nullptr ? FString() : FString(Datatype->identityToken)
 	});
 
@@ -2092,7 +2092,7 @@ TSharedPtr<const FPFAccountManagementClientLinkNintendoSwitchDeviceIdRequest> Co
 	TSharedPtr<const FPFAccountManagementClientLinkNintendoSwitchDeviceIdRequest> ConvertedType = MakeShared<FPFAccountManagementClientLinkNintendoSwitchDeviceIdRequest>(FPFAccountManagementClientLinkNintendoSwitchDeviceIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.nintendoSwitchDeviceId = Datatype->nintendoSwitchDeviceId == nullptr ? FString() : FString(Datatype->nintendoSwitchDeviceId)
 	});
 
@@ -2125,7 +2125,7 @@ TSharedPtr<const FPFAccountManagementLinkOpenIdConnectRequest> ConvertLinkOpenId
 		.connectionId = Datatype->connectionId == nullptr ? FString() : FString(Datatype->connectionId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.idToken = Datatype->idToken == nullptr ? FString() : FString(Datatype->idToken)
 	});
 
@@ -2159,8 +2159,8 @@ TSharedPtr<const FPFAccountManagementClientLinkPSNAccountRequest> ConvertClientL
 		.authCode = Datatype->authCode == nullptr ? FString() : FString(Datatype->authCode),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.redirectUri = Datatype->redirectUri == nullptr ? FString() : FString(Datatype->redirectUri)
 	});
 
@@ -2194,9 +2194,9 @@ TSharedPtr<const FPFAccountManagementLinkSteamAccountRequest> ConvertLinkSteamAc
 	TSharedPtr<const FPFAccountManagementLinkSteamAccountRequest> ConvertedType = MakeShared<FPFAccountManagementLinkSteamAccountRequest>(FPFAccountManagementLinkSteamAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.steamTicket = Datatype->steamTicket == nullptr ? FString() : FString(Datatype->steamTicket),
-		.ticketIsServiceSpecific = TSharedPtr<const bool>(Datatype->ticketIsServiceSpecific)
+		.ticketIsServiceSpecific = ConvertOptionalToUnreal(Datatype->ticketIsServiceSpecific)
 	});
 
 	return ConvertedType;
@@ -2229,7 +2229,7 @@ TSharedPtr<const FPFAccountManagementClientLinkTwitchAccountRequest> ConvertClie
 		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink)
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink)
 	});
 
 	return ConvertedType;
@@ -2260,7 +2260,7 @@ TSharedPtr<const FPFAccountManagementClientLinkXboxAccountRequest> ConvertClient
 	TSharedPtr<const FPFAccountManagementClientLinkXboxAccountRequest> ConvertedType = MakeShared<FPFAccountManagementClientLinkXboxAccountRequest>(FPFAccountManagementClientLinkXboxAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 #if defined(PF_GDK_AVAILABLE) && defined(PF_UE_GDK_SUPPORT)
 		.user = Datatype->user == nullptr ? FGDKUserHandle() : FGDKUserHandle(Datatype->user)
 #elif defined(PF_GDK_AVAILABLE)
@@ -3052,7 +3052,7 @@ TSharedPtr<const FPFAccountManagementBanRequest> ConvertBanRequestToUnreal(const
 	}
 
 	TSharedPtr<const FPFAccountManagementBanRequest> ConvertedType = MakeShared<FPFAccountManagementBanRequest>(FPFAccountManagementBanRequest{
-		.durationInHours = TSharedPtr<const uint32>(Datatype->durationInHours),
+		.durationInHours = ConvertOptionalToUnreal(Datatype->durationInHours),
 		.IPAddress = Datatype->IPAddress == nullptr ? FString() : FString(Datatype->IPAddress),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.reason = Datatype->reason == nullptr ? FString() : FString(Datatype->reason),
@@ -3404,7 +3404,7 @@ TSharedPtr<const FPFAccountManagementServerLinkBattleNetAccountRequest> ConvertS
 	TSharedPtr<const FPFAccountManagementServerLinkBattleNetAccountRequest> ConvertedType = MakeShared<FPFAccountManagementServerLinkBattleNetAccountRequest>(FPFAccountManagementServerLinkBattleNetAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.identityToken = Datatype->identityToken == nullptr ? FString() : FString(Datatype->identityToken),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
 	});
@@ -3438,7 +3438,7 @@ TSharedPtr<const FPFAccountManagementServerLinkNintendoServiceAccountRequest> Co
 	TSharedPtr<const FPFAccountManagementServerLinkNintendoServiceAccountRequest> ConvertedType = MakeShared<FPFAccountManagementServerLinkNintendoServiceAccountRequest>(FPFAccountManagementServerLinkNintendoServiceAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.identityToken = Datatype->identityToken == nullptr ? FString() : FString(Datatype->identityToken),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
 	});
@@ -3472,7 +3472,7 @@ TSharedPtr<const FPFAccountManagementLinkNintendoServiceAccountSubjectRequest> C
 	TSharedPtr<const FPFAccountManagementLinkNintendoServiceAccountSubjectRequest> ConvertedType = MakeShared<FPFAccountManagementLinkNintendoServiceAccountSubjectRequest>(FPFAccountManagementLinkNintendoServiceAccountSubjectRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.subject = Datatype->subject == nullptr ? FString() : FString(Datatype->subject)
 	});
@@ -3506,7 +3506,7 @@ TSharedPtr<const FPFAccountManagementServerLinkNintendoSwitchDeviceIdRequest> Co
 	TSharedPtr<const FPFAccountManagementServerLinkNintendoSwitchDeviceIdRequest> ConvertedType = MakeShared<FPFAccountManagementServerLinkNintendoSwitchDeviceIdRequest>(FPFAccountManagementServerLinkNintendoSwitchDeviceIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.nintendoSwitchDeviceId = Datatype->nintendoSwitchDeviceId == nullptr ? FString() : FString(Datatype->nintendoSwitchDeviceId),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
 	});
@@ -3541,8 +3541,8 @@ TSharedPtr<const FPFAccountManagementServerLinkPSNAccountRequest> ConvertServerL
 		.authCode = Datatype->authCode == nullptr ? FString() : FString(Datatype->authCode),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.redirectUri = Datatype->redirectUri == nullptr ? FString() : FString(Datatype->redirectUri)
 	});
@@ -3578,8 +3578,8 @@ TSharedPtr<const FPFAccountManagementLinkPSNIdRequest> ConvertLinkPSNIdRequestTo
 	TSharedPtr<const FPFAccountManagementLinkPSNIdRequest> ConvertedType = MakeShared<FPFAccountManagementLinkPSNIdRequest>(FPFAccountManagementLinkPSNIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.PSNUserId = Datatype->PSNUserId == nullptr ? FString() : FString(Datatype->PSNUserId)
 	});
@@ -3614,7 +3614,7 @@ TSharedPtr<const FPFAccountManagementLinkServerCustomIdRequest> ConvertLinkServe
 	TSharedPtr<const FPFAccountManagementLinkServerCustomIdRequest> ConvertedType = MakeShared<FPFAccountManagementLinkServerCustomIdRequest>(FPFAccountManagementLinkServerCustomIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.serverCustomId = Datatype->serverCustomId == nullptr ? FString() : FString(Datatype->serverCustomId)
 	});
@@ -3648,7 +3648,7 @@ TSharedPtr<const FPFAccountManagementLinkSteamIdRequest> ConvertLinkSteamIdReque
 	TSharedPtr<const FPFAccountManagementLinkSteamIdRequest> ConvertedType = MakeShared<FPFAccountManagementLinkSteamIdRequest>(FPFAccountManagementLinkSteamIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.steamId = Datatype->steamId == nullptr ? FString() : FString(Datatype->steamId)
 	});
@@ -3683,7 +3683,7 @@ TSharedPtr<const FPFAccountManagementServerLinkTwitchAccountRequest> ConvertServ
 		.accessToken = Datatype->accessToken == nullptr ? FString() : FString(Datatype->accessToken),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId)
 	});
 
@@ -3716,7 +3716,7 @@ TSharedPtr<const FPFAccountManagementServerLinkXboxAccountRequest> ConvertServer
 	TSharedPtr<const FPFAccountManagementServerLinkXboxAccountRequest> ConvertedType = MakeShared<FPFAccountManagementServerLinkXboxAccountRequest>(FPFAccountManagementServerLinkXboxAccountRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.xboxToken = Datatype->xboxToken == nullptr ? FString() : FString(Datatype->xboxToken)
 	});
@@ -3750,7 +3750,7 @@ TSharedPtr<const FPFAccountManagementLinkXboxIdRequest> ConvertLinkXboxIdRequest
 	TSharedPtr<const FPFAccountManagementLinkXboxIdRequest> ConvertedType = MakeShared<FPFAccountManagementLinkXboxIdRequest>(FPFAccountManagementLinkXboxIdRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceLink = TSharedPtr<const bool>(Datatype->forceLink),
+		.forceLink = ConvertOptionalToUnreal(Datatype->forceLink),
 		.playFabId = Datatype->playFabId == nullptr ? FString() : FString(Datatype->playFabId),
 		.sandbox = Datatype->sandbox == nullptr ? FString() : FString(Datatype->sandbox),
 		.xboxId = Datatype->xboxId == nullptr ? FString() : FString(Datatype->xboxId)
@@ -4296,11 +4296,11 @@ TSharedPtr<const FPFAccountManagementUpdateBanRequest> ConvertUpdateBanRequestTo
 	}
 
 	TSharedPtr<const FPFAccountManagementUpdateBanRequest> ConvertedType = MakeShared<FPFAccountManagementUpdateBanRequest>(FPFAccountManagementUpdateBanRequest{
-		.active = TSharedPtr<const bool>(Datatype->active),
+		.active = ConvertOptionalToUnreal(Datatype->active),
 		.banId = Datatype->banId == nullptr ? FString() : FString(Datatype->banId),
 		.expires = ConvertTimeToUnreal(Datatype->expires),
 		.IPAddress = Datatype->IPAddress == nullptr ? FString() : FString(Datatype->IPAddress),
-		.permanent = TSharedPtr<const bool>(Datatype->permanent),
+		.permanent = ConvertOptionalToUnreal(Datatype->permanent),
 		.reason = Datatype->reason == nullptr ? FString() : FString(Datatype->reason),
 		.userFamilyType = MakeShared<FPFAccountManagementUserFamilyType>(ConvertUserFamilyTypeToUnreal(Datatype->userFamilyType))
 	});
@@ -4458,7 +4458,7 @@ TSharedPtr<const FPFAccountManagementSetDisplayNameRequest> ConvertSetDisplayNam
 		.customTagsCount = Datatype->customTagsCount,
 		.displayName = Datatype->displayName == nullptr ? FString() : FString(Datatype->displayName),
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
-		.expectedVersion = TSharedPtr<const int32>(Datatype->expectedVersion)
+		.expectedVersion = ConvertOptionalToUnreal(Datatype->expectedVersion)
 	});
 
 	return ConvertedType;
@@ -4489,7 +4489,7 @@ TSharedPtr<const FPFAccountManagementSetDisplayNameResponse> ConvertSetDisplayNa
 
 	TSharedPtr<const FPFAccountManagementSetDisplayNameResponse> ConvertedType = MakeShared<FPFAccountManagementSetDisplayNameResponse>(FPFAccountManagementSetDisplayNameResponse{
 		.operationResult = MakeShared<FPFOperationTypes>(ConvertOperationTypesToUnreal(Datatype->operationResult)),
-		.versionNumber = TSharedPtr<const int32>(Datatype->versionNumber)
+		.versionNumber = ConvertOptionalToUnreal(Datatype->versionNumber)
 	});
 
 	return ConvertedType;

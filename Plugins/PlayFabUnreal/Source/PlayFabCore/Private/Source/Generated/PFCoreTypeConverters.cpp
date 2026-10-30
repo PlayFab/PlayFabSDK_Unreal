@@ -1271,10 +1271,10 @@ TSharedPtr<const FPFItemInstance> ConvertItemInstanceToUnreal(const PFItemInstan
 		.itemId = Datatype->itemId == nullptr ? FString() : FString(Datatype->itemId),
 		.itemInstanceId = Datatype->itemInstanceId == nullptr ? FString() : FString(Datatype->itemInstanceId),
 		.purchaseDate = ConvertTimeToUnreal(Datatype->purchaseDate),
-		.remainingUses = TSharedPtr<const int32>(Datatype->remainingUses),
+		.remainingUses = ConvertOptionalToUnreal(Datatype->remainingUses),
 		.unitCurrency = Datatype->unitCurrency == nullptr ? FString() : FString(Datatype->unitCurrency),
 		.unitPrice = Datatype->unitPrice,
-		.usesIncrementedBy = TSharedPtr<const int32>(Datatype->usesIncrementedBy)
+		.usesIncrementedBy = ConvertOptionalToUnreal(Datatype->usesIncrementedBy)
 	});
 
 	return ConvertedType;
@@ -1820,7 +1820,7 @@ TSharedPtr<const FPFUserTitleInfo> ConvertUserTitleInfoToUnreal(const PFUserTitl
 		.created = FDateTime::FromUnixTimestamp((int64)Datatype->created),
 		.displayName = Datatype->displayName == nullptr ? FString() : FString(Datatype->displayName),
 		.firstLogin = ConvertTimeToUnreal(Datatype->firstLogin),
-		.isBanned = TSharedPtr<const bool>(Datatype->isBanned),
+		.isBanned = ConvertOptionalToUnreal(Datatype->isBanned),
 		.lastLogin = ConvertTimeToUnreal(Datatype->lastLogin),
 		.origination = MakeShared<FPFUserOrigination>(ConvertUserOriginationToUnreal(Datatype->origination)),
 		.titlePlayerAccount = ConvertEntityKeyToUnreal(Datatype->titlePlayerAccount)
@@ -2229,8 +2229,8 @@ TSharedPtr<const FPFLocationModel> ConvertLocationModelToUnreal(const PFLocation
 		.city = Datatype->city == nullptr ? FString() : FString(Datatype->city),
 		.continentCode = MakeShared<FPFContinentCode>(ConvertContinentCodeToUnreal(Datatype->continentCode)),
 		.countryCode = MakeShared<FPFCountryCode>(ConvertCountryCodeToUnreal(Datatype->countryCode)),
-		.latitude = TSharedPtr<const double>(Datatype->latitude),
-		.longitude = TSharedPtr<const double>(Datatype->longitude)
+		.latitude = ConvertOptionalToUnreal(Datatype->latitude),
+		.longitude = ConvertOptionalToUnreal(Datatype->longitude)
 	});
 
 	return ConvertedType;
@@ -2475,7 +2475,7 @@ TSharedPtr<const FPFPlayerProfileModel> ConvertPlayerProfileModelToUnreal(const 
 		.tags = ConvertPlayfabArrayToUnreal<PFTagModel, FPFTagModel>(Datatype->tags, Datatype->tagsCount, ConvertTagModelToUnreal),
 		.tagsCount = Datatype->tagsCount,
 		.titleId = Datatype->titleId == nullptr ? FString() : FString(Datatype->titleId),
-		.totalValueToDateInUSD = TSharedPtr<const uint32>(Datatype->totalValueToDateInUSD),
+		.totalValueToDateInUSD = ConvertOptionalToUnreal(Datatype->totalValueToDateInUSD),
 		.valuesToDate = ConvertPlayfabArrayToUnreal<PFValueToDateModel, FPFValueToDateModel>(Datatype->valuesToDate, Datatype->valuesToDateCount, ConvertValueToDateModelToUnreal),
 		.valuesToDateCount = Datatype->valuesToDateCount
 	});

@@ -6,12 +6,19 @@
 #include "OnlineIdentityInterfacePlayFab.h"
 #include "PlayFabSocketSubsystem.h"
 #include "PlayFabPartyNetwork.h"
+#include "PlayFabNetDriverRouting.h"
+#include "PlayFabPartyNetworkCompletion.h"
 #include "Interfaces/IPluginManager.h"
 #include "SocketSubsystem.h"
 #include "IpConnection.h"
 #include "PlayFabNetDriver.h"
 #include "OnlineExternalUIInterfacePlayFab.h"
 #include "PlayFabHelpers.h"
+#if !UE_BUILD_SHIPPING
+#include "PlayFabPartyConfig.h"
+#endif
+#include "PlayFabVoiceInitialization.h"
+#include "PlayFabCustomData.h"
 #include "OnlineSubsystemModule.h"
 
 #if defined(OSS_PLAYFAB_PLAYSTATION)
@@ -54,6 +61,11 @@ OSS_PLAYFAB_PASSTHROUGH_FUNCTION_DEFINITION(IOnlineGameMatchesPtr, GetGameMatche
 
 namespace
 {
+	bool IsCustomDataEndpointEnabled()
+	{
+		return GConfig && PlayFabCustomData::IsEnabled(*GConfig, GEngineIni);
+	}
+
 	void* PlayFabAlloc(size_t Size, uint32_t MemoryTypeId)
 	{
 		return FMemory::Malloc(Size);
@@ -62,6 +74,32 @@ namespace
 	void PlayFabFree(void* PointerToMemory, uint32_t MemoryTypeId)
 	{
 		FMemory::Free(PointerToMemory);
+	}
+
+	TSharedPtr<FPlayFabPartyNetwork> GetPartyNetworkByNetworkId(
+		const FOnlineSubsystemPlayFab& Subsystem,
+		const FString& NetworkId,
+		FName* OutSessionName = nullptr)
+	{
+		if (NetworkId.IsEmpty())
+		{
+			return nullptr;
+		}
+
+		FScopeLock ScopeLock(&Subsystem.PartyNetworksLock);
+		for (const auto& Pair : Subsystem.PartyNetworks)
+		{
+			if (Pair.Value->NetworkId == NetworkId)
+			{
+				if (OutSessionName)
+				{
+					*OutSessionName = Pair.Key;
+				}
+				return Pair.Value;
+			}
+		}
+
+		return nullptr;
 	}
 }
 
@@ -108,6 +146,11 @@ void FOnlineSubsystemPlayFab::ParseNetworkConfiguration()
 	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxEndpointsPerDeviceCount"), MaxEndpointsPerDeviceCount, GEngineIni);
 	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxUserCount"), MaxUserCount, GEngineIni);
 	GConfig->GetInt(TEXT("OnlineSubsystemPlayFab"), TEXT("MaxUsersPerDeviceCount"), MaxUsersPerDeviceCount, GEngineIni);
+	if (IsCustomDataEndpointEnabled() && MaxEndpointsPerDeviceCount < 2)
+	{
+		UE_LOG_ONLINE(Warning, TEXT("Custom data requires two Party endpoints per device; increasing MaxEndpointsPerDeviceCount from %d to 2"), MaxEndpointsPerDeviceCount);
+		MaxEndpointsPerDeviceCount = 2;
+	}
 
 	TArray<FString> ConnectivityOptionsArr;
 	GConfig->GetArray(TEXT("OnlineSubsystemPlayFab"), TEXT("DirectPeerConnectivityOptions"), ConnectivityOptionsArr, GEngineIni);
@@ -148,7 +191,8 @@ TSharedPtr<FPlayFabPartyNetwork> FOnlineSubsystemPlayFab::CreateAndConnectToNetw
 		MaxEndpointsPerDeviceCount,
 		MaxUserCount,
 		MaxUsersPerDeviceCount,
-		DirectPeerConnectivityOptions);
+		DirectPeerConnectivityOptions,
+		IsCustomDataEndpointEnabled());
 	if (NewNetwork->CreateAndConnectToNetwork())
 	{
 		PartyNetworks.Add(SessionName, NewNetwork);
@@ -175,7 +219,8 @@ TSharedPtr<FPlayFabPartyNetwork> FOnlineSubsystemPlayFab::ConnectToNetwork(FName
 		MaxEndpointsPerDeviceCount,
 		MaxUserCount,
 		MaxUsersPerDeviceCount,
-		DirectPeerConnectivityOptions);
+		DirectPeerConnectivityOptions,
+		IsCustomDataEndpointEnabled());
 	if (NewNetwork->ConnectToNetwork(NetworkId, NetworkDescriptorStr))
 	{
 		PartyNetworks.Add(SessionName, NewNetwork);
@@ -234,7 +279,14 @@ void FOnlineSubsystemPlayFab::RemovePartyNetwork(FName SessionName)
 bool FOnlineSubsystemPlayFab::Init()
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::Init"));
-	
+
+	const FName NativeOSSName = GetNativePlatformSubsystemName();
+	if (NativeOSSName == NAME_None || NativeOSSName == NULL_SUBSYSTEM)
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::Init skipped: no usable native platform online subsystem is configured (NativePlatformService = '%s')"), *NativeOSSName.ToString());
+		return false;
+	}
+
 	NativeOSS = GetNativeOnlineSubsystem(GetInstanceName());
 	if (!ensure(NativeOSS))
 	{
@@ -304,7 +356,8 @@ bool FOnlineSubsystemPlayFab::Init()
 	IdentityInterface = MakeShared<FOnlineIdentityPlayFab, ESPMode::ThreadSafe>(this);
 	SessionInterface = MakeShared<FOnlineSessionPlayFab, ESPMode::ThreadSafe>(this);
 	ExternalUIInterface = MakeShared<FOnlineExternalUIPlayFab, ESPMode::ThreadSafe>(this);
-	VoiceInterface = MakeShared<FOnlineVoicePlayFab, ESPMode::ThreadSafe>(this);
+	FOnlineVoicePlayFabPtr VoiceInterfaceCandidate = MakeShared<FOnlineVoicePlayFab, ESPMode::ThreadSafe>(this);
+	VoiceInterface = PlayFabVoiceInitialization::Initialize(VoiceInterfaceCandidate);
 	CognitiveServicesInterface = MakeShared<FOnlineCognitiveServicesPlayFab, ESPMode::ThreadSafe>(this);
 
 	// Initialize EventTracer
@@ -322,9 +375,6 @@ void FOnlineSubsystemPlayFab::InitializePlayFab()
 
 #if defined(OSS_PLAYFAB_PLAYSTATION)
 	HRESULT hr = PFInitialize(nullptr);
-#else // OSS_PLAYFAB_PLAYSTATION
-	HRESULT hr = FPFInitialize();
-#endif // !OSS_PLAYFAB_PLAYSTATION
 	if (FAILED(hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::InitializePlayFab: PFInitialize failed: 0x%08x"), hr);
@@ -333,11 +383,21 @@ void FOnlineSubsystemPlayFab::InitializePlayFab()
 	{
 		bPFInitialized = true;
 	}
+#else // OSS_PLAYFAB_PLAYSTATION
+	if (!FPFInitialize())
+	{
+		UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::InitializePlayFab: FPFInitialize failed"));
+	}
+	else
+	{
+		bPFInitialized = true;
+	}
+#endif // !OSS_PLAYFAB_PLAYSTATION
 }
 
 void FOnlineSubsystemPlayFab::InitializePlayFabParty()
 {
-	if (!bPartyInitialized)
+	PartyLifecycle.TryInitialize(bPartyInitialized, [this]()
 	{
 		UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty"));
 
@@ -372,16 +432,36 @@ void FOnlineSubsystemPlayFab::InitializePlayFabParty()
 			}
 		}
 
+#if !UE_BUILD_SHIPPING
+		const bool bUseDebugConnectivityPreservationMode = PlayFabPartyConfig::ShouldUseDebugConnectivityPreservationMode();
+		const PartyDevelopmentConnectivityPreservationMode ConnectivityPreservationMode = bUseDebugConnectivityPreservationMode
+			? PartyDevelopmentConnectivityPreservationMode::TemporaryDebugging
+			: PartyDevelopmentConnectivityPreservationMode::Standard;
+		const PartyError SetOptionErr = Manager.SetOption(
+			nullptr,
+			PartyOption::DevelopmentConnectivityPreservationMode,
+			&ConnectivityPreservationMode);
+
+		if (PARTY_FAILED(SetOptionErr))
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty: Failed to configure Party connectivity preservation mode: %s"), *GetPartyErrorMessage(SetOptionErr));
+		}
+		else if (bUseDebugConnectivityPreservationMode)
+		{
+			UE_LOG_ONLINE(Display, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty: Party debug connectivity preservation enabled (30 minute timeout)"));
+		}
+#endif
+
 		PartyError Err = Manager.Initialize(&partyInitConfig);
 		if (PARTY_FAILED(Err))
 		{
 			UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::InitializePlayFabParty: Initialize failed: %s"), *GetPartyErrorMessage(Err));
-			return;
+			return false;
 		}
 
 		UE_LOG_ONLINE(Display, TEXT("FOnlineSubsystemPlayFab InitializePlayFabParty with PlayFab TitleID %s"), *TitleID);
-		bPartyInitialized = true;
-	}
+		return true;
+	});
 }
 
 void FOnlineSubsystemPlayFab::InitializeMultiplayer()
@@ -451,26 +531,14 @@ void FOnlineSubsystemPlayFab::CleanUpPlayFab()
 		MultiplayerHandle = nullptr;
 	}
 
-	if (bPartyInitialized)
-	{
-		bPartyInitialized = false;
-
-		{
-			FScopeLock ScopeLock(&PartyNetworksLock);
-			PartyNetworks.Empty();
-		}
-
-		// This cleans up everything allocated in PartyManager.Initialize() and
-		// should only be used when done with networking
-		PartyManager::GetSingleton().Cleanup();
-	}
+	CleanUpPlayFabParty();
 
 	if (bPFInitialized)
 	{
 		bPFInitialized = false;
 
-		// Directly call the PFUninitializeAsync instead of FPFUninitializeAsync because the latter
-		// utilizes the XAsyncTaskManager and we want this to be blocking.
+#if defined(OSS_PLAYFAB_PLAYSTATION)
+		// Directly call the PFUninitializeAsync because we called the native PFInitialize instead of FPFInitialize.
 		HRESULT Hr = LocalTask(
 			[](XAsyncBlock* Block) { return PFUninitializeAsync(Block); }
 		);
@@ -478,6 +546,13 @@ void FOnlineSubsystemPlayFab::CleanUpPlayFab()
 		{
 			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CleanUpPlayFab PFUninitializeAsync failed: 0x%08x"), Hr);
 		}
+#else // OSS_PLAYFAB_PLAYSTATION
+		if (!FPFUninitialize())
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::CleanUpPlayFab FPFUninitialize failed"));
+			bPFInitialized = true;
+		}
+#endif // !OSS_PLAYFAB_PLAYSTATION
 	}
 }
 
@@ -485,7 +560,18 @@ bool FOnlineSubsystemPlayFab::Shutdown()
 {
 	UE_LOG_ONLINE(Display, TEXT("OnlineSubsystemPlayFab::Shutdown()"));
 
+	PartyLifecycle.BeginShutdown();
+	// The callback only writes its atomic signal, so draining it cannot wait on the game thread.
+	UnregisterNetworkInitCallbacks();
+	FCoreDelegates::ApplicationWillEnterBackgroundDelegate.RemoveAll(this);
+	FCoreDelegates::ApplicationHasEnteredForegroundDelegate.RemoveAll(this);
+
 	FOnlineSubsystemImpl::Shutdown();
+
+	if (MatchmakingInterface.IsValid())
+	{
+		MatchmakingInterface->Shutdown();
+	}
 
 	{
 		FScopeLock ScopeLock(&PartyNetworksLock);
@@ -527,12 +613,6 @@ bool FOnlineSubsystemPlayFab::Shutdown()
 	DestroyPlayFabSocketSubsystem();
 
 	CleanUpPlayFab();
-
-	UnregisterNetworkInitCallbacks();
-
-	// Unregister for suspend/resume callbacks
-	FCoreDelegates::ApplicationWillEnterBackgroundDelegate.RemoveAll(this);
-	FCoreDelegates::ApplicationHasEnteredForegroundDelegate.RemoveAll(this);
 
 #ifdef OSS_PLAYFAB_SWITCH
 	CleanUpSwitch();
@@ -619,7 +699,18 @@ FText FOnlineSubsystemPlayFab::GetSocialPlatformName() const
 
 void FOnlineSubsystemPlayFab::OnAppSuspend()
 {
+	if (!IsInGameThread())
+	{
+		ExecuteNextTick([this]() { OnAppSuspend(); });
+		return;
+	}
+	if (PartyLifecycle.IsShuttingDown())
+	{
+		return;
+	}
+
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnAppSuspend"));
+	PartyLifecycle.Suspend();
 
 	if (IdentityInterface.IsValid())
 	{
@@ -631,10 +722,13 @@ void FOnlineSubsystemPlayFab::OnAppSuspend()
 		VoiceInterface->OnAppSuspend();
 	}
 
-	if (bPartyInitialized)
-	{
-		bPartyInitialized = false;
+	CleanUpPlayFabParty();
+}
 
+void FOnlineSubsystemPlayFab::CleanUpPlayFabParty()
+{
+	PartyLifecycle.Cleanup(bPartyInitialized, [this]()
+	{
 		{
 			FScopeLock ScopeLock(&PartyNetworksLock);
 			PartyNetworks.Empty();
@@ -642,12 +736,21 @@ void FOnlineSubsystemPlayFab::OnAppSuspend()
 
 		// This cleans up everything allocated in PartyManager.Initialize() and
 		// should only be used when done with networking
-		PartyManager::GetSingleton().Cleanup();
-	}
+		const PartyError Err = PartyManager::GetSingleton().Cleanup();
+		if (PARTY_FAILED(Err))
+		{
+			UE_LOG_ONLINE(Error, TEXT("FOnlineSubsystemPlayFab::CleanUpPlayFabParty: Cleanup failed: %s"), *GetPartyErrorMessage(Err));
+		}
+	});
 }
 
 void FOnlineSubsystemPlayFab::OnAppResumeDefault()
 {
+	if (!PartyLifecycle.Resume(PartyLifecycle.GetGeneration()))
+	{
+		return;
+	}
+
 	TryInitializePlayFabParty();
 
 	if (IdentityInterface.IsValid())
@@ -666,8 +769,13 @@ void FOnlineSubsystemPlayFab::OnAppResumeGDK()
 {
 	if (SessionInterface.IsValid())
 	{
+		const uint64 ResumeGeneration = PartyLifecycle.GetGeneration();
 		FOnSessionsRemovedDelegate OnSessionsRemovedDelegate;
-		OnSessionsRemovedDelegate.BindLambda([this]() {
+		OnSessionsRemovedDelegate.BindLambda([this, ResumeGeneration]() {
+			if (!PartyLifecycle.Resume(ResumeGeneration))
+			{
+				return;
+			}
 			UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnAppResume: Received OnLobbyDisconnected"));
 			if (bMultiplayerInitialized)
 			{
@@ -702,6 +810,16 @@ void FOnlineSubsystemPlayFab::OnAppResumeGDK()
 
 void FOnlineSubsystemPlayFab::OnAppResume()
 {
+	if (!IsInGameThread())
+	{
+		ExecuteNextTick([this]() { OnAppResume(); });
+		return;
+	}
+	if (PartyLifecycle.IsShuttingDown())
+	{
+		return;
+	}
+
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnAppResume"));
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
@@ -723,6 +841,15 @@ bool FOnlineSubsystemPlayFab::Tick(float DeltaTime)
 	if (!FOnlineSubsystemImpl::Tick(DeltaTime))
 	{
 		return false;
+	}
+
+	if (PartyLifecycle.IsShuttingDown())
+	{
+		return false;
+	}
+	if (PartyLifecycle.ConsumeConnectivityChanged(DeltaTime))
+	{
+		TryInitializePlayFabParty();
 	}
 
 #ifdef OSS_PLAYFAB_PLAYSTATION
@@ -784,6 +911,11 @@ FPlayFabLobbyPtr FOnlineSubsystemPlayFab::GetPlayFabLobbyInterface() const
 }
 
 FMatchmakingInterfacePtr FOnlineSubsystemPlayFab::GetMatchmakingInterface() const
+{
+	return MatchmakingInterface;
+}
+
+IOnlineMatchmakingPlayFabPtr FOnlineSubsystemPlayFab::GetPlayFabMatchmakingInterface() const
 {
 	return MatchmakingInterface;
 }
@@ -868,16 +1000,34 @@ void FOnlineSubsystemPlayFab::DoWork()
 			case PartyStateChangeType::NetworkPropertiesChanged:						 OnNetworkPropertiesChanged(Change); break;
 			case PartyStateChangeType::KickDeviceCompleted:								 OnKickDeviceCompleted(Change); break;
 			case PartyStateChangeType::KickUserCompleted:								 OnKickUserCompleted(Change); break;
-			case PartyStateChangeType::ChatControlJoinedNetwork:						 VoiceInterface->OnChatControlJoinedNetwork(Change); break;
-			case PartyStateChangeType::ChatControlLeftNetwork:							 VoiceInterface->OnChatControlLeftNetwork(Change); break;
-			case PartyStateChangeType::ChatControlDestroyed:							 VoiceInterface->OnChatControlDestroyed(Change); break;
-			case PartyStateChangeType::ChatControlCreated:								 VoiceInterface->OnChatControlCreated(Change); break;
-			case PartyStateChangeType::ConnectChatControlCompleted:						 VoiceInterface->OnConnectChatControlCompleted(Change); break;
-			case PartyStateChangeType::CreateChatControlCompleted:						 VoiceInterface->OnCreateChatControlCompleted(Change); break;
-			case PartyStateChangeType::DestroyChatControlCompleted:						 VoiceInterface->OnDestroyChatControlCompleted(Change); break;
-			case PartyStateChangeType::LocalChatAudioInputChanged:						 VoiceInterface->OnLocalChatAudioInputChanged(Change); break;
-			case PartyStateChangeType::SetChatAudioInputCompleted:						 VoiceInterface->OnSetChatAudioInputCompleted(Change); break;
-			case PartyStateChangeType::SetChatAudioOutputCompleted:						 VoiceInterface->OnSetChatAudioOutputCompleted(Change); break;
+			case PartyStateChangeType::ChatControlJoinedNetwork:
+			case PartyStateChangeType::ChatControlLeftNetwork:
+			case PartyStateChangeType::ChatControlDestroyed:
+			case PartyStateChangeType::ChatControlCreated:
+			case PartyStateChangeType::ConnectChatControlCompleted:
+			case PartyStateChangeType::CreateChatControlCompleted:
+			case PartyStateChangeType::DestroyChatControlCompleted:
+			case PartyStateChangeType::LocalChatAudioInputChanged:
+			case PartyStateChangeType::SetChatAudioInputCompleted:
+			case PartyStateChangeType::SetChatAudioOutputCompleted:
+				if (VoiceInterface.IsValid())
+				{
+					switch (Change->stateChangeType)
+					{
+					case PartyStateChangeType::ChatControlJoinedNetwork: VoiceInterface->OnChatControlJoinedNetwork(Change); break;
+					case PartyStateChangeType::ChatControlLeftNetwork: VoiceInterface->OnChatControlLeftNetwork(Change); break;
+					case PartyStateChangeType::ChatControlDestroyed: VoiceInterface->OnChatControlDestroyed(Change); break;
+					case PartyStateChangeType::ChatControlCreated: VoiceInterface->OnChatControlCreated(Change); break;
+					case PartyStateChangeType::ConnectChatControlCompleted: VoiceInterface->OnConnectChatControlCompleted(Change); break;
+					case PartyStateChangeType::CreateChatControlCompleted: VoiceInterface->OnCreateChatControlCompleted(Change); break;
+					case PartyStateChangeType::DestroyChatControlCompleted: VoiceInterface->OnDestroyChatControlCompleted(Change); break;
+					case PartyStateChangeType::LocalChatAudioInputChanged: VoiceInterface->OnLocalChatAudioInputChanged(Change); break;
+					case PartyStateChangeType::SetChatAudioInputCompleted: VoiceInterface->OnSetChatAudioInputCompleted(Change); break;
+					case PartyStateChangeType::SetChatAudioOutputCompleted: VoiceInterface->OnSetChatAudioOutputCompleted(Change); break;
+					default: break;
+					}
+				}
+				break;
 			case PartyStateChangeType::SetChatAudioEncoderBitrateCompleted:				 OnSetChatAudioEncoderBitrateCompleted(Change); break;
 			case PartyStateChangeType::LocalChatAudioOutputChanged:						 OnLocalChatAudioOutputChanged(Change); break;
 			case PartyStateChangeType::SetLanguageCompleted:							 OnSetLanguageCompleted(Change); break;
@@ -1031,6 +1181,32 @@ void FOnlineSubsystemPlayFab::OnCreateNewNetworkCompleted(const PartyStateChange
 		{
 			UE_LOG_ONLINE(Warning, TEXT("CreateNewNetworkCompleted: FAIL: %s"), *PartyStateChangeResultToReasonString(Result->result));
 			UE_LOG_ONLINE(Warning, TEXT("ErrorDetail: %s"), *GetPartyErrorMessage(Result->errorDetail));
+
+			// Party guarantees networkIdentifier is populated even when CreateNewNetwork fails asynchronously.
+			const FString NetworkId = Result->networkDescriptor.networkIdentifier != nullptr
+				? UTF8_TO_TCHAR(Result->networkDescriptor.networkIdentifier)
+				: FString();
+			FName SessionName;
+			TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByNetworkId(*this, NetworkId, &SessionName);
+			if (TargetNetwork.IsValid())
+			{
+				const TOptional<PlayFabPartyNetworkCompletion::FEndpointFailure> Failure = PlayFabPartyNetworkCompletion::GetEndpointFailure(
+					Result->result,
+					TargetNetwork->NetworkId,
+					TargetNetwork->NetworkState);
+				PlayFabPartyNetworkCompletion::CompleteFailure(
+					Failure,
+					[this, SessionName]() { RemovePartyNetwork(SessionName); },
+					[this](const PlayFabPartyNetworkCompletion::FEndpointFailure& EndpointFailure)
+					{
+						TriggerOnPartyEndpointCreatedDelegates(false, EndpointFailure.NetworkId, 0, EndpointFailure.bIsHosting);
+					},
+					[]() {});
+			}
+			else
+			{
+				UE_LOG_ONLINE(Warning, TEXT("OnCreateNewNetworkCompleted: Could not find Party network for NetworkId '%s'"), *NetworkId);
+			}
 		}
 	}
 }
@@ -1046,7 +1222,14 @@ void FOnlineSubsystemPlayFab::OnConnectToNetworkCompleted(const PartyStateChange
 		TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network, &SessionName);
 		if (!TargetNetwork)
 		{
-			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnConnectToNetworkCompleted: Could not find matching FPlayFabPartyNetwork for raw network pointer"));
+			const FString NetworkId = Result->networkDescriptor.networkIdentifier != nullptr
+				? UTF8_TO_TCHAR(Result->networkDescriptor.networkIdentifier)
+				: FString();
+			TargetNetwork = GetPartyNetworkByNetworkId(*this, NetworkId, &SessionName);
+		}
+		if (!TargetNetwork)
+		{
+			UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnConnectToNetworkCompleted: Could not find matching FPlayFabPartyNetwork"));
 			TriggerOnConnectToPlayFabPartyNetworkCompletedDelegates(false);
 			return;
 		}
@@ -1073,8 +1256,18 @@ void FOnlineSubsystemPlayFab::OnConnectToNetworkCompleted(const PartyStateChange
 			UE_LOG_ONLINE(Warning, TEXT("ConnectToNetworkCompleted: FAIL:  %s"), *PartyStateChangeResultToReasonString(Result->result));
 			UE_LOG_ONLINE(Warning, TEXT("ErrorDetail: %s"), *GetPartyErrorMessage(Result->errorDetail));
 
-			RemovePartyNetwork(SessionName);
-			TriggerOnConnectToPlayFabPartyNetworkCompletedDelegates(false);
+			const TOptional<PlayFabPartyNetworkCompletion::FEndpointFailure> Failure = PlayFabPartyNetworkCompletion::GetEndpointFailure(
+				Result->result,
+				TargetNetwork->NetworkId,
+				TargetNetwork->NetworkState);
+			PlayFabPartyNetworkCompletion::CompleteFailure(
+				Failure,
+				[this, SessionName]() { RemovePartyNetwork(SessionName); },
+				[this](const PlayFabPartyNetworkCompletion::FEndpointFailure& EndpointFailure)
+				{
+					TriggerOnPartyEndpointCreatedDelegates(false, EndpointFailure.NetworkId, 0, EndpointFailure.bIsHosting);
+				},
+				[this]() { TriggerOnConnectToPlayFabPartyNetworkCompletedDelegates(false); });
 		}
 	}
 }
@@ -1092,7 +1285,7 @@ void FOnlineSubsystemPlayFab::OnLeaveNetworkCompleted(const PartyStateChange* Ch
 			if (TargetNetwork)
 			{
 				UE_LOG_ONLINE(Verbose, TEXT("OnLeaveNetworkCompleted: SUCCESS for NetworkId %s"), *TargetNetwork->NetworkId);
-				// Don't null Network pointer yet — OnNetworkDestroyed will handle final cleanup
+				// OnNetworkDestroyed performs final cleanup and completes the destroy Party gate.
 				TargetNetwork->NetworkState = EPlayFabPartyNetworkState::NoNetwork;
 			}
 			else
@@ -1104,6 +1297,18 @@ void FOnlineSubsystemPlayFab::OnLeaveNetworkCompleted(const PartyStateChange* Ch
 		{
 			UE_LOG_ONLINE(Warning, TEXT("OnLeaveNetworkCompleted: FAIL:  %s"), *PartyStateChangeResultToReasonString(Result->result));
 			UE_LOG_ONLINE(Warning, TEXT("ErrorDetail: %s"), *GetPartyErrorMessage(Result->errorDetail));
+			FName SessionName = NAME_None;
+			const TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network, &SessionName);
+			if (!TargetNetwork.IsValid())
+			{
+				UE_LOG_ONLINE(Warning, TEXT("OnLeaveNetworkCompleted: FAIL but could not resolve the session from the Party network"));
+				return;
+			}
+
+			if (SessionInterface.IsValid())
+			{
+				SessionInterface->OnPartyNetworkLeaveCompleted(SessionName, false);
+			}
 		}
 	}
 }
@@ -1117,25 +1322,44 @@ void FOnlineSubsystemPlayFab::OnNetworkDestroyed(const PartyStateChange* Change)
 	{
 		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnNetworkDestroyed: PlayFab Party network was destroyed with reason code %d"), Result->reason);
 
+		UPlayFabNetDriver* PlayFabNetDriver = PlayFabNetDriverRouting::Get(Result->network);
+		if (PlayFabNetDriver != nullptr)
+		{
+			PlayFabNetDriverRouting::Unlink(Result->network, PlayFabNetDriver);
+		}
+
 		FName DestroyedSessionName;
 		TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network, &DestroyedSessionName);
 		if (TargetNetwork)
 		{
-			TargetNetwork->Network = nullptr;
-			RemovePartyNetwork(DestroyedSessionName);
+			const bool bPartyLeaveSucceeded = Result->reason == PartyDestroyedReason::Requested;
+			const TOptional<PlayFabPartyNetworkCompletion::FEndpointFailure> Failure =
+				PlayFabPartyNetworkCompletion::GetEndpointFailureForNetworkState(
+					TargetNetwork->NetworkId,
+					TargetNetwork->NetworkState);
+			PlayFabPartyNetworkCompletion::CompleteFailure(
+				Failure,
+				[this, DestroyedSessionName, TargetNetwork, bPartyLeaveSucceeded]()
+				{
+					TargetNetwork->ResetCustomData();
+					TargetNetwork->Network = nullptr;
+					RemovePartyNetwork(DestroyedSessionName);
+					if (SessionInterface.IsValid())
+					{
+						SessionInterface->OnPartyNetworkLeaveCompleted(DestroyedSessionName, bPartyLeaveSucceeded);
+					}
+				},
+				[this](const PlayFabPartyNetworkCompletion::FEndpointFailure& EndpointFailure)
+				{
+					TriggerOnPartyEndpointCreatedDelegates(false, EndpointFailure.NetworkId, 0, EndpointFailure.bIsHosting);
+				},
+				[]() {});
 		}
 		else
 		{
 			UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnNetworkDestroyed: Network already cleaned up"));
 		}
 
-		FPlayFabSocketSubsystem* SocketSubsystem = static_cast<FPlayFabSocketSubsystem*>(ISocketSubsystem::Get(PLAYFAB_SOCKET_SUBSYSTEM));
-		if (SocketSubsystem == nullptr)
-		{
-			return;
-		}
-
-		UPlayFabNetDriver* PlayFabNetDriver = SocketSubsystem->GetLinkedNetDriver();
 		if (PlayFabNetDriver == nullptr)
 		{
 			return;
@@ -1185,6 +1409,12 @@ void FOnlineSubsystemPlayFab::OnEndpointMessageReceived(const PartyStateChange* 
 	const PartyEndpointMessageReceivedStateChange* Result = static_cast<const PartyEndpointMessageReceivedStateChange*>(Change);
 	if (Result)
 	{
+		TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network);
+		if (TargetNetwork && TargetNetwork->IsCustomDataMessage(*Result))
+		{
+			TriggerOnCustomDataMessageReceivedDelegates(Result);
+			return;
+		}
 		TriggerOnEndpointMessageReceivedDelegates(Result);
 	}
 }
@@ -1253,6 +1483,39 @@ void FOnlineSubsystemPlayFab::OnNetworkPropertiesChanged(const PartyStateChange*
 void FOnlineSubsystemPlayFab::OnCreateEndpointCompleted(const PartyStateChange* Change)
 {
 	UE_LOG_ONLINE(Verbose, TEXT("FOnlineSubsystemPlayFab::OnCreateEndpointCompleted"));
+
+	const PartyCreateEndpointCompletedStateChange* Result = static_cast<const PartyCreateEndpointCompletedStateChange*>(Change);
+	if (!Result || Result->result == PartyStateChangeResult::Succeeded)
+	{
+		return;
+	}
+
+	UE_LOG_ONLINE(Warning, TEXT("CreateEndpointCompleted: FAIL: %s"), *PartyStateChangeResultToReasonString(Result->result));
+	UE_LOG_ONLINE(Warning, TEXT("ErrorDetail: %s"), *GetPartyErrorMessage(Result->errorDetail));
+
+	TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network);
+	if (!TargetNetwork)
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnCreateEndpointCompleted: Could not find matching FPlayFabPartyNetwork"));
+		return;
+	}
+	const bool bIsCustomEndpointOperation = Result->asyncIdentifier == TargetNetwork.Get();
+	if (bIsCustomEndpointOperation)
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FOnlineSubsystemPlayFab::OnCreateEndpointCompleted: Optional custom endpoint creation failed; normal session remains active"));
+		TargetNetwork->ResetCustomData();
+	}
+
+	const TOptional<PlayFabPartyNetworkCompletion::FEndpointFailure> Failure =
+		PlayFabPartyNetworkCompletion::GetEndpointCreationFailure(
+			Result->result,
+			TargetNetwork->NetworkId,
+			TargetNetwork->NetworkState,
+			bIsCustomEndpointOperation);
+	if (Failure.IsSet())
+	{
+		TriggerOnPartyEndpointCreatedDelegates(false, Failure->NetworkId, 0, Failure->bIsHosting);
+	}
 }
 
 void FOnlineSubsystemPlayFab::OnDestroyEndpointCompleted(const PartyStateChange* Change)
@@ -1279,6 +1542,11 @@ void FOnlineSubsystemPlayFab::OnEndpointCreated(const PartyStateChange* Change)
 		PartyEndpoint* NewEndpoint = Result->endpoint;
 		if (NewEndpoint)
 		{
+			if (TargetNetwork->HandleCustomEndpointCreated(NewEndpoint))
+			{
+				return;
+			}
+
 			uint16 EndpointId = 0;
 			PartyError Err = NewEndpoint->GetUniqueIdentifier(&EndpointId);
 			if (PARTY_FAILED(Err) || EndpointId == 0)
@@ -1314,6 +1582,12 @@ void FOnlineSubsystemPlayFab::OnEndpointDestroyed(const PartyStateChange* Change
 		PartyEndpoint* NewEndpoint = Result->endpoint;
 		if (NewEndpoint)
 		{
+			TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network);
+			if (TargetNetwork && TargetNetwork->HandleCustomEndpointDestroyed(NewEndpoint))
+			{
+				return;
+			}
+
 			uint16 EndpointId = 0;
 			PartyError Err = NewEndpoint->GetUniqueIdentifier(&EndpointId);
 			if (PARTY_FAILED(Err) || EndpointId == 0)
@@ -1322,7 +1596,7 @@ void FOnlineSubsystemPlayFab::OnEndpointDestroyed(const PartyStateChange* Change
 			}
 			else
 			{
-				TSharedPtr<FPlayFabPartyNetwork> TargetNetwork = GetPartyNetworkByRawPtr(Result->network);
+				TargetNetwork = GetPartyNetworkByRawPtr(Result->network);
 				if (TargetNetwork)
 				{
 					TargetNetwork->Endpoints.Remove(EndpointId);
@@ -1338,7 +1612,7 @@ void FOnlineSubsystemPlayFab::OnEndpointDestroyed(const PartyStateChange* Change
 				return;
 			}
 
-			UPlayFabNetDriver* PlayFabNetDriver = SocketSubsystem->GetLinkedNetDriver();
+			UPlayFabNetDriver* PlayFabNetDriver = PlayFabNetDriverRouting::Get(Result->network);
 			if (PlayFabNetDriver == nullptr)
 			{
 				return;

@@ -407,8 +407,8 @@ public class PlayFabUnreal : ModuleRules
         else
         {
             // Loading XCurl from new folder structure (windows)
-            RuntimeDependencies.Add("$(BinaryOutputDir)/XCurl.dll", Path.Combine(BinPath, "XCurl.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/XCurl.pdb", Path.Combine(BinPath, "XCurl.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/XCurl.dll", Path.Combine(BinPath, "XCurl.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/XCurl.pdb", Path.Combine(BinPath, "XCurl.pdb"), StagedFileType.DebugNonUFS);
             PublicAdditionalLibraries.Add(Path.Combine(LibPath, "XCurl.lib"));
         }
 
@@ -416,16 +416,16 @@ public class PlayFabUnreal : ModuleRules
         PublicIncludePaths.Add(IncludePath);
 
         // Binaries
-        RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.dll", Path.Combine(BinPath, "libHttpClient.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.pdb", Path.Combine(BinPath, "libHttpClient.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/xgameruntime.dll", Path.Combine(BinPath, "xgameruntime.dll"), StagedFileType.SystemNonUFS);
-        RuntimeDependencies.Add("$(BinaryOutputDir)/xgameruntime.pdb", Path.Combine(BinPath, "xgameruntime.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/libHttpClient.dll", Path.Combine(BinPath, "libHttpClient.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/libHttpClient.pdb", Path.Combine(BinPath, "libHttpClient.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/xgameruntime.dll", Path.Combine(BinPath, "xgameruntime.dll"), StagedFileType.SystemNonUFS);
+        RuntimeDependencies.Add("$(TargetOutputDir)/xgameruntime.pdb", Path.Combine(BinPath, "xgameruntime.pdb"), StagedFileType.DebugNonUFS);
 
         // Import libs
         PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.lib"));
@@ -440,7 +440,7 @@ public class PlayFabUnreal : ModuleRules
 
         if (File.Exists(MicrosoftGameConfigPath))
         {
-            RuntimeDependencies.Add("$(BinaryOutputDir)/MicrosoftGame.config", MicrosoftGameConfigPath, StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/MicrosoftGame.config", MicrosoftGameConfigPath, StagedFileType.SystemNonUFS);
         }
     }
 
@@ -469,14 +469,14 @@ public class PlayFabUnreal : ModuleRules
             PublicIncludePaths.Add(IncludePath);
 
             // Binaries
-            RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.dll", Path.Combine(BinPath, "libHttpClient.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/libHttpClient.pdb", Path.Combine(BinPath, "libHttpClient.pdb"), StagedFileType.DebugNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
-            RuntimeDependencies.Add("$(BinaryOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/libHttpClient.dll", Path.Combine(BinPath, "libHttpClient.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/libHttpClient.pdb", Path.Combine(BinPath, "libHttpClient.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabCore.dll", Path.Combine(BinPath, "PlayFabCore.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabCore.pdb", Path.Combine(BinPath, "PlayFabCore.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabServices.dll", Path.Combine(BinPath, "PlayFabServices.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabServices.pdb", Path.Combine(BinPath, "PlayFabServices.pdb"), StagedFileType.DebugNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabGameSave.dll", Path.Combine(BinPath, "PlayFabGameSave.dll"), StagedFileType.SystemNonUFS);
+            RuntimeDependencies.Add("$(TargetOutputDir)/PlayFabGameSave.pdb", Path.Combine(BinPath, "PlayFabGameSave.pdb"), StagedFileType.DebugNonUFS);
 
             // Import libs
             PublicAdditionalLibraries.Add(Path.Combine(LibPath, "libHttpClient.lib"));

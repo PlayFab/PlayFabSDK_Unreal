@@ -147,13 +147,18 @@ bool FOnlineExternalUIPlayFab::ShowProfileUI(const FUniqueNetId& Requestor, cons
 	return true;
 }
 
-void FOnlineExternalUIPlayFab::HandleShowInviteUIComplete(bool bIsSuccess)
+void FOnlineExternalUIPlayFab::HandleShowInviteUIComplete(bool bWasSuccessful)
 {
 	if (OSSPlayFab)
 	{
-		OSSPlayFab->ExecuteNextTick([this, bIsSuccess]()
+		if (!bWasSuccessful)
+		{
+			UE_LOG_ONLINE_EXTERNALUI(Warning, TEXT("FOnlineExternalUIPlayFab::ShowInviteUI did not complete successfully"));
+		}
+
+		OSSPlayFab->ExecuteNextTick([this]()
 			{
-				TriggerOnExternalUIChangeDelegates(bIsSuccess);
+				TriggerOnExternalUIChangeDelegates(false);
 			});
 	}
 }

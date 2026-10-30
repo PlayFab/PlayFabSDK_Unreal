@@ -92,6 +92,11 @@ void FDeleteInventoryCollectionAsyncTask::DoWork()
 
 void FDeleteInventoryCollectionAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);

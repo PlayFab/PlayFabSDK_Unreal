@@ -110,7 +110,7 @@ TSharedPtr<const FPFGroupsApplyToGroupRequest> ConvertApplyToGroupRequestToUnrea
 	}
 
 	TSharedPtr<const FPFGroupsApplyToGroupRequest> ConvertedType = MakeShared<FPFGroupsApplyToGroupRequest>(FPFGroupsApplyToGroupRequest{
-		.autoAcceptOutstandingInvite = TSharedPtr<const bool>(Datatype->autoAcceptOutstandingInvite),
+		.autoAcceptOutstandingInvite = ConvertOptionalToUnreal(Datatype->autoAcceptOutstandingInvite),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
@@ -544,7 +544,7 @@ TSharedPtr<const FPFGroupsInviteToGroupRequest> ConvertInviteToGroupRequestToUnr
 	}
 
 	TSharedPtr<const FPFGroupsInviteToGroupRequest> ConvertedType = MakeShared<FPFGroupsInviteToGroupRequest>(FPFGroupsInviteToGroupRequest{
-		.autoAcceptOutstandingApplication = TSharedPtr<const bool>(Datatype->autoAcceptOutstandingApplication),
+		.autoAcceptOutstandingApplication = ConvertOptionalToUnreal(Datatype->autoAcceptOutstandingApplication),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
@@ -1347,7 +1347,7 @@ TSharedPtr<const FPFGroupsUpdateGroupRequest> ConvertUpdateGroupRequestToUnreal(
 		.adminRoleId = Datatype->adminRoleId == nullptr ? FString() : FString(Datatype->adminRoleId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.expectedProfileVersion = TSharedPtr<const int32>(Datatype->expectedProfileVersion),
+		.expectedProfileVersion = ConvertOptionalToUnreal(Datatype->expectedProfileVersion),
 		.group = ConvertEntityKeyToUnreal(Datatype->group),
 		.groupName = Datatype->groupName == nullptr ? FString() : FString(Datatype->groupName),
 		.memberRoleId = Datatype->memberRoleId == nullptr ? FString() : FString(Datatype->memberRoleId)
@@ -1414,7 +1414,7 @@ TSharedPtr<const FPFGroupsUpdateGroupRoleRequest> ConvertUpdateGroupRoleRequestT
 	TSharedPtr<const FPFGroupsUpdateGroupRoleRequest> ConvertedType = MakeShared<FPFGroupsUpdateGroupRoleRequest>(FPFGroupsUpdateGroupRoleRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.expectedProfileVersion = TSharedPtr<const int32>(Datatype->expectedProfileVersion),
+		.expectedProfileVersion = ConvertOptionalToUnreal(Datatype->expectedProfileVersion),
 		.group = ConvertEntityKeyToUnreal(Datatype->group),
 		.roleId = Datatype->roleId == nullptr ? FString() : FString(Datatype->roleId),
 		.roleName = Datatype->roleName == nullptr ? FString() : FString(Datatype->roleName)

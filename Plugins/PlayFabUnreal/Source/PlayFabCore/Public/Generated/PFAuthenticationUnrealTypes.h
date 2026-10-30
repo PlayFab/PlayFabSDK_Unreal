@@ -1520,9 +1520,9 @@ struct FPFAuthenticationValidateEntityTokenResponse
 
 // Delegates Declarations
 
-DECLARE_DELEGATE_ThreeParams(FOnPFAuthenticationLoginCompleteDelegate, const FPFAuthenticationLoginResult*, FPFEntityHandle*, bool);
+DECLARE_DELEGATE_FourParams(FOnPFAuthenticationLoginCompleteDelegate, const FPFAuthenticationLoginResult*, FPFEntityHandle*, const FString&, bool);
  
-DECLARE_DELEGATE_ThreeParams(FOnPFAuthenticationServerLoginCompleteDelegate, const FPFAuthenticationLoginResult*, PFAuthenticationEntityTokenResponse const**, bool);
+DECLARE_DELEGATE_FourParams(FOnPFAuthenticationServerLoginCompleteDelegate, const FPFAuthenticationLoginResult*, PFAuthenticationEntityTokenResponse const**, const FString&, bool);
 
 #if 0
 DECLARE_DELEGATE_TwoParams(FOnRegisterPlayFabUserDelegate, const FPFAuthenticationRegisterPlayFabUserResult*, bool);

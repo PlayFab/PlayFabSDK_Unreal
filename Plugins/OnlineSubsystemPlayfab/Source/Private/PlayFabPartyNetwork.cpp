@@ -6,6 +6,7 @@
 #include "SocketSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
 #include "OnlineIdentityInterfacePlayFab.h"
+#include "PlayFabCustomData.h"
 
 
 FString GetNetworkStateStateString(EPlayFabPartyNetworkState State)
@@ -29,7 +30,8 @@ FPlayFabPartyNetwork::FPlayFabPartyNetwork(
 	int32 InMaxEndpointsPerDeviceCount,
 	int32 InMaxUserCount,
 	int32 InMaxUsersPerDeviceCount,
-	PartyDirectPeerConnectivityOptions InDirectPeerConnectivityOptions
+	PartyDirectPeerConnectivityOptions InDirectPeerConnectivityOptions,
+	bool bInCustomDataEnabled
 )
 	: MaxDeviceCount(InMaxDeviceCount)
 	, MaxDevicesPerUserCount(InMaxDevicesPerUserCount)
@@ -38,11 +40,14 @@ FPlayFabPartyNetwork::FPlayFabPartyNetwork(
 	, MaxUsersPerDeviceCount(InMaxUsersPerDeviceCount)
 	, DirectPeerConnectivityOptions(InDirectPeerConnectivityOptions)
 	, OSSPlayFab(InOSSPlayFab)
+	, bCustomDataEnabled(bInCustomDataEnabled)
 {
 }
 
 FPlayFabPartyNetwork::~FPlayFabPartyNetwork()
 {
+	CustomDataLocalEndpoint = nullptr;
+	CustomDataEndpoints.Reset();
 	LeaveNetwork();
 }
 
@@ -328,5 +333,114 @@ bool FPlayFabPartyNetwork::InternalConnectToNetwork(PartyLocalUser* PlayFabParty
 		return false;
 	}
 
+	if (bCustomDataEnabled)
+	{
+		PartyString PropertyKey = PlayFabCustomData::ChannelKey;
+		PartyDataBuffer PropertyValue{
+			const_cast<ANSICHAR*>(PlayFabCustomData::ChannelValue),
+			static_cast<uint32>(sizeof(PlayFabCustomData::ChannelValue))
+		};
+		Err = Network->CreateEndpoint(
+			PlayFabPartyLocalUser,
+			1,
+			&PropertyKey,
+			&PropertyValue,
+			this,
+			&CustomDataLocalEndpoint);
+		if (PARTY_FAILED(Err))
+		{
+			CustomDataLocalEndpoint = nullptr;
+			UE_LOG_ONLINE(Warning, TEXT("FPlayFabPartyNetwork::InternalConnectToNetwork: Custom endpoint creation failed: %s"), *GetPartyErrorMessage(Err));
+		}
+	}
+
 	return true;
+}
+
+bool FPlayFabPartyNetwork::MulticastCustomData(const TArray<uint8>& Payload)
+{
+	const PlayFabCustomData::ESendAction SendAction = PlayFabCustomData::GetSendAction(
+		CustomDataLocalEndpoint != nullptr,
+		Payload.Num(),
+		CustomDataEndpoints.Num());
+	if (SendAction == PlayFabCustomData::ESendAction::Reject)
+	{
+		return false;
+	}
+	if (SendAction == PlayFabCustomData::ESendAction::SucceedWithoutSend)
+	{
+		return true;
+	}
+
+	TArray<PartyEndpoint*> Targets;
+	CustomDataEndpoints.GenerateValueArray(Targets);
+	PartySendMessageQueuingConfiguration QueueConfiguration{};
+	QueueConfiguration.priority = c_maxSendMessageQueuingPriority;
+	QueueConfiguration.identityForCancelFilters = static_cast<uint32>(reinterpret_cast<uintptr_t>(this));
+	QueueConfiguration.timeoutInMilliseconds = 100;
+	PartyDataBuffer Buffer{ const_cast<uint8*>(Payload.GetData()), static_cast<uint32>(Payload.Num()) };
+	const PartyError Err = CustomDataLocalEndpoint->SendMessage(
+		static_cast<uint32>(Targets.Num()),
+		Targets.GetData(),
+		PartySendMessageOptions::AllowLazyAcknowledgement,
+		&QueueConfiguration,
+		1,
+		&Buffer,
+		nullptr);
+	if (PARTY_FAILED(Err))
+	{
+		UE_LOG_ONLINE(Warning, TEXT("FPlayFabPartyNetwork::MulticastCustomData: SendMessage failed: %s"), *GetPartyErrorMessage(Err));
+		return false;
+	}
+	return true;
+}
+
+bool FPlayFabPartyNetwork::HandleCustomEndpointCreated(PartyEndpoint* Endpoint)
+{
+	if (!bCustomDataEnabled || !PlayFabCustomData::IsCustomEndpoint(Endpoint))
+	{
+		return false;
+	}
+
+	if (Endpoint == CustomDataLocalEndpoint)
+	{
+		return true;
+	}
+
+	uint16 EndpointId = 0;
+	if (PARTY_SUCCEEDED(Endpoint->GetUniqueIdentifier(&EndpointId)) && EndpointId != 0)
+	{
+		CustomDataEndpoints.Add(EndpointId, Endpoint);
+	}
+	return true;
+}
+
+bool FPlayFabPartyNetwork::HandleCustomEndpointDestroyed(PartyEndpoint* Endpoint)
+{
+	if (Endpoint == CustomDataLocalEndpoint)
+	{
+		CustomDataLocalEndpoint = nullptr;
+		return true;
+	}
+
+	for (auto It = CustomDataEndpoints.CreateIterator(); It; ++It)
+	{
+		if (It.Value() == Endpoint)
+		{
+			It.RemoveCurrent();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool FPlayFabPartyNetwork::IsCustomDataMessage(const PartyEndpointMessageReceivedStateChange& StateChange) const
+{
+	return PlayFabCustomData::IsReceivedOnEndpoint(StateChange, CustomDataLocalEndpoint);
+}
+
+void FPlayFabPartyNetwork::ResetCustomData()
+{
+	CustomDataLocalEndpoint = nullptr;
+	CustomDataEndpoints.Reset();
 }

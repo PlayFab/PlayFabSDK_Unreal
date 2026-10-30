@@ -12,7 +12,7 @@ TSharedPtr<const FPFPlatformSpecificAndroidDevicePushNotificationRegistrationReq
 	TSharedPtr<const FPFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest> ConvertedType = MakeShared<FPFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest>(FPFPlatformSpecificAndroidDevicePushNotificationRegistrationRequest{
 		.confirmationMessage = Datatype->confirmationMessage == nullptr ? FString() : FString(Datatype->confirmationMessage),
 		.deviceToken = Datatype->deviceToken == nullptr ? FString() : FString(Datatype->deviceToken),
-		.sendPushNotificationConfirmation = TSharedPtr<const bool>(Datatype->sendPushNotificationConfirmation)
+		.sendPushNotificationConfirmation = ConvertOptionalToUnreal(Datatype->sendPushNotificationConfirmation)
 	});
 
 	return ConvertedType;
@@ -41,7 +41,7 @@ TSharedPtr<const FPFPlatformSpecificRefreshPSNAuthTokenRequest> ConvertRefreshPS
 
 	TSharedPtr<const FPFPlatformSpecificRefreshPSNAuthTokenRequest> ConvertedType = MakeShared<FPFPlatformSpecificRefreshPSNAuthTokenRequest>(FPFPlatformSpecificRefreshPSNAuthTokenRequest{
 		.authCode = Datatype->authCode == nullptr ? FString() : FString(Datatype->authCode),
-		.issuerId = TSharedPtr<const int32>(Datatype->issuerId),
+		.issuerId = ConvertOptionalToUnreal(Datatype->issuerId),
 		.redirectUri = Datatype->redirectUri == nullptr ? FString() : FString(Datatype->redirectUri)
 	});
 
@@ -72,7 +72,7 @@ TSharedPtr<const FPFPlatformSpecificRegisterForIOSPushNotificationRequest> Conve
 	TSharedPtr<const FPFPlatformSpecificRegisterForIOSPushNotificationRequest> ConvertedType = MakeShared<FPFPlatformSpecificRegisterForIOSPushNotificationRequest>(FPFPlatformSpecificRegisterForIOSPushNotificationRequest{
 		.confirmationMessage = Datatype->confirmationMessage == nullptr ? FString() : FString(Datatype->confirmationMessage),
 		.deviceToken = Datatype->deviceToken == nullptr ? FString() : FString(Datatype->deviceToken),
-		.sendPushNotificationConfirmation = TSharedPtr<const bool>(Datatype->sendPushNotificationConfirmation)
+		.sendPushNotificationConfirmation = ConvertOptionalToUnreal(Datatype->sendPushNotificationConfirmation)
 	});
 
 	return ConvertedType;

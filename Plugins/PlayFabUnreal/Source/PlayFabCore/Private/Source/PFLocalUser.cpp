@@ -182,9 +182,9 @@ bool PLAYFABCORE_API FPFLocalUserTryGetEntityHandle(
 {
     RETURN_FALSE_IF_NULL(localUserHandle);
 
-    PFEntityHandle handle;
+    PFEntityHandle handle{ nullptr };
     RETURN_FALSE_IF_FAILED(PFLocalUserTryGetEntityHandle(localUserHandle.Get(), &handle));
-    entityHandle = *reinterpret_cast<FPFEntityHandle*>(&handle);
+    *reinterpret_cast<PFEntityHandle*>(&entityHandle) = handle;
 
     return true;
 }

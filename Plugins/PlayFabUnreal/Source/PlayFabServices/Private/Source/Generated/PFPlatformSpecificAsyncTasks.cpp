@@ -32,6 +32,11 @@ void FClientAndroidDevicePushNotificationRegistrationAsyncTask::DoWork()
 
 void FClientAndroidDevicePushNotificationRegistrationAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -72,6 +77,11 @@ void FClientRefreshPSNAuthTokenAsyncTask::DoWork()
 
 void FClientRefreshPSNAuthTokenAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -112,6 +122,11 @@ void FClientRegisterForIOSPushNotificationAsyncTask::DoWork()
 
 void FClientRegisterForIOSPushNotificationAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);

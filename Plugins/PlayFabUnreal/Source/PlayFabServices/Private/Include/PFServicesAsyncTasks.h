@@ -7,6 +7,7 @@
 #include "XAsyncTaskManager.h"
 #include "XAsyncTask.h"
 #include "PFServicesTypes.h"
+#include "PFInitRefCount.h"
 THIRD_PARTY_INCLUDES_START
 #include <playfab/services/PFServices.h>
 THIRD_PARTY_INCLUDES_END
@@ -15,6 +16,7 @@ class PLAYFABSERVICES_API FPFServicesUninitializeAsyncTask : public FXAsyncTask
 {
 public:
 	FPFServicesUninitializeAsyncTask(
+		FPFInitRefCount& refCount,
 		FOnPFServicesUninitializeDelegate delegate
 	);
 
@@ -24,5 +26,8 @@ public:
 
 private:
 
+	void CompleteWithResult(HRESULT hr);
+
+	FPFInitRefCount* refCount;
 	FOnPFServicesUninitializeDelegate delegate;
 };

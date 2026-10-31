@@ -94,11 +94,11 @@ TSharedPtr<const FPFInventoryAddInventoryItemsRequest> ConvertAddInventoryItemsR
 	}
 
 	TSharedPtr<const FPFInventoryAddInventoryItemsRequest> ConvertedType = MakeShared<FPFInventoryAddInventoryItemsRequest>(FPFInventoryAddInventoryItemsRequest{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.collectionId = Datatype->collectionId == nullptr ? FString() : FString(Datatype->collectionId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.eTag = Datatype->eTag == nullptr ? FString() : FString(Datatype->eTag),
 		.idempotencyId = Datatype->idempotencyId == nullptr ? FString() : FString(Datatype->idempotencyId),
@@ -274,8 +274,8 @@ TSharedPtr<const FPFInventoryAddInventoryItemsOperation> ConvertAddInventoryItem
 	}
 
 	TSharedPtr<const FPFInventoryAddInventoryItemsOperation> ConvertedType = MakeShared<FPFInventoryAddInventoryItemsOperation>(FPFInventoryAddInventoryItemsOperation{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.item = ConvertInventoryItemReferenceToUnreal(Datatype->item),
 		.newStackValues = ConvertInitialValuesToUnreal(Datatype->newStackValues)
 	});
@@ -362,9 +362,9 @@ TSharedPtr<const FPFInventoryPurchaseInventoryItemsOperation> ConvertPurchaseInv
 	}
 
 	TSharedPtr<const FPFInventoryPurchaseInventoryItemsOperation> ConvertedType = MakeShared<FPFInventoryPurchaseInventoryItemsOperation>(FPFInventoryPurchaseInventoryItemsOperation{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.deleteEmptyStacks = Datatype->deleteEmptyStacks,
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.item = ConvertInventoryItemReferenceToUnreal(Datatype->item),
 		.newStackValues = ConvertInitialValuesToUnreal(Datatype->newStackValues),
 		.priceAmounts = ConvertPlayfabArrayToUnreal<PFInventoryPurchasePriceAmount, FPFInventoryPurchasePriceAmount>(Datatype->priceAmounts, Datatype->priceAmountsCount, ConvertPurchasePriceAmountToUnreal),
@@ -402,9 +402,9 @@ TSharedPtr<const FPFInventorySubtractInventoryItemsOperation> ConvertSubtractInv
 	}
 
 	TSharedPtr<const FPFInventorySubtractInventoryItemsOperation> ConvertedType = MakeShared<FPFInventorySubtractInventoryItemsOperation>(FPFInventorySubtractInventoryItemsOperation{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.deleteEmptyStacks = Datatype->deleteEmptyStacks,
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.item = ConvertInventoryItemReferenceToUnreal(Datatype->item)
 	});
 
@@ -434,7 +434,7 @@ TSharedPtr<const FPFInventoryTransferInventoryItemsOperation> ConvertTransferInv
 	}
 
 	TSharedPtr<const FPFInventoryTransferInventoryItemsOperation> ConvertedType = MakeShared<FPFInventoryTransferInventoryItemsOperation>(FPFInventoryTransferInventoryItemsOperation{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.deleteEmptyStacks = Datatype->deleteEmptyStacks,
 		.givingItem = ConvertInventoryItemReferenceToUnreal(Datatype->givingItem),
 		.newStackValues = ConvertInitialValuesToUnreal(Datatype->newStackValues),
@@ -468,7 +468,7 @@ TSharedPtr<const FPFInventoryInventoryItem> ConvertInventoryItemToUnreal(const P
 	}
 
 	TSharedPtr<const FPFInventoryInventoryItem> ConvertedType = MakeShared<FPFInventoryInventoryItem>(FPFInventoryInventoryItem{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.displayProperties = FPFJsonObject{ .stringValue = FString(Datatype->displayProperties.stringValue) },
 		.expirationDate = ConvertTimeToUnreal(Datatype->expirationDate),
 		.id = Datatype->id == nullptr ? FString() : FString(Datatype->id),
@@ -986,8 +986,8 @@ TSharedPtr<const FPFInventoryTransactionOperation> ConvertTransactionOperationTo
 	}
 
 	TSharedPtr<const FPFInventoryTransactionOperation> ConvertedType = MakeShared<FPFInventoryTransactionOperation>(FPFInventoryTransactionOperation{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.itemFriendlyId = Datatype->itemFriendlyId == nullptr ? FString() : FString(Datatype->itemFriendlyId),
 		.itemId = Datatype->itemId == nullptr ? FString() : FString(Datatype->itemId),
 		.itemType = Datatype->itemType == nullptr ? FString() : FString(Datatype->itemType),
@@ -1200,12 +1200,12 @@ TSharedPtr<const FPFInventoryPurchaseInventoryItemsRequest> ConvertPurchaseInven
 	}
 
 	TSharedPtr<const FPFInventoryPurchaseInventoryItemsRequest> ConvertedType = MakeShared<FPFInventoryPurchaseInventoryItemsRequest>(FPFInventoryPurchaseInventoryItemsRequest{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.collectionId = Datatype->collectionId == nullptr ? FString() : FString(Datatype->collectionId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.deleteEmptyStacks = Datatype->deleteEmptyStacks,
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.eTag = Datatype->eTag == nullptr ? FString() : FString(Datatype->eTag),
 		.idempotencyId = Datatype->idempotencyId == nullptr ? FString() : FString(Datatype->idempotencyId),
@@ -1810,12 +1810,12 @@ TSharedPtr<const FPFInventorySubtractInventoryItemsRequest> ConvertSubtractInven
 	}
 
 	TSharedPtr<const FPFInventorySubtractInventoryItemsRequest> ConvertedType = MakeShared<FPFInventorySubtractInventoryItemsRequest>(FPFInventorySubtractInventoryItemsRequest{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.collectionId = Datatype->collectionId == nullptr ? FString() : FString(Datatype->collectionId),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.deleteEmptyStacks = Datatype->deleteEmptyStacks,
-		.durationInSeconds = TSharedPtr<const double>(Datatype->durationInSeconds),
+		.durationInSeconds = ConvertOptionalToUnreal(Datatype->durationInSeconds),
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.eTag = Datatype->eTag == nullptr ? FString() : FString(Datatype->eTag),
 		.idempotencyId = Datatype->idempotencyId == nullptr ? FString() : FString(Datatype->idempotencyId),
@@ -1886,7 +1886,7 @@ TSharedPtr<const FPFInventoryTransferInventoryItemsRequest> ConvertTransferInven
 	}
 
 	TSharedPtr<const FPFInventoryTransferInventoryItemsRequest> ConvertedType = MakeShared<FPFInventoryTransferInventoryItemsRequest>(FPFInventoryTransferInventoryItemsRequest{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.deleteEmptyStacks = Datatype->deleteEmptyStacks,

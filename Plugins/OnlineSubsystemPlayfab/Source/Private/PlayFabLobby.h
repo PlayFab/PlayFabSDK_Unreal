@@ -61,9 +61,11 @@ public:
 	bool JoinLobby(const FUniqueNetId& UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession);
 	bool JoinLobbyWithUser(const FUniqueNetId& HostingPlayerId, FName SessionName, const FOnlineSessionSettings& SessionSettings);
 	bool JoinArrangedLobby(FName SessionName, const FOnlineMatchmakingTicketInfoPtr MatchTicket);
-	bool UpdateLobby(FName SessionName, const FOnlineSessionSettings& SessionSettings);
+	bool UpdateLobby(FName SessionName, const FOnlineSessionSettings& SessionSettings, FOnUpdateLobbyCompletedDelegate CompletionDelegate = {});
 	bool AddLocalPlayer(const FUniqueNetId& PlayerId, FName SessionName, const FOnRegisterLocalPlayerCompleteDelegate& Delegate);
 	bool LeaveLobby(const FUniqueNetId& PlayerId, FName SessionName, const FOnDestroySessionCompleteDelegate& CompletionDelegate, const FOnUnregisterLocalPlayerCompleteDelegate& UnregisterLocalPlayerCompleteDelegate, bool bDestroyingSession);
+	bool CleanupFailedCreateLobby(FName SessionName);
+    void AbandonLobbyJoins(const TSharedPtr<FPlayFabSessionState>& SessionState);
 	bool FindLobbies(const FUniqueNetId& UserId, TSharedPtr<FOnlineSessionSearch> SearchSettings);
 	bool FindFriendLobbies(const FUniqueNetId& UserId);
 	const FDynamicSearchKeyAllocator::FSettingKeyType* FindSearchKey(const FString& SearchKey) const;
@@ -106,7 +108,15 @@ PACKAGE_SCOPE:
 	TSharedPtr<FOnlineSessionSearch> CurrentSessionSearch;
 	int32 SearchingUserNum;
 
+protected:
+    virtual HRESULT RequestLobbyLeave(PFLobbyHandle LobbyHandle);
+
 private:
+	friend class FPlayFabMatchmakingTestAccessor;
+    friend class FPlayFabLobbyJoinTestAccessor;
+	bool CleanupDetachedLobby(PFLobbyHandle LobbyHandle);
+    void ProcessAbandonedLobbyJoins();
+	void CompleteLobbyUpdate(int OperationId, PFLobbyHandle LobbyHandle);
 	void ProcessPendingCreateAndJoinLobbyCompletions();
 	void CompleteCreateAndJoinLobby(
 		PFLobbyHandle Lobby,
@@ -129,6 +139,24 @@ private:
 
 	// we can eliminate this map if we pass SessionName as asyncIdentifier to lobby calls
 	TMap<PFLobbyHandle, FName> LobbySessionMap;
+    struct FJoinLobbyOperation
+    {
+        FName SessionName;
+        TWeakPtr<FPlayFabSessionState> SessionState;
+        bool bCompleted = false;
+        bool bJoined = false;
+        bool bAbandoned = false;
+        bool bLeavePending = false;
+        int32 CleanupAttempts = 0;
+        double NextCleanupAttemptSeconds = 0.0;
+    };
+    TMap<PFLobbyHandle, FJoinLobbyOperation> JoinLobbyOperations;
+	struct FPendingArrangedLobby
+	{
+		FOnlineMatchmakingTicketInfoPtr Ticket;
+		FString PlayerNickname;
+	};
+	TMap<PFLobbyHandle, FPendingArrangedLobby> PendingArrangedLobbies;
 
 	struct FPendingCreateAndJoinLobbyCompletion
 	{
@@ -168,6 +196,8 @@ private:
 	{
 		int LobbyPostUpdateCount;
 		bool MergedCompletionResult;
+		FOnUpdateLobbyCompletedDelegate CompletionDelegate;
+		TWeakPtr<FPlayFabSessionState> SessionState;
 	};
 
 	TMap<int, FUpdateLobbyCompletionState> UpdateLobbyOperations;

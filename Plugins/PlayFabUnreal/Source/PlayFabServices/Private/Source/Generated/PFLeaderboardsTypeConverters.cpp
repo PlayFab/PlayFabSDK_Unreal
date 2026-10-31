@@ -329,7 +329,7 @@ TSharedPtr<const FPFLeaderboardsGetFriendLeaderboardForEntityRequest> ConvertGet
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.externalFriendSources = MakeShared<FPFExternalFriendSources>(ConvertExternalFriendSourcesToUnreal(Datatype->externalFriendSources)),
 		.leaderboardName = Datatype->leaderboardName == nullptr ? FString() : FString(Datatype->leaderboardName),
-		.version = TSharedPtr<const uint32>(Datatype->version),
+		.version = ConvertOptionalToUnreal(Datatype->version),
 		.xboxToken = Datatype->xboxToken == nullptr ? FString() : FString(Datatype->xboxToken)
 	});
 
@@ -442,8 +442,8 @@ TSharedPtr<const FPFLeaderboardsGetEntityLeaderboardRequest> ConvertGetEntityLea
 		.customTagsCount = Datatype->customTagsCount,
 		.leaderboardName = Datatype->leaderboardName == nullptr ? FString() : FString(Datatype->leaderboardName),
 		.pageSize = Datatype->pageSize,
-		.startingPosition = TSharedPtr<const uint32>(Datatype->startingPosition),
-		.version = TSharedPtr<const uint32>(Datatype->version)
+		.startingPosition = ConvertOptionalToUnreal(Datatype->startingPosition),
+		.version = ConvertOptionalToUnreal(Datatype->version)
 	});
 
 	return ConvertedType;
@@ -479,7 +479,7 @@ TSharedPtr<const FPFLeaderboardsGetLeaderboardAroundEntityRequest> ConvertGetLea
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),
 		.leaderboardName = Datatype->leaderboardName == nullptr ? FString() : FString(Datatype->leaderboardName),
 		.maxSurroundingEntries = Datatype->maxSurroundingEntries,
-		.version = TSharedPtr<const uint32>(Datatype->version)
+		.version = ConvertOptionalToUnreal(Datatype->version)
 	});
 
 	return ConvertedType;
@@ -589,7 +589,7 @@ TSharedPtr<const FPFLeaderboardsGetLeaderboardForEntitiesRequest> ConvertGetLead
 		.entityIds = ConvertCharArrayToUnreal(Datatype->entityIds, Datatype->entityIdsCount),
 		.entityIdsCount = Datatype->entityIdsCount,
 		.leaderboardName = Datatype->leaderboardName == nullptr ? FString() : FString(Datatype->leaderboardName),
-		.version = TSharedPtr<const uint32>(Datatype->version)
+		.version = ConvertOptionalToUnreal(Datatype->version)
 	});
 
 	return ConvertedType;
@@ -678,7 +678,7 @@ TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsRequest> ConvertListLe
 	TSharedPtr<const FPFLeaderboardsListLeaderboardDefinitionsRequest> ConvertedType = MakeShared<FPFLeaderboardsListLeaderboardDefinitionsRequest>(FPFLeaderboardsListLeaderboardDefinitionsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
+		.pageSize = ConvertOptionalToUnreal(Datatype->pageSize),
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
@@ -820,7 +820,7 @@ TSharedPtr<const FPFLeaderboardsUpdateLeaderboardDefinitionRequest> ConvertUpdat
 		.customTagsCount = Datatype->customTagsCount,
 		.eventEmissionConfig = ConvertLeaderboardEventEmissionConfigToUnreal(Datatype->eventEmissionConfig),
 		.name = Datatype->name == nullptr ? FString() : FString(Datatype->name),
-		.sizeLimit = TSharedPtr<const int32>(Datatype->sizeLimit),
+		.sizeLimit = ConvertOptionalToUnreal(Datatype->sizeLimit),
 		.versionConfiguration = ConvertVersionConfigurationToUnreal(Datatype->versionConfiguration)
 	});
 

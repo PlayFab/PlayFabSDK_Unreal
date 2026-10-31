@@ -367,6 +367,11 @@ The PlayFab Unreal Plugin provides access to the following services:
 
 For detailed implementation examples, configuration samples, and step-by-step code walkthroughs, see the [Code Examples](CODE_EXAMPLES.md) document.
 
+For shared group tickets, use `GetPlayFabMatchmakingInterface()` and follow the
+[group matchmaking example](CODE_EXAMPLES.md#group-matchmaking). Create/Join
+start active tickets; configure the complete match capacity in the request's
+`SessionSettings` and wait for the independent final session-readiness callback.
+
 The code examples cover:
 - Xbox and Custom ID authentication
 - Service initialization and configuration

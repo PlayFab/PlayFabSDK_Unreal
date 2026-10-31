@@ -138,6 +138,11 @@ void FDeleteEntityItemReviewsAsyncTask::DoWork()
 
 void FDeleteEntityItemReviewsAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -179,6 +184,11 @@ void FDeleteItemAsyncTask::DoWork()
 
 void FDeleteItemAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -878,6 +888,11 @@ void FPublishDraftItemAsyncTask::DoWork()
 
 void FPublishDraftItemAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -920,6 +935,11 @@ void FReportItemAsyncTask::DoWork()
 
 void FReportItemAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -963,6 +983,11 @@ void FReportItemReviewAsyncTask::DoWork()
 
 void FReportItemReviewAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1004,6 +1029,11 @@ void FReviewItemAsyncTask::DoWork()
 
 void FReviewItemAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1106,6 +1136,11 @@ void FSetItemModerationStateAsyncTask::DoWork()
 
 void FSetItemModerationStateAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1149,6 +1184,11 @@ void FSubmitItemReviewVoteAsyncTask::DoWork()
 
 void FSubmitItemReviewVoteAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1189,6 +1229,11 @@ void FTakedownItemReviewsAsyncTask::DoWork()
 
 void FTakedownItemReviewsAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1229,6 +1274,11 @@ void FUpdateCatalogConfigAsyncTask::DoWork()
 
 void FUpdateCatalogConfigAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);

@@ -32,6 +32,11 @@ void FClientAddOrUpdateContactEmailAsyncTask::DoWork()
 
 void FClientAddOrUpdateContactEmailAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1135,6 +1140,11 @@ void FClientLinkAndroidDeviceIDAsyncTask::DoWork()
 
 void FClientLinkAndroidDeviceIDAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1176,6 +1186,11 @@ void FClientLinkAppleAsyncTask::DoWork()
 
 void FClientLinkAppleAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1217,6 +1232,11 @@ void FClientLinkBattleNetAccountAsyncTask::DoWork()
 
 void FClientLinkBattleNetAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1257,6 +1277,11 @@ void FClientLinkCustomIDAsyncTask::DoWork()
 
 void FClientLinkCustomIDAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1298,6 +1323,11 @@ void FClientLinkFacebookAccountAsyncTask::DoWork()
 
 void FClientLinkFacebookAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1339,6 +1369,11 @@ void FClientLinkFacebookInstantGamesIdAsyncTask::DoWork()
 
 void FClientLinkFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1384,6 +1419,11 @@ void FClientLinkGameCenterAccountAsyncTask::DoWork()
 
 void FClientLinkGameCenterAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1425,6 +1465,11 @@ void FClientLinkGoogleAccountAsyncTask::DoWork()
 
 void FClientLinkGoogleAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1466,6 +1511,11 @@ void FClientLinkGooglePlayGamesServicesAccountAsyncTask::DoWork()
 
 void FClientLinkGooglePlayGamesServicesAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1509,6 +1559,11 @@ void FClientLinkIOSDeviceIDAsyncTask::DoWork()
 
 void FClientLinkIOSDeviceIDAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1551,6 +1606,11 @@ void FClientLinkKongregateAsyncTask::DoWork()
 
 void FClientLinkKongregateAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1592,6 +1652,11 @@ void FClientLinkNintendoServiceAccountAsyncTask::DoWork()
 
 void FClientLinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1633,6 +1698,11 @@ void FClientLinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 
 void FClientLinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1674,6 +1744,11 @@ void FClientLinkOpenIdConnectAsyncTask::DoWork()
 
 void FClientLinkOpenIdConnectAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1716,6 +1791,11 @@ void FClientLinkPSNAccountAsyncTask::DoWork()
 
 void FClientLinkPSNAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1758,6 +1838,11 @@ void FClientLinkSteamAccountAsyncTask::DoWork()
 
 void FClientLinkSteamAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1799,6 +1884,11 @@ void FClientLinkTwitchAsyncTask::DoWork()
 
 void FClientLinkTwitchAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1844,6 +1934,11 @@ void FClientLinkXboxAccountAsyncTask::DoWork()
 
 void FClientLinkXboxAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1883,6 +1978,11 @@ void FClientRemoveContactEmailAsyncTask::DoWork()
 
 void FClientRemoveContactEmailAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -1968,6 +2068,11 @@ void FClientSendAccountRecoveryEmailAsyncTask::DoWork()
 
 void FClientSendAccountRecoveryEmailAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2008,6 +2113,11 @@ void FClientUnlinkAndroidDeviceIDAsyncTask::DoWork()
 
 void FClientUnlinkAndroidDeviceIDAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2047,6 +2157,11 @@ void FClientUnlinkAppleAsyncTask::DoWork()
 
 void FClientUnlinkAppleAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2086,6 +2201,11 @@ void FClientUnlinkBattleNetAccountAsyncTask::DoWork()
 
 void FClientUnlinkBattleNetAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2125,6 +2245,11 @@ void FClientUnlinkCustomIDAsyncTask::DoWork()
 
 void FClientUnlinkCustomIDAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2163,6 +2288,11 @@ void FClientUnlinkFacebookAccountAsyncTask::DoWork()
 
 void FClientUnlinkFacebookAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2203,6 +2333,11 @@ void FClientUnlinkFacebookInstantGamesIdAsyncTask::DoWork()
 
 void FClientUnlinkFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2242,6 +2377,11 @@ void FClientUnlinkGameCenterAccountAsyncTask::DoWork()
 
 void FClientUnlinkGameCenterAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2281,6 +2421,11 @@ void FClientUnlinkGoogleAccountAsyncTask::DoWork()
 
 void FClientUnlinkGoogleAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2320,6 +2465,11 @@ void FClientUnlinkGooglePlayGamesServicesAccountAsyncTask::DoWork()
 
 void FClientUnlinkGooglePlayGamesServicesAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2360,6 +2510,11 @@ void FClientUnlinkIOSDeviceIDAsyncTask::DoWork()
 
 void FClientUnlinkIOSDeviceIDAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2399,6 +2554,11 @@ void FClientUnlinkKongregateAsyncTask::DoWork()
 
 void FClientUnlinkKongregateAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2438,6 +2598,11 @@ void FClientUnlinkNintendoServiceAccountAsyncTask::DoWork()
 
 void FClientUnlinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2478,6 +2643,11 @@ void FClientUnlinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 
 void FClientUnlinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2517,6 +2687,11 @@ void FClientUnlinkOpenIdConnectAsyncTask::DoWork()
 
 void FClientUnlinkOpenIdConnectAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2555,6 +2730,11 @@ void FClientUnlinkPSNAccountAsyncTask::DoWork()
 
 void FClientUnlinkPSNAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2594,6 +2774,11 @@ void FClientUnlinkSteamAccountAsyncTask::DoWork()
 
 void FClientUnlinkSteamAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2634,6 +2819,11 @@ void FClientUnlinkTwitchAsyncTask::DoWork()
 
 void FClientUnlinkTwitchAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2673,6 +2863,11 @@ void FClientUnlinkXboxAccountAsyncTask::DoWork()
 
 void FClientUnlinkXboxAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2710,6 +2905,11 @@ void FClientUpdateAvatarUrlAsyncTask::DoWork()
 
 void FClientUpdateAvatarUrlAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2804,6 +3004,11 @@ void FServerAddOrUpdateContactEmailAsyncTask::DoWork()
 
 void FServerAddOrUpdateContactEmailAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -2897,6 +3102,11 @@ void FServerDeletePlayerAsyncTask::DoWork()
 
 void FServerDeletePlayerAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -3845,6 +4055,11 @@ void FServerLinkBattleNetAccountAsyncTask::DoWork()
 
 void FServerLinkBattleNetAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -3887,6 +4102,11 @@ void FServerLinkNintendoServiceAccountAsyncTask::DoWork()
 
 void FServerLinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -3929,6 +4149,11 @@ void FServerLinkNintendoServiceAccountSubjectAsyncTask::DoWork()
 
 void FServerLinkNintendoServiceAccountSubjectAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -3971,6 +4196,11 @@ void FServerLinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 
 void FServerLinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4015,6 +4245,11 @@ void FServerLinkPSNAccountAsyncTask::DoWork()
 
 void FServerLinkPSNAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4058,6 +4293,11 @@ void FServerLinkPSNIdAsyncTask::DoWork()
 
 void FServerLinkPSNIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4100,6 +4340,11 @@ void FServerLinkServerCustomIdAsyncTask::DoWork()
 
 void FServerLinkServerCustomIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4142,6 +4387,11 @@ void FServerLinkSteamIdAsyncTask::DoWork()
 
 void FServerLinkSteamIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4184,6 +4434,11 @@ void FServerLinkTwitchAccountAsyncTask::DoWork()
 
 void FServerLinkTwitchAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4226,6 +4481,11 @@ void FServerLinkXboxAccountAsyncTask::DoWork()
 
 void FServerLinkXboxAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4269,6 +4529,11 @@ void FServerLinkXboxIdAsyncTask::DoWork()
 
 void FServerLinkXboxIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4416,6 +4681,11 @@ void FServerSendCustomAccountRecoveryEmailAsyncTask::DoWork()
 
 void FServerSendCustomAccountRecoveryEmailAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4457,6 +4727,11 @@ void FServerSendEmailFromTemplateAsyncTask::DoWork()
 
 void FServerSendEmailFromTemplateAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4497,6 +4772,11 @@ void FServerUnlinkBattleNetAccountAsyncTask::DoWork()
 
 void FServerUnlinkBattleNetAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4537,6 +4817,11 @@ void FServerUnlinkFacebookAccountAsyncTask::DoWork()
 
 void FServerUnlinkFacebookAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4578,6 +4863,11 @@ void FServerUnlinkFacebookInstantGamesIdAsyncTask::DoWork()
 
 void FServerUnlinkFacebookInstantGamesIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4618,6 +4908,11 @@ void FServerUnlinkNintendoServiceAccountAsyncTask::DoWork()
 
 void FServerUnlinkNintendoServiceAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4659,6 +4954,11 @@ void FServerUnlinkNintendoSwitchDeviceIdAsyncTask::DoWork()
 
 void FServerUnlinkNintendoSwitchDeviceIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4699,6 +4999,11 @@ void FServerUnlinkPSNAccountAsyncTask::DoWork()
 
 void FServerUnlinkPSNAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4740,6 +5045,11 @@ void FServerUnlinkServerCustomIdAsyncTask::DoWork()
 
 void FServerUnlinkServerCustomIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4780,6 +5090,11 @@ void FServerUnlinkSteamIdAsyncTask::DoWork()
 
 void FServerUnlinkSteamIdAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4821,6 +5136,11 @@ void FServerUnlinkTwitchAccountAsyncTask::DoWork()
 
 void FServerUnlinkTwitchAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4861,6 +5181,11 @@ void FServerUnlinkXboxAccountAsyncTask::DoWork()
 
 void FServerUnlinkXboxAccountAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);
@@ -4900,6 +5225,11 @@ void FServerUpdateAvatarUrlAsyncTask::DoWork()
 
 void FServerUpdateAvatarUrlAsyncTask::ProcessResults()
 {
+	if (HResult == S_OK)
+	{
+		HResult = XAsyncGetStatus(*mAsyncBlock, false);
+	}
+
 	if (HResult != S_OK)
 	{
 		Delegate.Execute(FString::Printf(TEXT("Async failure: 0x%08X"), static_cast<uint32>(HResult)), false);

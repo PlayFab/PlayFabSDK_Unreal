@@ -23,11 +23,18 @@ struct PartyPacket
 	TArray<uint8> Data;
 };
 
+namespace PlayFabSocketConfig
+{
+	constexpr int32 DefaultSendMessageTimeoutMs = 500;
+	constexpr int32 MinSendMessageTimeoutMs = 1;
+	constexpr int32 MaxSendMessageTimeoutMs = 60 * 1000;
+
+	uint32 NormalizeSendMessageTimeoutMs(int32 ConfiguredTimeoutMs);
+}
+
 class FPlayFabSocket : public FSocket
 {
 PACKAGE_SCOPE:
-	static const uint32 SendTimeout;
-	
 	class FOnlineSubsystemPlayFab* OSSPlayFab = nullptr;
 	class FPlayFabSocketSubsystem* SocketSubsystem = nullptr;
 	TWeakObjectPtr<UPlayFabNetDriver> NetDriver;
@@ -81,6 +88,7 @@ public:
 
 	void AddNewPendingData(uint16 sourceEndpoint, TArray<uint8> NewData);
 	void SetPartyNetwork(TSharedPtr<class FPlayFabPartyNetwork> InPartyNetwork);
+	Party::PartyNetwork* GetPartyNetworkHandle() const;
 
 private:
 	TWeakPtr<class FPlayFabPartyNetwork> PartyNetwork;

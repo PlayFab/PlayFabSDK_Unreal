@@ -29,7 +29,7 @@ void FPFAuthenticationLoginWithXUserAsyncTask::DoWork()
 
 	if (FAILED(hr))
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("DoWork failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 
@@ -52,17 +52,18 @@ void FPFAuthenticationLoginWithXUserAsyncTask::ProcessResults()
 		{
 			TSharedPtr<const FPFAuthenticationLoginResult> ResultType = ConvertLoginResultToUnreal(result);
 
-			FPFEntityHandle* entityHandlePtr = reinterpret_cast<FPFEntityHandle*>(&handle);
-			delegate.ExecuteIfBound(ResultType.Get(), entityHandlePtr, true);
+			FPFEntityHandle entityHandle;
+			*reinterpret_cast<PFEntityHandle*>(&entityHandle) = handle;
+			delegate.ExecuteIfBound(ResultType.Get(), &entityHandle, FString(), true);
 		}
 		else
 		{
-			delegate.ExecuteIfBound(nullptr, nullptr, false);
+			delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResult failure: 0x%08X"), static_cast<uint32>(hr)), false);
 		}
 	}
 	else
 	{
-		delegate.ExecuteIfBound(nullptr, nullptr, false);
+		delegate.ExecuteIfBound(nullptr, nullptr, FString::Printf(TEXT("GetResultSize failure: 0x%08X"), static_cast<uint32>(hr)), false);
 	}
 }
 

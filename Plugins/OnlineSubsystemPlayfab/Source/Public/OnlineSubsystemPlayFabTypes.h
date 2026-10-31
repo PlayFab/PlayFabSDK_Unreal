@@ -57,6 +57,8 @@ public:
 	FUniqueNetIdStringRef SessionId;
 	FString NativeSessionIdString;
 	FString NativePlatform;
+	// Own the native result so a later search cannot invalidate this result's native join data.
+	TSharedPtr<const FOnlineSessionSearchResult> NativeSessionSearchResult;
 	FString ConnectionString;
 	PFLobbyHandle LobbyHandle{};
 	FName SessionName = NAME_None;
@@ -210,6 +212,8 @@ namespace EOnlinePlayFabMatchmakingState
 	};
 }
 
+struct FPlayFabSessionState;
+
 class FOnlineMatchmakingTicketInfo
 {
 public:
@@ -233,19 +237,28 @@ public:
 	FString	TicketId;
 	FString	MatchId;
 	FString	CancellationReason;
-	float	GiveUpAfterTimeInSeconds;
+	float	GiveUpAfterTimeInSeconds = 0.0f;
 
 private:
 	TSharedPtr<FPlayFabUser> HostUser;
+	TWeakPtr<FPlayFabSessionState> SessionState;
+
+	friend class FMatchmakingInterfacePlayFab;
+	friend class FOnlineSessionPlayFab;
+	friend class FPlayFabLobby;
+	friend class FPlayFabMatchmakingTestAccessor;
+	friend class FPlayFabGroupMatchmakingTestAccessor;
 
 public:
 	FName SessionName;
 	FOnlineSessionSettings SessionSettings;
 	FUniqueNetIdPlayFabPtr SearchingPlayerNetId;
-	EOnlinePlayFabMatchmakingState::Type MatchmakingState;
+	EOnlinePlayFabMatchmakingState::Type MatchmakingState = EOnlinePlayFabMatchmakingState::None;
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
-	PFMatchmakingTicketHandle PlayFabMatchTicket;
-	const PFMatchmakingMatchDetails* PlayFabMatchmakingDetails;
+	PFMatchmakingTicketHandle PlayFabMatchTicket = nullptr;
+	const PFMatchmakingMatchDetails* PlayFabMatchmakingDetails = nullptr;
+	FDelegateHandle OnJoinArrangedLobbyCompleteDelegateHandle;
+	bool bTerminalCallbackDispatched = false;
 
 	TSharedPtr<FPlayFabUser> GetHostUser() const
 	{

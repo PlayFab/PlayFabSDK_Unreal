@@ -13,6 +13,8 @@ namespace
 {
 	constexpr double CreateLobbyCompletionRetryIntervalSeconds = 0.1;
 	constexpr double CreateLobbyCompletionTimeoutSeconds = 5.0;
+    constexpr double AbandonedLobbyCleanupRetryIntervalSeconds = 1.0;
+    constexpr int32 MaxAbandonedLobbyCleanupAttempts = 3;
 }
 
 static const FDynamicSearchKeyAllocator::FDefaultAssignment s_DefaultSearchKeyAssignments[] =
@@ -430,6 +432,12 @@ bool FPlayFabLobby::JoinLobby(const FUniqueNetId& UserId, FName SessionName, con
 
 bool FPlayFabLobby::JoinLobbyWithUser(const FUniqueNetId& UserId, FName SessionName, const FOnlineSessionSettings& SessionSettings)
 {
+    const auto SessionState = OSSPlayFab->GetSessionInterfacePlayFab()->GetSessionStatePtr(SessionName);
+    if (!SessionState.IsValid())
+    {
+        UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::JoinLobbyWithUser: No session state for %s"), *SessionName.ToString());
+        return false;
+    }
 	PFLobbyHandle LobbyHandle;
 	PFLobbyJoinConfiguration LobbyConfig{};
 
@@ -512,6 +520,7 @@ bool FPlayFabLobby::JoinLobbyWithUser(const FUniqueNetId& UserId, FName SessionN
 		return false;
 	}
 	LobbySessionMap.Add(LobbyHandle, SessionName);
+    JoinLobbyOperations.Add(LobbyHandle, {SessionName, SessionState});
 
 	return true;
 }
@@ -582,20 +591,19 @@ bool FPlayFabLobby::JoinArrangedLobby(FName SessionName, const FOnlineMatchmakin
 	LobbyConfig.memberPropertyKeys = MemberKeys.GetData();
 	LobbyConfig.memberPropertyValues = MemberValues.GetData();
 
-	TUniquePtr<FString> LocalPlayerNickName = MakeUnique<FString>(PlayerNickName);
-	
-	HRESULT Hr = PFMultiplayerJoinArrangedLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), MatchTicket->GetHostUser()->GetEntityHandle().Get(), MatchTicket->PlayFabMatchmakingDetails->lobbyArrangementString, &LobbyConfig, static_cast<void*>(LocalPlayerNickName.Release()), &LobbyHandle);
+	HRESULT Hr = PFMultiplayerJoinArrangedLobbyWithEntityHandle(OSSPlayFab->GetMultiplayerHandle(), MatchTicket->GetHostUser()->GetEntityHandle().Get(), MatchTicket->PlayFabMatchmakingDetails->lobbyArrangementString, &LobbyConfig, nullptr, &LobbyHandle);
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFMultiplayerJoinArrangedLobby failed: Error code [0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
 		return false;
 	}
 	LobbySessionMap.Add(LobbyHandle, SessionName);
+	PendingArrangedLobbies.Add(LobbyHandle, {MatchTicket, PlayerNickName});
 
 	return true;
 }
 
-bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings& SessionSettings)
+bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings& SessionSettings, FOnUpdateLobbyCompletedDelegate CompletionDelegate)
 {
 	int OperationId = NextUpdateLobbyOperationId;
 	NextUpdateLobbyOperationId.fetch_add(1);
@@ -619,6 +627,8 @@ bool FPlayFabLobby::UpdateLobby(FName SessionName, const FOnlineSessionSettings&
 	FUpdateLobbyCompletionState UpdateLobbyCompletionState;
 	UpdateLobbyCompletionState.LobbyPostUpdateCount = 0;
 	UpdateLobbyCompletionState.MergedCompletionResult = true;
+	UpdateLobbyCompletionState.CompletionDelegate = MoveTemp(CompletionDelegate);
+	UpdateLobbyCompletionState.SessionState = OSSPlayFab->GetSessionInterfacePlayFab()->GetSessionStatePtr(SessionName);
 
 	// Update member properties for all party local users (skip on dedicated server — server is not a lobby member)
 	if (!IsRunningDedicatedServer())
@@ -942,26 +952,17 @@ bool FPlayFabLobby::LeaveLobby(const FUniqueNetId& PlayerId, FName SessionName, 
 	if (bDestroyingSession)
 	{
 		UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby destroying session!"));
-		if (IsRunningDedicatedServer())
-		{
-			Hr = PFLobbyServerDeleteLobby(LobbyHandle, nullptr);
-			if (FAILED(Hr))
-			{
-				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyServerDeleteLobby failed: 0x%08x"), Hr);
-				CompletionDelegate.ExecuteIfBound(SessionName, false);
-				return false;
-			}
-		}
-		else
-		{
-			Hr = PFLobbyLeave(LobbyHandle, nullptr, nullptr);
-			if (FAILED(Hr))
-			{
-				UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::PFLobbyLeave failed: 0x%08x"), Hr);
-				CompletionDelegate.ExecuteIfBound(SessionName, false);
-				return false;
-			}
-		}
+        Hr = RequestLobbyLeave(LobbyHandle);
+        if (FAILED(Hr))
+        {
+            UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::LeaveLobby: Leave/delete failed: 0x%08x"), Hr);
+            CompletionDelegate.ExecuteIfBound(SessionName, false);
+            return false;
+        }
+        if (FJoinLobbyOperation* Operation = JoinLobbyOperations.Find(LobbyHandle))
+        {
+            Operation->bLeavePending = true;
+        }
 	}
 	else
 	{
@@ -992,6 +993,122 @@ bool FPlayFabLobby::LeaveLobby(const FUniqueNetId& PlayerId, FName SessionName, 
 	}
 
 	return true;
+}
+
+bool FPlayFabLobby::CleanupFailedCreateLobby(FName SessionName)
+{
+	PFLobbyHandle LobbyHandle = nullptr;
+	if (!GetLobbyFromSession(SessionName, LobbyHandle))
+	{
+		UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby::CleanupFailedCreateLobby: No lobby found for session %s"), *SessionName.ToString());
+		return false;
+	}
+
+	return CleanupDetachedLobby(LobbyHandle);
+}
+
+bool FPlayFabLobby::CleanupDetachedLobby(PFLobbyHandle LobbyHandle)
+{
+	// Detach the old handle before cleanup so late callbacks cannot resolve a replacement
+	// session that reuses the same name, even if the cleanup request fails synchronously.
+	LobbySessionMap.Remove(LobbyHandle);
+    FJoinLobbyOperation* Operation = JoinLobbyOperations.Find(LobbyHandle);
+    if (FailedCreateLobbyCleanupHandles.Contains(LobbyHandle) || (Operation && Operation->bLeavePending))
+    {
+        return true;
+    }
+    if (Operation)
+    {
+        Operation->bAbandoned = true;
+        ++Operation->CleanupAttempts;
+        Operation->NextCleanupAttemptSeconds = FPlatformTime::Seconds() + AbandonedLobbyCleanupRetryIntervalSeconds;
+    }
+    FailedCreateLobbyCleanupHandles.Add(LobbyHandle);
+	const HRESULT Hr = RequestLobbyLeave(LobbyHandle);
+	if (FAILED(Hr))
+	{
+		FailedCreateLobbyCleanupHandles.Remove(LobbyHandle);
+		UE_LOG_ONLINE(
+			Error,
+			TEXT("FPlayFabLobby::CleanupDetachedLobby: PFLobbyLeave failed for lobby %p. Error code [0x%08x], Error message:%s"),
+			LobbyHandle,
+			Hr,
+			*GetMultiplayerErrorMessage(Hr));
+        if (Operation && Operation->CleanupAttempts >= MaxAbandonedLobbyCleanupAttempts)
+        {
+            UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::CleanupDetachedLobby: Abandoned lobby %p cleanup exhausted %d attempts"),
+                LobbyHandle, Operation->CleanupAttempts);
+        }
+		return false;
+	}
+    if (Operation)
+    {
+        Operation->bLeavePending = true;
+    }
+
+	return true;
+}
+
+HRESULT FPlayFabLobby::RequestLobbyLeave(PFLobbyHandle LobbyHandle)
+{
+    return IsRunningDedicatedServer()
+        ? PFLobbyServerDeleteLobby(LobbyHandle, nullptr)
+        : PFLobbyLeave(LobbyHandle, nullptr, nullptr);
+}
+
+void FPlayFabLobby::AbandonLobbyJoins(const TSharedPtr<FPlayFabSessionState>& SessionState)
+{
+    check(SessionState.IsValid());
+    TArray<PFLobbyHandle> CleanupHandles;
+    TArray<PFLobbyHandle> FailedHandles;
+    for (auto& Entry : JoinLobbyOperations)
+    {
+        FJoinLobbyOperation& Operation = Entry.Value;
+        if (Operation.SessionState.Pin() != SessionState)
+        {
+            continue;
+        }
+        Operation.bAbandoned = true;
+        LobbySessionMap.Remove(Entry.Key);
+        if (Operation.bCompleted && !Operation.bLeavePending)
+        {
+            if (Operation.bJoined)
+            {
+                CleanupHandles.Add(Entry.Key);
+            }
+            else
+            {
+                FailedHandles.Add(Entry.Key);
+            }
+        }
+    }
+    for (PFLobbyHandle Handle : FailedHandles)
+    {
+        JoinLobbyOperations.Remove(Handle);
+    }
+    for (PFLobbyHandle Handle : CleanupHandles)
+    {
+        CleanupDetachedLobby(Handle);
+    }
+}
+
+void FPlayFabLobby::ProcessAbandonedLobbyJoins()
+{
+    const double Now = FPlatformTime::Seconds();
+    TArray<PFLobbyHandle> CleanupHandles;
+    for (const auto& Entry : JoinLobbyOperations)
+    {
+        const FJoinLobbyOperation& Operation = Entry.Value;
+        if (Operation.bAbandoned && Operation.bCompleted && Operation.bJoined && !Operation.bLeavePending &&
+            Operation.CleanupAttempts < MaxAbandonedLobbyCleanupAttempts && Now >= Operation.NextCleanupAttemptSeconds)
+        {
+            CleanupHandles.Add(Entry.Key);
+        }
+    }
+    for (PFLobbyHandle Handle : CleanupHandles)
+    {
+        CleanupDetachedLobby(Handle);
+    }
 }
 
 bool FPlayFabLobby::FindLobbies(const FUniqueNetId& UserId, TSharedPtr<FOnlineSessionSearch> SearchSettings)
@@ -1177,6 +1294,7 @@ void FPlayFabLobby::UnregisterForInvites_PlayFabMultiplayer(const PFEntityHandle
 void FPlayFabLobby::DoWork()
 {
 	ProcessPendingCreateAndJoinLobbyCompletions();
+    ProcessAbandonedLobbyJoins();
 
 	uint32 StateChangeCount = 0u;
 	const PFLobbyStateChange* const* StateChanges = nullptr;
@@ -1257,15 +1375,7 @@ void FPlayFabLobby::DoWork()
 						// All PFLobbyPostUpdate calls in one UpdateLobby have been received
 						if (UpdateLobbyCompletionState->LobbyPostUpdateCount == LobbyPostPair->Value)
 						{
-							FName* SessionName = LobbySessionMap.Find(UpdateCompleted.lobby);
-							TriggerOnUpdateLobbyCompletedDelegates(*SessionName, UpdateLobbyOperations[UpdateLobbyOperationId].MergedCompletionResult);
-							UpdateLobbyOperations.Remove(UpdateLobbyOperationId);
-
-							// All UpdateLobby calls have been handled
-							if (UpdateLobbyOperations.Num() == 0)
-							{
-								NextUpdateLobbyOperationId.store(0);
-							}
+							CompleteLobbyUpdate(UpdateLobbyOperationId, UpdateCompleted.lobby);
 						}
 					}
 				}
@@ -1303,21 +1413,7 @@ void FPlayFabLobby::DoWork()
 						UpdateLobbyOperations[UpdateLobbyOperationId].MergedCompletionResult = UpdateLobbyCompletionState->MergedCompletionResult && SUCCEEDED(UpdateCompleted.result);
 						if (UpdateLobbyCompletionState->LobbyPostUpdateCount == LobbyPostPair->Value)
 						{
-							FName* SessionName = LobbySessionMap.Find(UpdateCompleted.lobby);
-							if (SessionName != nullptr)
-							{
-								TriggerOnUpdateLobbyCompletedDelegates(*SessionName, UpdateLobbyOperations[UpdateLobbyOperationId].MergedCompletionResult);
-							}
-							else
-							{
-								UE_LOG_ONLINE(Warning, TEXT("FPlayFabLobby::DoWork: No session name found for lobby handle during ServerPostUpdateCompleted"));
-							}
-							UpdateLobbyOperations.Remove(UpdateLobbyOperationId);
-
-							if (UpdateLobbyOperations.Num() == 0)
-							{
-								NextUpdateLobbyOperationId.store(0);
-							}
+							CompleteLobbyUpdate(UpdateLobbyOperationId, UpdateCompleted.lobby);
 						}
 					}
 				}
@@ -1334,6 +1430,13 @@ void FPlayFabLobby::DoWork()
 
 				if (DeleteCompleted.lobby != nullptr)
 				{
+					if (FailedCreateLobbyCleanupHandles.Remove(DeleteCompleted.lobby) > 0)
+					{
+                        JoinLobbyOperations.Remove(DeleteCompleted.lobby);
+						LobbySessionMap.Remove(DeleteCompleted.lobby);
+						break;
+					}
+
 					FName* SessionName = LobbySessionMap.Find(DeleteCompleted.lobby);
 					if (SessionName != nullptr)
 					{
@@ -1342,9 +1445,14 @@ void FPlayFabLobby::DoWork()
 
 						if (ExistingNamedSession.IsValid() && ExistingNamedSession->SessionState == EOnlineSessionState::Destroying)
 						{
-							SessionInterface->RemoveNamedSession(*SessionName);
+                            const FName CompletedSessionName = *SessionName;
+                            const auto SessionState = SessionInterface->GetSessionStatePtr(CompletedSessionName);
+                            if (!SessionState.IsValid() || !SessionState->bSteamJoin)
+                            {
+                                SessionInterface->RemoveNamedSession(CompletedSessionName);
+                            }
 							LobbySessionMap.Remove(DeleteCompleted.lobby);
-							TriggerOnLeaveLobbyCompletedDelegates(*SessionName, true);
+                            TriggerOnLeaveLobbyCompletedDelegates(CompletedSessionName, true);
 						}
 					}
 				}
@@ -1722,10 +1830,44 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 	EOnJoinSessionCompleteResult::Type JoinResult = EOnJoinSessionCompleteResult::UnknownError;
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyJoinLobbyCompletedStateChange(%u) event"), StateChange.stateChangeType);
 
-	FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
+    FJoinLobbyOperation* Operation = JoinLobbyOperations.Find(StateChange.lobby);
+    if (!Operation || Operation->bCompleted)
+    {
+        UE_LOG_ONLINE(Verbose, TEXT("Ignoring join completion without an active lobby operation"));
+        return;
+    }
+    Operation->bCompleted = true;
+    Operation->bJoined = SUCCEEDED(StateChange.result);
+    const FName SessionName = Operation->SessionName;
+    const auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
+    const auto JoinedState = Operation->SessionState.Pin();
+    const FName* MappedName = LobbySessionMap.Find(StateChange.lobby);
+    const bool bCurrentState = JoinedState.IsValid() && SessionInterface->GetSessionStatePtr(SessionName) == JoinedState;
+    if (Operation->bAbandoned || !bCurrentState || !MappedName || *MappedName != SessionName ||
+        (JoinedState->bSteamJoin && !JoinedState->SteamJoinCompletion.IsJoining()))
+    {
+        UE_LOG_ONLINE(Verbose, TEXT("Ignoring join completion for an inactive or replaced session"));
+        if (!bCurrentState || !Operation->bLeavePending)
+        {
+            Operation->bAbandoned = true;
+            LobbySessionMap.Remove(StateChange.lobby);
+        }
+        if (!Operation->bLeavePending)
+        {
+            if (Operation->bJoined)
+            {
+                CleanupDetachedLobby(StateChange.lobby);
+            }
+            else
+            {
+                JoinLobbyOperations.Remove(StateChange.lobby);
+            }
+        }
+        return;
+    }
 	if (FAILED(StateChange.result))
 	{
-		UE_LOG_ONLINE(Error, TEXT("Failed to join lobby. ErrorCode=[0x%08x]"), StateChange.result);
+		UE_LOG_ONLINE(Error, TEXT("Failed to join lobby. ErrorCode=[0x%08x], Error message:%s"), static_cast<uint32>(StateChange.result), *GetMultiplayerErrorMessage(StateChange.result));
 		JoinResult = ConvertMultiplayerErrorToJoinSessionResult(StateChange.result);
 	}
 	else
@@ -1742,8 +1884,7 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 			}
 			else
 			{
-				auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
-				SessionInterface->SetHostOnSession(*SessionName, *OwnerEntityKeyPtr);
+				SessionInterface->SetHostOnSession(SessionName, *OwnerEntityKeyPtr);
 			}
 		}
 		else
@@ -1751,8 +1892,7 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::HandleJoinLobbyCompleted failed to GetOwner for the lobby. ErrorCode=[0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
 		}
 
-		auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
-		FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(*SessionName);
+		FNamedOnlineSessionPtr ExistingNamedSession = JoinedState->NamedSession;
 		ExistingNamedSession->bHosting = false; // you are never hosting when you join
 
 		const char* LobbyId;
@@ -1773,7 +1913,7 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 		NewSessionInfo->SetSessionId(UTF8_TO_TCHAR(LobbyId));
 		NewSessionInfo->ConnectionString = UTF8_TO_TCHAR(ConnectionString);
 		NewSessionInfo->LobbyHandle = StateChange.lobby;
-		NewSessionInfo->SessionName = *SessionName;
+		NewSessionInfo->SessionName = SessionName;
 
 		ExistingNamedSession->SessionInfo = NewSessionInfo;
 		ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
@@ -1813,7 +1953,7 @@ void FPlayFabLobby::HandleJoinLobbyCompleted(const PFLobbyJoinLobbyCompletedStat
 #endif
 	}
 
-	TriggerOnJoinLobbyCompletedDelegates(*SessionName, JoinResult);
+	TriggerOnJoinLobbyCompletedDelegates(SessionName, JoinResult);
 }
 
 void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLobbyCompletedStateChange& StateChange)
@@ -1821,16 +1961,45 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyJoinArrangedLobbyCompletedStateChange(%u) event"), StateChange.stateChangeType);
 	bool bHosting = false;
 
-	FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
+	FPendingArrangedLobby Pending;
+	const FName* FoundName = LobbySessionMap.Find(StateChange.lobby);
+	if (!PendingArrangedLobbies.RemoveAndCopyValue(StateChange.lobby, Pending) || !FoundName)
+	{
+		UE_LOG_ONLINE(Verbose, TEXT("Ignoring arranged-lobby completion without an active join."));
+		return;
+	}
+	const FName SessionName = *FoundName;
+	auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
+	const TSharedPtr<FPlayFabSessionState> ExpectedState = Pending.Ticket->SessionState.Pin();
+	if (!ExpectedState.IsValid() || SessionInterface->GetSessionStatePtr(SessionName) != ExpectedState ||
+		!ExpectedState->MatchmakingCompletion.IsInProgress() || Pending.Ticket->bTerminalCallbackDispatched)
+	{
+		UE_LOG_ONLINE(Verbose, TEXT("Ignoring arranged-lobby completion for an inactive or replaced session."));
+		if (SUCCEEDED(StateChange.result))
+		{
+			CleanupDetachedLobby(StateChange.lobby);
+		}
+		else
+		{
+			LobbySessionMap.Remove(StateChange.lobby);
+		}
+		return;
+	}
 	if (FAILED(StateChange.result))
 	{
-		UE_LOG_ONLINE(Error, TEXT("Failed to join arranged lobby. ErrorCode=[0x%08x]"), StateChange.result);
-		TriggerOnJoinArrangedLobbyCompletedDelegates(*SessionName, false);
+		UE_LOG_ONLINE(Error, TEXT("Failed to join arranged lobby. ErrorCode=[0x%08x], Error message:%s"), static_cast<uint32>(StateChange.result), *GetMultiplayerErrorMessage(StateChange.result));
+		LobbySessionMap.Remove(StateChange.lobby);
+		TriggerOnJoinArrangedLobbyCompletedDelegates(SessionName, false);
 		return;
 	}
 
-	auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
-	FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(*SessionName);
+	FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(SessionName);
+
+	const auto FailJoin = [this, &StateChange, SessionName]()
+	{
+		CleanupDetachedLobby(StateChange.lobby);
+		TriggerOnJoinArrangedLobbyCompletedDelegates(SessionName, false);
+	};
 
 	const PFEntityKey* OwnerPtr;
 	HRESULT Hr = PFLobbyGetOwner(StateChange.lobby, &OwnerPtr);
@@ -1839,7 +2008,7 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 		if (OwnerPtr == nullptr)
 		{
 			UE_LOG_ONLINE(Error, TEXT("The owner does not exist!"));
-			TriggerOnJoinArrangedLobbyCompletedDelegates(*SessionName, false);
+			FailJoin();
 			return;
 		}
 
@@ -1847,7 +2016,7 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 		if (!IdentityIntPtr.IsValid())
 		{
 			UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::HandleJoinArrangedLobbyCompleted Identity Interface is invalid"));
-			TriggerOnJoinArrangedLobbyCompletedDelegates(*SessionName, false);
+			FailJoin();
 			return;
 		}
 
@@ -1860,14 +2029,16 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 		{
 			UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby::HandleJoinArrangedLobbyCompleted Owner of the lobby is a local user."));
 			bHosting = true;
-			FString PlayerNickName = *(static_cast<FString*>(StateChange.asyncContext));
+			const FString& PlayerNickName = Pending.PlayerNickname;
 			ExistingNamedSession->SessionSettings.Set(SETTING_HOST_NICKNAME, PlayerNickName, EOnlineDataAdvertisementType::ViaOnlineService);
-			UpdateLobby(*SessionName, ExistingNamedSession->SessionSettings);
+			UpdateLobby(SessionName, ExistingNamedSession->SessionSettings);
 		}
 	}
 	else
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::HandleJoinArrangedLobbyCompleted failed to GetOwner for the lobby. ErrorCode=[0x%08x], Error message:%s"), Hr, *GetMultiplayerErrorMessage(Hr));
+		FailJoin();
+		return;
 	}
 
 	ExistingNamedSession->bHosting = bHosting;
@@ -1877,6 +2048,8 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted failed to GetLobbyId: 0x%08x"), Hr);
+		FailJoin();
+		return;
 	}
 
 	const char* ConnectionString;
@@ -1884,13 +2057,15 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 	if (FAILED(Hr))
 	{
 		UE_LOG_ONLINE(Error, TEXT("FPlayFabLobby::HandleCreateAndJoinLobbyCompleted failed to GetConnectionString: 0x%08x"), Hr);
+		FailJoin();
+		return;
 	}
 
 	TSharedRef<FOnlineSessionInfoPlayFab> NewSessionInfo = MakeShared<FOnlineSessionInfoPlayFab>();
 	NewSessionInfo->SetSessionId(UTF8_TO_TCHAR(LobbyId));
 	NewSessionInfo->ConnectionString = UTF8_TO_TCHAR(ConnectionString);
 	NewSessionInfo->LobbyHandle = StateChange.lobby;
-	NewSessionInfo->SessionName = *SessionName;
+	NewSessionInfo->SessionName = SessionName;
 
 	ExistingNamedSession->SessionInfo = NewSessionInfo;
 	ExistingNamedSession->SessionState = EOnlineSessionState::Pending;
@@ -1902,7 +2077,39 @@ void FPlayFabLobby::HandleJoinArrangedLobbyCompleted(const PFLobbyJoinArrangedLo
 	}
 #endif
 
-	TriggerOnJoinArrangedLobbyCompletedDelegates(*SessionName, true);
+	TriggerOnJoinArrangedLobbyCompletedDelegates(SessionName, true);
+}
+
+void FPlayFabLobby::CompleteLobbyUpdate(int OperationId, PFLobbyHandle LobbyHandle)
+{
+	FUpdateLobbyCompletionState Completion;
+	if (!UpdateLobbyOperations.RemoveAndCopyValue(OperationId, Completion))
+	{
+		return;
+	}
+	if (UpdateLobbyOperations.IsEmpty())
+	{
+		NextUpdateLobbyOperationId.store(0);
+	}
+	const FName* FoundName = LobbySessionMap.Find(LobbyHandle);
+	if (!FoundName)
+	{
+		UE_LOG_ONLINE(Verbose, TEXT("Ignoring update completion for a detached lobby."));
+		return;
+	}
+	const FName SessionName = *FoundName;
+	const TSharedPtr<FPlayFabSessionState> ExpectedState = Completion.SessionState.Pin();
+	const FOnlineSessionPlayFabPtr Sessions = OSSPlayFab->GetSessionInterfacePlayFab();
+	if (!ExpectedState.IsValid() || Sessions->GetSessionStatePtr(SessionName) != ExpectedState)
+	{
+		UE_LOG_ONLINE(Verbose, TEXT("Ignoring update completion for a replaced session."));
+		return;
+	}
+	Completion.CompletionDelegate.ExecuteIfBound(SessionName, Completion.MergedCompletionResult);
+	if (Sessions->GetSessionStatePtr(SessionName) == ExpectedState)
+	{
+		TriggerOnUpdateLobbyCompletedDelegates(SessionName, Completion.MergedCompletionResult);
+	}
 }
 
 void FPlayFabLobby::HandleLobbyUpdate(const PFLobbyUpdatedStateChange& StateChange)
@@ -1910,7 +2117,10 @@ void FPlayFabLobby::HandleLobbyUpdate(const PFLobbyUpdatedStateChange& StateChan
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyUpdatedStateChange(%u) event"), StateChange.stateChangeType);
 
 	FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
-	TriggerOnLobbyUpdateDelegates(*SessionName, StateChange);
+	if (SessionName)
+	{
+		TriggerOnLobbyUpdateDelegates(*SessionName, StateChange);
+	}
 }
 
 void FPlayFabLobby::HandleOnMemberAdded(const PFLobbyMemberAddedStateChange& StateChange)
@@ -1918,7 +2128,10 @@ void FPlayFabLobby::HandleOnMemberAdded(const PFLobbyMemberAddedStateChange& Sta
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyMemberAddedStateChange(%u) event"), StateChange.stateChangeType);
 
 	FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
-	TriggerOnLobbyMemberAddedDelegates(*SessionName, StateChange);
+	if (SessionName)
+	{
+		TriggerOnLobbyMemberAddedDelegates(*SessionName, StateChange);
+	}
 }
 
 void FPlayFabLobby::HandleOnAddMemberCompleted(const PFLobbyAddMemberCompletedStateChange& StateChange)
@@ -1942,7 +2155,10 @@ void FPlayFabLobby::HandleOnMemberRemoved(const PFLobbyMemberRemovedStateChange&
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyMemberRemovedStateChange(%u) event"), StateChange.stateChangeType);
 
 	FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
-	TriggerOnLobbyMemberRemovedDelegates(*SessionName, StateChange);
+	if (SessionName)
+	{
+		TriggerOnLobbyMemberRemovedDelegates(*SessionName, StateChange);
+	}
 }
 
 void FPlayFabLobby::HandleForceRemoveMember(const PFLobbyForceRemoveMemberCompletedStateChange& StateChange)
@@ -1967,9 +2183,26 @@ void FPlayFabLobby::HandleLeaveLobbyCompleted(const PFLobbyLeaveLobbyCompletedSt
 	{
 		if (FailedCreateLobbyCleanupHandles.Remove(StateChange.lobby) > 0)
 		{
+            JoinLobbyOperations.Remove(StateChange.lobby);
 			LobbySessionMap.Remove(StateChange.lobby);
 			return;
 		}
+
+        if (StateChange.localUser == nullptr)
+        {
+            if (const FJoinLobbyOperation* Operation = JoinLobbyOperations.Find(StateChange.lobby))
+            {
+                const auto ExpectedState = Operation->SessionState.Pin();
+                const bool bStale = Operation->bAbandoned || !ExpectedState.IsValid() ||
+                    OSSPlayFab->GetSessionInterfacePlayFab()->GetSessionStatePtr(Operation->SessionName) != ExpectedState;
+                JoinLobbyOperations.Remove(StateChange.lobby);
+                if (bStale)
+                {
+                    LobbySessionMap.Remove(StateChange.lobby);
+                    return;
+                }
+            }
+        }
 
 		const FPendingCreateAndJoinLobbyCompletion* PendingCompletion =
 			PendingCreateAndJoinLobbyCompletions.Find(StateChange.lobby);
@@ -1985,8 +2218,23 @@ void FPlayFabLobby::HandleLeaveLobbyCompleted(const PFLobbyLeaveLobbyCompletedSt
 		}
 
 		FName* SessionName = LobbySessionMap.Find(StateChange.lobby);
+		if (SessionName == nullptr)
+		{
+			UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby::HandleLeaveLobbyCompleted: No session mapping found for lobby 0x%p"), StateChange.lobby);
+			TriggerOnLeaveLobbyCompletedDelegates(FName(), false);
+			return;
+		}
+
 		auto SessionInterface = OSSPlayFab->GetSessionInterfacePlayFab();
 		FNamedOnlineSessionPtr ExistingNamedSession = SessionInterface->GetNamedSessionPtr(*SessionName);
+		if (!ExistingNamedSession.IsValid())
+		{
+			UE_LOG_ONLINE(Verbose, TEXT("FPlayFabLobby::HandleLeaveLobbyCompleted: Session %s was already removed"), *SessionName->ToString());
+			const FName RemovedSessionName = *SessionName;
+			LobbySessionMap.Remove(StateChange.lobby);
+			TriggerOnLeaveLobbyCompletedDelegates(RemovedSessionName, false);
+			return;
+		}
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
 		if (IsNativePlatformSubsystemGDK())
@@ -2019,9 +2267,15 @@ void FPlayFabLobby::HandleLeaveLobbyCompleted(const PFLobbyLeaveLobbyCompletedSt
 		// Check if this is DestroySession or UnregisterLocalUser
 		if (ExistingNamedSession->SessionState == EOnlineSessionState::Destroying)
 		{
-			SessionInterface->RemoveNamedSession(*SessionName);
+            const FName CompletedSessionName = *SessionName;
+            const auto SessionState = SessionInterface->GetSessionStatePtr(CompletedSessionName);
+            // Steam join rollback owns state until lobby, Party and native cleanup finish.
+            if (!SessionState.IsValid() || !SessionState->bSteamJoin)
+            {
+                SessionInterface->RemoveNamedSession(CompletedSessionName);
+            }
 			LobbySessionMap.Remove(StateChange.lobby);
-			TriggerOnLeaveLobbyCompletedDelegates(*SessionName, true);
+            TriggerOnLeaveLobbyCompletedDelegates(CompletedSessionName, true);
 		}
 		else
 		{
@@ -2041,7 +2295,7 @@ void FPlayFabLobby::HandleFindLobbiesCompleted(const PFLobbyFindLobbiesCompleted
 
 	if (FAILED(StateChange.result))
 	{
-		UE_LOG_ONLINE(Error, TEXT("Failed to find lobbies. ErrorCode=[0x%08x]"), StateChange.result);
+		UE_LOG_ONLINE(Error, TEXT("Failed to find lobbies. ErrorCode=[0x%08x], Error message:%s"), static_cast<uint32>(StateChange.result), *GetMultiplayerErrorMessage(StateChange.result));
 		CurrentSessionSearch->SearchState = EOnlineAsyncTaskState::Failed;
 	}
 	else
@@ -2090,6 +2344,7 @@ void FPlayFabLobby::HandleInvitationReceived(const PFLobbyInviteReceivedStateCha
 	if (SessionInterface.IsValid())
 	{
 		SessionInterface->OnInvitationReceived_PlayFabMultiplayer(StateChange.listeningEntity, StateChange.invitingEntity, FString(StateChange.connectionString));
+		SessionInterface->NotifyLobbyInviteForStandardDelegate_PlayFabMultiplayer(StateChange);
 	}
 	else
 	{
@@ -2101,7 +2356,24 @@ void FPlayFabLobby::HandleLobbyDisconnected(const PFLobbyDisconnectedStateChange
 {
 	UE_LOG_ONLINE(Verbose, TEXT("Received PFLobbyDisconnectedStateChange(%u) event"), StateChange.stateChangeType);
 
-	FailedCreateLobbyCleanupHandles.Remove(StateChange.lobby);
+	if (FailedCreateLobbyCleanupHandles.Remove(StateChange.lobby) > 0)
+	{
+        JoinLobbyOperations.Remove(StateChange.lobby);
+		LobbySessionMap.Remove(StateChange.lobby);
+		return;
+	}
+    if (const FJoinLobbyOperation* Operation = JoinLobbyOperations.Find(StateChange.lobby))
+    {
+        const auto ExpectedState = Operation->SessionState.Pin();
+        const bool bStale = Operation->bAbandoned || !ExpectedState.IsValid() ||
+            OSSPlayFab->GetSessionInterfacePlayFab()->GetSessionStatePtr(Operation->SessionName) != ExpectedState;
+        JoinLobbyOperations.Remove(StateChange.lobby);
+        if (bStale)
+        {
+            LobbySessionMap.Remove(StateChange.lobby);
+            return;
+        }
+    }
 	if (CancelPendingCreateAndJoinLobbyCompletion(
 		StateChange.lobby,
 		E_ABORT,

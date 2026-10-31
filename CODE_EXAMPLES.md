@@ -110,6 +110,7 @@ void AYourGameMode::LoginWithXboxUser()
         FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this](
             const FPFAuthenticationLoginResult* loginResult, 
             FPFEntityHandle* handle, 
+            const FString& ErrorMessage,
             bool bWasSuccessful)
         {
             if (bWasSuccessful)
@@ -122,7 +123,7 @@ void AYourGameMode::LoginWithXboxUser()
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("Xbox login failed"));
+                UE_LOG(LogTemp, Error, TEXT("Xbox login failed: %s"), *ErrorMessage);
             }
         }));
         
@@ -163,6 +164,7 @@ void AYourGameMode::LoginWithCustomId()
         FOnPFAuthenticationLoginCompleteDelegate::CreateLambda([this](
             const FPFAuthenticationLoginResult* loginResult, 
             FPFEntityHandle* handle, 
+            const FString& ErrorMessage,
             bool bWasSuccessful)
         {
             if (bWasSuccessful)
@@ -175,7 +177,7 @@ void AYourGameMode::LoginWithCustomId()
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("Custom ID login failed"));
+                UE_LOG(LogTemp, Error, TEXT("Custom ID login failed: %s"), *ErrorMessage);
             }
         }));
         
@@ -517,6 +519,123 @@ AYourGameMode::~AYourGameMode()
     FPFServicesUninitialize();
 }
 ````
+
+## Group Matchmaking
+
+Add `OnlineSubsystemPlayFab` to your game module's dependencies and include
+`OnlineSubsystemPlayFab.h` and `OnlineMatchmakingInterfacePlayFab.h`.
+Use your existing PlayFab subsystem instance and authenticated **platform user**
+ID. Calls must run on the game thread.
+
+The group must already share a PlayFab lobby so the creator can resolve remote
+members from current membership. The creator supplies the complete platform-user
+roster, including itself. Use a separate result session name from the existing
+group lobby.
+
+```cpp
+IOnlineMatchmakingPlayFabPtr Matchmaking = PlayFabSubsystem->GetPlayFabMatchmakingInterface();
+if (!Matchmaking.IsValid())
+{
+    UE_LOG(LogTemp, Error, TEXT("PlayFab matchmaking is unavailable"));
+    return;
+}
+
+FPlayFabGroupMatchmakingRequest Request;
+Request.QueueName = TEXT("YourConfiguredQueue");
+Request.TimeoutInSeconds = 120;
+Request.LocalUserAttributesJson = TEXT("{}");
+Request.SessionSettings.NumPublicConnections = 4; // Capacity of the complete match.
+Request.SessionSettings.bShouldAdvertise = true;
+Request.SessionSettings.bAllowJoinInProgress = true;
+
+const FName ResultSessionName(TEXT("MatchedGame"));
+FOnPlayFabMatchmakingComplete OnComplete = FOnPlayFabMatchmakingComplete::CreateLambda(
+    [](const FPlayFabMatchmakingCompleteResult& Result)
+    {
+        if (!Result.bWasSuccessful)
+        {
+            UE_LOG(LogTemp, Error, TEXT("Matchmaking failed: %s"), *Result.Error.ToLogString());
+            return;
+        }
+        // Resolve the completed named session and perform title-specific host/client travel.
+        UE_LOG(LogTemp, Log, TEXT("Session ready: %s"), *Result.ResultSessionName.ToString());
+    });
+
+// On the creator only; ExpectedMembers includes LocalUserId and the remote platform IDs.
+const bool bAccepted = Matchmaking->CreateGroupMatchmakingTicket(
+    LocalUserId, ResultSessionName, ExpectedMembers, Request,
+    FOnPlayFabGroupTicketCreated::CreateLambda(
+        [](const FPlayFabGroupTicketCreatedResult& Result)
+        {
+            if (!Result.bWasSuccessful)
+            {
+                UE_LOG(LogTemp, Error, TEXT("Ticket creation failed: %s"), *Result.Error.ToLogString());
+                return;
+            }
+            // Publish Result.TicketId to the expected members through your group coordination layer.
+            // Creation is not final matchmaking success; keep waiting for OnComplete.
+        }),
+    OnComplete);
+if (!bAccepted)
+{
+    UE_LOG(LogTemp, Warning, TEXT("The group request was rejected; failure callbacks will follow"));
+}
+```
+
+Publish the confirmed ticket ID using your title's group coordination layer.
+On each expected remote device, join that ID using the same queue and compatible
+session settings, that device's local platform user ID, and its own attributes:
+
+```cpp
+const bool bAccepted = Matchmaking->JoinGroupMatchmakingTicket(
+    LocalUserId, ResultSessionName, SharedTicketId, Request,
+    FOnPlayFabGroupTicketJoined::CreateLambda(
+        [](const FPlayFabGroupTicketJoinedResult& Result)
+        {
+            if (!Result.bWasSuccessful)
+            {
+                UE_LOG(LogTemp, Error, TEXT("Ticket join failed: %s"), *Result.Error.ToLogString());
+            }
+        }),
+    OnComplete);
+if (!bAccepted)
+{
+    UE_LOG(LogTemp, Warning, TEXT("The join request was rejected; failure callbacks will follow"));
+}
+```
+
+After every expected member joins, matchmaking starts automatically. **Do not call
+`IOnlineSession::StartMatchmaking` afterward**: Create/Join already start an active
+ticket. Neither early callback means a game session is ready; only the independent
+final callback reports completed matchmaking, arranged-lobby, and Party setup.
+Group results use these typed delegates rather than the legacy solo
+`OnMatchmakingComplete` multicast.
+
+Cancel a pending ticket through the existing session interface:
+
+```cpp
+if (!PlayFabSubsystem->GetSessionInterface()->CancelMatchmaking(*LocalUserId, ResultSessionName))
+{
+    UE_LOG(LogTemp, Warning, TEXT("The ticket could not be canceled"));
+}
+```
+
+Cancellation is available while the matchmaking ticket is active; it is not a
+general cancellation API for later Party setup or travel. A canceled group
+operation reports terminal failure with `EOnlineErrorResult::Canceled` and also
+uses the existing `OnCancelMatchmakingComplete` delegate.
+
+Removing or destroying `ResultSessionName` instead aborts a pending local operation,
+including pending Party setup. It reports `Canceled` with error code `Aborted`
+through the typed callbacks, without emitting `OnCancelMatchmakingComplete`.
+Local teardown releases the ticket even if requesting service cancellation fails;
+SDK ticket destruction makes a further best-effort cancellation attempt. This
+local abort result is not confirmation that the backend ticket was canceled.
+
+Rejected calls return `false` and report both early and terminal failures on a
+subsequent subsystem tick. Calls on an interface retained after shutdown fail
+synchronously instead; shutdown discards outstanding callbacks. Bind callbacks
+with title-appropriate object lifetime management.
 
 ## Additional Examples
 

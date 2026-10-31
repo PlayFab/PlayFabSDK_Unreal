@@ -147,23 +147,27 @@ GenerateUserAttributes(
 
 bool ParseDataObjectFromPlayFabResponse(
 	const FHttpResponsePtr HttpResponse,
-	TSharedRef<TJsonReader<TCHAR>>& JsonReader,
 	TSharedPtr<FJsonObject>& HttpResponseJSON,
 	const TSharedPtr<FJsonObject>*& OutDataObject
 )
 {
 	if (!HttpResponse.IsValid())
 	{
+		UE_LOG_ONLINE(Error, TEXT("ParseDataObjectFromPlayFabResponse failed: HttpResponse was invalid"));
 		return false;
 	}
 
 	if (HttpResponse->GetResponseCode() != 200)
 	{
-		const FString ErrorResponseStr = HttpResponse->GetContentAsString();
-		UE_LOG_ONLINE(Error, TEXT("ParseDataObjectFromPlayFabResponse failed with response code %u, response:%s!"), HttpResponse->GetResponseCode(), *ErrorResponseStr);
+		UE_LOG_ONLINE(Error, TEXT("ParseDataObjectFromPlayFabResponse failed. Url:%s, ResponseCode:%d, RequestId:%s"),
+			*HttpResponse->GetURL(),
+			HttpResponse->GetResponseCode(),
+			*HttpResponse->GetHeader(TEXT("X-RequestId")));
+		UE_LOG_ONLINE(Verbose, TEXT("ParseDataObjectFromPlayFabResponse response:%s"), *HttpResponse->GetContentAsString());
 		return false;
 	}
 
+	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(HttpResponse->GetContentAsString());
 	if (!FJsonSerializer::Deserialize(JsonReader, HttpResponseJSON))
 	{
 		return false;
@@ -316,11 +320,9 @@ bool ParsePlayFabIdsFromPlatformIdsResponse(
 	TMap<FString, FString>& EntityIdMapping
 	)
 {
-	const FString ResponseStr = HttpResponse->GetContentAsString();
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ResponseStr);
 	TSharedPtr<FJsonObject> HttpResponseJSON;
 	const TSharedPtr<FJsonObject>* JsonDataObject;
-	if (!ParseDataObjectFromPlayFabResponse(HttpResponse, JsonReader, HttpResponseJSON, JsonDataObject))
+	if (!ParseDataObjectFromPlayFabResponse(HttpResponse, HttpResponseJSON, JsonDataObject))
 	{
 		return false;
 	}
@@ -336,8 +338,9 @@ bool ParsePlayFabIdsFromPlatformIdsResponse(
 	return ParseNsaIdToPlayFabIdMappingDataObject(JsonDataObject, EntityIdMapping);
 #elif defined(OSS_PLAYFAB_PLAYSTATION)
 	return ParsePsnIdToPlayFabIdMappingDataObject(JsonDataObject, EntityIdMapping);
-#endif
+#else
 	return false;
+#endif
 }
 
 bool ParseTitleAccountIDsFromPlatformIDsResponse(
@@ -363,11 +366,9 @@ bool ParseTitleAccountIDsFromPlatformIDsResponse(
 //	}
 //}
 
-	const FString ResponseStr = HttpResponse->GetContentAsString();
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ResponseStr);
 	TSharedPtr<FJsonObject> HttpResponseJSON;
 	const TSharedPtr<FJsonObject>* JsonDataObject = nullptr;
-	if (!ParseDataObjectFromPlayFabResponse(HttpResponse, JsonReader, HttpResponseJSON, JsonDataObject))
+	if (!ParseDataObjectFromPlayFabResponse(HttpResponse, HttpResponseJSON, JsonDataObject))
 	{
 		return false;
 	}
@@ -425,11 +426,9 @@ bool ParseTitlePlayerAccountFromPlayerCombinedInfoResponse(
 	}
 }
 */
-	const FString ResponseStr = HttpResponse->GetContentAsString();
-	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ResponseStr);
 	TSharedPtr<FJsonObject> HttpResponseJSON;
 	const TSharedPtr<FJsonObject>* JsonDataObject = nullptr;
-	if (!ParseDataObjectFromPlayFabResponse(HttpResponse, JsonReader, HttpResponseJSON, JsonDataObject))
+	if (!ParseDataObjectFromPlayFabResponse(HttpResponse, HttpResponseJSON, JsonDataObject))
 	{
 		return false;
 	}

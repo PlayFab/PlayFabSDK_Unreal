@@ -8,6 +8,7 @@
 #include "OnlineDelegateMacros.h"
 #include "OnlineSubsystemImpl.h"
 #include "OnlineSubsystemPlayFabPackage.h"
+#include "OnlineMatchmakingInterfacePlayFab.h"
 #include "OnlineVoiceInterfacePlayFab.h"
 #include "OnlineCognitiveServicesInterfacePlayFab.h"
 #include "OnlineSubsystemPlayFabDefines.h"
@@ -17,6 +18,7 @@
 #include "Misc/ConfigCacheIni.h"
 #include "..\PlatformSpecific\PlatformDefines.h"
 #include "..\Private\PlayFabEventTracer.h"
+#include "..\Private\PlayFabPartyLifecycle.h"
 
 #include "PlayFabSDKIncludes.h"
 
@@ -39,6 +41,9 @@ class FPlayFabPartyNetwork;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEndpointMessageReceived, const PartyEndpointMessageReceivedStateChange* /*Change*/);
 typedef FOnEndpointMessageReceived::FDelegate FOnEndpointMessageReceivedDelegate;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCustomDataMessageReceived, const PartyEndpointMessageReceivedStateChange* /*Change*/);
+typedef FOnCustomDataMessageReceived::FDelegate FOnCustomDataMessageReceivedDelegate;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnConnectToPlayFabPartyNetworkCompleted, bool /*bSuccess*/);
 typedef FOnConnectToPlayFabPartyNetworkCompleted::FDelegate FOnConnectToPlayFabPartyNetworkCompletedDelegate;
@@ -147,8 +152,13 @@ public:
 
 	FPlayFabLobbyPtr GetPlayFabLobbyInterface() const;
 	FMatchmakingInterfacePtr GetMatchmakingInterface() const;
+	IOnlineMatchmakingPlayFabPtr GetPlayFabMatchmakingInterface() const;
 
 private:
+	friend class FPlayFabMatchmakingTestAccessor;
+    friend class FPlayFabLobbyJoinTestAccessor;
+	friend class FPlayFabGroupMatchmakingTestAccessor;
+
 	void RegisterNetworkInitCallbacks();
 	void UnregisterNetworkInitCallbacks();
 	void InitializePlayFab();
@@ -157,6 +167,7 @@ private:
 	void InitializeMultiplayer();
 	void InitializeEventTracer();
 	void SetMemoryCallbacks();
+	void CleanUpPlayFabParty();
 	void CleanUpPlayFab();
 	void ParseNetworkConfiguration();
 	void OnAppResumeDefault();
@@ -166,7 +177,10 @@ private:
 	void RegisterNetworkInitCallbacksGDK();
 	void UnregisterNetworkInitCallbacksGDK();
 	void TryInitializePlayFabPartyGDK();
+	uint64 NetworkInitRegistrationToken = 0;
 #endif // OSS_PLAYFAB_GDK_SUPPORT
+
+	PlayFabPartyLifecycle::FState PartyLifecycle;
 
 #ifdef OSS_PLAYFAB_SWITCH
 	void* LibBufferParty;
@@ -258,6 +272,7 @@ public:
 	void OnConfigureAudioManipulationRenderStreamCompleted(const PartyStateChange* Change);
 
 	DEFINE_ONLINE_DELEGATE_ONE_PARAM(OnEndpointMessageReceived, const PartyEndpointMessageReceivedStateChange* /*Change*/);
+	DEFINE_ONLINE_DELEGATE_ONE_PARAM(OnCustomDataMessageReceived, const PartyEndpointMessageReceivedStateChange* /*Change*/);
 	DEFINE_ONLINE_DELEGATE_ONE_PARAM(OnConnectToPlayFabPartyNetworkCompleted, bool /*bSuccess*/);
 	DEFINE_ONLINE_DELEGATE_FOUR_PARAM(OnPartyEndpointCreated, bool /*bSuccess*/, const FString& /*NetworkId*/, uint16 /*EndpointID*/, bool /*bIsHosting*/);
 

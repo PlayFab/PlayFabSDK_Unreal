@@ -654,7 +654,7 @@ TSharedPtr<const FPFStatisticsListStatisticDefinitionsRequest> ConvertListStatis
 	TSharedPtr<const FPFStatisticsListStatisticDefinitionsRequest> ConvertedType = MakeShared<FPFStatisticsListStatisticDefinitionsRequest>(FPFStatisticsListStatisticDefinitionsRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
+		.pageSize = ConvertOptionalToUnreal(Datatype->pageSize),
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
@@ -840,7 +840,7 @@ TSharedPtr<const FPFStatisticsStatisticUpdate> ConvertStatisticUpdateToUnreal(co
 		.name = Datatype->name == nullptr ? FString() : FString(Datatype->name),
 		.scores = ConvertCharArrayToUnreal(Datatype->scores, Datatype->scoresCount),
 		.scoresCount = Datatype->scoresCount,
-		.version = TSharedPtr<const uint32>(Datatype->version)
+		.version = ConvertOptionalToUnreal(Datatype->version)
 	});
 
 	return ConvertedType;

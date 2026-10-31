@@ -8,6 +8,9 @@
 #include "OnlineSubsystemPlayFabDefines.h"
 #include "OnlineSubsystemPlayFabPackage.h"
 #include "OnlineSubsystemPlayFabTypes.h"
+#include "PlayFabDestroySessionCompletion.h"
+#include "PlayFabMatchmakingCompletion.h"
+#include "PlayFabSessionJoin.h"
 #include "PlayFabLobby.h"
 #include "MatchmakingInterfacePlayFab.h"
 
@@ -40,6 +43,8 @@ struct FPlayFabSessionState
 	FPlayFabSessionState(FName InSessionName, FNamedOnlineSessionRef InNamedSession, bool bInUsesNativeSession, FOnlineSubsystemPlayFab* InSubsystem);
 	~FPlayFabSessionState();
 
+	void ReleasePartyNetwork();
+
 	FName SessionName;
 
 	// The Unreal named session associated with this state
@@ -57,13 +62,14 @@ struct FPlayFabSessionState
 	// Per-session operation state
 	FString NetworkId;
 	ENetworkFlowType NetworkFlowType = ENetworkFlowType::None;
+	PlayFabMatchmakingCompletion::FState MatchmakingCompletion;
+	TSharedPtr<FPlayFabGroupMatchmakingCallbacks> GroupMatchmaking;
 
 	// Maps PlayFab entity IDs to platform-specific user IDs for this session's members
 	TMap<FString, FString> EntityPlatformIdMapping;
 
 	// Lobby operation delegate handles
 	FDelegateHandle OnUpdateLobbyCompleteDelegate;
-	FDelegateHandle OnUpdateSession_MatchmakingDelegateHandle;
 
 	// Lobby delegate callbacks
 	void OnUpdateLobbyCompleted(FName InSessionName, bool bWasSuccessful);
@@ -73,7 +79,18 @@ struct FPlayFabSessionState
 	FDelegateHandle OnNativeCreateSessionCompleteDelegateHandle;
 	FDelegateHandle OnNativeUpdateSessionCompleteDelegateHandle;
 	FDelegateHandle OnNativeJoinSessionCompleteDelegateHandle;
+	FDelegateHandle OnNativeJoinRollbackCompleteDelegateHandle;
 
+	PlayFabSessionJoin::FState SteamJoinCompletion;
+	bool bSteamJoin = false;
+	bool bNativeJoinRollbackComplete = true;
+	TOptional<bool> JoinRollbackPlayFabResult;
+	TOptional<PlayFabSessionJoin::FResult> CancelledJoinResult;
+
+	std::atomic_bool bCreateSessionCompletionTriggered { false };
+	std::atomic_bool bPartyNetworkReleased { false };
+	PlayFabDestroySessionCompletion::FState DestroyCompletionState;
+	FOnDestroySessionCompleteDelegate DestroyCompletionDelegate;
 	bool bUsesNativeSession;
 
 	FOnlineSubsystemPlayFab* OSSPlayFab;
@@ -81,6 +98,22 @@ struct FPlayFabSessionState
 
 using FPlayFabSessionStateRef = TSharedRef<FPlayFabSessionState>;
 using FPlayFabSessionStatePtr = TSharedPtr<FPlayFabSessionState>;
+
+struct FPlayFabFindSessionsOperation
+{
+    TSharedPtr<FOnlineSessionSearch> PlayFabSearch;
+    TSharedPtr<FOnlineSessionSearch> NativeSearch;
+    FDelegateHandle LobbyDelegateHandle;
+    FDelegateHandle NativeDelegateHandle;
+    bool bStarting = true;
+    bool bPlayFabComplete = false;
+    bool bNativeComplete = true;
+    bool bPlayFabSuccess = false;
+    bool bNativeSuccess = false;
+    bool bCompleted = false;
+
+    TOptional<bool> TryComplete();
+};
 
 struct FPendingInviteData
 {
@@ -183,9 +216,10 @@ PACKAGE_SCOPE:
 	TArray<FPlayFabSessionStateRef> SessionStates;
 	FPlayFabSessionStatePtr TryAddSessionState(FName SessionName, FNamedOnlineSessionRef InNamedSession);
 	FPlayFabSessionStatePtr GetSessionStatePtr(FName SessionName) const;
+	bool GetPlayFabEntityKeyForPlatformUser(const FUniqueNetId& UserId, FString& OutEntityId, FString& OutEntityType) const;
 
 protected:
-	bool JoinSession_PlayFabInternal(int32 ControllerIndex, TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession);
+	bool JoinSession_PlayFabInternal(int32 ControllerIndex, TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession, bool bSteamJoin = false, bool bUsesNativeSession = false);
 
 	void OnPartyEndpointCreated(bool bSuccess, const FString& NetworkId, uint16 EndpointID, bool bIsHosting);
 	void OnCreatePartyEndpoint(bool bSuccess, bool bIsHosting, FPlayFabSessionStateRef SessionState);
@@ -193,7 +227,7 @@ protected:
 	FOnlineSubsystemPlayFab* OSSPlayFab = nullptr;
 
 	void OnJoinLobbyCompleted(FName InSessionName, EOnJoinSessionCompleteResult::Type Result);
-	void OnMatchmakingComplete(FName SessionName, bool bWasSuccessful);
+	void OnMatchmakingComplete(FName SessionName, bool bWasSuccessful, FPlayFabSessionStatePtr ExpectedState);
 
 #if defined(OSS_PLAYFAB_PLAYSTATION)
 	FName NativeSessionName = NAME_GameSession;
@@ -210,27 +244,46 @@ protected:
 	void OnCreatePartyEndpoint_JoinSession(bool bSuccess, FName SessionName);
 
 public:
+	FName GetNativeSessionName(FName SessionName) const { return ResolveNativeSessionName(SessionName); }
+
 	void Tick(float DeltaTime);
 
 	void OnCreateSessionCompleted(FName SessionName, bool bWasSuccessful, bool bSkipCleanup);
 
 	void OnLobbyCreatedAndJoinCompleted(bool bSuccess, FName SessionName);
 
-	void OnMatchmakingTicketCompleted(bool bSuccess, FName SessionName);
+	void OnMatchmakingTicketCompleted(bool bSuccess, FName SessionName, FPlayFabSessionStatePtr ExpectedState);
 
-	void OnCancelMatchmakingComplete(FName SessionName, bool bSuccess);
+	void OnCancelMatchmakingComplete(FName SessionName, bool bSuccess, FPlayFabSessionStatePtr ExpectedState);
+	bool TryCompleteMatchmaking(const FPlayFabSessionStatePtr& SessionState, bool bSuccess, bool bWasCancelled = false);
 
 	void OnLeaveLobbyCompleted(FName SessionName, bool bSuccess);
+	void OnPartyNetworkLeaveCompleted(FName SessionName, bool bSuccess);
 
 	void OnFindLobbiesCompleted(int32 LocalUserNum, bool bSuccess, TSharedPtr<FOnlineSessionSearch> SearchResults);
-	FOnFindLobbiesCompletedDelegate OnFindLobbiesCompletedDelegateHandle;
-	FDelegateHandle OnFindLobbiesCompletedHandle;
 
 	void OnFindFriendLobbiesCompleted(int32 LocalUserNum, bool bSuccess, TSharedPtr<FOnlineSessionSearch> SearchResults);
 	FDelegateHandle OnFindFriendLobbiesCompletedHandle;
 
 private:
-	void TeardownSessionNetwork(FName SessionName);
+	void AbortMatchmaking(const FPlayFabSessionStatePtr& SessionState);
+	bool JoinSteamSession(int32 ControllerIndex, FUniqueNetIdPtr UserId, FName SessionName, const FOnlineSessionSearchResult& DesiredSession);
+	void CompletePlayFabJoin(const FPlayFabSessionStatePtr& SessionState, EOnJoinSessionCompleteResult::Type Result);
+	void HandleSteamJoinCompletion(const FPlayFabSessionStatePtr& SessionState, const TOptional<PlayFabSessionJoin::FResult>& Result);
+	void BeginNativeJoinRollback(const FPlayFabSessionStatePtr& SessionState);
+	void TryCompleteJoinRollback(const FPlayFabSessionStatePtr& SessionState);
+	void TryCompleteFindSessions(const TSharedRef<FPlayFabFindSessionsOperation>& Operation);
+	TSharedPtr<FPlayFabFindSessionsOperation> FindSessionsOperation;
+	// Per-instance SDK entry points allow deterministic lifecycle tests.
+	decltype(&PFLobbyGetMembers) GetLobbyMembers = &PFLobbyGetMembers;
+	decltype(&PFLobbyGetMemberProperty) GetLobbyMemberProperty = &PFLobbyGetMemberProperty;
+	friend class FPlayFabGroupMatchmakingTestAccessor;
+
+	EOnlineAsyncTaskState::Type BeginPartyNetworkLeave(FName SessionName);
+	void TeardownSessionNetwork(FName SessionName, bool bLeavePartyNetwork = true);
+	void NormalizeNativeSessionSettings(FOnlineSessionSettings& SessionSettings) const;
+	bool TryCompleteCreateSession(const FPlayFabSessionStatePtr& SessionState, bool bSuccess, bool bCleanupSession);
+	void TryCompleteDestroySession(const FPlayFabSessionStatePtr& SessionState, const TOptional<bool>& CompletionResult);
 	void TryClaimVoiceForSession(FName SessionName);
 	bool IsVoiceSession(FName SessionName) const;
 	void RegisterVoice(const FUniqueNetId& PlayerId);
@@ -239,12 +292,8 @@ private:
 	FOnlineSessionSearchResult CreateSearchResultFromInvite(const PFLobbyInviteReceivedStateChange& StateChange);
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
-	XTaskQueueRegistrationToken ActivationHandler = { 0 };
-	bool bActivationHandlerRegistered = false;
+	FDelegateHandle InviteReceivedHandle;
 #endif // OSS_PLAYFAB_GDK_SUPPORT
-#if defined(OSS_PLAYFAB_WIN64)
-	TSharedPtr<FOnlineSessionSearch> CachedSearchSettings;
-#endif // OSS_PLAYFAB_WIN64
 
 	FPendingInviteData PendingInviteData;
 
@@ -255,7 +304,6 @@ private:
 	// Flag for whether the current platform should call into the platform's native session interface
 	bool bPlatformUsesNativeSession = false;
 
-	FDelegateHandle OnNativeFindSessionsCompleteDelegateHandle;
 
 	FDelegateHandle OnNativeSessionUserInviteAcceptedDelegateHandle;
 	FOnSessionUserInviteAcceptedDelegate OnNativeSessionUserInviteAcceptedDelegate;
@@ -295,7 +343,9 @@ public:
 	//Activity
 	void SetMultiplayerActivityForSession(const FNamedOnlineSessionPtr& ExistingNamedSession);
 	void SetMultiplayerActivity(PFLobbyHandle LobbyHandle, const PFEntityKey& EntityKey, const FOnlineSessionSettings& OnlineSessionSettings) const;
+	void SetMultiplayerActivity(PFLobbyHandle LobbyHandle, FName SessionName, const PFEntityKey& EntityKey, const FOnlineSessionSettings& OnlineSessionSettings) const;
 	void SetMultiplayerActivity(PFLobbyHandle LobbyHandle, const TArray<PFEntityKey>& EntityKeys, const FOnlineSessionSettings& OnlineSessionSettings) const;
+	void SetMultiplayerActivity(PFLobbyHandle LobbyHandle, FName SessionName, const TArray<PFEntityKey>& EntityKeys, const FOnlineSessionSettings& OnlineSessionSettings) const;
 	void DeleteMultiplayerActivity(PFLobbyHandle LobbyHandle, const PFEntityKey& EntityKey, const FOnlineSessionSettings& OnlineSessionSettings) const;
 	void DeleteMultiplayerActivity(PFLobbyHandle LobbyHandle, const TArray<PFEntityKey>& EntityKeys, const FOnlineSessionSettings& OnlineSessionSettings) const;
 	void RecordRecentlyMetPlayer(PFLobbyHandle LobbyHandle, const PFEntityKey& EntityKey, const PFEntityKey& RecentPlayerEntityKey, const FString& RecentPlayerPlatformIdStr) const;
@@ -319,6 +369,7 @@ public:
 	bool SendSessionInviteToFriend_PlayFabMultiplayer(const PFEntityKey& LocalUserEntityKey, FName SessionName, const PFEntityKey& FriendEntityKey);
 	bool SendSessionInviteToFriends_PlayFabMultiplayer(const PFEntityKey& LocalUserEntityKey, FName SessionName, const TArray<PFEntityKey>& RemoteUserEntityKeys);
 	void OnInvitationReceived_PlayFabMultiplayer(const PFEntityKey& ListeningEntityKey, const PFEntityKey& InvitingEntityKey, const FString& InConnectionString);
+	void NotifyLobbyInviteForStandardDelegate_PlayFabMultiplayer(const PFLobbyInviteReceivedStateChange& StateChange);
 
 private:
 	friend struct FPlayFabSessionState;

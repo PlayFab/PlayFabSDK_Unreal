@@ -272,7 +272,7 @@ TSharedPtr<const FPFMultiplayerServerListBuildAliasesRequest> ConvertListBuildAl
 	TSharedPtr<const FPFMultiplayerServerListBuildAliasesRequest> ConvertedType = MakeShared<FPFMultiplayerServerListBuildAliasesRequest>(FPFMultiplayerServerListBuildAliasesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
+		.pageSize = ConvertOptionalToUnreal(Datatype->pageSize),
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
@@ -396,7 +396,7 @@ TSharedPtr<const FPFMultiplayerServerListBuildSummariesRequest> ConvertListBuild
 	TSharedPtr<const FPFMultiplayerServerListBuildSummariesRequest> ConvertedType = MakeShared<FPFMultiplayerServerListBuildSummariesRequest>(FPFMultiplayerServerListBuildSummariesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
+		.pageSize = ConvertOptionalToUnreal(Datatype->pageSize),
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
@@ -489,7 +489,7 @@ TSharedPtr<const FPFMultiplayerServerDynamicStandbySettings> ConvertDynamicStand
 		.dynamicFloorMultiplierThresholds = ConvertPlayfabArrayToUnreal<PFMultiplayerServerDynamicStandbyThreshold, FPFMultiplayerServerDynamicStandbyThreshold>(Datatype->dynamicFloorMultiplierThresholds, Datatype->dynamicFloorMultiplierThresholdsCount, ConvertDynamicStandbyThresholdToUnreal),
 		.dynamicFloorMultiplierThresholdsCount = Datatype->dynamicFloorMultiplierThresholdsCount,
 		.isEnabled = Datatype->isEnabled,
-		.rampDownSeconds = TSharedPtr<const int32>(Datatype->rampDownSeconds)
+		.rampDownSeconds = ConvertOptionalToUnreal(Datatype->rampDownSeconds)
 	});
 
 	return ConvertedType;
@@ -588,7 +588,7 @@ TSharedPtr<const FPFMultiplayerServerBuildRegion> ConvertBuildRegionToUnreal(con
 		.dynamicStandbySettings = ConvertDynamicStandbySettingsToUnreal(Datatype->dynamicStandbySettings),
 		.isAssetReplicationComplete = Datatype->isAssetReplicationComplete,
 		.maxServers = Datatype->maxServers,
-		.multiplayerServerCountPerVm = TSharedPtr<const int32>(Datatype->multiplayerServerCountPerVm),
+		.multiplayerServerCountPerVm = ConvertOptionalToUnreal(Datatype->multiplayerServerCountPerVm),
 		.region = Datatype->region == nullptr ? FString() : FString(Datatype->region),
 		.scheduledStandbySettings = ConvertScheduledStandbySettingsToUnreal(Datatype->scheduledStandbySettings),
 		.standbyServers = Datatype->standbyServers,
@@ -700,7 +700,7 @@ TSharedPtr<const FPFMultiplayerServerListQosServersForTitleRequest> ConvertListQ
 	TSharedPtr<const FPFMultiplayerServerListQosServersForTitleRequest> ConvertedType = MakeShared<FPFMultiplayerServerListQosServersForTitleRequest>(FPFMultiplayerServerListQosServersForTitleRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.includeAllRegions = TSharedPtr<const bool>(Datatype->includeAllRegions),
+		.includeAllRegions = ConvertOptionalToUnreal(Datatype->includeAllRegions),
 		.routingPreference = Datatype->routingPreference == nullptr ? FString() : FString(Datatype->routingPreference)
 	});
 
@@ -792,7 +792,7 @@ TSharedPtr<const FPFMultiplayerServerListSecretSummariesRequest> ConvertListSecr
 	TSharedPtr<const FPFMultiplayerServerListSecretSummariesRequest> ConvertedType = MakeShared<FPFMultiplayerServerListSecretSummariesRequest>(FPFMultiplayerServerListSecretSummariesRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.pageSize = TSharedPtr<const int32>(Datatype->pageSize),
+		.pageSize = ConvertOptionalToUnreal(Datatype->pageSize),
 		.skipToken = Datatype->skipToken == nullptr ? FString() : FString(Datatype->skipToken)
 	});
 
@@ -1264,7 +1264,7 @@ TSharedPtr<const FPFMultiplayerServerUploadSecretRequest> ConvertUploadSecretReq
 	TSharedPtr<const FPFMultiplayerServerUploadSecretRequest> ConvertedType = MakeShared<FPFMultiplayerServerUploadSecretRequest>(FPFMultiplayerServerUploadSecretRequest{
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
-		.forceUpdate = TSharedPtr<const bool>(Datatype->forceUpdate),
+		.forceUpdate = ConvertOptionalToUnreal(Datatype->forceUpdate),
 		.gameSecret = ConvertSecretToUnreal(Datatype->gameSecret)
 	});
 

@@ -32,7 +32,8 @@ public:
 		int32 InMaxEndpointsPerDeviceCount,
 		int32 InMaxUserCount,
 		int32 InMaxUsersPerDeviceCount,
-		PartyDirectPeerConnectivityOptions InDirectPeerConnectivityOptions
+		PartyDirectPeerConnectivityOptions InDirectPeerConnectivityOptions,
+		bool bInCustomDataEnabled
 	);
 	~FPlayFabPartyNetwork();
 
@@ -58,9 +59,17 @@ public:
 	bool AddChatControlToNetwork(PartyLocalChatControl* LocalChatControl);
 	FString SerializeNetworkDescriptor(const PartyNetworkDescriptor& InNetworkDescriptor);
 	PartyEndpoint* GetEndpoint(uint32 EndpointId);
+	bool MulticastCustomData(const TArray<uint8>& Payload);
+	bool HandleCustomEndpointCreated(PartyEndpoint* Endpoint);
+	bool HandleCustomEndpointDestroyed(PartyEndpoint* Endpoint);
+	bool IsCustomDataMessage(const PartyEndpointMessageReceivedStateChange& StateChange) const;
+	void ResetCustomData();
 
 private:
 	bool InternalConnectToNetwork(PartyLocalUser* PlayFabPartyLocalUser, const FString& InNetworkId, Party::PartyNetworkDescriptor& InNetworkDescriptor);
 
 	FOnlineSubsystemPlayFab* OSSPlayFab = nullptr;
+	bool bCustomDataEnabled = false;
+	PartyLocalEndpoint* CustomDataLocalEndpoint = nullptr;
+	TMap<uint32, PartyEndpoint*> CustomDataEndpoints;
 };

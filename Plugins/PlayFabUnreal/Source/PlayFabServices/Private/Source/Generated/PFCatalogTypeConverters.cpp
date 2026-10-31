@@ -350,8 +350,8 @@ TSharedPtr<const FPFCatalogCatalogPrice> ConvertCatalogPriceToUnreal(const PFCat
 	TSharedPtr<const FPFCatalogCatalogPrice> ConvertedType = MakeShared<FPFCatalogCatalogPrice>(FPFCatalogCatalogPrice{
 		.amounts = ConvertPlayfabArrayToUnreal<PFCatalogCatalogPriceAmount, FPFCatalogCatalogPriceAmount>(Datatype->amounts, Datatype->amountsCount, ConvertCatalogPriceAmountToUnreal),
 		.amountsCount = Datatype->amountsCount,
-		.unitAmount = TSharedPtr<const int32>(Datatype->unitAmount),
-		.unitDurationInSeconds = TSharedPtr<const double>(Datatype->unitDurationInSeconds)
+		.unitAmount = ConvertOptionalToUnreal(Datatype->unitAmount),
+		.unitDurationInSeconds = ConvertOptionalToUnreal(Datatype->unitDurationInSeconds)
 	});
 
 	return ConvertedType;
@@ -408,7 +408,7 @@ TSharedPtr<const FPFCatalogCatalogItemReference> ConvertCatalogItemReferenceToUn
 	}
 
 	TSharedPtr<const FPFCatalogCatalogItemReference> ConvertedType = MakeShared<FPFCatalogCatalogItemReference>(FPFCatalogCatalogItemReference{
-		.amount = TSharedPtr<const int32>(Datatype->amount),
+		.amount = ConvertOptionalToUnreal(Datatype->amount),
 		.id = Datatype->id == nullptr ? FString() : FString(Datatype->id),
 		.priceOptions = ConvertCatalogPriceOptionsToUnreal(Datatype->priceOptions)
 	});
@@ -496,13 +496,13 @@ TSharedPtr<const FPFCatalogRating> ConvertRatingToUnreal(const PFCatalogRating* 
 	}
 
 	TSharedPtr<const FPFCatalogRating> ConvertedType = MakeShared<FPFCatalogRating>(FPFCatalogRating{
-		.average = TSharedPtr<const float>(Datatype->average),
-		.count1Star = TSharedPtr<const int32>(Datatype->count1Star),
-		.count2Star = TSharedPtr<const int32>(Datatype->count2Star),
-		.count3Star = TSharedPtr<const int32>(Datatype->count3Star),
-		.count4Star = TSharedPtr<const int32>(Datatype->count4Star),
-		.count5Star = TSharedPtr<const int32>(Datatype->count5Star),
-		.totalCount = TSharedPtr<const int32>(Datatype->totalCount)
+		.average = ConvertOptionalToUnreal(Datatype->average),
+		.count1Star = ConvertOptionalToUnreal(Datatype->count1Star),
+		.count2Star = ConvertOptionalToUnreal(Datatype->count2Star),
+		.count3Star = ConvertOptionalToUnreal(Datatype->count3Star),
+		.count4Star = ConvertOptionalToUnreal(Datatype->count4Star),
+		.count5Star = ConvertOptionalToUnreal(Datatype->count5Star),
+		.totalCount = ConvertOptionalToUnreal(Datatype->totalCount)
 	});
 
 	return ConvertedType;
@@ -583,7 +583,7 @@ TSharedPtr<const FPFCatalogFilterOptions> ConvertFilterOptionsToUnreal(const PFC
 
 	TSharedPtr<const FPFCatalogFilterOptions> ConvertedType = MakeShared<FPFCatalogFilterOptions>(FPFCatalogFilterOptions{
 		.filter = Datatype->filter == nullptr ? FString() : FString(Datatype->filter),
-		.includeAllItems = TSharedPtr<const bool>(Datatype->includeAllItems)
+		.includeAllItems = ConvertOptionalToUnreal(Datatype->includeAllItems)
 	});
 
 	return ConvertedType;
@@ -638,9 +638,9 @@ TSharedPtr<const FPFCatalogCatalogPriceAmountOverride> ConvertCatalogPriceAmount
 	}
 
 	TSharedPtr<const FPFCatalogCatalogPriceAmountOverride> ConvertedType = MakeShared<FPFCatalogCatalogPriceAmountOverride>(FPFCatalogCatalogPriceAmountOverride{
-		.fixedValue = TSharedPtr<const int32>(Datatype->fixedValue),
+		.fixedValue = ConvertOptionalToUnreal(Datatype->fixedValue),
 		.itemId = Datatype->itemId == nullptr ? FString() : FString(Datatype->itemId),
-		.multiplier = TSharedPtr<const double>(Datatype->multiplier)
+		.multiplier = ConvertOptionalToUnreal(Datatype->multiplier)
 	});
 
 	return ConvertedType;
@@ -773,7 +773,7 @@ TSharedPtr<const FPFCatalogCatalogItem> ConvertCatalogItemToUnreal(const PFCatal
 		.id = Datatype->id == nullptr ? FString() : FString(Datatype->id),
 		.images = ConvertPlayfabArrayToUnreal<PFCatalogImage, FPFCatalogImage>(Datatype->images, Datatype->imagesCount, ConvertImageToUnreal),
 		.imagesCount = Datatype->imagesCount,
-		.isHidden = TSharedPtr<const bool>(Datatype->isHidden),
+		.isHidden = ConvertOptionalToUnreal(Datatype->isHidden),
 		.itemReferences = ConvertPlayfabArrayToUnreal<PFCatalogCatalogItemReference, FPFCatalogCatalogItemReference>(Datatype->itemReferences, Datatype->itemReferencesCount, ConvertCatalogItemReferenceToUnreal),
 		.itemReferencesCount = Datatype->itemReferencesCount,
 		.keywords = ConvertPlayfabMapToUnreal<PFCatalogKeywordSetDictionaryEntry, FPFCatalogKeywordSet, PFCatalogKeywordSet>(Datatype->keywords, Datatype->keywordsCount, ConvertKeywordSetToUnreal),
@@ -1499,7 +1499,7 @@ TSharedPtr<const FPFCatalogGetDraftItemsRequest> ConvertGetDraftItemsRequestToUn
 		.alternateIds = ConvertPlayfabArrayToUnreal<PFCatalogCatalogAlternateId, FPFCatalogCatalogAlternateId>(Datatype->alternateIds, Datatype->alternateIdsCount, ConvertCatalogAlternateIdToUnreal),
 		.alternateIdsCount = Datatype->alternateIdsCount,
 		.continuationToken = Datatype->continuationToken == nullptr ? FString() : FString(Datatype->continuationToken),
-		.count = TSharedPtr<const int32>(Datatype->count),
+		.count = ConvertOptionalToUnreal(Datatype->count),
 		.customTags = ConvertCharMapToUnreal(Datatype->customTags, Datatype->customTagsCount),
 		.customTagsCount = Datatype->customTagsCount,
 		.entity = ConvertEntityKeyToUnreal(Datatype->entity),

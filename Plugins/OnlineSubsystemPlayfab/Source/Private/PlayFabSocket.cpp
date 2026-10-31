@@ -6,8 +6,12 @@
 #include "PlayFabSocketSubsystem.h"
 #include "OnlineSubsystemPlayFab.h"
 #include "PlayFabPartyNetwork.h"
+#include "PlayFabNetDriverRouting.h"
 
-const uint32 FPlayFabSocket::SendTimeout = 500;
+uint32 PlayFabSocketConfig::NormalizeSendMessageTimeoutMs(int32 ConfiguredTimeoutMs)
+{
+	return static_cast<uint32>(FMath::Clamp(ConfiguredTimeoutMs, MinSendMessageTimeoutMs, MaxSendMessageTimeoutMs));
+}
 
 FPlayFabSocket::FPlayFabSocket(FOnlineSubsystemPlayFab* InOSSPlayFab, const FString& InSocketDescription, const FName& InSocketProtocol) :
 	FSocket(SOCKTYPE_Datagram, InSocketDescription, InSocketProtocol),
@@ -15,9 +19,29 @@ FPlayFabSocket::FPlayFabSocket(FOnlineSubsystemPlayFab* InOSSPlayFab, const FStr
 	SocketSubsystem(static_cast<FPlayFabSocketSubsystem*>(ISocketSubsystem::Get(PLAYFAB_SOCKET_SUBSYSTEM))),
 	PendingPackets(2048)
 {
+	int32 ConfiguredSendMessageTimeoutMs = PlayFabSocketConfig::DefaultSendMessageTimeoutMs;
+	const bool bHasConfiguredSendMessageTimeout = GConfig != nullptr && GConfig->GetInt(
+		TEXT("OnlineSubsystemPlayFab"),
+		TEXT("SendMessageTimeoutMs"),
+		ConfiguredSendMessageTimeoutMs,
+		GEngineIni);
+	const uint32 SendMessageTimeoutMs = PlayFabSocketConfig::NormalizeSendMessageTimeoutMs(ConfiguredSendMessageTimeoutMs);
+
+	if (bHasConfiguredSendMessageTimeout &&
+		(ConfiguredSendMessageTimeoutMs < PlayFabSocketConfig::MinSendMessageTimeoutMs ||
+		 ConfiguredSendMessageTimeoutMs > PlayFabSocketConfig::MaxSendMessageTimeoutMs))
+	{
+		UE_LOG(LogSockets, Warning,
+			TEXT("[OnlineSubsystemPlayFab] SendMessageTimeoutMs=%d is outside the supported range [%d, %d]; using %u."),
+			ConfiguredSendMessageTimeoutMs,
+			PlayFabSocketConfig::MinSendMessageTimeoutMs,
+			PlayFabSocketConfig::MaxSendMessageTimeoutMs,
+			SendMessageTimeoutMs);
+	}
+
 	PartyQueueConfiguration.priority = Party::c_maxSendMessageQueuingPriority;
 	PartyQueueConfiguration.identityForCancelFilters = static_cast<uint32>(reinterpret_cast<uintptr_t>(this));
-	PartyQueueConfiguration.timeoutInMilliseconds = SendTimeout;
+	PartyQueueConfiguration.timeoutInMilliseconds = SendMessageTimeoutMs;
 }
 
 FPlayFabSocket::~FPlayFabSocket()
@@ -204,4 +228,14 @@ void FPlayFabSocket::AddNewPendingData(uint16 SourceEndpoint, TArray<uint8> NewD
 void FPlayFabSocket::SetPartyNetwork(TSharedPtr<FPlayFabPartyNetwork> InPartyNetwork)
 {
 	PartyNetwork = InPartyNetwork;
+	if (NetDriver.IsValid())
+	{
+		PlayFabNetDriverRouting::Link(GetPartyNetworkHandle(), NetDriver.Get());
+	}
+}
+
+PartyNetwork* FPlayFabSocket::GetPartyNetworkHandle() const
+{
+	TSharedPtr<FPlayFabPartyNetwork> ReadyNetwork = PartyNetwork.Pin();
+	return ReadyNetwork.IsValid() ? ReadyNetwork->Network : nullptr;
 }

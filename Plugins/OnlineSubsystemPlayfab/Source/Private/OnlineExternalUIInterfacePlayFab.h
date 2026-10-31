@@ -50,10 +50,13 @@ public:
 	virtual void ReportExitInGameStoreUI() override;
 
 private:
-	void HandleShowInviteUIComplete(bool bIsSuccess);
+	void HandleShowInviteUIComplete(bool bWasSuccessful);
 
 #if defined(OSS_PLAYFAB_GDK_SUPPORT)
 	bool ShowInviteUIGDK(int32 LocalUserNum, FName SessionName = NAME_GameSession);
+	void HandleReadFriendsForSessionInvite(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr, FName SessionName);
+	bool ShowSessionInvitePlayerPickerGDK(int32 LocalUserNum, FName SessionName, const TArray<TSharedRef<class FOnlineFriend>>& Friends);
+	bool ShowInviteErrorDialogGDK(const char* ContentText);
 #endif // OSS_PLAYFAB_GDK_SUPPORT
 };
 

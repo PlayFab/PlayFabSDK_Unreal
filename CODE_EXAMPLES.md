@@ -37,6 +37,12 @@ This should allow you to call any PlayFab APIs.
 
 ## Basic Usage
 
+### Networking validation
+
+- Socket receives reject oversized datagrams with `SE_EMSGSIZE` without copying and preserve the sender address. Invalid receive buffers and invalid send arguments return `SE_EINVAL`.
+- Party payload and core async-result sizes are checked before narrowing to Unreal array sizes. Endpoint addresses without an explicit port use the endpoint ID as the port.
+- Custom multicast receive callbacks accept only the client's connected host. Servers reject inbound custom multicast, and queued messages are revalidated before delivery.
+
 ### 1. Initialize PlayFab Services
 
 In your game's initialization code (typically in your GameMode constructor or `BeginPlay`):

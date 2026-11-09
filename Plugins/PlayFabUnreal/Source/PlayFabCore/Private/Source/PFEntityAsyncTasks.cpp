@@ -1,5 +1,6 @@
 #include "PFEntityAsyncTasks.h"
 #include "PFCoreTypeConverters.h"
+#include "PlayFabResultBuffer.h"
 
 FPFEntityGetEntityTokenAsyncTask::FPFEntityGetEntityTokenAsyncTask(
 	FPFEntityHandle entityHandle,
@@ -27,10 +28,13 @@ void FPFEntityGetEntityTokenAsyncTask::ProcessResults()
 
 	HRESULT hr = PFEntityGetEntityTokenResultSize(*mAsyncBlock, &resultSize);
 
+	if (SUCCEEDED(hr) && !PlayFabResultBuffer::TryAllocate(resultSize, bufferArray))
+	{
+		hr = E_INVALIDARG;
+	}
+
 	if (SUCCEEDED(hr))
 	{
-		bufferArray.SetNumUninitialized(resultSize);
-
 		PFEntityToken const* result;
 		hr = PFEntityGetEntityTokenResult(*mAsyncBlock, resultSize, bufferArray.GetData(), &result, nullptr);
 

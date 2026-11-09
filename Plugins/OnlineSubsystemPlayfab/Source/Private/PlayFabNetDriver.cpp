@@ -12,6 +12,7 @@
 #include "PlayFabHelpers.h"
 #include "PlayFabPartyNetwork.h"
 #include "PlayFabCustomData.h"
+#include "Engine/NetConnection.h"
 
 FOnFillCustomMulticastPayload UPlayFabNetDriver::FillCustomMulticastPayloadDelegate;
 FOnCustomDataReceived UPlayFabNetDriver::OnCustomDataReceivedDelegate;
@@ -141,7 +142,14 @@ void UPlayFabNetDriver::TickDispatch(float DeltaTime)
 	TPair<FString, TArray<uint8>> Packet;
 	while (PendingCustomDataPackets.Dequeue(Packet))
 	{
-		OnCustomDataReceivedDelegate.ExecuteIfBound(GetWorld(), this, Packet.Key, Packet.Value);
+		if (IsCustomDataSenderAuthorized(Packet.Key))
+		{
+			OnCustomDataReceivedDelegate.ExecuteIfBound(GetWorld(), this, Packet.Key, Packet.Value);
+		}
+		else
+		{
+			UE_LOG(LogSockets, Verbose, TEXT("UPlayFabNetDriver::TickDispatch: Dropping custom data no longer authorized by the current host connection"));
+		}
 	}
 }
 
@@ -193,10 +201,54 @@ void UPlayFabNetDriver::OnCustomDataMessageReceived(const PartyEndpointMessageRe
 	}
 
 	TArray<uint8> Payload;
+	if (!IsCustomDataSenderAuthorized(UTF8_TO_TCHAR(SenderEntityId)))
+	{
+		UE_LOG(LogSockets, Verbose, TEXT("UPlayFabNetDriver::OnCustomDataMessageReceived: Dropping custom data not sent by the connected host"));
+		return;
+	}
+
 	if (PlayFabCustomData::CopyPayload(*Change, Payload))
 	{
 		PendingCustomDataPackets.Enqueue(TPair<FString, TArray<uint8>>(UTF8_TO_TCHAR(SenderEntityId), MoveTemp(Payload)));
 	}
+	else
+	{
+		UE_LOG(LogSockets, Warning, TEXT("UPlayFabNetDriver::OnCustomDataMessageReceived: Dropping invalid custom payload (size %u)"), Change->messageSize);
+	}
+}
+
+bool UPlayFabNetDriver::IsCustomDataSenderAuthorized(const FString& SenderEntityId)
+{
+	if (IsServer() || bFallbackToPlatformSocketSubsystem || !ServerConnection)
+	{
+		return false;
+	}
+
+	TSharedPtr<const FInternetAddr> HostAddress = ServerConnection->GetRemoteAddr();
+	FOnlineSubsystemPlayFab* OSSPlayFab = GetOnlineSubsystemPlayFab();
+	TSharedPtr<FPlayFabPartyNetwork> PartyNetwork = OSSPlayFab ? OSSPlayFab->GetPartyNetwork(SessionName) : nullptr;
+	if (!HostAddress.IsValid() || !PartyNetwork.IsValid())
+	{
+		return false;
+	}
+
+	uint32 HostEndpointId = 0;
+	HostAddress->GetIp(HostEndpointId);
+	PartyEndpoint* HostEndpoint = PartyNetwork->GetEndpoint(HostEndpointId);
+	if (!HostEndpoint)
+	{
+		return false;
+	}
+
+	PartyString HostEntityId = nullptr;
+	const PartyError Err = HostEndpoint->GetEntityId(&HostEntityId);
+	if (PARTY_FAILED(Err) || !HostEntityId)
+	{
+		UE_LOG(LogSockets, Warning, TEXT("UPlayFabNetDriver::IsCustomDataSenderAuthorized: Failed to resolve connected host EntityId: %s"), *GetPartyErrorMessage(Err));
+		return false;
+	}
+
+	return PlayFabCustomData::IsAuthorizedSender(false, SenderEntityId, UTF8_TO_TCHAR(HostEntityId));
 }
 
 FOnlineSubsystemPlayFab* UPlayFabNetDriver::GetOnlineSubsystemPlayFab()

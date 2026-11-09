@@ -35,6 +35,19 @@ Make sure to include the PlayFabUnreal header in your game classes:
 
 This should allow you to call any PlayFab APIs.
 
+## Party Custom Multicast
+
+The optional custom-data endpoint is server-to-client only:
+
+```ini
+[OnlineSubsystemPlayFab]
+bEnableCustomDataEndpoint=true
+```
+
+Bind `UPlayFabNetDriver::FillCustomMulticastPayloadDelegate` on the host and `UPlayFabNetDriver::OnCustomDataReceivedDelegate` on clients. Clients only deliver custom data from the EntityId associated with their current server connection; authenticated non-host peers and inbound custom multicast on servers are rejected. Queued packets are revalidated before delivery after connection changes.
+
+Socket receives reject datagrams larger than the caller's buffer with `SE_EMSGSIZE`, copy no bytes, and preserve the sender address for error attribution. Null or nonpositive-capacity receive buffers return `SE_EINVAL` without consuming a queued datagram.
+
 ## Basic Usage
 
 ### 1. Initialize PlayFab Services

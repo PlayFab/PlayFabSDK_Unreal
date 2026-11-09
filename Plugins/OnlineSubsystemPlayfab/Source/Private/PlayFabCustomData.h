@@ -73,6 +73,11 @@ namespace PlayFabCustomData
 		return true;
 	}
 
+	inline bool IsAuthorizedSender(bool bIsServer, const FString& SenderEntityId, const FString& HostEntityId)
+	{
+		return !bIsServer && !HostEntityId.IsEmpty() && SenderEntityId.Equals(HostEntityId, ESearchCase::CaseSensitive);
+	}
+
 	enum class ESendAction
 	{
 		Reject,

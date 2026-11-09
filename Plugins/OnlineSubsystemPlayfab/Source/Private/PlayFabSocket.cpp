@@ -143,9 +143,11 @@ bool FPlayFabSocket::Send(const uint8* Data, int32 Count, int32& BytesSent)
 
 bool FPlayFabSocket::RecvFrom(uint8* Data, int32 BufferSize, int32& BytesRead, FInternetAddr& Source, ESocketReceiveFlags::Type Flags /*= ESocketReceiveFlags::None*/)
 {
-	if (BufferSize == 0)
+	BytesRead = 0;
+	if (!Data || BufferSize <= 0)
 	{
-		SocketSubsystem->LastSocketError = SE_NO_ERROR;
+		UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::RecvFrom: Invalid receive buffer (size %d)"), BufferSize);
+		SocketSubsystem->LastSocketError = SE_EINVAL;
 		return false;
 	}
 
@@ -160,8 +162,16 @@ bool FPlayFabSocket::RecvFrom(uint8* Data, int32 BufferSize, int32& BytesRead, F
 
 	Source.SetIp(CurrentPacket.SourceEndpoint);
 	Source.SetPort(CurrentPacket.SourceEndpoint);
+	if (CurrentPacket.Data.Num() > BufferSize)
+	{
+		UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::RecvFrom: Dropping %d-byte packet exceeding receive buffer capacity %d"), CurrentPacket.Data.Num(), BufferSize);
+		SocketSubsystem->LastSocketError = SE_EMSGSIZE;
+		return false;
+	}
+
 	BytesRead = CurrentPacket.Data.Num();
 	FMemory::Memcpy(Data, CurrentPacket.Data.GetData(), BytesRead);
+	SocketSubsystem->LastSocketError = SE_NO_ERROR;
 
 #if OSS_PLAYFAB_VERBOSE_PACKET_LEVEL_LOGGING
 	UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::RecvFrom bytes: %d UniqueID: %d"), BytesRead, CurrentPacket.SourceEndpoint);

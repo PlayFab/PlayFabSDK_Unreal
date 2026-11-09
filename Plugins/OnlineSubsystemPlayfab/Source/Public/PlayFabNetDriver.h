@@ -49,6 +49,7 @@ public:
 private:
 	void SendCustomMulticastDataForTick();
 	void OnCustomDataMessageReceived(const Party::PartyEndpointMessageReceivedStateChange* Change);
+	bool IsCustomDataSenderAuthorized(const FString& SenderEntityId);
 
 	bool bFallbackToPlatformSocketSubsystem = false;
 	FName SessionName;

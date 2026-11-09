@@ -71,4 +71,58 @@ bool FPlayFabSocketReceiveBoundsTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FPlayFabSocketSendBoundsTest,
+	"PlayFab.OSS.Socket.Send.Bounds",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FPlayFabSocketSendBoundsTest::RunTest(const FString&)
+{
+	FPlayFabSocketSubsystem Subsystem;
+	FPlayFabSocket Socket(nullptr, TEXT("SendBoundsTest"), NAME_None);
+	Socket.SocketSubsystem = &Subsystem;
+	TSharedRef<FInternetAddr> Destination = Subsystem.CreateInternetAddr();
+	uint8 Byte = 1;
+	int32 BytesSent = 99;
+
+	TestFalse(TEXT("A negative send count is rejected before SDK conversion"), Socket.SendTo(&Byte, -1, BytesSent, *Destination));
+	TestEqual(TEXT("An invalid send reports no bytes sent"), BytesSent, 0);
+	TestEqual(TEXT("A negative count reports invalid arguments"), Subsystem.GetLastErrorCode(), SE_EINVAL);
+
+	BytesSent = 99;
+	TestFalse(TEXT("A null nonempty send buffer is rejected"), Socket.SendTo(nullptr, 1, BytesSent, *Destination));
+	TestEqual(TEXT("A null buffer reports no bytes sent"), BytesSent, 0);
+	TestEqual(TEXT("A null buffer reports invalid arguments"), Subsystem.GetLastErrorCode(), SE_EINVAL);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FPlayFabSocketMessageBoundsTest,
+	"PlayFab.OSS.Socket.Message.Bounds",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FPlayFabSocketMessageBoundsTest::RunTest(const FString&)
+{
+	AddExpectedMessage(TEXT("Dropping invalid packet"), ELogVerbosity::Warning, EAutomationExpectedMessageFlags::Contains, 3);
+	FPlayFabSocketSubsystem Subsystem;
+	Party::PartyEndpointMessageReceivedStateChange Change{};
+	uint8 Byte = 1;
+
+	// Rejected messages must never dereference the sender or read the claimed payload.
+	int32 SenderStorage = 0;
+	Change.senderEndpoint = reinterpret_cast<Party::PartyEndpoint*>(&SenderStorage);
+	Change.messageBuffer = &Byte;
+	Change.messageSize = static_cast<uint32>(MAX_int32) + 1u;
+	Subsystem.OnEndpointMessageReceived(&Change);
+
+	Change.messageBuffer = nullptr;
+	Change.messageSize = 1;
+	Subsystem.OnEndpointMessageReceived(&Change);
+
+	Change.senderEndpoint = nullptr;
+	Change.messageBuffer = &Byte;
+	Subsystem.OnEndpointMessageReceived(&Change);
+	return true;
+}
+
 #endif

@@ -98,6 +98,14 @@ bool FPlayFabCustomDataPayloadOwnershipTest::RunTest(const FString&)
 
 	StateChange.messageBuffer = nullptr;
 	TestFalse(TEXT("A missing Party payload is rejected"), PlayFabCustomData::CopyPayload(StateChange, Payload));
+
+	StateChange.messageBuffer = PartyBuffer;
+	StateChange.messageSize = static_cast<uint32>(MAX_int32) + 1u;
+	TestFalse(TEXT("A payload size that cannot fit TArray is rejected before reading"), PlayFabCustomData::CopyPayload(StateChange, Payload));
+	TestEqual(TEXT("An invalid size leaves the existing payload unchanged"), Payload.Num(), 3);
+
+	StateChange.messageSize = 0;
+	TestFalse(TEXT("An empty custom payload is rejected"), PlayFabCustomData::CopyPayload(StateChange, Payload));
 	return true;
 }
 

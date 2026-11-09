@@ -211,6 +211,10 @@ void UPlayFabNetDriver::OnCustomDataMessageReceived(const PartyEndpointMessageRe
 	{
 		PendingCustomDataPackets.Enqueue(TPair<FString, TArray<uint8>>(UTF8_TO_TCHAR(SenderEntityId), MoveTemp(Payload)));
 	}
+	else
+	{
+		UE_LOG(LogSockets, Warning, TEXT("UPlayFabNetDriver::OnCustomDataMessageReceived: Dropping invalid custom payload (size %u)"), Change->messageSize);
+	}
 }
 
 bool UPlayFabNetDriver::IsCustomDataSenderAuthorized(const FString& SenderEntityId)

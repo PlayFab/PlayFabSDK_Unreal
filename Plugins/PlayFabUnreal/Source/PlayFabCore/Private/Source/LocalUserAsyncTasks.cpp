@@ -1,5 +1,6 @@
 #include "LocalUserAsyncTasks.h"
 #include "Generated/PFAuthenticationTypeConverters.h"
+#include "PlayFabResultBuffer.h"
 #include <playfab/core/PFLocalUser.h>
 
 LocalUserLoginAsyncTask::LocalUserLoginAsyncTask(
@@ -31,10 +32,13 @@ void LocalUserLoginAsyncTask::ProcessResults()
 
     HRESULT hr = PFLocalUserLoginGetResultSize(*mAsyncBlock, &resultSize);
 
+    if (SUCCEEDED(hr) && !PlayFabResultBuffer::TryAllocate(resultSize, bufferArray))
+    {
+        hr = E_INVALIDARG;
+    }
+
     if (SUCCEEDED(hr))
     {
-        bufferArray.Reserve(resultSize);
-
         PFEntityHandle entityHandle{ nullptr };
         PFAuthenticationLoginResult const* loginResult{ nullptr };
         hr = PFLocalUserLoginGetResult(*mAsyncBlock, &entityHandle, resultSize, bufferArray.GetData(), &loginResult, nullptr);

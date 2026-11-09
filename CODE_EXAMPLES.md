@@ -48,6 +48,8 @@ Bind `UPlayFabNetDriver::FillCustomMulticastPayloadDelegate` on the host and `UP
 
 Socket receives reject datagrams larger than the caller's buffer with `SE_EMSGSIZE`, copy no bytes, and preserve the sender address for error attribution. Null or nonpositive-capacity receive buffers return `SE_EINVAL` without consuming a queued datagram.
 
+Socket sends reject negative lengths and null nonempty buffers with `SE_EINVAL`. Party message lengths must fit Unreal's `int32` array size before payload allocation or copying. Core entity-token and local-user-login result buffers likewise reject SDK sizes that cannot fit a `TArray`, reporting failure through their existing completion delegates. PlayFab endpoint addresses without an explicit port use the endpoint ID as the port without reading beyond the string terminator.
+
 ## Basic Usage
 
 ### 1. Initialize PlayFab Services

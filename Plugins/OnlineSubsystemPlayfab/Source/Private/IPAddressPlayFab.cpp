@@ -76,29 +76,18 @@ void FInternetAddrPlayFab::SetIp(const TCHAR* InAddr, bool& bIsValid)
 {
 	bIsValid = false;
 
-	if (FCString::Strncmp(InAddr, PLAYFAB_URL_PREFIX, FCString::Strlen(PLAYFAB_URL_PREFIX)) == 0)
+	if (InAddr && FCString::Strncmp(InAddr, PLAYFAB_URL_PREFIX, FCString::Strlen(PLAYFAB_URL_PREFIX)) == 0)
 	{
 		const TCHAR* AddrStart = InAddr + UE_ARRAY_COUNT(PLAYFAB_URL_PREFIX) - 1;
-		if (AddrStart)
+		const TCHAR* PortSeparator = FCString::Strrchr(AddrStart, TEXT(':'));
+		const FString PartyIdString = PortSeparator
+			? FString(static_cast<int32>(PortSeparator - AddrStart), AddrStart)
+			: FString(AddrStart);
+		if (!PartyIdString.IsEmpty())
 		{
-			const TCHAR* PortStart = FCString::Strrchr(AddrStart, L':');
-			if (PortStart == nullptr)
-			{
-				PortStart = AddrStart + FCString::Strlen(AddrStart) + 1;
-			}
-			else
-			{
-				PortStart++;
-			}
-
-			Port = FCString::Atoi(PortStart);
-
-			FString PartyIdString = FString(AddrStart, static_cast<int>(static_cast<intptr_t>(PortStart - AddrStart)) - 1);
-			if (PartyIdString.Len() > 0)
-			{
-				EndpointId = FCString::Atoi(*PartyIdString);
-				bIsValid = EndpointId != 0;
-			}
+			EndpointId = FCString::Atoi(*PartyIdString);
+			Port = PortSeparator ? FCString::Atoi(PortSeparator + 1) : EndpointId;
+			bIsValid = EndpointId != 0;
 		}
 	}
 }

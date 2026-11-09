@@ -59,15 +59,22 @@ bool FPlayFabSocket::SendTo(const uint8* Data, int32 Count, int32& BytesSent, co
 {
 	BytesSent = 0;
 
-	if (OSSPlayFab == nullptr)
-	{
-		UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocket::SendTo failed, OSSPlayFab was null"));
-		return false;
-	}
-
 	if (SocketSubsystem == nullptr)
 	{
 		UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocket::SendTo failed, SocketSubsystem was null"));
+		return false;
+	}
+
+	if (Count < 0 || (!Data && Count > 0))
+	{
+		UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::SendTo: Invalid send buffer (size %d)"), Count);
+		SocketSubsystem->LastSocketError = SE_EINVAL;
+		return false;
+	}
+
+	if (OSSPlayFab == nullptr)
+	{
+		UE_LOG(LogSockets, Verbose, TEXT("FPlayFabSocket::SendTo failed, OSSPlayFab was null"));
 		return false;
 	}
 

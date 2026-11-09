@@ -63,13 +63,13 @@ namespace PlayFabCustomData
 
 	inline bool CopyPayload(const Party::PartyEndpointMessageReceivedStateChange& StateChange, TArray<uint8>& OutPayload)
 	{
-		if (!StateChange.messageBuffer || StateChange.messageSize == 0)
+		if (!StateChange.messageBuffer || StateChange.messageSize == 0 || StateChange.messageSize > static_cast<uint32>(MAX_int32))
 		{
 			return false;
 		}
 
 		const uint8* Buffer = static_cast<const uint8*>(StateChange.messageBuffer);
-		OutPayload = TArray<uint8>(Buffer, StateChange.messageSize);
+		OutPayload = TArray<uint8>(Buffer, static_cast<int32>(StateChange.messageSize));
 		return true;
 	}
 

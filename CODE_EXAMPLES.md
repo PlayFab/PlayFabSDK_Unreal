@@ -39,7 +39,7 @@ This should allow you to call any PlayFab APIs.
 
 ### Networking validation
 
-- Socket receives reject oversized datagrams with `SE_EMSGSIZE` without copying and preserve the sender address. Invalid receive buffers and invalid send arguments return `SE_EINVAL`.
+- Socket receives reject oversized datagrams with `SE_EMSGSIZE` without copying and preserve the sender address. Zero-capacity receives retain `SE_NO_ERROR` and leave `BytesRead` unchanged; successful receives retain the prior socket error. Invalid-buffer guards do not introduce `SE_EINVAL`. Send checks preserve existing failure order, diagnostic text, and the SDK send-failure code (`SE_ECONNRESET`).
 - Party payload and core async-result sizes are checked before narrowing to Unreal array sizes. Endpoint addresses without an explicit port use the endpoint ID as the port.
 - Custom multicast receive callbacks accept only the client's connected host. Servers reject inbound custom multicast, and queued messages are revalidated before delivery.
 

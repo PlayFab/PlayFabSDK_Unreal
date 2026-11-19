@@ -130,8 +130,16 @@ void FPlayFabSocketSubsystem::OnEndpointMessageReceived(const PartyEndpointMessa
 {
 	if (MessagedReceivedChange)
 	{
+		if (!MessagedReceivedChange->senderEndpoint ||
+			(!MessagedReceivedChange->messageBuffer && MessagedReceivedChange->messageSize > 0) ||
+			MessagedReceivedChange->messageSize > static_cast<uint32>(MAX_int32))
+		{
+			UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocketSubsystem::OnEndpointMessageReceived: Dropping invalid packet (size %u)"), MessagedReceivedChange->messageSize);
+			return;
+		}
+
 		const uint8* Buffer = static_cast<const uint8*>(MessagedReceivedChange->messageBuffer);
-		TArray<uint8> Payload(Buffer, MessagedReceivedChange->messageSize);
+		TArray<uint8> Payload(Buffer, static_cast<int32>(MessagedReceivedChange->messageSize));
 
 		uint16 SenderEndpointId = 0;
 		PartyError Err = MessagedReceivedChange->senderEndpoint->GetUniqueIdentifier(&SenderEndpointId);

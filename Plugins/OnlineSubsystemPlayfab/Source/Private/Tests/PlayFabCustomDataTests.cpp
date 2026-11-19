@@ -98,6 +98,32 @@ bool FPlayFabCustomDataPayloadOwnershipTest::RunTest(const FString&)
 
 	StateChange.messageBuffer = nullptr;
 	TestFalse(TEXT("A missing Party payload is rejected"), PlayFabCustomData::CopyPayload(StateChange, Payload));
+
+	StateChange.messageBuffer = PartyBuffer;
+	StateChange.messageSize = static_cast<uint32>(MAX_int32) + 1u;
+	TestFalse(TEXT("A payload size that cannot fit TArray is rejected before reading"), PlayFabCustomData::CopyPayload(StateChange, Payload));
+	TestEqual(TEXT("An invalid size leaves the existing payload unchanged"), Payload.Num(), 3);
+
+	StateChange.messageSize = 0;
+	TestFalse(TEXT("An empty custom payload is rejected"), PlayFabCustomData::CopyPayload(StateChange, Payload));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FPlayFabCustomDataSenderAuthorityTest,
+	"PlayFab.OSS.CustomData.SenderAuthority",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FPlayFabCustomDataSenderAuthorityTest::RunTest(const FString&)
+{
+	TestTrue(TEXT("Clients accept their connected host"), PlayFabCustomData::IsAuthorizedSender(false, TEXT("host"), TEXT("host")));
+	TestFalse(TEXT("An authenticated non-host peer is rejected"), PlayFabCustomData::IsAuthorizedSender(false, TEXT("peer"), TEXT("host")));
+	TestFalse(TEXT("A server rejects inbound multicast data"), PlayFabCustomData::IsAuthorizedSender(true, TEXT("host"), TEXT("host")));
+	TestFalse(TEXT("An unresolved host fails closed"), PlayFabCustomData::IsAuthorizedSender(false, TEXT("peer"), TEXT("")));
+	TestFalse(TEXT("Empty identities cannot authorize one another"), PlayFabCustomData::IsAuthorizedSender(false, TEXT(""), TEXT("")));
+	TestFalse(TEXT("An empty sender is rejected"), PlayFabCustomData::IsAuthorizedSender(false, TEXT(""), TEXT("host")));
+	TestFalse(TEXT("Entity identities must match exactly"), PlayFabCustomData::IsAuthorizedSender(false, TEXT("HOST"), TEXT("host")));
+	TestFalse(TEXT("Queued data from a former host is rejected"), PlayFabCustomData::IsAuthorizedSender(false, TEXT("old-host"), TEXT("new-host")));
 	return true;
 }
 

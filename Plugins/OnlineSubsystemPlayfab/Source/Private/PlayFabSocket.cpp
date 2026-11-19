@@ -98,6 +98,13 @@ bool FPlayFabSocket::SendTo(const uint8* Data, int32 Count, int32& BytesSent, co
 		return false;
 	}
 
+	if (Count < 0 || (!Data && Count > 0))
+	{
+		UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::SendTo: Invalid send buffer (size %d)"), Count);
+		SocketSubsystem->LastSocketError = SE_ECONNRESET;
+		return false;
+	}
+
 	int TargetEndPointCount = 1;
 	Party::PartyEndpoint* TargetEndpoints[1] = { RemoteEndpoint };
 
@@ -149,6 +156,14 @@ bool FPlayFabSocket::RecvFrom(uint8* Data, int32 BufferSize, int32& BytesRead, F
 		return false;
 	}
 
+	if (!Data || BufferSize < 0)
+	{
+		BytesRead = 0;
+		UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::RecvFrom: Invalid receive buffer (size %d)"), BufferSize);
+		SocketSubsystem->LastSocketError = SE_NO_ERROR;
+		return false;
+	}
+
 	PartyPacket CurrentPacket;
 	if (!PendingPackets.Dequeue(CurrentPacket))
 	{
@@ -160,6 +175,14 @@ bool FPlayFabSocket::RecvFrom(uint8* Data, int32 BufferSize, int32& BytesRead, F
 
 	Source.SetIp(CurrentPacket.SourceEndpoint);
 	Source.SetPort(CurrentPacket.SourceEndpoint);
+	if (CurrentPacket.Data.Num() > BufferSize)
+	{
+		BytesRead = 0;
+		UE_LOG(LogSockets, Warning, TEXT("FPlayFabSocket::RecvFrom: Dropping %d-byte packet exceeding receive buffer capacity %d"), CurrentPacket.Data.Num(), BufferSize);
+		SocketSubsystem->LastSocketError = SE_EMSGSIZE;
+		return false;
+	}
+
 	BytesRead = CurrentPacket.Data.Num();
 	FMemory::Memcpy(Data, CurrentPacket.Data.GetData(), BytesRead);
 

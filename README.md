@@ -1,5 +1,17 @@
 # PlayFab Unreal Engine Plugin - Getting Started Guide
 
+[![Latest release][badge-release]][link-release]
+[![License: MIT][badge-license]][link-license]
+[![Unreal Engine 5.8][badge-unreal]][link-unreal]
+[![Microsoft GDK April 2026 Update 2][badge-gdk]][link-gdk]
+[![Documentation on Microsoft Learn][badge-docs]][link-docs]
+[![Visit our Blog][badge-blog]][link-blog]
+[![Join us on Discord][badge-discord]][link-discord]
+[![PRs welcome][badge-prs]][link-prs]
+
+> [!NOTE]
+> This SDK supports the Unified SDK for PlayFab. If you are using the Legacy (v1) SDKs for PlayFab, please see https://github.com/PlayFab/PlayFabMultiplayerUnreal
+
 ## Overview
 
 The PlayFab Unreal Engine Plugin provides comprehensive integration with PlayFab's backend services for game developers. This plugin includes two main components:
@@ -486,3 +498,20 @@ if (bEnabled)
     IGDKRuntimeModule::Get();
 }
 ````
+
+[badge-release]: https://img.shields.io/github/v/release/PlayFab/PlayFabSDK_Unreal?label=release&color=107C10
+[link-release]: https://github.com/PlayFab/PlayFabSDK_Unreal/releases
+[badge-license]: https://img.shields.io/github/license/PlayFab/PlayFabSDK_Unreal?color=107C10
+[link-license]: LICENSE
+[badge-unreal]: https://img.shields.io/badge/Unreal%20Engine-5.8-0E1128?logo=unrealengine&logoColor=white
+[link-unreal]: https://www.unrealengine.com/
+[badge-gdk]: https://img.shields.io/badge/Microsoft%20GDK-April%202026%20Update%202-107C10
+[link-gdk]: https://github.com/microsoft/GDK/releases
+[badge-docs]: https://img.shields.io/badge/docs-Microsoft%20Learn-0078D4
+[link-docs]: https://learn.microsoft.com/xbox/playfab/sdks/unified-unreal/overview
+[badge-blog]: https://img.shields.io/badge/Visit%20our-Blog-FFA500?logo=rss&logoColor=white
+[link-blog]: https://developer.microsoft.com/en-us/games/articles/tags/playfab/
+[badge-discord]: https://img.shields.io/badge/Join%20us%20on-Discord-7289DA?logo=discord&logoColor=white
+[link-discord]: https://aka.ms/msftgamedevdiscord
+[badge-prs]: https://img.shields.io/badge/PRs-welcome-d6336c
+[link-prs]: https://github.com/PlayFab/PlayFabSDK_Unreal/pulls

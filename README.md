@@ -10,7 +10,7 @@
 [![PRs welcome][badge-prs]][link-prs]
 
 > [!NOTE]
-> This SDK supports the Unified SDK for PlayFab. If you are using the Legacy (v1) SDKs for PlayFab, please see https://github.com/PlayFab/PlayFabMultiplayerUnreal
+> This is the Unified PlayFab Unreal SDK, which includes an updated OnlineSubsystemPlayFab plugin. For the standalone PlayFab Online Subsystem, see [PlayFabMultiplayerUnreal](https://github.com/PlayFab/PlayFabMultiplayerUnreal). For the legacy (v1) PlayFab Unreal SDK, see [UnrealMarketplacePlugin](https://github.com/PlayFab/UnrealMarketplacePlugin).
 
 ## Overview
 
